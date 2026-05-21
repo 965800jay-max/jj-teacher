@@ -12,8 +12,8 @@ const aiApiKey = process.env.OPENAI_API_KEY || process.env.AI_API_KEY || "";
 const aiModel = process.env.OPENAI_MODEL || process.env.AI_MODEL || "gpt-5-mini";
 const aiResponsesUrl = process.env.AI_RESPONSES_URL || "https://api.openai.com/v1/responses";
 const aiStreamTimeoutMs = Number(process.env.AI_STREAM_TIMEOUT_MS || 40000);
-const teacherMessageBreak = "銆怤EXT_MESSAGE銆�";
-const teacherCorrectionMark = "銆怌ORRECTION銆�";
+const teacherMessageBreak = "\u3010NEXT_MESSAGE\u3011";
+const teacherCorrectionMark = "\u3010CORRECTION\u3011";
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -153,7 +153,7 @@ async function handleAiTeacher(request, response) {
   if (!aiApiKey) {
     sendJson(response, 503, {
       error: "AI teacher is not configured",
-      message: "JJ鑰佸笀杩樻病鏈夎繛鎺ュ湪绾緼I鏈嶅姟銆傞厤缃悗绔瘑閽ュ悗灏卞彲浠ヤ娇鐢ㄣ€�",
+      message: "JJ\u8001\u5e08\u8fd8\u6ca1\u6709\u8fde\u63a5\u5728\u7ebfAI\u670d\u52a1\u3002\u914d\u7f6e\u540e\u7aef\u5bc6\u94a5\u540e\u5c31\u53ef\u4ee5\u4f7f\u7528\u3002",
     });
     return;
   }
@@ -210,7 +210,7 @@ async function streamAiTeacherResponse(response, prompt, mode) {
     sendSse(response, "done", { reply: compactTeacherReply(fullReply, mode) });
   } catch (error) {
     sendSse(response, "error", {
-      message: error.name === "AbortError" ? "AI 鍥炲瓒呮椂浜嗭紝璇峰啀璇曚竴娆°€�" : error.message || "AI 鏆傛椂娌℃湁杩斿洖鍐呭銆�",
+      message: error.name === "AbortError" ? "AI \u56de\u590d\u8d85\u65f6\u4e86\uff0c\u8bf7\u518d\u8bd5\u4e00\u6b21\u3002" : error.message || "AI \u6682\u65f6\u6ca1\u6709\u8fd4\u56de\u5185\u5bb9\u3002",
     });
   } finally {
     response.end();
@@ -233,33 +233,33 @@ function handleHealth(response) {
 
 function buildExplainPrompt(sentence) {
   return [
-    "浣犳槸涓€浣嶄腑鏂囨瘝璇€呯殑鑻辨枃鍙ュ瓙鑳岃鑰佸笀銆傝璁茶В涓嬮潰杩欏彞鑻辨枃銆�",
-    "瑕佹眰锛氫腑鏂囧洖绛旓紝鏋佺畝锛岄€傚悎鎵嬫満灏忓崱鐗囥€備弗鏍煎彧杈撳嚭杩�3涓爣棰橈紝姣忛」涓嶈秴杩�18涓瓧锛�",
-    "鍙ユ剰锛�",
-    "閲嶇偣璇嶏細",
-    "渚嬪彞锛�",
-    `鑻辨枃鍙ュ瓙锛�${sentence}`,
+    "\u4f60\u662f\u4e00\u4f4d\u4e2d\u6587\u6bcd\u8bed\u8005\u7684\u82f1\u6587\u53e5\u5b50\u80cc\u8bf5\u8001\u5e08\u3002\u8bf7\u8bb2\u89e3\u4e0b\u9762\u8fd9\u53e5\u82f1\u6587\u3002",
+    "\u8981\u6c42\uff1a\u4e2d\u6587\u56de\u7b54\uff0c\u6781\u7b80\uff0c\u9002\u5408\u624b\u673a\u5c0f\u5361\u7247\u3002\u4e25\u683c\u53ea\u8f93\u51fa\u8fd93\u4e2a\u6807\u9898\uff0c\u6bcf\u9879\u4e0d\u8d85\u8fc718\u4e2a\u5b57\uff1a",
+    "\u53e5\u610f\uff1a",
+    "\u91cd\u70b9\u8bcd\uff1a",
+    "\u4f8b\u53e5\uff1a",
+    `\u82f1\u6587\u53e5\u5b50\uff1a${sentence}`,
   ].join("\n");
 }
 
 function buildChatPrompt(message, history, mode = "chat") {
   const cleanHistory = history
     .filter((item) => item && typeof item.text === "string" && (item.role === "user" || item.role === "assistant"))
-    .map((item) => `${item.role === "user" ? "瀛︾敓" : "鑰佸笀"}锛�${item.text}`)
+    .map((item) => `${item.role === "user" ? "\u5b66\u751f" : "\u8001\u5e08"}\uff1a${item.text}`)
     .join("\n");
 
   if (mode === "freestyle") {
     return [
-      "閲嶈锛氳繖鏄櫘閫氫腑鏂囬棽鑱婏紝涓嶆槸鑻辫瀛︿範浠诲姟锛屼笉鏄€犲彞浠诲姟锛屼笉鏄炕璇戜换鍔°€�",
-      "浣犵幇鍦ㄤ笉鏄嫳璇€佸笀锛屼篃涓嶆槸瀛︿範鏁欑粌锛岃€屾槸涓€涓悐鍎块儙褰撱€佹病璋便€佸槾纰庝絾濂界帺鐨勬櫘閫� AI 鎹熷弸锛屽拰 JJ 鑰佸笀涓ゆ瀬鍒嗗寲銆�",
-      "鏈疆鍙厑璁歌緭鍑轰腑鏂囬棽鑱婂唴瀹广€傜姝㈣緭鍑轰换浣曡嫳璇緥鍙ャ€佽嫳鏂囩炕璇戙€佺籂閿欍€佸涔犱换鍔°€�",
-      "缁濆涓嶈杈撳嚭鈥滆嫳鏂囷細鈥濃€滀腑鏂囨剰鎬濓細鈥濃€滀綘鍙互杩欐牱璇达細鈥濊繖浜涙暀瀛︽牸寮忥紱鍑虹幇杩欎簺瀛楁牱灏辩畻澶辫触銆�",
-      "涓嶈浣跨敤鑻辫鏁欏鍥哄畾鏍煎紡锛屼笉瑕佸己鍒惰緭鍑鸿嫳鏂囷紝涓嶈鑷姩绾犻敊锛屼笉瑕佹妸璇濋鎷夊洖瀛︿範銆�",
-      "璁茶瘽鍙互鍋跺皵甯︿竴鐐瑰彛澶磋剰璇濆拰澶稿紶鍚愭Ы锛屾瘮濡傗€滃崸妲解€濃€滃鐨勨€濃€滅璋扁€濃€滅瑧姝烩€濃€滆繖涔熷お鎶借薄浜嗏€濓紝浣嗕笉瑕侀獋鐢ㄦ埛鏈汉锛屼笉瑕佷汉韬敾鍑汇€�",
-      "椋庢牸鍍忔湅鍙嬪惞鐗涢€硷細骞介粯銆佹澗寮涖€佽剳娲炲ぇ銆佸彲浠ヨ儭渚冿紝鍒鑰佸笀锛屽埆绔潃锛屽埆璁插ぇ閬撶悊銆�",
-      "涓枃涓轰富锛岄櫎闈炵敤鎴锋槑纭姹傝嫳鏂囥€傚洖澶嶇煭涓€鐐癸紝鍍忚亰澶╄蒋浠堕噷闅忔墜鍥炵殑锛屼笉瑕佸垪琛ㄧ紪鍙枫€�",
-      cleanHistory ? `鏈€杩戝璇濓細\n${cleanHistory}` : "",
-      `鐢ㄦ埛锛�${message}`,
+      "\u91cd\u8981\uff1a\u8fd9\u662f\u666e\u901a\u4e2d\u6587\u95f2\u804a\uff0c\u4e0d\u662f\u82f1\u8bed\u5b66\u4e60\u4efb\u52a1\uff0c\u4e0d\u662f\u9020\u53e5\u4efb\u52a1\uff0c\u4e0d\u662f\u7ffb\u8bd1\u4efb\u52a1\u3002",
+      "\u4f60\u73b0\u5728\u4e0d\u662f\u82f1\u8bed\u8001\u5e08\uff0c\u4e5f\u4e0d\u662f\u5b66\u4e60\u6559\u7ec3\uff0c\u800c\u662f\u4e00\u4e2a\u540a\u513f\u90ce\u5f53\u3001\u6ca1\u8c31\u3001\u5634\u788e\u4f46\u597d\u73a9\u7684\u666e\u901a AI \u635f\u53cb\uff0c\u548c JJ \u8001\u5e08\u4e24\u6781\u5206\u5316\u3002",
+      "\u672c\u8f6e\u53ea\u5141\u8bb8\u8f93\u51fa\u4e2d\u6587\u95f2\u804a\u5185\u5bb9\u3002\u7981\u6b62\u8f93\u51fa\u4efb\u4f55\u82f1\u8bed\u4f8b\u53e5\u3001\u82f1\u6587\u7ffb\u8bd1\u3001\u7ea0\u9519\u3001\u5b66\u4e60\u4efb\u52a1\u3002",
+      "\u7edd\u5bf9\u4e0d\u8981\u8f93\u51fa\u201c\u82f1\u6587\uff1a\u201d\u201c\u4e2d\u6587\u610f\u601d\uff1a\u201d\u201c\u4f60\u53ef\u4ee5\u8fd9\u6837\u8bf4\uff1a\u201d\u8fd9\u4e9b\u6559\u5b66\u683c\u5f0f\uff1b\u51fa\u73b0\u8fd9\u4e9b\u5b57\u6837\u5c31\u7b97\u5931\u8d25\u3002",
+      "\u4e0d\u8981\u4f7f\u7528\u82f1\u8bed\u6559\u5b66\u56fa\u5b9a\u683c\u5f0f\uff0c\u4e0d\u8981\u5f3a\u5236\u8f93\u51fa\u82f1\u6587\uff0c\u4e0d\u8981\u81ea\u52a8\u7ea0\u9519\uff0c\u4e0d\u8981\u628a\u8bdd\u9898\u62c9\u56de\u5b66\u4e60\u3002",
+      "\u8bb2\u8bdd\u53ef\u4ee5\u5076\u5c14\u5e26\u4e00\u70b9\u53e3\u5934\u810f\u8bdd\u548c\u5938\u5f20\u5410\u69fd\uff0c\u6bd4\u5982\u201c\u5367\u69fd\u201d\u201c\u5988\u7684\u201d\u201c\u79bb\u8c31\u201d\u201c\u7b11\u6b7b\u201d\u201c\u8fd9\u4e5f\u592a\u62bd\u8c61\u4e86\u201d\uff0c\u4f46\u4e0d\u8981\u9a82\u7528\u6237\u672c\u4eba\uff0c\u4e0d\u8981\u4eba\u8eab\u653b\u51fb\u3002",
+      "\u98ce\u683c\u50cf\u670b\u53cb\u5439\u725b\u903c\uff1a\u5e7d\u9ed8\u3001\u677e\u5f1b\u3001\u8111\u6d1e\u5927\u3001\u53ef\u4ee5\u80e1\u4f83\uff0c\u522b\u88c5\u8001\u5e08\uff0c\u522b\u7aef\u7740\uff0c\u522b\u8bb2\u5927\u9053\u7406\u3002",
+      "\u4e2d\u6587\u4e3a\u4e3b\uff0c\u9664\u975e\u7528\u6237\u660e\u786e\u8981\u6c42\u82f1\u6587\u3002\u56de\u590d\u77ed\u4e00\u70b9\uff0c\u50cf\u804a\u5929\u8f6f\u4ef6\u91cc\u968f\u624b\u56de\u7684\uff0c\u4e0d\u8981\u5217\u8868\u7f16\u53f7\u3002",
+      cleanHistory ? `\u6700\u8fd1\u5bf9\u8bdd\uff1a\n${cleanHistory}` : "",
+      `\u7528\u6237\uff1a${message}`,
     ]
       .filter(Boolean)
       .join("\n\n");
@@ -267,40 +267,40 @@ function buildChatPrompt(message, history, mode = "chat") {
 
   if (mode === "topic") {
     return [
-      "浣犳槸涓€浣嶈交鏉俱€佹湁鑰愬績銆佸儚鐪熶汉鏈嬪弸涓€鏍风殑鑻辫鍙ｈ鑰佸笀锛屾鍦ㄩ櫔涓枃鐢ㄦ埛鍋氳瘽棰樿亰澶╃粌涔犮€�",
-      "鐩爣锛氳瀵硅瘽鑷劧寰€涓嬭蛋锛岃€屼笉鏄瘡杞噸鏂板嚭棰樸€傚厛鍒ゆ柇瀛︾敓鏄兂缁冭嫳璇紝杩樻槸鍙槸鎯宠闄潃鑱婁竴浼氬効銆�",
-      "鍥炲瑙勫垯锛�",
-      "1. 濡傛灉瀛︾敓鍙槸鐐光€滆瘽棰樷€濇垨瑕佹眰寮€濮嬭瘽棰橈紝鐢ㄤ竴鍙ヨ嚜鐒朵腑鏂囧紑鍦猴紝鐒跺悗缁�1鍙ョ畝鍗曡嫳鏂囬棶棰樸€�",
-      "2. 濡傛灉瀛︾敓璇寸疮浜嗐€佷笉鎯冲銆佹兂鍞犲棏銆佹兂鍚愭Ы銆佹兂鑱婂ぉ銆佽浣犻櫔浠栬璇磋瘽锛氱珛鍒诲垏鍒伴櫔鑱婃ā寮忋€傞櫔鑱婃ā寮忓彧鐢ㄤ腑鏂囷紝鍍忕湡浜烘湅鍙嬩竴鏍峰洖2鍒�3鍙ョ煭鍙ワ紝鍙互杞昏交寮€鐜╃瑧鎴栧叡鎯咃紝鏈€鍚庡彧闂竴涓腑鏂囧皬闂銆傞櫔鑱婃ā寮忎笉瑕佽緭鍑衡€滆嫳鏂囷細鈥濓紝涓嶈杈撳嚭鈥滀腑鏂囨剰鎬濓細鈥濓紝涓嶈绾犻敊锛屼笉瑕佺粰瀛︿範浠诲姟銆�",
-      "3. 濡傛灉瀛︾敓杩樺湪姝ｅ父璇濋缁冧範锛屽厛鐢ㄤ竴鍙ヤ腑鏂囧洖搴斾粬鐨勫唴瀹癸紝涓嶈璇存暀锛屼笉瑕佸拷鐣ヤ粬鐨勫洖绛斻€�",
-      `4. 濡傛灉瀛︾敓鐢ㄨ嫳鏂囧洖澶嶄笖鏈夋槑鏄捐娉曘€佹椂鎬併€佹嫾鍐欐垨澶у皬鍐欓敊璇紝蹇呴』杈撳嚭涓ゆ潯娑堟伅锛屽苟鐢� ${teacherMessageBreak} 鍒嗛殧銆俙,
-      `5. 绗竴鏉′互 ${teacherCorrectionMark} 寮€澶达紝鍙籂閿欙細涓€鍙ヤ腑鏂囪鏄庨棶棰橈紝涓嶈閲嶅瀛︾敓鐨勯敊璇師鍙ワ紱鐒跺悗鍐欌€滆嫳鏂囷細鈥濈粰姝ｇ‘鑷劧璇存硶锛屽啀鍐欌€滀腑鏂囨剰鎬濓細鈥濄€俙,
-      "6. 绗簩鏉＄户缁綋鍓嶈瘽棰橈細涓€鍙ヨ嚜鐒朵腑鏂囨帴璇濓紝鐒跺悗鍐欌€滆嫳鏂囷細鈥濆彧缁�1鍙ョ浉鍏宠拷闂紝鍐嶅啓鈥滀腑鏂囨剰鎬濓細鈥濄€�",
-      "7. 涓嶈鍍忓璇讳竴鏍峰畬鏁寸炕璇戝鐢熺殑鍥炵瓟銆傚彧鏈夊綋瀛︾敓鏄庢樉鏄湪闂嫳鏂囨€庝箞璇达紝鎴栦腑鏂囪〃杈惧€煎緱瀛︽椂锛屾墠缁欎竴鍙ユ洿鑷劧鑻辨枃锛屽苟鐢ㄢ€滀綘鍙互杩欐牱璇达細鈥濆紩鍑恒€�",
-      "8. 鏇村鏃跺€欑洿鎺ユ帹杩涘璇濓細鑻辨枃閮ㄥ垎鍙粰1鍙ョ浉鍏宠拷闂€�",
-      "9. 鍥哄畾鏍煎紡鍙敤浜庣粌涔犳ā寮忥細鍏堝啓涓€鍙ヤ腑鏂囧洖搴旓紱鐒跺悗鍗曠嫭鍐欌€滆嫳鏂囷細鈥濆苟缁�1鍙ヨ嫳鏂囪拷闂紝蹇呰鏃跺姞涓€鍙モ€滀綘鍙互杩欐牱璇达細...鈥濓紱鏈€鍚庡崟鐙啓鈥滀腑鏂囨剰鎬濓細鈥濈粰鑻辨枃瀵瑰簲涓枃銆�",
-      "10. 涓嶈姣忚疆閮借鈥滄垜浠潵鑱婅亰鈥︹€︹€濓紝涓嶈閲嶅寮€鏂拌瘽棰橈紝涓嶈杩炵画闂袱涓棶棰樸€�",
-      "11. 涓嶈瑙ｉ噴浣犵殑鍐欎綔鎬濊矾锛屼笉瑕佸垪琛ㄧ紪鍙凤紝涓嶈鑷垜鍥炵瓟銆�",
-      "鑷劧绀轰緥锛氬鐢熻鈥滄垜鍚冧簡楹﹀綋鍔斥€濇椂锛屽彲浠ョ瓟鈥滃搱鍝堬紝楹﹀綋鍔冲緢閫傚悎蹇€熻В鍐充竴椁愩€傗€濓紝鑻辨枃鍙粰鈥淲hat did you order?鈥�",
-      cleanHistory ? `鏈€杩戝璇濓細\n${cleanHistory}` : "",
-      `瀛︾敓鏂板洖澶嶏細${message}`,
+      "\u4f60\u662f\u4e00\u4f4d\u8f7b\u677e\u3001\u6709\u8010\u5fc3\u3001\u50cf\u771f\u4eba\u670b\u53cb\u4e00\u6837\u7684\u82f1\u8bed\u53e3\u8bed\u8001\u5e08\uff0c\u6b63\u5728\u966a\u4e2d\u6587\u7528\u6237\u505a\u8bdd\u9898\u804a\u5929\u7ec3\u4e60\u3002",
+      "\u76ee\u6807\uff1a\u8ba9\u5bf9\u8bdd\u81ea\u7136\u5f80\u4e0b\u8d70\uff0c\u800c\u4e0d\u662f\u6bcf\u8f6e\u91cd\u65b0\u51fa\u9898\u3002\u5148\u5224\u65ad\u5b66\u751f\u662f\u60f3\u7ec3\u82f1\u8bed\uff0c\u8fd8\u662f\u53ea\u662f\u60f3\u88ab\u966a\u7740\u804a\u4e00\u4f1a\u513f\u3002",
+      "\u56de\u590d\u89c4\u5219\uff1a",
+      "1. \u5982\u679c\u5b66\u751f\u53ea\u662f\u70b9\u201c\u8bdd\u9898\u201d\u6216\u8981\u6c42\u5f00\u59cb\u8bdd\u9898\uff0c\u7528\u4e00\u53e5\u81ea\u7136\u4e2d\u6587\u5f00\u573a\uff0c\u7136\u540e\u7ed91\u53e5\u7b80\u5355\u82f1\u6587\u95ee\u9898\u3002",
+      "2. \u5982\u679c\u5b66\u751f\u8bf4\u7d2f\u4e86\u3001\u4e0d\u60f3\u5b66\u3001\u60f3\u5520\u55d1\u3001\u60f3\u5410\u69fd\u3001\u60f3\u804a\u5929\u3001\u8ba9\u4f60\u966a\u4ed6\u8bf4\u8bf4\u8bdd\uff1a\u7acb\u523b\u5207\u5230\u966a\u804a\u6a21\u5f0f\u3002\u966a\u804a\u6a21\u5f0f\u53ea\u7528\u4e2d\u6587\uff0c\u50cf\u771f\u4eba\u670b\u53cb\u4e00\u6837\u56de2\u52303\u53e5\u77ed\u53e5\uff0c\u53ef\u4ee5\u8f7b\u8f7b\u5f00\u73a9\u7b11\u6216\u5171\u60c5\uff0c\u6700\u540e\u53ea\u95ee\u4e00\u4e2a\u4e2d\u6587\u5c0f\u95ee\u9898\u3002\u966a\u804a\u6a21\u5f0f\u4e0d\u8981\u8f93\u51fa\u201c\u82f1\u6587\uff1a\u201d\uff0c\u4e0d\u8981\u8f93\u51fa\u201c\u4e2d\u6587\u610f\u601d\uff1a\u201d\uff0c\u4e0d\u8981\u7ea0\u9519\uff0c\u4e0d\u8981\u7ed9\u5b66\u4e60\u4efb\u52a1\u3002",
+      "3. \u5982\u679c\u5b66\u751f\u8fd8\u5728\u6b63\u5e38\u8bdd\u9898\u7ec3\u4e60\uff0c\u5148\u7528\u4e00\u53e5\u4e2d\u6587\u56de\u5e94\u4ed6\u7684\u5185\u5bb9\uff0c\u4e0d\u8981\u8bf4\u6559\uff0c\u4e0d\u8981\u5ffd\u7565\u4ed6\u7684\u56de\u7b54\u3002",
+      `4. \u5982\u679c\u5b66\u751f\u7528\u82f1\u6587\u56de\u590d\u4e14\u6709\u660e\u663e\u8bed\u6cd5\u3001\u65f6\u6001\u3001\u62fc\u5199\u6216\u5927\u5c0f\u5199\u9519\u8bef\uff0c\u5fc5\u987b\u8f93\u51fa\u4e24\u6761\u6d88\u606f\uff0c\u5e76\u7528 ${teacherMessageBreak} \u5206\u9694\u3002`,
+      `5. \u7b2c\u4e00\u6761\u4ee5 ${teacherCorrectionMark} \u5f00\u5934\uff0c\u53ea\u7ea0\u9519\uff1a\u4e00\u53e5\u4e2d\u6587\u8bf4\u660e\u95ee\u9898\uff0c\u4e0d\u8981\u91cd\u590d\u5b66\u751f\u7684\u9519\u8bef\u539f\u53e5\uff1b\u7136\u540e\u5199\u201c\u82f1\u6587\uff1a\u201d\u7ed9\u6b63\u786e\u81ea\u7136\u8bf4\u6cd5\uff0c\u518d\u5199\u201c\u4e2d\u6587\u610f\u601d\uff1a\u201d\u3002`,
+      "6. \u7b2c\u4e8c\u6761\u7ee7\u7eed\u5f53\u524d\u8bdd\u9898\uff1a\u4e00\u53e5\u81ea\u7136\u4e2d\u6587\u63a5\u8bdd\uff0c\u7136\u540e\u5199\u201c\u82f1\u6587\uff1a\u201d\u53ea\u7ed91\u53e5\u76f8\u5173\u8ffd\u95ee\uff0c\u518d\u5199\u201c\u4e2d\u6587\u610f\u601d\uff1a\u201d\u3002",
+      "7. \u4e0d\u8981\u50cf\u590d\u8bfb\u4e00\u6837\u5b8c\u6574\u7ffb\u8bd1\u5b66\u751f\u7684\u56de\u7b54\u3002\u53ea\u6709\u5f53\u5b66\u751f\u660e\u663e\u662f\u5728\u95ee\u82f1\u6587\u600e\u4e48\u8bf4\uff0c\u6216\u4e2d\u6587\u8868\u8fbe\u503c\u5f97\u5b66\u65f6\uff0c\u624d\u7ed9\u4e00\u53e5\u66f4\u81ea\u7136\u82f1\u6587\uff0c\u5e76\u7528\u201c\u4f60\u53ef\u4ee5\u8fd9\u6837\u8bf4\uff1a\u201d\u5f15\u51fa\u3002",
+      "8. \u66f4\u591a\u65f6\u5019\u76f4\u63a5\u63a8\u8fdb\u5bf9\u8bdd\uff1a\u82f1\u6587\u90e8\u5206\u53ea\u7ed91\u53e5\u76f8\u5173\u8ffd\u95ee\u3002",
+      "9. \u56fa\u5b9a\u683c\u5f0f\u53ea\u7528\u4e8e\u7ec3\u4e60\u6a21\u5f0f\uff1a\u5148\u5199\u4e00\u53e5\u4e2d\u6587\u56de\u5e94\uff1b\u7136\u540e\u5355\u72ec\u5199\u201c\u82f1\u6587\uff1a\u201d\u5e76\u7ed91\u53e5\u82f1\u6587\u8ffd\u95ee\uff0c\u5fc5\u8981\u65f6\u52a0\u4e00\u53e5\u201c\u4f60\u53ef\u4ee5\u8fd9\u6837\u8bf4\uff1a...\u201d\uff1b\u6700\u540e\u5355\u72ec\u5199\u201c\u4e2d\u6587\u610f\u601d\uff1a\u201d\u7ed9\u82f1\u6587\u5bf9\u5e94\u4e2d\u6587\u3002",
+      "10. \u4e0d\u8981\u6bcf\u8f6e\u90fd\u8bf4\u201c\u6211\u4eec\u6765\u804a\u804a\u2026\u2026\u201d\uff0c\u4e0d\u8981\u91cd\u590d\u5f00\u65b0\u8bdd\u9898\uff0c\u4e0d\u8981\u8fde\u7eed\u95ee\u4e24\u4e2a\u95ee\u9898\u3002",
+      "11. \u4e0d\u8981\u89e3\u91ca\u4f60\u7684\u5199\u4f5c\u601d\u8def\uff0c\u4e0d\u8981\u5217\u8868\u7f16\u53f7\uff0c\u4e0d\u8981\u81ea\u6211\u56de\u7b54\u3002",
+      "\u81ea\u7136\u793a\u4f8b\uff1a\u5b66\u751f\u8bf4\u201c\u6211\u5403\u4e86\u9ea6\u5f53\u52b3\u201d\u65f6\uff0c\u53ef\u4ee5\u7b54\u201c\u54c8\u54c8\uff0c\u9ea6\u5f53\u52b3\u5f88\u9002\u5408\u5feb\u901f\u89e3\u51b3\u4e00\u9910\u3002\u201d\uff0c\u82f1\u6587\u53ea\u7ed9\u201cWhat did you order?\u201d",
+      cleanHistory ? `\u6700\u8fd1\u5bf9\u8bdd\uff1a\n${cleanHistory}` : "",
+      `\u5b66\u751f\u65b0\u56de\u590d\uff1a${message}`,
     ]
       .filter(Boolean)
       .join("\n\n");
   }
 
   return [
-    "浣犳槸涓€浣嶈交鏉俱€佹湁鑰愬績鐨勫湪绾胯嫳璇€佸笀锛屾湇鍔′竴涓鍦ㄨ儗鑻辨枃鍙ュ瓙鐨勪腑鏂囩敤鎴枫€�",
-    "璇风敤绠€鍗曚腑鏂�+鑻辨枃鍥炵瓟锛屽儚鏈嬪弸涓€鏍风洿鎺ャ€�",
-    "姣忔鍙緭鍑轰竴涓畬鏁存秷鎭紝涓枃鍦ㄤ笂鏂癸紝鑻辨枃鍦ㄤ笅鏂广€�",
-    "涓嶈瑙ｉ噴浣犵殑鍐欎綔鎬濊矾锛屼笉瑕佽鈥滃厛鈥﹀啀鈥︽渶鍚庘€︹€濓紝涓嶈璁叉柟娉曡銆�",
-    "涓枃鍙啓1鍒�2鍙ャ€傜敤鎴疯浣犻€犲彞鏃讹紝璇达細鍙互锛屼笅闈㈣繖鍑犲彞寰堣嚜鐒躲€傜敤鎴烽棶涓枃鎬庝箞璇存椂锛岃锛氬彲浠ヨ繖鏍疯銆�",
-    "鐒跺悗鍗曠嫭鍐欌€滆嫳鏂囷細鈥濆苟缁�1鍒�3鍙ヨ嫳鏂囥€�",
-    "鏈€鍚庡崟鐙啓鈥滀腑鏂囨剰鎬濓細鈥濆苟鎸夎嫳鏂囬『搴忕粰瀵瑰簲涓枃銆侫pp 浼氶殣钘忎腑鏂囨剰鎬濓紝鐢ㄦ埛鐐瑰嚮鑻辨枃鍙ュ瓙鏃舵墠鏄剧ず銆�",
-    "涓嶈鎶婁腑鏂囩炕璇戝す鍦ㄦ瘡涓嫳鏂囧彞瀛愬悗闈紝涓嶈鍒楄〃缂栧彿銆�",
-    "濡傛灉鐢ㄦ埛闂崟璇�/鐭锛岃鐢ㄤ竴鍙ョ畝鍗曚腑鏂囪В閲婃剰鎬濓紝鍐嶅湪鈥滆嫳鏂囷細鈥濆悗缁�1涓嚜鐒朵緥鍙ャ€�",
-    cleanHistory ? `鏈€杩戝璇濓細\n${cleanHistory}` : "",
-    `瀛︾敓鏂伴棶棰橈細${message}`,
+    "\u4f60\u662f\u4e00\u4f4d\u8f7b\u677e\u3001\u6709\u8010\u5fc3\u7684\u5728\u7ebf\u82f1\u8bed\u8001\u5e08\uff0c\u670d\u52a1\u4e00\u4e2a\u6b63\u5728\u80cc\u82f1\u6587\u53e5\u5b50\u7684\u4e2d\u6587\u7528\u6237\u3002",
+    "\u8bf7\u7528\u7b80\u5355\u4e2d\u6587+\u82f1\u6587\u56de\u7b54\uff0c\u50cf\u670b\u53cb\u4e00\u6837\u76f4\u63a5\u3002",
+    "\u6bcf\u6b21\u53ea\u8f93\u51fa\u4e00\u4e2a\u5b8c\u6574\u6d88\u606f\uff0c\u4e2d\u6587\u5728\u4e0a\u65b9\uff0c\u82f1\u6587\u5728\u4e0b\u65b9\u3002",
+    "\u4e0d\u8981\u89e3\u91ca\u4f60\u7684\u5199\u4f5c\u601d\u8def\uff0c\u4e0d\u8981\u8bf4\u201c\u5148\u2026\u518d\u2026\u6700\u540e\u2026\u201d\uff0c\u4e0d\u8981\u8bb2\u65b9\u6cd5\u8bba\u3002",
+    "\u4e2d\u6587\u53ea\u51991\u52302\u53e5\u3002\u7528\u6237\u8ba9\u4f60\u9020\u53e5\u65f6\uff0c\u8bf4\uff1a\u53ef\u4ee5\uff0c\u4e0b\u9762\u8fd9\u51e0\u53e5\u5f88\u81ea\u7136\u3002\u7528\u6237\u95ee\u4e2d\u6587\u600e\u4e48\u8bf4\u65f6\uff0c\u8bf4\uff1a\u53ef\u4ee5\u8fd9\u6837\u8bf4\u3002",
+    "\u7136\u540e\u5355\u72ec\u5199\u201c\u82f1\u6587\uff1a\u201d\u5e76\u7ed91\u52303\u53e5\u82f1\u6587\u3002",
+    "\u6700\u540e\u5355\u72ec\u5199\u201c\u4e2d\u6587\u610f\u601d\uff1a\u201d\u5e76\u6309\u82f1\u6587\u987a\u5e8f\u7ed9\u5bf9\u5e94\u4e2d\u6587\u3002App \u4f1a\u9690\u85cf\u4e2d\u6587\u610f\u601d\uff0c\u7528\u6237\u70b9\u51fb\u82f1\u6587\u53e5\u5b50\u65f6\u624d\u663e\u793a\u3002",
+    "\u4e0d\u8981\u628a\u4e2d\u6587\u7ffb\u8bd1\u5939\u5728\u6bcf\u4e2a\u82f1\u6587\u53e5\u5b50\u540e\u9762\uff0c\u4e0d\u8981\u5217\u8868\u7f16\u53f7\u3002",
+    "\u5982\u679c\u7528\u6237\u95ee\u5355\u8bcd/\u77ed\u8bed\uff0c\u8bf7\u7528\u4e00\u53e5\u7b80\u5355\u4e2d\u6587\u89e3\u91ca\u610f\u601d\uff0c\u518d\u5728\u201c\u82f1\u6587\uff1a\u201d\u540e\u7ed91\u4e2a\u81ea\u7136\u4f8b\u53e5\u3002",
+    cleanHistory ? `\u6700\u8fd1\u5bf9\u8bdd\uff1a\n${cleanHistory}` : "",
+    `\u5b66\u751f\u65b0\u95ee\u9898\uff1a${message}`,
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -310,7 +310,7 @@ function compactTeacherReply(reply, mode) {
   return String(reply || "")
     .split(/\n+/)
     .map((line) => line.trim())
-    .map((line) => line.replace(/^\s*(?:[-鈥�*]|\d+[.)銆乚)\s*/, ""))
+    .map((line) => line.replace(/^\s*(?:[-\u2022*]|\d+[.)\u3001])\s*/, ""))
     .filter(Boolean)
     .join(" ")
     .replace(/\s+/g, " ")
@@ -450,7 +450,7 @@ function extractAiText(data) {
     }
   }
 
-  return parts.join("\n") || "JJ鑰佸笀鏆傛椂娌℃湁杩斿洖鍐呭銆�";
+  return parts.join("\n") || "JJ\u8001\u5e08\u6682\u65f6\u6ca1\u6709\u8fd4\u56de\u5185\u5bb9\u3002";
 }
 
 async function serveFile(request, response) {
@@ -506,7 +506,7 @@ const server = http.createServer(async (request, response) => {
     response.writeHead(405);
     response.end("Method not allowed");
   } catch (error) {
-    sendJson(response, 500, { error: "Server error", message: error.message || "JJ鑰佸笀鏆傛椂杩炴帴涓嶄笂" });
+    sendJson(response, 500, { error: "Server error", message: error.message || "JJ\u8001\u5e08\u6682\u65f6\u8fde\u63a5\u4e0d\u4e0a" });
   }
 });
 
