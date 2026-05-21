@@ -1,0 +1,1 @@
+window.SENTENCE_READER_AI_ENDPOINT = "";

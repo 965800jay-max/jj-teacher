@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JJ老师</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="top-bar">
+        <div>
+          <p class="eyebrow" id="pageEyebrow">Sentence Reader</p>
+          <h1 id="pageTitle">句读</h1>
+        </div>
+        <button class="icon-button" id="clearButton" type="button" aria-label="清空内容" title="清空">
+          <span aria-hidden="true">×</span>
+        </button>
+      </header>
+
+      <section class="page-view is-active" id="sentencesPage" aria-label="句子学习">
+        <section class="view-panel" aria-label="句子分类">
+          <div class="view-tabs" role="tablist" aria-label="句子分类">
+            <button class="view-tab is-active" id="learningTab" type="button" role="tab" aria-selected="true">学习中</button>
+            <button class="view-tab" id="learnedTab" type="button" role="tab" aria-selected="false">已学会</button>
+          </div>
+          <p id="sentenceCount">0 句</p>
+          <label class="voice-picker">
+            <span>语速</span>
+            <input id="speedSlider" type="range" min="0.5" max="1" step="0.05" value="1" aria-label="调整朗读语速" />
+            <strong id="speedValue">1.00x</strong>
+          </label>
+        </section>
+
+        <section class="input-panel" aria-label="添加英文句子">
+          <textarea
+            id="sentenceInput"
+            placeholder="输入或粘贴要添加的英文句子..."
+            autocomplete="off"
+            spellcheck="false"
+          ></textarea>
+          <div class="input-actions">
+            <button class="primary-button" id="addButton" type="button">添加</button>
+          </div>
+        </section>
+
+        <section class="sentence-list" id="sentenceList" aria-live="polite"></section>
+
+        <section class="empty-state" id="emptyState">
+          <h2>添加句子后就能直接听</h2>
+          <p>整句点右侧按钮，单词直接点英文。</p>
+        </section>
+      </section>
+
+      <section class="page-view exam-page" id="examPage" aria-label="句子考试">
+        <section class="exam-hero">
+          <p class="eyebrow">Sentence Quiz</p>
+          <h2>句子默写考试</h2>
+          <p id="examProgress">准备中</p>
+        </section>
+
+        <section class="exam-card" aria-label="默写题目">
+          <p class="sheet-label">中文句意</p>
+          <h2 id="examPrompt">先添加学习中的句子和中文句意</h2>
+          <textarea
+            id="examAnswer"
+            placeholder="输入完整英文句子..."
+            autocomplete="off"
+            spellcheck="false"
+          ></textarea>
+          <div class="exam-actions">
+            <button class="primary-button" id="examCheckButton" type="button">检查</button>
+            <button class="ghost-button" id="examDontKnowButton" type="button">我不会</button>
+          </div>
+          <div class="exam-feedback" id="examFeedback" aria-live="polite"></div>
+          <div class="exam-answer-panel" id="examAnswerPanel" aria-live="polite"></div>
+          <button class="ghost-button" id="examNextButton" type="button">下一题</button>
+        </section>
+      </section>
+
+      <section class="page-view teacher-page" id="teacherPage" aria-label="JJ老师">
+        <section class="chat-panel" aria-label="JJ老师聊天">
+          <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
+          <div class="quick-prompts" aria-label="快捷问题">
+            <button type="button" id="topicButton" data-topic="start">话题</button>
+            <button type="button" data-prompt="给我3句适合日常聊天的英文句子。">日常口语句子</button>
+            <button type="button" data-prompt="给我3句适合背诵的高级英文句子，难度中等。">高级背诵句子</button>
+            <button type="button" data-prompt="帮我用英文造3句关于今天心情的自然句子。">按主题造句</button>
+          </div>
+          <div class="chat-composer">
+            <textarea
+              class="teacher-input"
+              id="teacherInput"
+              placeholder="问JJ老师，比如：给我几句适合旅行时使用的英文句子..."
+              rows="1"
+              enterkeyhint="send"
+              autocomplete="off"
+              spellcheck="false"
+            ></textarea>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="页面切换">
+      <button class="bottom-nav-button is-active" id="sentencesNav" type="button" aria-current="page">句子</button>
+      <button class="bottom-nav-button" id="examNav" type="button">考试</button>
+      <button class="bottom-nav-button" id="teacherNav" type="button">JJ老师</button>
+    </nav>
+
+    <div class="barrage-layer" id="barrageLayer" aria-hidden="true"></div>
+
+    <aside class="word-sheet" id="wordSheet" aria-live="polite" aria-label="单词释义">
+      <div class="sheet-handle"></div>
+      <div class="word-main">
+        <div>
+          <p class="sheet-label">Word</p>
+          <h2 id="selectedWord">word</h2>
+          <p id="phoneticText"></p>
+        </div>
+        <button class="round-button" id="wordSpeakButton" type="button" aria-label="朗读单词" title="朗读单词">
+          <span aria-hidden="true">▶</span>
+        </button>
+      </div>
+      <p class="meaning" id="meaningText"></p>
+    </aside>
+
+    <script src="./config.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

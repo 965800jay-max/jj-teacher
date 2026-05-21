@@ -1,0 +1,8 @@
+{
+  "appId": "com.sentencereader.app",
+  "appName": "JJ老师",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}
