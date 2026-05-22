@@ -21,6 +21,12 @@ const labelYouCanSay = "\u4f60\u53ef\u4ee5\u8fd9\u6837\u8bf4\uff1a";
 const labelSentenceMeaning = "\u53e5\u610f\uff1a";
 const labelKeyWords = "\u91cd\u70b9\u8bcd\uff1a";
 const labelExample = "\u4f8b\u53e5\uff1a";
+const targetLanguages = {
+  english: { label: "English", speech: "en-US" },
+  spanish: { label: "Spanish", speech: "es-ES" },
+  japanese: { label: "Japanese", speech: "ja-JP" },
+  korean: { label: "Korean", speech: "ko-KR" },
+};
 const dataDir = process.env.DATA_DIR || path.join(root, "data");
 const userStoreFile = path.join(dataDir, "users.json");
 const authTokenTtlMs = 1000 * 60 * 60 * 24 * 30;
@@ -182,10 +188,16 @@ async function requireUser(request) {
 }
 
 function publicUser(user) {
+  const settings = sanitizeSettings(user.data?.settings || {
+    learningLanguage: user.data?.learningLanguage,
+    avatar: user.data?.avatar,
+  });
   return {
     id: user.id,
     email: user.email,
     name: user.name,
+    avatar: settings.avatar,
+    learningLanguage: settings.learningLanguage,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
@@ -193,6 +205,23 @@ function publicUser(user) {
 
 function limitText(value, maxLength) {
   return String(value || "").trim().slice(0, maxLength);
+}
+
+function normalizeTargetLanguage(code) {
+  return targetLanguages[code] ? code : "english";
+}
+
+function getTargetLanguageInfo(code) {
+  return targetLanguages[normalizeTargetLanguage(code)] || targetLanguages.english;
+}
+
+function sanitizeSettings(settings) {
+  const source = settings && typeof settings === "object" ? settings : {};
+  const avatar = limitText(source.avatar, 16000);
+  return {
+    learningLanguage: normalizeTargetLanguage(source.learningLanguage),
+    avatar: avatar.startsWith("data:image/") ? avatar : "",
+  };
 }
 
 function sanitizeSentence(item) {
@@ -232,18 +261,50 @@ function sanitizeTeacherMessage(item) {
   return clean;
 }
 
-function sanitizeUserData(payload) {
-  const source = payload && typeof payload === "object" ? payload : {};
-
+function sanitizeLanguageData(data) {
+  const source = data && typeof data === "object" ? data : {};
   return {
-    appVersion: limitText(source.appVersion, 40),
-    savedAt: Date.now(),
+    savedAt: typeof source.savedAt === "number" ? source.savedAt : Date.now(),
     sentences: Array.isArray(source.sentences)
       ? source.sentences.map(sanitizeSentence).filter(Boolean).slice(0, 1000)
       : [],
     teacherMessages: Array.isArray(source.teacherMessages)
       ? source.teacherMessages.map(sanitizeTeacherMessage).filter(Boolean).slice(-80)
       : [],
+  };
+}
+
+function sanitizeLanguages(languages) {
+  const source = languages && typeof languages === "object" ? languages : {};
+  return Object.keys(targetLanguages).reduce((all, code) => {
+    all[code] = sanitizeLanguageData(source[code]);
+    return all;
+  }, {});
+}
+
+function sanitizeUserData(payload) {
+  const source = payload && typeof payload === "object" ? payload : {};
+  const settings = sanitizeSettings(source.settings || {
+    learningLanguage: source.learningLanguage,
+    avatar: source.avatar,
+  });
+  const languages = sanitizeLanguages(source.languages);
+  const currentLanguage = normalizeTargetLanguage(settings.learningLanguage || source.learningLanguage);
+  if (!languages[currentLanguage].sentences.length && Array.isArray(source.sentences)) {
+    languages[currentLanguage].sentences = source.sentences.map(sanitizeSentence).filter(Boolean).slice(0, 1000);
+  }
+  if (!languages[currentLanguage].teacherMessages.length && Array.isArray(source.teacherMessages)) {
+    languages[currentLanguage].teacherMessages = source.teacherMessages.map(sanitizeTeacherMessage).filter(Boolean).slice(-80);
+  }
+
+  return {
+    appVersion: limitText(source.appVersion, 40),
+    savedAt: Date.now(),
+    settings,
+    learningLanguage: currentLanguage,
+    languages,
+    sentences: languages[currentLanguage].sentences,
+    teacherMessages: languages[currentLanguage].teacherMessages,
   };
 }
 
@@ -332,6 +393,41 @@ async function handleSaveUserData(request, response) {
   sendJson(response, 200, { ok: true, user: publicUser(user), data: user.data });
 }
 
+async function handleAuthProfile(request, response) {
+  const payload = await readJsonBody(request);
+  const { store, user } = await requireUser(request);
+  const name = limitText(payload.name || user.name, 40);
+  if (!name) throw httpError(400, "Please enter a display name.");
+
+  const currentSettings = sanitizeSettings(user.data?.settings || {
+    learningLanguage: user.data?.learningLanguage,
+    avatar: user.data?.avatar,
+  });
+  const avatar = limitText(payload.avatar, 16000);
+  const learningLanguage = normalizeTargetLanguage(payload.learningLanguage || currentSettings.learningLanguage);
+  user.name = name;
+  user.data = sanitizeUserData({
+    ...(user.data || {}),
+    settings: {
+      ...currentSettings,
+      learningLanguage,
+      avatar: avatar.startsWith("data:image/") ? avatar : currentSettings.avatar,
+    },
+  });
+  user.updatedAt = Date.now();
+  await saveUserStore(store);
+  sendJson(response, 200, { ok: true, user: publicUser(user), data: user.data });
+}
+
+async function handleListUsers(request, response) {
+  const { store } = await requireUser(request);
+  await saveUserStore(store);
+  const users = Object.values(store.users)
+    .map(publicUser)
+    .sort((left, right) => String(left.name || "").localeCompare(String(right.name || ""), "zh-Hans-CN"));
+  sendJson(response, 200, { users });
+}
+
 async function handleSpeech(request, response) {
   let payload;
   try {
@@ -343,6 +439,7 @@ async function handleSpeech(request, response) {
 
   const text = String(payload.text || "").trim();
   const mode = String(payload.mode || "sentence");
+  const voiceLanguage = limitText(payload.voiceLanguage, 12) || getTargetLanguageInfo(payload.language).speech;
 
   if (!text) {
     sendJson(response, 400, { error: "Text is required" });
@@ -354,7 +451,7 @@ async function handleSpeech(request, response) {
     return;
   }
 
-  const cacheKey = `online-tts\n${mode}\n${text}`;
+  const cacheKey = `online-tts\n${voiceLanguage}\n${mode}\n${text}`;
   if (speechCache.has(cacheKey)) {
     response.writeHead(200, {
       "Content-Type": "audio/mpeg",
@@ -365,7 +462,7 @@ async function handleSpeech(request, response) {
     return;
   }
 
-  const audio = await fetchOnlineSpeech(text);
+  const audio = await fetchOnlineSpeech(text, voiceLanguage);
   speechCache.set(cacheKey, audio);
   response.writeHead(200, {
     "Content-Type": "audio/mpeg",
@@ -375,11 +472,11 @@ async function handleSpeech(request, response) {
   response.end(audio);
 }
 
-async function fetchOnlineSpeech(text) {
+async function fetchOnlineSpeech(text, voiceLanguage = "en-US") {
   const params = new URLSearchParams({
     ie: "UTF-8",
     client: "tw-ob",
-    tl: "en-US",
+    tl: voiceLanguage,
     q: text,
     ttsspeed: "1",
   });
@@ -416,6 +513,14 @@ async function handleAiTeacher(request, response) {
   }
 
   const mode = String(payload.mode || "chat");
+  const targetLanguage = normalizeTargetLanguage(payload.targetLanguage);
+  if (mode === "convert-language") {
+    const sourceLanguage = normalizeTargetLanguage(payload.sourceLanguage);
+    const reply = await askAiTeacher(buildConvertLanguagePrompt(payload, sourceLanguage, targetLanguage), mode, targetLanguage);
+    sendJson(response, 200, { reply });
+    return;
+  }
+
   if (mode === "explain") {
     const sentence = String(payload.sentence || "").trim();
     if (!sentence) {
@@ -423,7 +528,7 @@ async function handleAiTeacher(request, response) {
       return;
     }
 
-    const reply = await askAiTeacher(buildExplainPrompt(sentence), mode);
+    const reply = await askAiTeacher(buildExplainPrompt(sentence, targetLanguage), mode, targetLanguage);
     sendJson(response, 200, { reply });
     return;
   }
@@ -436,15 +541,15 @@ async function handleAiTeacher(request, response) {
 
   const history = Array.isArray(payload.messages) ? payload.messages.slice(-10) : [];
   if (payload.stream === true) {
-    await streamAiTeacherResponse(response, buildChatPrompt(message, history, mode), mode);
+    await streamAiTeacherResponse(response, buildChatPrompt(message, history, mode, targetLanguage), mode, targetLanguage);
     return;
   }
 
-  const reply = compactTeacherReply(await askAiTeacher(buildChatPrompt(message, history, mode), mode), mode);
+  const reply = compactTeacherReply(await askAiTeacher(buildChatPrompt(message, history, mode, targetLanguage), mode, targetLanguage), mode);
   sendJson(response, 200, { reply });
 }
 
-async function streamAiTeacherResponse(response, prompt, mode) {
+async function streamAiTeacherResponse(response, prompt, mode, targetLanguage = "english") {
   response.writeHead(200, {
     "Content-Type": "text/event-stream; charset=utf-8",
     "Cache-Control": "no-cache, no-transform",
@@ -457,7 +562,7 @@ async function streamAiTeacherResponse(response, prompt, mode) {
 
   try {
     let lastFlush = "";
-    const fullReply = await askAiTeacherStream(prompt, mode, (delta, accumulated) => {
+    const fullReply = await askAiTeacherStream(prompt, mode, targetLanguage, (delta, accumulated) => {
       if (!delta || accumulated === lastFlush) return;
 
       lastFlush = accumulated;
@@ -488,19 +593,43 @@ function handleHealth(response) {
   });
 }
 
-function buildExplainPrompt(sentence) {
+function buildExplainPrompt(sentence, targetLanguage = "english") {
+  const language = getTargetLanguageInfo(targetLanguage);
   return [
-    "You are an English memorization teacher for native Chinese speakers.",
+    `You are a ${language.label} memorization teacher for native Chinese speakers.`,
     "Reply in Simplified Chinese. Keep it extremely short for a mobile card.",
     "Output exactly these three headings, with each section under 18 Chinese characters:",
     labelSentenceMeaning,
     labelKeyWords,
     labelExample,
-    `English sentence: ${sentence}`,
+    `${language.label} sentence: ${sentence}`,
   ].join("\n");
 }
 
-function buildChatPrompt(message, history, mode = "chat") {
+function buildConvertLanguagePrompt(payload, sourceLanguage = "english", targetLanguage = "english") {
+  const source = getTargetLanguageInfo(sourceLanguage);
+  const target = getTargetLanguageInfo(targetLanguage);
+  const sentences = Array.isArray(payload.sentences) ? payload.sentences.slice(0, 120) : [];
+  const teacherMessages = Array.isArray(payload.teacherMessages) ? payload.teacherMessages.slice(-24) : [];
+  return [
+    `You are converting one language-learning app user's saved data from ${source.label} study to ${target.label} study.`,
+    "Convert saved sentences and teacher chat history into the target study language without losing progress.",
+    "Rules:",
+    `1. In saved sentences, every text field must become a natural ${target.label} sentence.`,
+    "2. Keep note and explanation fields in Simplified Chinese.",
+    `3. In teacherMessages, leave casual Chinese chat in Simplified Chinese, but convert any old study-language sentences, questions, examples, or translations into ${target.label}.`,
+    `4. If a message contains the app label ${labelEnglish}, keep that exact label, but the content after it must be ${target.label}.`,
+    `5. If a message contains ${labelMeaning}, keep the meaning after it in Simplified Chinese.`,
+    "6. Do not add unrelated content, do not delete user messages, and do not change role values.",
+    "7. Return JSON only. No Markdown, no explanation.",
+    "The JSON shape must be:",
+    '{"sentences":[{"text":"","note":"","learned":false,"learnedAt":null,"aiExplanation":""}],"teacherMessages":[{"role":"assistant","text":""}]}',
+    `Old data: ${JSON.stringify({ sentences, teacherMessages })}`,
+  ].join("\n");
+}
+
+function buildChatPrompt(message, history, mode = "chat", targetLanguage = "english") {
+  const language = getTargetLanguageInfo(targetLanguage);
   const cleanHistory = history
     .filter((item) => item && typeof item.text === "string" && (item.role === "user" || item.role === "assistant"))
     .map((item) => `${item.role === "user" ? "Student" : "Teacher"}: ${item.text}`)
@@ -508,9 +637,9 @@ function buildChatPrompt(message, history, mode = "chat") {
 
   if (mode === "freestyle") {
     return [
-      "Important: this is casual Chinese chat, not an English lesson, sentence-making task, translation task, or grammar correction task.",
-      "You are not acting as an English teacher now. You are a natural, warm, normal Chinese chat AI.",
-      "Only output casual Simplified Chinese unless the user clearly asks for English.",
+      `Important: this is casual Chinese chat, not a ${language.label} lesson, sentence-making task, translation task, or grammar correction task.`,
+      `You are not acting as a ${language.label} teacher now. You are a natural, warm, normal Chinese chat AI.`,
+      `Only output casual Simplified Chinese unless the user clearly asks for ${language.label}.`,
       `Do not use teaching labels such as ${labelEnglish}, ${labelMeaning}, or ${labelYouCanSay}.`,
       "Do not force English, do not auto-correct, and do not pull the conversation back to studying.",
       "Reply like a friend. Be relaxed, but do not over-act, do not use profanity, and do not perform exaggerated comedy.",
@@ -524,20 +653,20 @@ function buildChatPrompt(message, history, mode = "chat") {
 
   if (mode === "topic") {
     return [
-      "You are a relaxed and patient spoken-English teacher for a Chinese user. You should feel like a real friendly person, not a rigid machine.",
+      `You are a relaxed and patient spoken-${language.label} teacher for a Chinese user. You should feel like a real friendly person, not a rigid machine.`,
       "Goal: keep the conversation moving naturally. Do not restart a new exercise every turn.",
-      "First decide whether the student wants to practice English or just wants a little casual company.",
+      `First decide whether the student wants to practice ${language.label} or just wants a little casual company.`,
       "Rules:",
-      "1. If the student only starts a topic, open with one natural Simplified Chinese sentence, then give exactly one simple English question.",
-      `2. Use the exact label ${labelEnglish} before English questions, and ${labelMeaning} before the Chinese meaning.`,
+      `1. If the student only starts a topic, open with one natural Simplified Chinese sentence, then give exactly one simple ${language.label} question.`,
+      `2. Use the exact label ${labelEnglish} before ${language.label} questions, and ${labelMeaning} before the Chinese meaning. The label is only for app parsing; the content after it must be ${language.label}.`,
       "3. If the student says they are tired, do not want to study, want to chat, vent, or be accompanied, switch to casual companion mode. In that mode, only use Simplified Chinese, reply in 2 to 3 short sentences, and ask one natural Chinese follow-up. Do not correct or give study tasks.",
       "4. If the student is still practicing, first respond naturally in Simplified Chinese to what they just said. Do not ignore the content.",
-      `5. If the student replies in English with clear grammar, tense, spelling, or capitalization mistakes, output two messages separated by ${teacherMessageBreak}.`,
-      `6. The first message must start with ${teacherCorrectionMark}. It only corrects the mistake: one Chinese sentence explaining the issue, then ${labelEnglish} with the correct natural sentence, then ${labelMeaning}.`,
+      `5. If the student replies in ${language.label} with clear grammar, tense, spelling, or expression mistakes, output two messages separated by ${teacherMessageBreak}.`,
+      `6. The first message must start with ${teacherCorrectionMark}. It only corrects the mistake: one Chinese sentence explaining the issue, then ${labelEnglish} with the correct natural ${language.label} sentence, then ${labelMeaning}.`,
       `7. The second message continues the topic: one natural Chinese response, then ${labelEnglish} with exactly one related follow-up question, then ${labelMeaning}.`,
-      `8. Do not repeat the student's answer like a translation machine. Only use ${labelYouCanSay} when the user clearly asks how to say something in English or when a Chinese expression is worth learning.`,
-      "9. Most of the time, continue the conversation directly. The English part should be only one related follow-up question.",
-      `10. In practice mode, the format is: one Chinese response, then ${labelEnglish} one English follow-up, optionally ${labelYouCanSay} one natural expression, then ${labelMeaning} the matching Chinese meaning.`,
+      `8. Do not repeat the student's answer like a translation machine. Only use ${labelYouCanSay} when the user clearly asks how to say something in ${language.label} or when a Chinese expression is worth learning.`,
+      `9. Most of the time, continue the conversation directly. The ${language.label} part should be only one related follow-up question.`,
+      `10. In practice mode, the format is: one Chinese response, then ${labelEnglish} one ${language.label} follow-up, optionally ${labelYouCanSay} one natural expression, then ${labelMeaning} the matching Chinese meaning.`,
       "11. Do not explain your thinking, do not use numbered lists in the final answer, and do not answer your own question.",
       "Natural example: if the student says they had McDonald's, respond in Chinese like a real person and only ask: What did you order?",
       cleanHistory ? `Recent conversation:\n${cleanHistory}` : "",
@@ -548,16 +677,16 @@ function buildChatPrompt(message, history, mode = "chat") {
   }
 
   return [
-    "You are a relaxed and patient online English teacher for a Chinese user memorizing English sentences.",
-    "Reply with simple Simplified Chinese plus English. Be direct and friendly.",
-    "Output one complete message. Put Chinese first and English below it.",
+    `You are a relaxed and patient online ${language.label} teacher for a Chinese user memorizing ${language.label} sentences.`,
+    `Reply with simple Simplified Chinese plus ${language.label}. Be direct and friendly.`,
+    `Output one complete message. Put Chinese first and ${language.label} below it.`,
     "Do not explain your reasoning or methodology.",
     "Use only 1 to 2 Chinese sentences before the English part.",
-    `Then write ${labelEnglish} and give 1 to 3 English sentences.`,
-    `Finally write ${labelMeaning} and give the matching Chinese meanings in the same order. The app will hide this meaning until the user taps the English sentence.`,
-    "Do not attach the Chinese translation after each English sentence. Do not use numbered lists.",
-    `If the user asks how to say something in English, use ${labelYouCanSay} before the English expression.`,
-    "If the user asks about a word or phrase, explain it briefly in Simplified Chinese, then give one natural English example after the English label.",
+    `Then write ${labelEnglish} and give 1 to 3 ${language.label} sentences. The label is only for app parsing; the content after it must be ${language.label}.`,
+    `Finally write ${labelMeaning} and give the matching Chinese meanings in the same order. The app will hide this meaning until the user taps the sentence.`,
+    `Do not attach the Chinese translation after each ${language.label} sentence. Do not use numbered lists.`,
+    `If the user asks how to say something in ${language.label}, use ${labelYouCanSay} before the ${language.label} expression.`,
+    `If the user asks about a word or phrase, explain it briefly in Simplified Chinese, then give one natural ${language.label} example after the app label.`,
     cleanHistory ? `Recent conversation:\n${cleanHistory}` : "",
     `Student new question: ${message}`,
   ]
@@ -576,7 +705,7 @@ function compactTeacherReply(reply, mode) {
     .trim();
 }
 
-async function askAiTeacher(prompt, mode = "chat") {
+async function askAiTeacher(prompt, mode = "chat", targetLanguage = "english") {
   const aiResponse = await fetch(aiResponsesUrl, {
     method: "POST",
     headers: {
@@ -586,7 +715,7 @@ async function askAiTeacher(prompt, mode = "chat") {
     body: JSON.stringify({
       model: aiModel,
       input: prompt,
-      instructions: buildAiInstructions(mode),
+      instructions: buildAiInstructions(mode, targetLanguage),
     }),
   });
 
@@ -598,7 +727,7 @@ async function askAiTeacher(prompt, mode = "chat") {
   return extractAiText(data).trim();
 }
 
-async function askAiTeacherStream(prompt, mode = "chat", onDelta = () => {}) {
+async function askAiTeacherStream(prompt, mode = "chat", targetLanguage = "english", onDelta = () => {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), aiStreamTimeoutMs);
 
@@ -612,7 +741,7 @@ async function askAiTeacherStream(prompt, mode = "chat", onDelta = () => {}) {
       body: JSON.stringify({
         model: aiModel,
         input: prompt,
-        instructions: buildAiInstructions(mode),
+        instructions: buildAiInstructions(mode, targetLanguage),
         stream: true,
       }),
       signal: controller.signal,
@@ -624,7 +753,7 @@ async function askAiTeacherStream(prompt, mode = "chat", onDelta = () => {}) {
     }
 
     if (!aiResponse.body?.getReader) {
-      return askAiTeacher(prompt, mode);
+      return askAiTeacher(prompt, mode, targetLanguage);
     }
 
     const reader = aiResponse.body.getReader();
@@ -658,16 +787,21 @@ async function askAiTeacherStream(prompt, mode = "chat", onDelta = () => {}) {
       fullText += delta;
       onDelta(delta, fullText);
     }
-    return fullText.trim() || askAiTeacher(prompt, mode);
+    return fullText.trim() || askAiTeacher(prompt, mode, targetLanguage);
   } finally {
     clearTimeout(timeout);
   }
 }
 
-function buildAiInstructions(mode = "chat") {
+function buildAiInstructions(mode = "chat", targetLanguage = "english") {
+  const language = getTargetLanguageInfo(targetLanguage);
+  if (mode === "convert-language") {
+    return "You convert app learning data between languages. Return valid JSON only, with no Markdown or explanation.";
+  }
+
   return mode === "freestyle"
     ? "You are a natural Chinese chat friend. Be calm, normal, warm, concise, and do not use English-teacher formatting unless asked."
-    : "You are an English learning teacher for Chinese speakers. Be accurate, friendly, concise, and practical.";
+    : `You are a ${language.label} learning teacher for Chinese speakers. Be accurate, friendly, concise, and practical.`;
 }
 
 function parseSseBlock(block) {
@@ -759,6 +893,16 @@ const server = http.createServer(async (request, response) => {
 
     if (request.method === "GET" && request.url === "/api/auth/me") {
       await handleAuthMe(request, response);
+      return;
+    }
+
+    if (request.method === "POST" && request.url === "/api/auth/profile") {
+      await handleAuthProfile(request, response);
+      return;
+    }
+
+    if (request.method === "GET" && request.url === "/api/users") {
+      await handleListUsers(request, response);
       return;
     }
 
