@@ -1,6 +1,6 @@
 {
-  "versionCode": 15,
-  "versionName": "free15",
-  "apkUrl": "https://files.catbox.moe/8gt1i4.apk",
-  "notes": "修复吹牛模式重复发送、重复回复的问题。"
+  "versionCode": 26,
+  "versionName": "free26",
+  "apkUrl": "https://files.catbox.moe/rqvfol.apk",
+  "notes": "Fix language switching, friends list, and profile editing."
 }
