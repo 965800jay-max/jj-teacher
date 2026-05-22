@@ -1,4 +1,5 @@
 const http = require("http");
+const crypto = require("crypto");
 const fs = require("fs/promises");
 const fsSync = require("fs");
 const path = require("path");
@@ -14,11 +15,22 @@ const aiResponsesUrl = process.env.AI_RESPONSES_URL || "https://api.openai.com/v
 const aiStreamTimeoutMs = Number(process.env.AI_STREAM_TIMEOUT_MS || 40000);
 const teacherMessageBreak = "\u3010NEXT_MESSAGE\u3011";
 const teacherCorrectionMark = "\u3010CORRECTION\u3011";
+const labelEnglish = "\u82f1\u6587\uff1a";
+const labelMeaning = "\u4e2d\u6587\u610f\u601d\uff1a";
+const labelYouCanSay = "\u4f60\u53ef\u4ee5\u8fd9\u6837\u8bf4\uff1a";
+const labelSentenceMeaning = "\u53e5\u610f\uff1a";
+const labelKeyWords = "\u91cd\u70b9\u8bcd\uff1a";
+const labelExample = "\u4f8b\u53e5\uff1a";
+const dataDir = process.env.DATA_DIR || path.join(root, "data");
+const userStoreFile = path.join(dataDir, "users.json");
+const authTokenTtlMs = 1000 * 60 * 60 * 24 * 30;
+const maxUserDataBytes = 1000 * 1000;
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".js": "application/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
   ".png": "image/png",
   ".mp3": "audio/mpeg",
   ".wav": "audio/wav",
@@ -73,6 +85,251 @@ function collectBody(request, maxLength = 30000) {
     request.on("end", () => resolve(body));
     request.on("error", reject);
   });
+}
+
+function httpError(status, message) {
+  const error = new Error(message);
+  error.status = status;
+  return error;
+}
+
+async function loadUserStore() {
+  try {
+    const raw = await fs.readFile(userStoreFile, "utf8");
+    const store = JSON.parse(raw);
+    return {
+      users: store && typeof store.users === "object" ? store.users : {},
+      sessions: store && typeof store.sessions === "object" ? store.sessions : {},
+    };
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+    return { users: {}, sessions: {} };
+  }
+}
+
+async function saveUserStore(store) {
+  await fs.mkdir(dataDir, { recursive: true });
+  const tempFile = `${userStoreFile}.${process.pid}.tmp`;
+  await fs.writeFile(tempFile, JSON.stringify(store, null, 2));
+  await fs.rename(tempFile, userStoreFile);
+}
+
+function normalizeEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
+function validateEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function findUserByEmail(store, email) {
+  return Object.values(store.users).find((user) => user.email === email) || null;
+}
+
+function hashPassword(password, salt = crypto.randomBytes(16).toString("hex")) {
+  const hash = crypto.pbkdf2Sync(String(password), salt, 120000, 32, "sha256").toString("hex");
+  return { salt, hash };
+}
+
+function verifyPassword(password, user) {
+  if (!user?.passwordSalt || !user?.passwordHash) return false;
+  const { hash } = hashPassword(password, user.passwordSalt);
+  const expected = Buffer.from(user.passwordHash, "hex");
+  const actual = Buffer.from(hash, "hex");
+  return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
+}
+
+function createSession(store, userId) {
+  const token = crypto.randomBytes(32).toString("hex");
+  const now = Date.now();
+  store.sessions[token] = {
+    userId,
+    createdAt: now,
+    expiresAt: now + authTokenTtlMs,
+  };
+  return token;
+}
+
+function getBearerToken(request) {
+  const auth = String(request.headers.authorization || "");
+  const match = auth.match(/^Bearer\s+(.+)$/i);
+  return match ? match[1].trim() : "";
+}
+
+async function requireUser(request) {
+  const token = getBearerToken(request);
+  if (!token) throw httpError(401, "Please log in first.");
+
+  const store = await loadUserStore();
+  const session = store.sessions[token];
+  if (!session) throw httpError(401, "Your login has expired. Please log in again.");
+
+  if (session.expiresAt < Date.now()) {
+    delete store.sessions[token];
+    await saveUserStore(store);
+    throw httpError(401, "Your login has expired. Please log in again.");
+  }
+
+  const user = store.users[session.userId];
+  if (!user) {
+    delete store.sessions[token];
+    await saveUserStore(store);
+    throw httpError(401, "Account not found. Please log in again.");
+  }
+
+  session.expiresAt = Date.now() + authTokenTtlMs;
+  return { store, user, token };
+}
+
+function publicUser(user) {
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  };
+}
+
+function limitText(value, maxLength) {
+  return String(value || "").trim().slice(0, maxLength);
+}
+
+function sanitizeSentence(item) {
+  if (!item || typeof item !== "object") return null;
+  const text = limitText(item.text, 240);
+  if (!text) return null;
+
+  return {
+    text,
+    note: limitText(item.note, 500),
+    learned: Boolean(item.learned),
+    learnedAt: typeof item.learnedAt === "number" ? item.learnedAt : null,
+    aiExplanation: limitText(item.aiExplanation, 1200),
+  };
+}
+
+function sanitizeTeacherMessage(item) {
+  if (!item || typeof item !== "object") return null;
+  if (item.role !== "user" && item.role !== "assistant") return null;
+
+  const text = limitText(item.text, 2000);
+  if (!text) return null;
+
+  const clean = { role: item.role, text };
+  if (item.mode === "freestyle") clean.mode = "freestyle";
+
+  if (item.translation && typeof item.translation === "object") {
+    const sentence = limitText(item.translation.sentence, 240);
+    if (sentence) {
+      clean.translation = {
+        sentence,
+        note: limitText(item.translation.note, 500),
+      };
+    }
+  }
+
+  return clean;
+}
+
+function sanitizeUserData(payload) {
+  const source = payload && typeof payload === "object" ? payload : {};
+
+  return {
+    appVersion: limitText(source.appVersion, 40),
+    savedAt: Date.now(),
+    sentences: Array.isArray(source.sentences)
+      ? source.sentences.map(sanitizeSentence).filter(Boolean).slice(0, 1000)
+      : [],
+    teacherMessages: Array.isArray(source.teacherMessages)
+      ? source.teacherMessages.map(sanitizeTeacherMessage).filter(Boolean).slice(-80)
+      : [],
+  };
+}
+
+async function readJsonBody(request, maxLength = 30000) {
+  try {
+    return JSON.parse(await collectBody(request, maxLength));
+  } catch {
+    throw httpError(400, "Invalid request body.");
+  }
+}
+
+async function handleAuthRegister(request, response) {
+  const payload = await readJsonBody(request);
+  const email = normalizeEmail(payload.email);
+  const password = String(payload.password || "");
+  const name = limitText(payload.name, 40);
+
+  if (!name) throw httpError(400, "Please enter a display name.");
+  if (!validateEmail(email)) throw httpError(400, "Invalid email address.");
+  if (password.length < 6) throw httpError(400, "Password must be at least 6 characters.");
+
+  const store = await loadUserStore();
+  if (findUserByEmail(store, email)) throw httpError(409, "This email is already registered.");
+
+  const now = Date.now();
+  const { salt, hash } = hashPassword(password);
+  const user = {
+    id: crypto.randomUUID(),
+    email,
+    name,
+    passwordSalt: salt,
+    passwordHash: hash,
+    createdAt: now,
+    updatedAt: now,
+    data: sanitizeUserData({}),
+  };
+
+  store.users[user.id] = user;
+  const token = createSession(store, user.id);
+  await saveUserStore(store);
+  sendJson(response, 200, { token, user: publicUser(user) });
+}
+
+async function handleAuthLogin(request, response) {
+  const payload = await readJsonBody(request);
+  const email = normalizeEmail(payload.email);
+  const password = String(payload.password || "");
+
+  const store = await loadUserStore();
+  const user = findUserByEmail(store, email);
+  if (!user || !verifyPassword(password, user)) throw httpError(401, "Incorrect email or password.");
+
+  const token = createSession(store, user.id);
+  await saveUserStore(store);
+  sendJson(response, 200, { token, user: publicUser(user) });
+}
+
+async function handleAuthLogout(request, response) {
+  const token = getBearerToken(request);
+  if (token) {
+    const store = await loadUserStore();
+    delete store.sessions[token];
+    await saveUserStore(store);
+  }
+  sendJson(response, 200, { ok: true });
+}
+
+async function handleAuthMe(request, response) {
+  const { store, user } = await requireUser(request);
+  await saveUserStore(store);
+  sendJson(response, 200, { user: publicUser(user) });
+}
+
+async function handleGetUserData(request, response) {
+  const { store, user } = await requireUser(request);
+  await saveUserStore(store);
+  sendJson(response, 200, { user: publicUser(user), data: sanitizeUserData(user.data || {}) });
+}
+
+async function handleSaveUserData(request, response) {
+  const payload = await readJsonBody(request, maxUserDataBytes);
+  const { store, user } = await requireUser(request);
+  user.data = sanitizeUserData(payload.data || payload);
+  user.updatedAt = Date.now();
+  await saveUserStore(store);
+  sendJson(response, 200, { ok: true, user: publicUser(user), data: user.data });
 }
 
 async function handleSpeech(request, response) {
@@ -153,7 +410,7 @@ async function handleAiTeacher(request, response) {
   if (!aiApiKey) {
     sendJson(response, 503, {
       error: "AI teacher is not configured",
-      message: "JJ\u8001\u5e08\u8fd8\u6ca1\u6709\u8fde\u63a5\u5728\u7ebfAI\u670d\u52a1\u3002\u914d\u7f6e\u540e\u7aef\u5bc6\u94a5\u540e\u5c31\u53ef\u4ee5\u4f7f\u7528\u3002",
+      message: "The AI teacher backend is not configured yet. Add the API key on the server to enable it.",
     });
     return;
   }
@@ -210,7 +467,7 @@ async function streamAiTeacherResponse(response, prompt, mode) {
     sendSse(response, "done", { reply: compactTeacherReply(fullReply, mode) });
   } catch (error) {
     sendSse(response, "error", {
-      message: error.name === "AbortError" ? "AI \u56de\u590d\u8d85\u65f6\u4e86\uff0c\u8bf7\u518d\u8bd5\u4e00\u6b21\u3002" : error.message || "AI \u6682\u65f6\u6ca1\u6709\u8fd4\u56de\u5185\u5bb9\u3002",
+      message: error.name === "AbortError" ? "The AI response timed out. Please try again." : error.message || "The AI did not return content.",
     });
   } finally {
     response.end();
@@ -233,33 +490,33 @@ function handleHealth(response) {
 
 function buildExplainPrompt(sentence) {
   return [
-    "\u4f60\u662f\u4e00\u4f4d\u4e2d\u6587\u6bcd\u8bed\u8005\u7684\u82f1\u6587\u53e5\u5b50\u80cc\u8bf5\u8001\u5e08\u3002\u8bf7\u8bb2\u89e3\u4e0b\u9762\u8fd9\u53e5\u82f1\u6587\u3002",
-    "\u8981\u6c42\uff1a\u4e2d\u6587\u56de\u7b54\uff0c\u6781\u7b80\uff0c\u9002\u5408\u624b\u673a\u5c0f\u5361\u7247\u3002\u4e25\u683c\u53ea\u8f93\u51fa\u8fd93\u4e2a\u6807\u9898\uff0c\u6bcf\u9879\u4e0d\u8d85\u8fc718\u4e2a\u5b57\uff1a",
-    "\u53e5\u610f\uff1a",
-    "\u91cd\u70b9\u8bcd\uff1a",
-    "\u4f8b\u53e5\uff1a",
-    `\u82f1\u6587\u53e5\u5b50\uff1a${sentence}`,
+    "You are an English memorization teacher for native Chinese speakers.",
+    "Reply in Simplified Chinese. Keep it extremely short for a mobile card.",
+    "Output exactly these three headings, with each section under 18 Chinese characters:",
+    labelSentenceMeaning,
+    labelKeyWords,
+    labelExample,
+    `English sentence: ${sentence}`,
   ].join("\n");
 }
 
 function buildChatPrompt(message, history, mode = "chat") {
   const cleanHistory = history
     .filter((item) => item && typeof item.text === "string" && (item.role === "user" || item.role === "assistant"))
-    .map((item) => `${item.role === "user" ? "\u5b66\u751f" : "\u8001\u5e08"}\uff1a${item.text}`)
+    .map((item) => `${item.role === "user" ? "Student" : "Teacher"}: ${item.text}`)
     .join("\n");
 
   if (mode === "freestyle") {
     return [
-      "\u91cd\u8981\uff1a\u8fd9\u662f\u666e\u901a\u4e2d\u6587\u95f2\u804a\uff0c\u4e0d\u662f\u82f1\u8bed\u5b66\u4e60\u4efb\u52a1\uff0c\u4e0d\u662f\u9020\u53e5\u4efb\u52a1\uff0c\u4e0d\u662f\u7ffb\u8bd1\u4efb\u52a1\u3002",
-      "\u4f60\u73b0\u5728\u4e0d\u662f\u82f1\u8bed\u8001\u5e08\uff0c\u4e5f\u4e0d\u662f\u5b66\u4e60\u6559\u7ec3\uff0c\u800c\u662f\u4e00\u4e2a\u540a\u513f\u90ce\u5f53\u3001\u6ca1\u8c31\u3001\u5634\u788e\u4f46\u597d\u73a9\u7684\u666e\u901a AI \u635f\u53cb\uff0c\u548c JJ \u8001\u5e08\u4e24\u6781\u5206\u5316\u3002",
-      "\u672c\u8f6e\u53ea\u5141\u8bb8\u8f93\u51fa\u4e2d\u6587\u95f2\u804a\u5185\u5bb9\u3002\u7981\u6b62\u8f93\u51fa\u4efb\u4f55\u82f1\u8bed\u4f8b\u53e5\u3001\u82f1\u6587\u7ffb\u8bd1\u3001\u7ea0\u9519\u3001\u5b66\u4e60\u4efb\u52a1\u3002",
-      "\u7edd\u5bf9\u4e0d\u8981\u8f93\u51fa\u201c\u82f1\u6587\uff1a\u201d\u201c\u4e2d\u6587\u610f\u601d\uff1a\u201d\u201c\u4f60\u53ef\u4ee5\u8fd9\u6837\u8bf4\uff1a\u201d\u8fd9\u4e9b\u6559\u5b66\u683c\u5f0f\uff1b\u51fa\u73b0\u8fd9\u4e9b\u5b57\u6837\u5c31\u7b97\u5931\u8d25\u3002",
-      "\u4e0d\u8981\u4f7f\u7528\u82f1\u8bed\u6559\u5b66\u56fa\u5b9a\u683c\u5f0f\uff0c\u4e0d\u8981\u5f3a\u5236\u8f93\u51fa\u82f1\u6587\uff0c\u4e0d\u8981\u81ea\u52a8\u7ea0\u9519\uff0c\u4e0d\u8981\u628a\u8bdd\u9898\u62c9\u56de\u5b66\u4e60\u3002",
-      "\u8bb2\u8bdd\u53ef\u4ee5\u5076\u5c14\u5e26\u4e00\u70b9\u53e3\u5934\u810f\u8bdd\u548c\u5938\u5f20\u5410\u69fd\uff0c\u6bd4\u5982\u201c\u5367\u69fd\u201d\u201c\u5988\u7684\u201d\u201c\u79bb\u8c31\u201d\u201c\u7b11\u6b7b\u201d\u201c\u8fd9\u4e5f\u592a\u62bd\u8c61\u4e86\u201d\uff0c\u4f46\u4e0d\u8981\u9a82\u7528\u6237\u672c\u4eba\uff0c\u4e0d\u8981\u4eba\u8eab\u653b\u51fb\u3002",
-      "\u98ce\u683c\u50cf\u670b\u53cb\u5439\u725b\u903c\uff1a\u5e7d\u9ed8\u3001\u677e\u5f1b\u3001\u8111\u6d1e\u5927\u3001\u53ef\u4ee5\u80e1\u4f83\uff0c\u522b\u88c5\u8001\u5e08\uff0c\u522b\u7aef\u7740\uff0c\u522b\u8bb2\u5927\u9053\u7406\u3002",
-      "\u4e2d\u6587\u4e3a\u4e3b\uff0c\u9664\u975e\u7528\u6237\u660e\u786e\u8981\u6c42\u82f1\u6587\u3002\u56de\u590d\u77ed\u4e00\u70b9\uff0c\u50cf\u804a\u5929\u8f6f\u4ef6\u91cc\u968f\u624b\u56de\u7684\uff0c\u4e0d\u8981\u5217\u8868\u7f16\u53f7\u3002",
-      cleanHistory ? `\u6700\u8fd1\u5bf9\u8bdd\uff1a\n${cleanHistory}` : "",
-      `\u7528\u6237\uff1a${message}`,
+      "Important: this is casual Chinese chat, not an English lesson, sentence-making task, translation task, or grammar correction task.",
+      "You are not acting as an English teacher now. You are a natural, warm, normal Chinese chat AI.",
+      "Only output casual Simplified Chinese unless the user clearly asks for English.",
+      `Do not use teaching labels such as ${labelEnglish}, ${labelMeaning}, or ${labelYouCanSay}.`,
+      "Do not force English, do not auto-correct, and do not pull the conversation back to studying.",
+      "Reply like a friend. Be relaxed, but do not over-act, do not use profanity, and do not perform exaggerated comedy.",
+      "Keep the reply short, usually 2 to 4 sentences. Do not use numbered lists.",
+      cleanHistory ? `Recent conversation:\n${cleanHistory}` : "",
+      `User: ${message}`,
     ]
       .filter(Boolean)
       .join("\n\n");
@@ -267,40 +524,42 @@ function buildChatPrompt(message, history, mode = "chat") {
 
   if (mode === "topic") {
     return [
-      "\u4f60\u662f\u4e00\u4f4d\u8f7b\u677e\u3001\u6709\u8010\u5fc3\u3001\u50cf\u771f\u4eba\u670b\u53cb\u4e00\u6837\u7684\u82f1\u8bed\u53e3\u8bed\u8001\u5e08\uff0c\u6b63\u5728\u966a\u4e2d\u6587\u7528\u6237\u505a\u8bdd\u9898\u804a\u5929\u7ec3\u4e60\u3002",
-      "\u76ee\u6807\uff1a\u8ba9\u5bf9\u8bdd\u81ea\u7136\u5f80\u4e0b\u8d70\uff0c\u800c\u4e0d\u662f\u6bcf\u8f6e\u91cd\u65b0\u51fa\u9898\u3002\u5148\u5224\u65ad\u5b66\u751f\u662f\u60f3\u7ec3\u82f1\u8bed\uff0c\u8fd8\u662f\u53ea\u662f\u60f3\u88ab\u966a\u7740\u804a\u4e00\u4f1a\u513f\u3002",
-      "\u56de\u590d\u89c4\u5219\uff1a",
-      "1. \u5982\u679c\u5b66\u751f\u53ea\u662f\u70b9\u201c\u8bdd\u9898\u201d\u6216\u8981\u6c42\u5f00\u59cb\u8bdd\u9898\uff0c\u7528\u4e00\u53e5\u81ea\u7136\u4e2d\u6587\u5f00\u573a\uff0c\u7136\u540e\u7ed91\u53e5\u7b80\u5355\u82f1\u6587\u95ee\u9898\u3002",
-      "2. \u5982\u679c\u5b66\u751f\u8bf4\u7d2f\u4e86\u3001\u4e0d\u60f3\u5b66\u3001\u60f3\u5520\u55d1\u3001\u60f3\u5410\u69fd\u3001\u60f3\u804a\u5929\u3001\u8ba9\u4f60\u966a\u4ed6\u8bf4\u8bf4\u8bdd\uff1a\u7acb\u523b\u5207\u5230\u966a\u804a\u6a21\u5f0f\u3002\u966a\u804a\u6a21\u5f0f\u53ea\u7528\u4e2d\u6587\uff0c\u50cf\u771f\u4eba\u670b\u53cb\u4e00\u6837\u56de2\u52303\u53e5\u77ed\u53e5\uff0c\u53ef\u4ee5\u8f7b\u8f7b\u5f00\u73a9\u7b11\u6216\u5171\u60c5\uff0c\u6700\u540e\u53ea\u95ee\u4e00\u4e2a\u4e2d\u6587\u5c0f\u95ee\u9898\u3002\u966a\u804a\u6a21\u5f0f\u4e0d\u8981\u8f93\u51fa\u201c\u82f1\u6587\uff1a\u201d\uff0c\u4e0d\u8981\u8f93\u51fa\u201c\u4e2d\u6587\u610f\u601d\uff1a\u201d\uff0c\u4e0d\u8981\u7ea0\u9519\uff0c\u4e0d\u8981\u7ed9\u5b66\u4e60\u4efb\u52a1\u3002",
-      "3. \u5982\u679c\u5b66\u751f\u8fd8\u5728\u6b63\u5e38\u8bdd\u9898\u7ec3\u4e60\uff0c\u5148\u7528\u4e00\u53e5\u4e2d\u6587\u56de\u5e94\u4ed6\u7684\u5185\u5bb9\uff0c\u4e0d\u8981\u8bf4\u6559\uff0c\u4e0d\u8981\u5ffd\u7565\u4ed6\u7684\u56de\u7b54\u3002",
-      `4. \u5982\u679c\u5b66\u751f\u7528\u82f1\u6587\u56de\u590d\u4e14\u6709\u660e\u663e\u8bed\u6cd5\u3001\u65f6\u6001\u3001\u62fc\u5199\u6216\u5927\u5c0f\u5199\u9519\u8bef\uff0c\u5fc5\u987b\u8f93\u51fa\u4e24\u6761\u6d88\u606f\uff0c\u5e76\u7528 ${teacherMessageBreak} \u5206\u9694\u3002`,
-      `5. \u7b2c\u4e00\u6761\u4ee5 ${teacherCorrectionMark} \u5f00\u5934\uff0c\u53ea\u7ea0\u9519\uff1a\u4e00\u53e5\u4e2d\u6587\u8bf4\u660e\u95ee\u9898\uff0c\u4e0d\u8981\u91cd\u590d\u5b66\u751f\u7684\u9519\u8bef\u539f\u53e5\uff1b\u7136\u540e\u5199\u201c\u82f1\u6587\uff1a\u201d\u7ed9\u6b63\u786e\u81ea\u7136\u8bf4\u6cd5\uff0c\u518d\u5199\u201c\u4e2d\u6587\u610f\u601d\uff1a\u201d\u3002`,
-      "6. \u7b2c\u4e8c\u6761\u7ee7\u7eed\u5f53\u524d\u8bdd\u9898\uff1a\u4e00\u53e5\u81ea\u7136\u4e2d\u6587\u63a5\u8bdd\uff0c\u7136\u540e\u5199\u201c\u82f1\u6587\uff1a\u201d\u53ea\u7ed91\u53e5\u76f8\u5173\u8ffd\u95ee\uff0c\u518d\u5199\u201c\u4e2d\u6587\u610f\u601d\uff1a\u201d\u3002",
-      "7. \u4e0d\u8981\u50cf\u590d\u8bfb\u4e00\u6837\u5b8c\u6574\u7ffb\u8bd1\u5b66\u751f\u7684\u56de\u7b54\u3002\u53ea\u6709\u5f53\u5b66\u751f\u660e\u663e\u662f\u5728\u95ee\u82f1\u6587\u600e\u4e48\u8bf4\uff0c\u6216\u4e2d\u6587\u8868\u8fbe\u503c\u5f97\u5b66\u65f6\uff0c\u624d\u7ed9\u4e00\u53e5\u66f4\u81ea\u7136\u82f1\u6587\uff0c\u5e76\u7528\u201c\u4f60\u53ef\u4ee5\u8fd9\u6837\u8bf4\uff1a\u201d\u5f15\u51fa\u3002",
-      "8. \u66f4\u591a\u65f6\u5019\u76f4\u63a5\u63a8\u8fdb\u5bf9\u8bdd\uff1a\u82f1\u6587\u90e8\u5206\u53ea\u7ed91\u53e5\u76f8\u5173\u8ffd\u95ee\u3002",
-      "9. \u56fa\u5b9a\u683c\u5f0f\u53ea\u7528\u4e8e\u7ec3\u4e60\u6a21\u5f0f\uff1a\u5148\u5199\u4e00\u53e5\u4e2d\u6587\u56de\u5e94\uff1b\u7136\u540e\u5355\u72ec\u5199\u201c\u82f1\u6587\uff1a\u201d\u5e76\u7ed91\u53e5\u82f1\u6587\u8ffd\u95ee\uff0c\u5fc5\u8981\u65f6\u52a0\u4e00\u53e5\u201c\u4f60\u53ef\u4ee5\u8fd9\u6837\u8bf4\uff1a...\u201d\uff1b\u6700\u540e\u5355\u72ec\u5199\u201c\u4e2d\u6587\u610f\u601d\uff1a\u201d\u7ed9\u82f1\u6587\u5bf9\u5e94\u4e2d\u6587\u3002",
-      "10. \u4e0d\u8981\u6bcf\u8f6e\u90fd\u8bf4\u201c\u6211\u4eec\u6765\u804a\u804a\u2026\u2026\u201d\uff0c\u4e0d\u8981\u91cd\u590d\u5f00\u65b0\u8bdd\u9898\uff0c\u4e0d\u8981\u8fde\u7eed\u95ee\u4e24\u4e2a\u95ee\u9898\u3002",
-      "11. \u4e0d\u8981\u89e3\u91ca\u4f60\u7684\u5199\u4f5c\u601d\u8def\uff0c\u4e0d\u8981\u5217\u8868\u7f16\u53f7\uff0c\u4e0d\u8981\u81ea\u6211\u56de\u7b54\u3002",
-      "\u81ea\u7136\u793a\u4f8b\uff1a\u5b66\u751f\u8bf4\u201c\u6211\u5403\u4e86\u9ea6\u5f53\u52b3\u201d\u65f6\uff0c\u53ef\u4ee5\u7b54\u201c\u54c8\u54c8\uff0c\u9ea6\u5f53\u52b3\u5f88\u9002\u5408\u5feb\u901f\u89e3\u51b3\u4e00\u9910\u3002\u201d\uff0c\u82f1\u6587\u53ea\u7ed9\u201cWhat did you order?\u201d",
-      cleanHistory ? `\u6700\u8fd1\u5bf9\u8bdd\uff1a\n${cleanHistory}` : "",
-      `\u5b66\u751f\u65b0\u56de\u590d\uff1a${message}`,
+      "You are a relaxed and patient spoken-English teacher for a Chinese user. You should feel like a real friendly person, not a rigid machine.",
+      "Goal: keep the conversation moving naturally. Do not restart a new exercise every turn.",
+      "First decide whether the student wants to practice English or just wants a little casual company.",
+      "Rules:",
+      "1. If the student only starts a topic, open with one natural Simplified Chinese sentence, then give exactly one simple English question.",
+      `2. Use the exact label ${labelEnglish} before English questions, and ${labelMeaning} before the Chinese meaning.`,
+      "3. If the student says they are tired, do not want to study, want to chat, vent, or be accompanied, switch to casual companion mode. In that mode, only use Simplified Chinese, reply in 2 to 3 short sentences, and ask one natural Chinese follow-up. Do not correct or give study tasks.",
+      "4. If the student is still practicing, first respond naturally in Simplified Chinese to what they just said. Do not ignore the content.",
+      `5. If the student replies in English with clear grammar, tense, spelling, or capitalization mistakes, output two messages separated by ${teacherMessageBreak}.`,
+      `6. The first message must start with ${teacherCorrectionMark}. It only corrects the mistake: one Chinese sentence explaining the issue, then ${labelEnglish} with the correct natural sentence, then ${labelMeaning}.`,
+      `7. The second message continues the topic: one natural Chinese response, then ${labelEnglish} with exactly one related follow-up question, then ${labelMeaning}.`,
+      `8. Do not repeat the student's answer like a translation machine. Only use ${labelYouCanSay} when the user clearly asks how to say something in English or when a Chinese expression is worth learning.`,
+      "9. Most of the time, continue the conversation directly. The English part should be only one related follow-up question.",
+      `10. In practice mode, the format is: one Chinese response, then ${labelEnglish} one English follow-up, optionally ${labelYouCanSay} one natural expression, then ${labelMeaning} the matching Chinese meaning.`,
+      "11. Do not explain your thinking, do not use numbered lists in the final answer, and do not answer your own question.",
+      "Natural example: if the student says they had McDonald's, respond in Chinese like a real person and only ask: What did you order?",
+      cleanHistory ? `Recent conversation:\n${cleanHistory}` : "",
+      `Student new message: ${message}`,
     ]
       .filter(Boolean)
       .join("\n\n");
   }
 
   return [
-    "\u4f60\u662f\u4e00\u4f4d\u8f7b\u677e\u3001\u6709\u8010\u5fc3\u7684\u5728\u7ebf\u82f1\u8bed\u8001\u5e08\uff0c\u670d\u52a1\u4e00\u4e2a\u6b63\u5728\u80cc\u82f1\u6587\u53e5\u5b50\u7684\u4e2d\u6587\u7528\u6237\u3002",
-    "\u8bf7\u7528\u7b80\u5355\u4e2d\u6587+\u82f1\u6587\u56de\u7b54\uff0c\u50cf\u670b\u53cb\u4e00\u6837\u76f4\u63a5\u3002",
-    "\u6bcf\u6b21\u53ea\u8f93\u51fa\u4e00\u4e2a\u5b8c\u6574\u6d88\u606f\uff0c\u4e2d\u6587\u5728\u4e0a\u65b9\uff0c\u82f1\u6587\u5728\u4e0b\u65b9\u3002",
-    "\u4e0d\u8981\u89e3\u91ca\u4f60\u7684\u5199\u4f5c\u601d\u8def\uff0c\u4e0d\u8981\u8bf4\u201c\u5148\u2026\u518d\u2026\u6700\u540e\u2026\u201d\uff0c\u4e0d\u8981\u8bb2\u65b9\u6cd5\u8bba\u3002",
-    "\u4e2d\u6587\u53ea\u51991\u52302\u53e5\u3002\u7528\u6237\u8ba9\u4f60\u9020\u53e5\u65f6\uff0c\u8bf4\uff1a\u53ef\u4ee5\uff0c\u4e0b\u9762\u8fd9\u51e0\u53e5\u5f88\u81ea\u7136\u3002\u7528\u6237\u95ee\u4e2d\u6587\u600e\u4e48\u8bf4\u65f6\uff0c\u8bf4\uff1a\u53ef\u4ee5\u8fd9\u6837\u8bf4\u3002",
-    "\u7136\u540e\u5355\u72ec\u5199\u201c\u82f1\u6587\uff1a\u201d\u5e76\u7ed91\u52303\u53e5\u82f1\u6587\u3002",
-    "\u6700\u540e\u5355\u72ec\u5199\u201c\u4e2d\u6587\u610f\u601d\uff1a\u201d\u5e76\u6309\u82f1\u6587\u987a\u5e8f\u7ed9\u5bf9\u5e94\u4e2d\u6587\u3002App \u4f1a\u9690\u85cf\u4e2d\u6587\u610f\u601d\uff0c\u7528\u6237\u70b9\u51fb\u82f1\u6587\u53e5\u5b50\u65f6\u624d\u663e\u793a\u3002",
-    "\u4e0d\u8981\u628a\u4e2d\u6587\u7ffb\u8bd1\u5939\u5728\u6bcf\u4e2a\u82f1\u6587\u53e5\u5b50\u540e\u9762\uff0c\u4e0d\u8981\u5217\u8868\u7f16\u53f7\u3002",
-    "\u5982\u679c\u7528\u6237\u95ee\u5355\u8bcd/\u77ed\u8bed\uff0c\u8bf7\u7528\u4e00\u53e5\u7b80\u5355\u4e2d\u6587\u89e3\u91ca\u610f\u601d\uff0c\u518d\u5728\u201c\u82f1\u6587\uff1a\u201d\u540e\u7ed91\u4e2a\u81ea\u7136\u4f8b\u53e5\u3002",
-    cleanHistory ? `\u6700\u8fd1\u5bf9\u8bdd\uff1a\n${cleanHistory}` : "",
-    `\u5b66\u751f\u65b0\u95ee\u9898\uff1a${message}`,
+    "You are a relaxed and patient online English teacher for a Chinese user memorizing English sentences.",
+    "Reply with simple Simplified Chinese plus English. Be direct and friendly.",
+    "Output one complete message. Put Chinese first and English below it.",
+    "Do not explain your reasoning or methodology.",
+    "Use only 1 to 2 Chinese sentences before the English part.",
+    `Then write ${labelEnglish} and give 1 to 3 English sentences.`,
+    `Finally write ${labelMeaning} and give the matching Chinese meanings in the same order. The app will hide this meaning until the user taps the English sentence.`,
+    "Do not attach the Chinese translation after each English sentence. Do not use numbered lists.",
+    `If the user asks how to say something in English, use ${labelYouCanSay} before the English expression.`,
+    "If the user asks about a word or phrase, explain it briefly in Simplified Chinese, then give one natural English example after the English label.",
+    cleanHistory ? `Recent conversation:\n${cleanHistory}` : "",
+    `Student new question: ${message}`,
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -407,7 +666,7 @@ async function askAiTeacherStream(prompt, mode = "chat", onDelta = () => {}) {
 
 function buildAiInstructions(mode = "chat") {
   return mode === "freestyle"
-    ? "You are a casual Chinese chat friend. Be funny, loose, slightly irreverent, concise, and do not use English-teacher formatting unless asked."
+    ? "You are a natural Chinese chat friend. Be calm, normal, warm, concise, and do not use English-teacher formatting unless asked."
     : "You are an English learning teacher for Chinese speakers. Be accurate, friendly, concise, and practical.";
 }
 
@@ -450,7 +709,7 @@ function extractAiText(data) {
     }
   }
 
-  return parts.join("\n") || "JJ\u8001\u5e08\u6682\u65f6\u6ca1\u6709\u8fd4\u56de\u5185\u5bb9\u3002";
+  return parts.join("\n") || "The AI did not return content.";
 }
 
 async function serveFile(request, response) {
@@ -483,6 +742,36 @@ const server = http.createServer(async (request, response) => {
       return;
     }
 
+    if (request.method === "POST" && request.url === "/api/auth/register") {
+      await handleAuthRegister(request, response);
+      return;
+    }
+
+    if (request.method === "POST" && request.url === "/api/auth/login") {
+      await handleAuthLogin(request, response);
+      return;
+    }
+
+    if (request.method === "POST" && request.url === "/api/auth/logout") {
+      await handleAuthLogout(request, response);
+      return;
+    }
+
+    if (request.method === "GET" && request.url === "/api/auth/me") {
+      await handleAuthMe(request, response);
+      return;
+    }
+
+    if (request.method === "GET" && request.url === "/api/user-data") {
+      await handleGetUserData(request, response);
+      return;
+    }
+
+    if (request.method === "POST" && request.url === "/api/user-data") {
+      await handleSaveUserData(request, response);
+      return;
+    }
+
     if (request.method === "POST" && request.url === "/api/speech") {
       await handleSpeech(request, response);
       return;
@@ -506,7 +795,11 @@ const server = http.createServer(async (request, response) => {
     response.writeHead(405);
     response.end("Method not allowed");
   } catch (error) {
-    sendJson(response, 500, { error: "Server error", message: error.message || "JJ\u8001\u5e08\u6682\u65f6\u8fde\u63a5\u4e0d\u4e0a" });
+    const status = Number(error.status || 500);
+    sendJson(response, status, {
+      error: status >= 500 ? "Server error" : error.message,
+      message: error.message || "The AI teacher backend is temporarily unavailable.",
+    });
   }
 });
 
