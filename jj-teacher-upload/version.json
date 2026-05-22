@@ -1,0 +1,6 @@
+{
+  "versionCode": 15,
+  "versionName": "free15",
+  "apkUrl": "https://files.catbox.moe/8gt1i4.apk",
+  "notes": "修复吹牛模式重复发送、重复回复的问题。"
+}
