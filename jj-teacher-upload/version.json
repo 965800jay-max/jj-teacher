@@ -1,6 +1,6 @@
 {
-  "versionCode": 37,
-  "versionName": "free37",
-  "apkUrl": "https://files.catbox.moe/0rad6r.apk",
-  "notes": "话题模式会自然延续同一话题，并修复从场景默写练习使用安卓系统手势返回场景详情。"
+  "versionCode": 38,
+  "versionName": "free38",
+  "apkUrl": "https://files.catbox.moe/ipvthv.apk",
+  "notes": "单词/场景页新增高频生活单词分类，场景默写不再自动加入句子，并扩展离线点词词库。"
 }

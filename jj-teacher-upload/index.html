@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#000000" />
     <title>智语导师</title>
-    <link rel="stylesheet" href="./styles.css?v=20260523-free37" />
+    <link rel="stylesheet" href="./styles.css?v=20260523-free38" />
   </head>
   <body>
     <main class="app-shell">
@@ -88,14 +88,15 @@
         </section>
       </section>
 
-      <section class="page-view scenes-page" id="scenesPage" aria-label="场景学习">
+      <section class="page-view scenes-page" id="scenesPage" aria-label="单词和场景学习">
         <section class="scenes-panel">
           <div class="scenes-header">
             <div>
-              <p class="eyebrow">Daily Scenes</p>
-              <h2>场景学习</h2>
+              <p class="eyebrow">Words & Scenes</p>
+              <h2>单词/场景</h2>
             </div>
           </div>
+          <div class="scene-mode-tabs" id="sceneModeTabs" aria-label="学习类型"></div>
           <div class="scene-group-tabs" id="sceneGroupTabs" aria-label="场景分类"></div>
           <div class="scene-list" id="sceneList" aria-live="polite"></div>
           <article class="scene-detail" id="sceneDetail" hidden aria-live="polite"></article>
@@ -138,7 +139,7 @@
 
     <nav class="bottom-nav" aria-label="页面切换">
       <button class="bottom-nav-button is-active" id="sentencesNav" type="button" aria-current="page">句子</button>
-      <button class="bottom-nav-button" id="scenesNav" type="button">场景</button>
+      <button class="bottom-nav-button" id="scenesNav" type="button">单词/场景</button>
       <button class="bottom-nav-button" id="teacherNav" type="button">智语导师</button>
       <button class="bottom-nav-button" id="friendsNav" type="button">好友</button>
     </nav>
@@ -202,7 +203,7 @@
       </div>
     </section>
 
-    <script src="./config.js?v=20260523-free37"></script>
-    <script src="./app.js?v=20260523-free37"></script>
+    <script src="./config.js?v=20260523-free38"></script>
+    <script src="./app.js?v=20260523-free38"></script>
   </body>
 </html>

@@ -71,6 +71,7 @@ const examFeedback = document.querySelector("#examFeedback");
 const examAnswerPanel = document.querySelector("#examAnswerPanel");
 const friendList = document.querySelector("#friendList");
 const refreshFriendsButton = document.querySelector("#refreshFriendsButton");
+const sceneModeTabs = document.querySelector("#sceneModeTabs");
 const sceneGroupTabs = document.querySelector("#sceneGroupTabs");
 const sceneList = document.querySelector("#sceneList");
 const sceneDetail = document.querySelector("#sceneDetail");
@@ -100,8 +101,8 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free37";
-const APP_VERSION_CODE = 37;
+const APP_BUILD_TAG = "free38";
+const APP_VERSION_CODE = 38;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
 const UPDATE_DISMISS_KEY = "sentence-reader-dismissed-update";
 const UPDATE_CHECK_TIMEOUT_MS = 6500;
@@ -128,9 +129,12 @@ let currentView = "learning";
 let currentPage = "sentences";
 let currentExamPosition = 0;
 let currentLearningLanguage = "english";
+let currentSceneMode = "words";
 let currentSceneGroup = "friends";
+let currentVocabGroup = "core";
 let activeSceneId = "";
 let examReturnSceneId = "";
+let sceneExamItems = [];
 let sceneHistoryFallbackTimer = 0;
 let teacherRenderFrame = 0;
 let teacherOpeningTopicTimer = 0;
@@ -273,6 +277,249 @@ const dictionary = {
   you: ["juː", "你；你们"],
   your: ["jʊr", "你的；你们的"],
 };
+
+const HIGH_FREQUENCY_DICTIONARY = {
+  "i'm": ["aɪm", "I am 的缩写；我是；我现在"],
+  "you're": ["jʊr", "you are 的缩写；你是；你现在"],
+  "he's": ["hiːz", "he is / he has 的缩写；他是；他已经"],
+  "she's": ["ʃiːz", "she is / she has 的缩写；她是；她已经"],
+  "it's": ["ɪts", "it is / it has 的缩写；它是；这是"],
+  "that's": ["ðæts", "that is 的缩写；那是；这就"],
+  "what's": ["wʌts", "what is 的缩写；什么是；怎么了"],
+  "what'd": ["wʌd", "what did / what would 的缩写"],
+  "how's": ["haʊz", "how is 的缩写；怎么样"],
+  "there's": ["ðerz", "there is 的缩写；有"],
+  "i'll": ["aɪl", "I will 的缩写；我会"],
+  "i'd": ["aɪd", "I would / I had 的缩写；我想；我会"],
+  "i've": ["aɪv", "I have 的缩写；我已经"],
+  "don't": ["doʊnt", "do not 的缩写；不要；不"],
+  "doesn't": ["ˈdʌznt", "does not 的缩写；不"],
+  "didn't": ["ˈdɪdnt", "did not 的缩写；没有"],
+  "can't": ["kænt", "cannot 的缩写；不能"],
+  "won't": ["woʊnt", "will not 的缩写；不会"],
+  "wouldn't": ["ˈwʊdnt", "would not 的缩写；不会；不愿"],
+  "isn't": ["ˈɪznt", "is not 的缩写；不是"],
+  "aren't": ["ɑːrnt", "are not 的缩写；不是"],
+  address: ["əˈdres", "地址"],
+  afternoon: ["ˌæftərˈnuːn", "下午"],
+  ahead: ["əˈhed", "前面；提前"],
+  almost: ["ˈɔːlmoʊst", "几乎；差点"],
+  alone: ["əˈloʊn", "独自；一个人"],
+  already: ["ɔːlˈredi", "已经"],
+  awesome: ["ˈɔːsəm", "很棒的；极好的"],
+  bad: ["bæd", "坏的；糟糕的"],
+  bag: ["bæɡ", "包；袋子"],
+  battery: ["ˈbætəri", "电池；电量"],
+  blame: ["bleɪm", "责怪"],
+  brain: ["breɪn", "大脑；脑子"],
+  bring: ["brɪŋ", "带来；拿来"],
+  bus: ["bʌs", "公交车；巴士"],
+  busy: ["ˈbɪzi", "忙的"],
+  buy: ["baɪ", "买"],
+  call: ["kɔːl", "打电话；称呼"],
+  card: ["kɑːrd", "卡；银行卡"],
+  carry: ["ˈkæri", "携带；带飞；承担"],
+  cash: ["kæʃ", "现金"],
+  cheap: ["tʃiːp", "便宜的"],
+  check: ["tʃek", "检查；查看"],
+  chicken: ["ˈtʃɪkɪn", "鸡肉；鸡"],
+  cold: ["koʊld", "冷的；感冒"],
+  color: ["ˈkʌlər", "颜色"],
+  coffee: ["ˈkɔːfi", "咖啡"],
+  corner: ["ˈkɔːrnər", "角落；街角"],
+  dinner: ["ˈdɪnər", "晚饭"],
+  done: ["dʌn", "完成的；结束的"],
+  drink: ["drɪŋk", "喝；饮料"],
+  early: ["ˈɜːrli", "早的；提前"],
+  eat: ["iːt", "吃"],
+  episode: ["ˈepɪsoʊd", "一集；片段"],
+  expensive: ["ɪkˈspensɪv", "贵的"],
+  family: ["ˈfæməli", "家人；家庭"],
+  favorite: ["ˈfeɪvərɪt", "最喜欢的"],
+  feeling: ["ˈfiːlɪŋ", "感觉；情绪"],
+  fine: ["faɪn", "好的；没事"],
+  food: ["fuːd", "食物"],
+  friend: ["frend", "朋友"],
+  game: ["ɡeɪm", "游戏；比赛"],
+  grab: ["ɡræb", "拿；顺手买；抓住"],
+  happy: ["ˈhæpi", "开心的"],
+  headache: ["ˈhedeɪk", "头痛"],
+  home: ["hoʊm", "家"],
+  hotel: ["hoʊˈtel", "酒店"],
+  hour: ["ˈaʊər", "小时"],
+  ice: ["aɪs", "冰"],
+  idea: ["aɪˈdiːə", "想法；主意"],
+  kind: ["kaɪnd", "种类；友善的；有点"],
+  late: ["leɪt", "晚的；迟到的"],
+  left: ["left", "左边；剩下"],
+  line: ["laɪn", "线；句子；排队"],
+  look: ["lʊk", "看；看起来"],
+  lost: ["lɔːst", "迷路的；丢失的"],
+  love: ["lʌv", "爱；喜欢"],
+  maybe: ["ˈmeɪbi", "也许；可能"],
+  medicine: ["ˈmedɪsɪn", "药；医学"],
+  menu: ["ˈmenjuː", "菜单"],
+  message: ["ˈmesɪdʒ", "消息；短信"],
+  milk: ["mɪlk", "牛奶"],
+  minute: ["ˈmɪnɪt", "分钟"],
+  money: ["ˈmʌni", "钱；金钱"],
+  morning: ["ˈmɔːrnɪŋ", "早上"],
+  movie: ["ˈmuːvi", "电影"],
+  music: ["ˈmjuːzɪk", "音乐"],
+  name: ["neɪm", "名字"],
+  nervous: ["ˈnɜːrvəs", "紧张的"],
+  night: ["naɪt", "晚上；夜晚"],
+  okay: ["oʊˈkeɪ", "好的；没事"],
+  online: ["ˌɑːnˈlaɪn", "在线；线上"],
+  order: ["ˈɔːrdər", "点单；订单；命令"],
+  phone: ["foʊn", "手机；电话"],
+  place: ["pleɪs", "地方；地点"],
+  plan: ["plæn", "计划"],
+  play: ["pleɪ", "玩；播放；比赛"],
+  price: ["praɪs", "价格"],
+  problem: ["ˈprɑːbləm", "问题；麻烦"],
+  receipt: ["rɪˈsiːt", "收据"],
+  regular: ["ˈreɡjələr", "常规的；正常的"],
+  reservation: ["ˌrezərˈveɪʃn", "预订；预约"],
+  rest: ["rest", "休息；剩余部分"],
+  rice: ["raɪs", "米饭；大米"],
+  room: ["ruːm", "房间"],
+  run: ["rʌn", "跑；运行；经营"],
+  sad: ["sæd", "难过的"],
+  school: ["skuːl", "学校"],
+  send: ["send", "发送"],
+  shower: ["ˈʃaʊər", "淋浴；洗澡"],
+  sign: ["saɪn", "标志；签名"],
+  size: ["saɪz", "尺码；大小"],
+  slow: ["sloʊ", "慢的"],
+  song: ["sɔːŋ", "歌曲"],
+  sorry: ["ˈsɑːri", "抱歉；不好意思"],
+  spicy: ["ˈspaɪsi", "辣的"],
+  station: ["ˈsteɪʃn", "车站"],
+  stay: ["steɪ", "待着；停留"],
+  start: ["stɑːrt", "开始"],
+  stop: ["stɑːp", "停止"],
+  street: ["striːt", "街道"],
+  subway: ["ˈsʌbweɪ", "地铁"],
+  sugar: ["ˈʃʊɡər", "糖"],
+  sweet: ["swiːt", "甜的；可爱的"],
+  taxi: ["ˈtæksi", "出租车"],
+  tea: ["tiː", "茶"],
+  tell: ["tel", "告诉；分辨"],
+  thanks: ["θæŋks", "谢谢"],
+  ticket: ["ˈtɪkɪt", "票；罚单"],
+  tired: ["ˈtaɪərd", "累的"],
+  tiring: ["ˈtaɪərɪŋ", "累人的"],
+  today: ["təˈdeɪ", "今天"],
+  tomorrow: ["təˈmɑːroʊ", "明天"],
+  tonight: ["təˈnaɪt", "今晚"],
+  topic: ["ˈtɑːpɪk", "话题"],
+  train: ["treɪn", "火车；训练"],
+  understand: ["ˌʌndərˈstænd", "理解；明白"],
+  walk: ["wɔːk", "走路；散步"],
+  warm: ["wɔːrm", "温暖的；热身"],
+  water: ["ˈwɔːtər", "水"],
+  watch: ["wɑːtʃ", "看；手表"],
+  weekend: ["ˈwiːkend", "周末"],
+  wrong: ["rɔːŋ", "错误的；不对的"],
+};
+
+Object.entries(HIGH_FREQUENCY_DICTIONARY).forEach(([word, entry]) => {
+  if (!dictionary[word]) dictionary[word] = entry;
+});
+
+const VOCAB_GROUPS = [
+  { id: "core", label: "基础高频" },
+  { id: "people", label: "人和关系" },
+  { id: "food", label: "吃喝" },
+  { id: "time", label: "时间日常" },
+  { id: "travel", label: "出门交通" },
+  { id: "shopping", label: "购物付款" },
+  { id: "feelings", label: "情绪状态" },
+];
+
+function vocabWord(group, zh, english, spanish, japanese, korean, note = "高频单词") {
+  return { group, zh, english, spanish, japanese, korean, note };
+}
+
+const VOCAB_LIBRARY = [
+  vocabWord("core", "我", "I", "yo", "私", "나", "代词"),
+  vocabWord("core", "你", "you", "tú", "あなた", "너", "代词"),
+  vocabWord("core", "我们", "we", "nosotros", "私たち", "우리", "代词"),
+  vocabWord("core", "这个", "this", "esto", "これ", "이것", "指示词"),
+  vocabWord("core", "那个", "that", "eso", "それ", "그것", "指示词"),
+  vocabWord("core", "这里", "here", "aquí", "ここ", "여기", "地点"),
+  vocabWord("core", "那里", "there", "allí", "そこ", "거기", "地点"),
+  vocabWord("core", "现在", "now", "ahora", "今", "지금", "时间"),
+  vocabWord("core", "稍后", "later", "después", "あとで", "나중에", "时间"),
+  vocabWord("core", "真的", "really", "de verdad", "本当に", "정말", "语气"),
+  vocabWord("core", "也许", "maybe", "quizás", "たぶん", "아마", "语气"),
+  vocabWord("core", "只是", "just", "solo", "ただ", "그냥", "语气"),
+  vocabWord("people", "朋友", "friend", "amigo", "友達", "친구", "关系"),
+  vocabWord("people", "家人", "family", "familia", "家族", "가족", "关系"),
+  vocabWord("people", "名字", "name", "nombre", "名前", "이름", "个人信息"),
+  vocabWord("people", "手机", "phone", "teléfono", "携帯", "휴대폰", "日常物品"),
+  vocabWord("people", "消息", "message", "mensaje", "メッセージ", "메시지", "聊天"),
+  vocabWord("people", "工作", "work", "trabajo", "仕事", "일", "日常"),
+  vocabWord("people", "学校", "school", "escuela", "学校", "학교", "日常"),
+  vocabWord("people", "家", "home", "casa", "家", "집", "地点"),
+  vocabWord("people", "帮助", "help", "ayuda", "助け", "도움", "求助"),
+  vocabWord("people", "想法", "idea", "idea", "アイデア", "생각", "聊天"),
+  vocabWord("food", "水", "water", "agua", "水", "물", "饮品"),
+  vocabWord("food", "咖啡", "coffee", "café", "コーヒー", "커피", "饮品"),
+  vocabWord("food", "茶", "tea", "té", "お茶", "차", "饮品"),
+  vocabWord("food", "牛奶", "milk", "leche", "牛乳", "우유", "饮品"),
+  vocabWord("food", "糖", "sugar", "azúcar", "砂糖", "설탕", "口味"),
+  vocabWord("food", "冰", "ice", "hielo", "氷", "얼음", "口味"),
+  vocabWord("food", "食物", "food", "comida", "食べ物", "음식", "吃饭"),
+  vocabWord("food", "米饭", "rice", "arroz", "ご飯", "밥", "主食"),
+  vocabWord("food", "鸡肉", "chicken", "pollo", "鶏肉", "닭고기", "食物"),
+  vocabWord("food", "辣的", "spicy", "picante", "辛い", "매운", "口味"),
+  vocabWord("food", "甜的", "sweet", "dulce", "甘い", "달콤한", "口味"),
+  vocabWord("food", "晚饭", "dinner", "cena", "夕食", "저녁", "吃饭"),
+  vocabWord("time", "今天", "today", "hoy", "今日", "오늘", "时间"),
+  vocabWord("time", "明天", "tomorrow", "mañana", "明日", "내일", "时间"),
+  vocabWord("time", "周末", "weekend", "fin de semana", "週末", "주말", "时间"),
+  vocabWord("time", "早上", "morning", "mañana", "朝", "아침", "时间"),
+  vocabWord("time", "晚上", "night", "noche", "夜", "밤", "时间"),
+  vocabWord("time", "分钟", "minute", "minuto", "分", "분", "时间"),
+  vocabWord("time", "小时", "hour", "hora", "時間", "시간", "时间"),
+  vocabWord("time", "早的", "early", "temprano", "早い", "이른", "时间"),
+  vocabWord("time", "晚的", "late", "tarde", "遅い", "늦은", "时间"),
+  vocabWord("travel", "地方", "place", "lugar", "場所", "장소", "地点"),
+  vocabWord("travel", "地址", "address", "dirección", "住所", "주소", "地点"),
+  vocabWord("travel", "街道", "street", "calle", "通り", "거리", "地点"),
+  vocabWord("travel", "车站", "station", "estación", "駅", "역", "交通"),
+  vocabWord("travel", "地铁", "subway", "metro", "地下鉄", "지하철", "交通"),
+  vocabWord("travel", "公交", "bus", "autobús", "バス", "버스", "交通"),
+  vocabWord("travel", "出租车", "taxi", "taxi", "タクシー", "택시", "交通"),
+  vocabWord("travel", "酒店", "hotel", "hotel", "ホテル", "호텔", "住宿"),
+  vocabWord("travel", "房间", "room", "habitación", "部屋", "방", "住宿"),
+  vocabWord("travel", "票", "ticket", "boleto", "チケット", "표", "交通"),
+  vocabWord("travel", "左边", "left", "izquierda", "左", "왼쪽", "方向"),
+  vocabWord("travel", "右边", "right", "derecha", "右", "오른쪽", "方向"),
+  vocabWord("shopping", "价格", "price", "precio", "値段", "가격", "购物"),
+  vocabWord("shopping", "钱", "money", "dinero", "お金", "돈", "付款"),
+  vocabWord("shopping", "银行卡", "card", "tarjeta", "カード", "카드", "付款"),
+  vocabWord("shopping", "现金", "cash", "efectivo", "現金", "현금", "付款"),
+  vocabWord("shopping", "尺码", "size", "talla", "サイズ", "사이즈", "购物"),
+  vocabWord("shopping", "颜色", "color", "color", "色", "색", "购物"),
+  vocabWord("shopping", "便宜的", "cheap", "barato", "安い", "싼", "价格"),
+  vocabWord("shopping", "贵的", "expensive", "caro", "高い", "비싼", "价格"),
+  vocabWord("shopping", "袋子", "bag", "bolsa", "袋", "봉투", "购物"),
+  vocabWord("shopping", "收据", "receipt", "recibo", "レシート", "영수증", "付款"),
+  vocabWord("feelings", "好的", "good", "bueno", "いい", "좋은", "状态"),
+  vocabWord("feelings", "没事", "fine", "bien", "大丈夫", "괜찮은", "状态"),
+  vocabWord("feelings", "累的", "tired", "cansado", "疲れた", "피곤한", "状态"),
+  vocabWord("feelings", "忙的", "busy", "ocupado", "忙しい", "바쁜", "状态"),
+  vocabWord("feelings", "开心的", "happy", "feliz", "うれしい", "행복한", "状态"),
+  vocabWord("feelings", "难过的", "sad", "triste", "悲しい", "슬픈", "状态"),
+  vocabWord("feelings", "紧张的", "nervous", "nervioso", "緊張した", "긴장한", "状态"),
+  vocabWord("feelings", "抱歉", "sorry", "perdón", "ごめん", "미안", "礼貌"),
+  vocabWord("feelings", "谢谢", "thanks", "gracias", "ありがとう", "고마워", "礼貌"),
+  vocabWord("feelings", "可以", "okay", "vale", "オーケー", "오케이", "回应"),
+  vocabWord("feelings", "爱", "love", "amor", "愛", "사랑", "情感"),
+];
 
 const SCENE_GROUPS = [
   { id: "friends", label: "朋友闲聊" },
@@ -927,20 +1174,44 @@ function normalizeWord(word) {
   return word.toLowerCase().replace(/^'+|'+$/g, "");
 }
 
+function getWordLookupVariants(word) {
+  const clean = normalizeWord(word).replace(/[’‘]/g, "'");
+  const variants = [clean];
+
+  if (clean.includes("'")) {
+    variants.push(clean.replace(/'s$/, ""));
+    variants.push(clean.replace(/'d$/, ""));
+    variants.push(clean.replace(/'ll$/, ""));
+    variants.push(clean.replace(/'ve$/, ""));
+    variants.push(clean.replace(/n't$/, ""));
+  }
+
+  if (clean.endsWith("ies") && clean.length > 4) variants.push(`${clean.slice(0, -3)}y`);
+  if (clean.endsWith("es") && clean.length > 3) variants.push(clean.slice(0, -2));
+  if (clean.endsWith("s") && clean.length > 3) variants.push(clean.slice(0, -1));
+
+  if (clean.endsWith("ing") && clean.length > 5) {
+    const base = clean.slice(0, -3);
+    variants.push(base, `${base}e`);
+    if (/([bcdfghjklmnpqrstvwxyz])\1$/i.test(base)) variants.push(base.slice(0, -1));
+  }
+
+  if (clean.endsWith("ed") && clean.length > 4) {
+    const base = clean.slice(0, -2);
+    variants.push(base, `${base}e`);
+    if (/([bcdfghjklmnpqrstvwxyz])\1$/i.test(base)) variants.push(base.slice(0, -1));
+  }
+
+  return [...new Set(variants.filter(Boolean))];
+}
+
 function lookupWord(word) {
-  const clean = normalizeWord(word);
-  if (dictionary[clean]) return dictionary[clean];
+  const variants = getWordLookupVariants(word);
+  for (const variant of variants) {
+    if (dictionary[variant]) return dictionary[variant];
+  }
 
-  const withoutPlural = clean.endsWith("s") ? clean.slice(0, -1) : clean;
-  if (dictionary[withoutPlural]) return dictionary[withoutPlural];
-
-  const withoutIng = clean.endsWith("ing") ? clean.slice(0, -3) : clean;
-  if (dictionary[withoutIng]) return dictionary[withoutIng];
-
-  const withoutEd = clean.endsWith("ed") ? clean.slice(0, -2) : clean;
-  if (dictionary[withoutEd]) return dictionary[withoutEd];
-
-  return ["", "本地词库暂未收录。正式版可以接入在线词典，点击后自动显示准确中文释义。"];
+  return ["", "这个词还在离线词库扩展中。你可以先问智语导师，也可以继续点其它常用词。"];
 }
 
 function softenForCasualSpeech(text) {
@@ -1878,6 +2149,10 @@ function getSceneText(item) {
   return item?.[currentLearningLanguage] || item?.english || "";
 }
 
+function getVocabText(item) {
+  return item?.[currentLearningLanguage] || item?.english || "";
+}
+
 function getSceneById(sceneId) {
   return SCENE_LIBRARY.find((scene) => scene.id === sceneId) || null;
 }
@@ -1937,15 +2212,112 @@ function addSceneToLearning(sceneId, options = {}) {
   return additions.length;
 }
 
+function renderSceneModeTabs(hasActiveScene) {
+  if (!sceneModeTabs) return;
+
+  sceneModeTabs.hidden = Boolean(hasActiveScene);
+  sceneModeTabs.innerHTML = "";
+  [
+    { id: "words", label: "单词" },
+    { id: "scenes", label: "场景" },
+  ].forEach((mode) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "scene-mode-tab";
+    button.classList.toggle("is-active", currentSceneMode === mode.id);
+    button.textContent = mode.label;
+    button.addEventListener("click", () => {
+      currentSceneMode = mode.id;
+      if (mode.id === "words") {
+        activeSceneId = "";
+        replaceSceneDetailHistoryWithList();
+      }
+      renderScenes();
+    });
+    sceneModeTabs.appendChild(button);
+  });
+}
+
+function renderVocabulary() {
+  sceneGroupTabs.innerHTML = "";
+  VOCAB_GROUPS.forEach((group) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "scene-group-tab";
+    button.classList.toggle("is-active", group.id === currentVocabGroup);
+    button.textContent = group.label;
+    button.addEventListener("click", () => {
+      currentVocabGroup = group.id;
+      renderScenes();
+    });
+    sceneGroupTabs.appendChild(button);
+  });
+
+  sceneList.innerHTML = "";
+  VOCAB_LIBRARY.filter((item) => item.group === currentVocabGroup).forEach((item) => {
+    const targetText = getVocabText(item);
+    const card = document.createElement("article");
+    card.className = "vocab-card";
+
+    const content = document.createElement("div");
+    content.className = "vocab-content";
+
+    const meta = document.createElement("span");
+    meta.className = "vocab-meta";
+    meta.textContent = item.note;
+
+    const title = document.createElement("strong");
+    title.textContent = targetText;
+
+    const meaning = document.createElement("span");
+    meaning.textContent = item.zh;
+
+    content.append(meta, title, meaning);
+
+    const speakButton = document.createElement("button");
+    speakButton.type = "button";
+    speakButton.className = "round-button";
+    speakButton.textContent = "▶";
+    speakButton.setAttribute("aria-label", `朗读：${targetText}`);
+    speakButton.addEventListener("click", () => speak(targetText, "sentence"));
+
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("button")) return;
+      speak(targetText, "sentence");
+    });
+
+    card.append(content, speakButton);
+    sceneList.appendChild(card);
+  });
+}
+
 function renderScenes() {
   if (!sceneGroupTabs || !sceneList || !sceneDetail) return;
 
+  const isWordsMode = currentSceneMode === "words";
+  if (isWordsMode && activeSceneId) {
+    activeSceneId = "";
+    replaceSceneDetailHistoryWithList();
+  }
+
   const progress = loadSceneProgress();
   const activeScene = getSceneById(activeSceneId);
+  renderSceneModeTabs(Boolean(activeScene));
   sceneGroupTabs.hidden = Boolean(activeScene);
   sceneList.hidden = Boolean(activeScene);
   sceneDetail.hidden = !activeScene;
 
+  if (isWordsMode) {
+    activeSceneId = "";
+    sceneDetail.hidden = true;
+    sceneGroupTabs.hidden = false;
+    sceneList.hidden = false;
+    sceneGroupTabs.setAttribute("aria-label", "单词分类");
+    renderVocabulary();
+    return;
+  }
+
+  sceneGroupTabs.setAttribute("aria-label", "场景分类");
   sceneGroupTabs.innerHTML = "";
   SCENE_GROUPS.forEach((group) => {
     const button = document.createElement("button");
@@ -2135,9 +2507,11 @@ function canReturnFromSceneExam() {
 }
 
 function openScenePractice(sceneId) {
-  if (!getSceneById(sceneId)) return;
+  const scene = getSceneById(sceneId);
+  if (!scene) return;
 
-  addSceneToLearning(sceneId);
+  sceneExamItems = getSceneLearningItems(scene);
+  currentExamPosition = 0;
   examReturnSceneId = sceneId;
   setPage("exam");
 }
@@ -3091,12 +3465,17 @@ function closeWordSheet() {
 }
 
 function getExamPool() {
+  if (sceneExamItems.length) {
+    return sceneExamItems.map((item, index) => ({ item, index })).filter(({ item }) => item.note.trim());
+  }
+
   return savedSentences
     .map((item, index) => ({ item, index }))
     .filter(({ item }) => !item.learned && item.note.trim());
 }
 
 function getLearningItems() {
+  if (sceneExamItems.length) return sceneExamItems;
   return savedSentences.filter((item) => !item.learned);
 }
 
@@ -3117,15 +3496,22 @@ function resetExamAnswer() {
 }
 
 function renderExam(shouldResetAnswer = false) {
+  const isSceneExam = sceneExamItems.length > 0;
   const learningItems = getLearningItems();
   const { pool, entry } = getCurrentExamItem();
   const missingNotes = Math.max(0, learningItems.length - pool.length);
 
   if (!entry) {
-    examProgress.textContent = learningItems.length
+    examProgress.textContent = isSceneExam
+      ? "这个场景暂无可默写内容"
+      : learningItems.length
       ? `${learningItems.length} 句学习中，${missingNotes} 句还没中文句意`
       : "学习中暂无句子";
-    examPrompt.textContent = learningItems.length ? "先回到句子页，给句子双点添加中文句意。" : `先添加要背的${getLearningLanguageConfig().label}句子。`;
+    examPrompt.textContent = isSceneExam
+      ? "先回到场景页选择其它场景。"
+      : learningItems.length
+        ? "先回到句子页，给句子双点添加中文句意。"
+        : `先添加要背的${getLearningLanguageConfig().label}句子。`;
     examAnswer.value = "";
     examAnswer.disabled = true;
     examCheckButton.disabled = true;
@@ -3142,8 +3528,10 @@ function renderExam(shouldResetAnswer = false) {
   examCheckButton.disabled = false;
   examDontKnowButton.disabled = false;
   examNextButton.disabled = pool.length <= 1;
-  examProgress.textContent = `${currentExamPosition + 1} / ${pool.length} 题 · 学习中 ${learningItems.length} 句`;
-  if (missingNotes) examProgress.textContent += ` · ${missingNotes} 句未填句意`;
+  examProgress.textContent = isSceneExam
+    ? `${currentExamPosition + 1} / ${pool.length} 题 · 场景默写`
+    : `${currentExamPosition + 1} / ${pool.length} 题 · 学习中 ${learningItems.length} 句`;
+  if (!isSceneExam && missingNotes) examProgress.textContent += ` · ${missingNotes} 句未填句意`;
   examPrompt.textContent = entry.item.note.trim();
   examAnswer.dataset.expected = entry.item.text;
 
@@ -3328,7 +3716,7 @@ function nextExamQuestion() {
   if (!pool.length) return;
 
   currentExamPosition = (currentExamPosition + 1) % pool.length;
-  localStorage.setItem(getLanguageStorageKey(EXAM_INDEX_KEY), String(currentExamPosition));
+  if (!sceneExamItems.length) localStorage.setItem(getLanguageStorageKey(EXAM_INDEX_KEY), String(currentExamPosition));
   renderExam(true);
   examAnswer.focus();
 }
@@ -3350,6 +3738,10 @@ function setPage(page) {
     examReturnSceneId = "";
   }
 
+  if (!isExam) {
+    sceneExamItems = [];
+  }
+
   sentencesPage.classList.toggle("is-active", !isTeacher && !isExam && !isScenes && !isFriends);
   examPage.classList.toggle("is-active", isExam);
   scenesPage.classList.toggle("is-active", isScenes);
@@ -3369,11 +3761,11 @@ function setPage(page) {
     : isExam
       ? "Sentence Review"
       : isScenes
-        ? "Daily Scenes"
+        ? "Words & Scenes"
         : isFriends
           ? "Community"
           : "Sentence Reader";
-  pageTitle.textContent = isTeacher ? (teacherFreeMode ? "闲聊模式" : "智语导师") : isExam ? "复习" : isScenes ? "场景" : isFriends ? "好友" : "句读";
+  pageTitle.textContent = isTeacher ? (teacherFreeMode ? "闲聊模式" : "智语导师") : isExam ? "复习" : isScenes ? "单词/场景" : isFriends ? "好友" : "句读";
   document.body.dataset.page = currentPage;
   localStorage.setItem(APP_PAGE_KEY, currentPage);
 
