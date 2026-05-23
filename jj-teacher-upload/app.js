@@ -100,8 +100,8 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free35";
-const APP_VERSION_CODE = 35;
+const APP_BUILD_TAG = "free36";
+const APP_VERSION_CODE = 36;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
 const UPDATE_DISMISS_KEY = "sentence-reader-dismissed-update";
 const UPDATE_CHECK_TIMEOUT_MS = 6500;
@@ -3504,18 +3504,12 @@ function shouldStartTeacherOpeningTopic() {
 function buildTeacherOpeningTopicPrompt() {
   const language = getLearningLanguageConfig();
   const prompts = [
-    `请主动开启一个轻松的${language.label}日常口语话题，像真人老师刚进教室时自然开场。`,
-    `请主动找一个适合今天练${language.label}口语的小话题，语气轻松一点。`,
-    `请先发起一个不尴尬的聊天话题，让学生可以很容易接一句${language.label}。`,
-    `请用一个年轻人也愿意聊的日常话题开场，不要像做题，目标语言是${language.label}。`,
+    `我们开始一个轻松的${language.label}日常话题吧。`,
+    `随便找个自然的${language.label}聊天话题开始吧。`,
+    `开启一个适合日常聊天的${language.label}话题吧。`,
+    `找一个好接话的${language.label}小话题吧。`,
   ];
-  const prompt = prompts[Math.floor(Math.random() * prompts.length)];
-
-  return [
-    prompt,
-    `只需要一句自然中文开场，再写“英文：”并给一句简单${language.label}问题，最后写“中文意思：”给这句${language.label}的中文。`,
-    "不要自我回答，不要连续问两个问题，不要列表编号。",
-  ].join("\n");
+  return prompts[Math.floor(Math.random() * prompts.length)];
 }
 
 function getTeacherOpeningFallback() {
@@ -3682,54 +3676,7 @@ function cleanFreestyleReply(text) {
 }
 
 function buildTeacherRequestMessage(message, mode) {
-  const language = getLearningLanguageConfig();
-  if (mode === "freestyle") {
-    return [
-      `重要：这是普通中文闲聊，不是${language.label}学习任务，不是造句任务，不是翻译任务。`,
-      `本轮只允许输出中文闲聊内容。除非用户明确要求，不要输出${language.label}例句、翻译、纠错、学习任务。`,
-      "绝对不要输出“英文：”“中文意思：”“你可以这样说：”这些教学格式；出现这些字样就算失败。",
-      `除非用户明确要求学${language.label}、翻译、造句，否则不要输出任何${language.label}句子。`,
-      "你现在是一个自然、温和、正常的中文聊天 AI，像朋友一样接话。",
-      "不要刻意搞笑，不要说脏话，不要夸张表演，不要阴阳怪气，不要装老师，不要讲大道理。",
-      "回复中文为主，短一点，2到4句就好。可以关心用户，也可以顺着话题问一个自然的小问题。",
-      `用户：${message}`,
-    ].join("\n");
-  }
-
-  if (mode === "topic") {
-    const isStartingTopic =
-      message === "话题" ||
-      /请随机找一个轻松日常话题开始聊天|找一个.*话题.*开始|开始.*话题|开启.*话题|start topic/i.test(message);
-    const topicRule = isStartingTopic
-      ? [
-          "回复要像真人老师轻松开场。",
-          `只开启一个日常话题：一句自然中文开场，然后写“英文：”并给1句简单${language.label}问题，最后写“中文意思：”给这句${language.label}的中文。`,
-          `注意：“英文：”只是 App 解析标签，标签后面的内容必须是${language.label}。`,
-          "不要自我回答，不要连续问两个问题，不要列表编号。",
-        ].join("")
-      : [
-          "先判断我的意图，再决定要不要教学。不要默认进入练习题模式。",
-          "如果我说累了、不想学、想唠嗑、想吐槽、想聊天、让我陪你说说话：立刻切到陪聊模式。陪聊模式只用中文，像真人朋友一样回2到3句短句，可以轻轻开玩笑或共情，最后只问一个中文小问题。陪聊模式不要输出“英文：”，不要输出“中文意思：”，不要纠错，不要给学习任务。",
-          "如果我还在正常话题练习，再先接住我刚说的内容，不要重新开话题。",
-          "正常话题练习里，先用一句自然中文回应我，语气像真人聊天，可以轻松一点。",
-          `如果我只是问“怎么说”、翻译、翻成${language.label}，不要复述我的中文原句，不要问正式还是非正式，不要加开场白；只输出两行：“英文：”给最常用的${language.label}说法，“中文意思：”给对应中文。`,
-          `如果我用${language.label}回复且有明显语法、时态、拼写或表达错误，必须输出两条消息，并用 ${TEACHER_MESSAGE_BREAK} 分隔。`,
-          `第一条以 ${TEACHER_CORRECTION_MARK} 开头，只纠错：一句中文说明问题，不要重复我的错误原句；然后写“英文：”给正确自然的${language.label}说法，再写“中文意思：”。`,
-          "第二条继续当前话题：一句自然中文接话，然后写“英文：”只给1句相关追问，再写“中文意思：”。",
-          `不要像复读一样完整翻译我的回答。只有当我的中文明显需要${language.label}表达时，才给一句更自然的${language.label}说法，并用“你可以这样说：”引出。`,
-          `${language.label}部分只给1句相关追问。`,
-          "固定格式：中文回应。英文：1句自然追问，必要时加一句“你可以这样说：...”。中文意思：对应中文。",
-          `注意：“英文：”只是 App 解析标签，标签后面的内容必须是${language.label}。`,
-          "不要每轮都说“我们来聊聊……”，不要说教，不要列表编号。",
-        ].join("");
-
-    return `${message}\n\n${topicRule}`;
-  }
-
-  const limitRule =
-    `回复要非常简单，像朋友一样说话。目标学习语言是${language.label}。不要解释你的思路，不要说“先…再…最后…”。如果我问“怎么说”、翻译、翻成${language.label}，不要复述我的中文原句，不要问我要正式还是非正式，不要加开场白；只输出两行：“英文：”给最常用的${language.label}说法，“中文意思：”给对应中文。如果我让你造句，就只说“可以，下面这几句很自然：”然后写“英文：”给${language.label}句子，最后写“中文意思：”并按顺序给对应中文；如果我问中文怎么说，也按“英文：... 中文意思：...”输出。注意：“英文：”只是 App 解析标签，标签后面的内容必须是${language.label}。`;
-
-  return `${message}\n\n${limitRule}`;
+  return message;
 }
 
 function shouldTranslateUserMessage(message, mode, displayText) {
@@ -3748,7 +3695,7 @@ function buildUserTranslationRequest(message) {
   const language = getLearningLanguageConfig();
   return [
     `请把下面这句中文口语变成1句自然${language.label}。`,
-    "只输出这个格式，不要解释，不要追问：",
+    "返回格式：",
     "英文：",
     "中文意思：",
     `中文：${message}`,
@@ -4430,7 +4377,7 @@ function startTopicPractice() {
   setTeacherTopicMode(true);
   const language = getLearningLanguageConfig();
   sendTeacherMessage(
-    `请随机找一个轻松日常话题开始聊天。只需要一句中文介绍话题，再给一句${language.label}问题。不要自我回答，不要再问第二个问题。`,
+    `我们开始一个轻松自然的${language.label}日常话题吧。`,
     "topic",
     "话题"
   );

@@ -3896,3 +3896,19 @@ textarea::placeholder,
   order: 1;
   color: #d4d4d4;
 }
+
+.chat-bubble.is-user .user-translation-panel {
+  border-top-color: rgba(0, 0, 0, 0.12) !important;
+  background: #ffffff !important;
+}
+
+.chat-bubble.is-user .user-translation-english {
+  color: #000000 !important;
+}
+
+.chat-bubble.is-user .user-translation-panel .teacher-line-speak,
+.chat-bubble.is-user .user-translation-panel .teacher-line-add {
+  border-color: rgba(0, 0, 0, 0.14) !important;
+  background: #ffffff !important;
+  color: #000000 !important;
+}

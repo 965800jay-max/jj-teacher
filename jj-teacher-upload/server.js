@@ -672,62 +672,13 @@ function buildChatPrompt(message, history, mode = "chat", targetLanguage = "engl
     .map((item) => `${item.role === "user" ? "Student" : "Teacher"}: ${item.text}`)
     .join("\n");
 
-  if (mode === "freestyle") {
-    return [
-      `Important: this is casual Chinese chat, not a ${language.label} lesson, sentence-making task, translation task, or grammar correction task.`,
-      `You are not acting as a ${language.label} teacher now. You are a natural, warm, normal Chinese chat AI.`,
-      `Only output casual Simplified Chinese unless the user clearly asks for ${language.label}.`,
-      `Do not use teaching labels such as ${labelEnglish}, ${labelMeaning}, or ${labelYouCanSay}.`,
-      "Do not force English, do not auto-correct, and do not pull the conversation back to studying.",
-      "Reply like a friend. Be relaxed, but do not over-act, do not use profanity, and do not perform exaggerated comedy.",
-      "Keep the reply short, usually 2 to 4 sentences. Do not use numbered lists.",
-      cleanHistory ? `Recent conversation:\n${cleanHistory}` : "",
-      `User: ${message}`,
-    ]
-      .filter(Boolean)
-      .join("\n\n");
-  }
-
-  if (mode === "topic") {
-    return [
-      `You are a relaxed and patient spoken-${language.label} teacher for a Chinese user. You should feel like a real friendly person, not a rigid machine.`,
-      "Goal: keep the conversation moving naturally. Do not restart a new exercise every turn.",
-      `First decide whether the student wants to practice ${language.label} or just wants a little casual company.`,
-      "Rules:",
-      `1. If the student only starts a topic, open with one natural Simplified Chinese sentence, then give exactly one simple ${language.label} question.`,
-      `2. Use the exact label ${labelEnglish} before ${language.label} questions, and ${labelMeaning} before the Chinese meaning. The label is only for app parsing; the content after it must be ${language.label}.`,
-      "3. If the student says they are tired, do not want to study, want to chat, vent, or be accompanied, switch to casual companion mode. In that mode, only use Simplified Chinese, reply in 2 to 3 short sentences, and ask one natural Chinese follow-up. Do not correct or give study tasks.",
-      "4. If the student is still practicing, first respond naturally in Simplified Chinese to what they just said. Do not ignore the content.",
-      `5. If the student asks how to say or translate a Chinese phrase into ${language.label}, do not repeat that Chinese phrase, do not ask for confirmation, do not add an opening sentence, and do not ask whether they want a formal or informal version unless they explicitly request variants. Output exactly two lines: ${labelEnglish} with the most common natural ${language.label} expression, then ${labelMeaning} with the Chinese meaning.`,
-      `6. If the student replies in ${language.label} with clear grammar, tense, spelling, or expression mistakes, output two messages separated by ${teacherMessageBreak}.`,
-      `7. The first message must start with ${teacherCorrectionMark}. It only corrects the mistake: one Chinese sentence explaining the issue, then ${labelEnglish} with the correct natural ${language.label} sentence, then ${labelMeaning}.`,
-      `8. The second message continues the topic: one natural Chinese response, then ${labelEnglish} with exactly one related follow-up question, then ${labelMeaning}.`,
-      `9. Do not repeat the student's answer like a translation machine. Only use ${labelYouCanSay} when a Chinese expression is worth learning inside normal practice.`,
-      `10. Most of the time, continue the conversation directly. The ${language.label} part should be only one related follow-up question.`,
-      `11. In practice mode, the format is: one Chinese response, then ${labelEnglish} one ${language.label} follow-up, optionally ${labelYouCanSay} one natural expression, then ${labelMeaning} the matching Chinese meaning.`,
-      "12. Do not explain your thinking, do not use numbered lists in the final answer, and do not answer your own question.",
-      "Natural example: if the student says they had McDonald's, respond in Chinese like a real person and only ask: What did you order?",
-      cleanHistory ? `Recent conversation:\n${cleanHistory}` : "",
-      `Student new message: ${message}`,
-    ]
-      .filter(Boolean)
-      .join("\n\n");
-  }
-
   return [
-    `You are a relaxed and patient online ${language.label} teacher for a Chinese user memorizing ${language.label} sentences.`,
-    `Reply with simple Simplified Chinese plus ${language.label}. Be direct and friendly.`,
-    `Output one complete message. Put Chinese first and ${language.label} below it.`,
-    "Do not explain your reasoning or methodology.",
-    "Use only 1 to 2 Chinese sentences before the English part.",
-    `If the user asks how to say or translate a Chinese phrase into ${language.label}, do not repeat that Chinese phrase, do not ask for confirmation, do not add an opening sentence, and do not ask whether they want a formal or informal version unless they explicitly request variants. Ignore the remaining general sentence-making rules and output exactly two lines: ${labelEnglish} with the most common natural ${language.label} expression, then ${labelMeaning} with the Chinese meaning.`,
-    `Then write ${labelEnglish} and give 1 to 3 ${language.label} sentences. The label is only for app parsing; the content after it must be ${language.label}.`,
-    `Finally write ${labelMeaning} and give the matching Chinese meanings in the same order. The app shows this meaning above the ${language.label} sentence.`,
-    `Do not attach the Chinese translation after each ${language.label} sentence. Do not use numbered lists.`,
-    `If the user asks how to say something in ${language.label}, prefer the direct ${labelEnglish} plus ${labelMeaning} format instead of ${labelYouCanSay}.`,
-    `If the user asks about a word or phrase, explain it briefly in Simplified Chinese, then give one natural ${language.label} example after the app label.`,
+    `Target learning language: ${language.label}.`,
+    mode === "freestyle" ? "Current mode: casual chat." : mode === "topic" ? "Current mode: topic practice." : "Current mode: language learning.",
+    `If you provide a ${language.label} study sentence or translation, put the ${language.label} text after ${labelEnglish} and the Chinese meaning after ${labelMeaning}.`,
+    `${labelEnglish} is only an app display marker; the content after it should still be ${language.label}.`,
     cleanHistory ? `Recent conversation:\n${cleanHistory}` : "",
-    `Student new question: ${message}`,
+    `User: ${message}`,
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -769,7 +720,7 @@ function trimDirectTranslationReply(reply, message) {
 }
 
 function finalizeTeacherReply(reply, mode, rawMessage = "") {
-  return trimDirectTranslationReply(compactTeacherReply(reply, mode), rawMessage);
+  return compactTeacherReply(reply, mode);
 }
 
 async function askAiTeacher(prompt, mode = "chat", targetLanguage = "english") {
@@ -888,9 +839,7 @@ function buildAiInstructions(mode = "chat", targetLanguage = "english") {
     return "You convert app learning data between languages. Return valid JSON only, with no Markdown or explanation.";
   }
 
-  return mode === "freestyle"
-    ? "You are a natural Chinese chat friend. Be calm, normal, warm, concise, and do not use English-teacher formatting unless asked."
-    : `You are a ${language.label} learning teacher for Chinese speakers. Be accurate, friendly, concise, and practical.`;
+  return `You are ZhiYu Tutor, a natural language-learning assistant. The user is learning ${language.label}.`;
 }
 
 function parseSseBlock(block) {
