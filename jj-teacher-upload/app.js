@@ -101,8 +101,8 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free29";
-const APP_VERSION_CODE = 29;
+const APP_BUILD_TAG = "free30";
+const APP_VERSION_CODE = 30;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
 const UPDATE_DISMISS_KEY = "sentence-reader-dismissed-update";
 const UPDATE_CHECK_TIMEOUT_MS = 6500;
@@ -643,6 +643,220 @@ const SCENE_LIBRARY = [
     ],
   },
 ];
+
+function sceneDialogueLine(speaker, zh, english, spanish, japanese, korean) {
+  return { speaker, zh, english, spanish, japanese, korean };
+}
+
+const SCENE_DIALOGUE_UPDATES = {
+  "daily-checkin": [
+    sceneDialogueLine("A", "今天怎么样？", "How's your day going?", "¿Cómo va tu día?", "今日はどんな感じ？", "오늘 하루 어때?"),
+    sceneDialogueLine("B", "挺累，脑子有点不转了。", "Pretty tiring. My brain's kind of done.", "Bastante cansado. Ya no me da la cabeza.", "けっこう疲れた。頭がもう回らない。", "꽤 피곤해. 머리가 거의 멈췄어."),
+    sceneDialogueLine("A", "忙到现在吗？", "You've been busy all day?", "¿Estuviste ocupado todo el día?", "一日中忙しかったの？", "하루 종일 바빴어?"),
+    sceneDialogueLine("B", "差不多，消息一直没停。", "Pretty much. My messages wouldn't stop.", "Sí, casi. Los mensajes no paraban.", "ほぼね。メッセージが止まらなかった。", "거의. 메시지가 계속 왔어."),
+    sceneDialogueLine("A", "那今晚别硬撑了。", "Then don't push it tonight.", "Entonces no te fuerces esta noche.", "今夜は無理しないで。", "오늘 밤은 무리하지 마."),
+    sceneDialogueLine("B", "我想洗个澡然后躺平。", "I just wanna shower and do nothing.", "Solo quiero bañarme y no hacer nada.", "シャワー浴びて何もしたくない。", "그냥 샤워하고 아무것도 안 하고 싶어."),
+    sceneDialogueLine("A", "可以，剩下的明天再说。", "Yeah, leave the rest for tomorrow.", "Sí, deja lo demás para mañana.", "うん、残りは明日にしよう。", "응, 나머지는 내일 해."),
+    sceneDialogueLine("B", "听起来很合理，我就这么干。", "That sounds right. I'm doing that.", "Suena bien. Eso haré.", "それがよさそう。そうする。", "그게 맞겠다. 그렇게 할게."),
+  ],
+  "weekend-plans": [
+    sceneDialogueLine("A", "周末有什么想法？", "Any thoughts for the weekend?", "¿Algún plan para el fin de semana?", "週末、何か考えてる？", "주말에 뭐 할 생각 있어?"),
+    sceneDialogueLine("B", "想出去，但又想赖在家。", "I wanna go out, but I also wanna stay in.", "Quiero salir, pero también quiero quedarme en casa.", "出かけたいけど、家にもいたい。", "나가고 싶은데 집에도 있고 싶어."),
+    sceneDialogueLine("A", "经典周末矛盾。", "Classic weekend problem.", "El problema clásico del fin de semana.", "週末あるあるだね。", "전형적인 주말 고민이네."),
+    sceneDialogueLine("B", "要不找个轻松点的地方？", "Maybe somewhere low-key?", "¿Quizás un lugar tranquilo?", "どこか気楽な場所にする？", "좀 편한 데 갈까?"),
+    sceneDialogueLine("A", "可以，喝杯咖啡走走？", "Yeah, coffee and a walk?", "Sí, ¿café y un paseo?", "いいね、コーヒー飲んで散歩する？", "좋아, 커피 마시고 좀 걸을까?"),
+    sceneDialogueLine("B", "我可以，别安排太早。", "I'm down, just not too early.", "Me apunto, pero no muy temprano.", "いいよ、でも早すぎるのはやめて。", "좋아, 너무 이르지만 않으면."),
+    sceneDialogueLine("A", "中午以后，完美。", "After noon. Perfect.", "Después del mediodía. Perfecto.", "昼過ぎね。完璧。", "점심 이후. 딱 좋아."),
+    sceneDialogueLine("B", "成，到时候发我地址。", "Deal. Send me the place then.", "Hecho. Mándame el lugar entonces.", "決まり。あとで場所送って。", "좋아. 그때 장소 보내줘."),
+  ],
+  "food-chat": [
+    sceneDialogueLine("A", "今天吃什么了？", "What'd you eat today?", "¿Qué comiste hoy?", "今日は何食べた？", "오늘 뭐 먹었어?"),
+    sceneDialogueLine("B", "随便吃了点，没啥灵魂。", "Just grabbed something. Nothing exciting.", "Comí cualquier cosa. Nada especial.", "適当に食べた。特に面白くない。", "그냥 대충 먹었어. 별건 아니야."),
+    sceneDialogueLine("A", "那晚饭认真吃。", "Then dinner needs to be good.", "Entonces la cena tiene que ser buena.", "じゃあ夕飯はちゃんとおいしいものにしよう。", "그럼 저녁은 제대로 먹어야지."),
+    sceneDialogueLine("B", "我想吃辣的，真的辣那种。", "I want something spicy. Like actually spicy.", "Quiero algo picante, de verdad picante.", "辛いものが食べたい。本当に辛いやつ。", "매운 거 먹고 싶어. 진짜 매운 거."),
+    sceneDialogueLine("A", "我知道一家店，味道很顶。", "I know a spot that's really good.", "Conozco un lugar muy bueno.", "すごくおいしい店知ってる。", "진짜 맛있는 곳 알아."),
+    sceneDialogueLine("B", "别光说，发地址。", "Don't just tease me. Send the address.", "No me dejes con la duda. Manda la dirección.", "気になること言わないで、住所送って。", "말만 하지 말고 주소 보내."),
+    sceneDialogueLine("A", "发了，别怪我让你上瘾。", "Sent. Don't blame me if you get hooked.", "Ya te lo mandé. No me culpes si te enganchas.", "送ったよ。ハマっても私のせいにしないで。", "보냈어. 중독돼도 내 탓 하지 마."),
+    sceneDialogueLine("B", "如果好吃，下次我请。", "If it's good, dinner's on me next time.", "Si está bueno, la próxima invito yo.", "おいしかったら次は私がおごる。", "맛있으면 다음엔 내가 살게."),
+  ],
+  "coffee-tea": [
+    sceneDialogueLine("A", "我需要来点咖啡续命。", "I need coffee to function.", "Necesito café para funcionar.", "コーヒーがないと動けない。", "커피 없으면 못 움직이겠어."),
+    sceneDialogueLine("B", "同感，我现在像低电量模式。", "Same. I'm on low-battery mode.", "Igual. Estoy en modo batería baja.", "同じく。今低電力モード。", "나도. 지금 배터리 부족 모드야."),
+    sceneDialogueLine("A", "走，买一杯？", "Wanna grab one?", "¿Vamos por uno?", "買いに行く？", "한 잔 사러 갈래?"),
+    sceneDialogueLine("B", "可以，但我想喝奶茶。", "Yeah, but I'm feeling milk tea.", "Sí, pero se me antoja té con leche.", "いいよ、でもミルクティーの気分。", "좋아, 근데 난 밀크티가 당겨."),
+    sceneDialogueLine("A", "少糖还是正常糖？", "Less sugar or regular?", "¿Menos azúcar o normal?", "砂糖少なめ？普通？", "당도 낮게? 보통?"),
+    sceneDialogueLine("B", "少糖少冰，我不想甜到发晕。", "Less sugar, less ice. I don't want it crazy sweet.", "Menos azúcar y menos hielo. No lo quiero tan dulce.", "砂糖少なめ、氷少なめ。甘すぎるのは無理。", "당도 낮게, 얼음 적게. 너무 달면 싫어."),
+    sceneDialogueLine("A", "行，我顺手也点一杯。", "Cool, I'll order one too.", "Va, yo también pido uno.", "了解、私も一杯頼む。", "좋아, 나도 하나 시킬게."),
+    sceneDialogueLine("B", "买完边走边聊。", "Let's walk and talk after we get them.", "Después caminamos y hablamos.", "買ったら歩きながら話そう。", "사고 나서 걸으면서 얘기하자."),
+  ],
+  "movies-shows": [
+    sceneDialogueLine("A", "最近有啥好看的？", "Anything good to watch lately?", "¿Algo bueno para ver últimamente?", "最近何か面白いのある？", "요즘 볼 만한 거 있어?"),
+    sceneDialogueLine("B", "有一部剧我昨晚差点看通宵。", "There's a show I almost stayed up all night watching.", "Hay una serie que casi me tuvo despierto toda la noche.", "昨日ほぼ徹夜で見そうになったドラマがある。", "어젯밤 거의 밤새 볼 뻔한 드라마 있어."),
+    sceneDialogueLine("A", "别剧透，先说值不值得看。", "No spoilers. Just tell me if it's worth it.", "Sin spoilers. Solo dime si vale la pena.", "ネタバレなしで、見る価値あるかだけ教えて。", "스포 말고 볼 만한지만 말해줘."),
+    sceneDialogueLine("B", "值得，节奏很快，不拖。", "Worth it. It moves fast and doesn't drag.", "Sí vale la pena. Va rápido y no se alarga.", "見る価値ある。テンポがよくてだれない。", "볼 만해. 전개 빠르고 안 늘어져."),
+    sceneDialogueLine("A", "我就怕那种前两集很慢的。", "I hate when the first two episodes are super slow.", "Odio cuando los primeros episodios son lentísimos.", "最初の二話が遅いの苦手。", "초반 두 편이 너무 느린 거 싫어."),
+    sceneDialogueLine("B", "这个不会，第一集就进状态。", "This one doesn't. It gets going right away.", "Esta no. Arranca enseguida.", "これは違う。第一話から面白い。", "이건 아니야. 첫 화부터 바로 몰입돼."),
+    sceneDialogueLine("A", "行，周末我开看。", "Alright, I'll start it this weekend.", "Va, la empiezo este fin de semana.", "じゃあ週末見始める。", "좋아, 주말에 보기 시작할게."),
+    sceneDialogueLine("B", "看完来找我吐槽。", "Come rant to me when you're done.", "Cuando termines, ven a comentarla conmigo.", "見終わったら感想言いに来て。", "다 보면 나한테 얘기해."),
+  ],
+  "music-share": [
+    sceneDialogueLine("A", "最近循环哪首歌？", "What song's been on repeat for you?", "¿Qué canción tienes en repetición?", "最近何をリピートしてる？", "요즘 무슨 노래 반복 재생해?"),
+    sceneDialogueLine("B", "有一首太上头了，我已经听腻又听回来了。", "One song has me hooked. I got sick of it and came back anyway.", "Una me tiene enganchado. Me cansé y aun así volví.", "ハマってる曲がある。飽きたのにまた戻ってきた。", "중독된 노래가 있어. 질렸는데도 다시 듣게 돼."),
+    sceneDialogueLine("A", "这才是真爱。", "That's real love.", "Eso sí es amor.", "それは本物の愛だね。", "그건 진짜 사랑이네."),
+    sceneDialogueLine("B", "我发你，你戴耳机听。", "I'll send it. Listen with headphones.", "Te la mando. Escúchala con audífonos.", "送るね。イヤホンで聴いて。", "보내줄게. 이어폰 끼고 들어."),
+    sceneDialogueLine("A", "好，如果不好听我要吐槽。", "Okay, but if it's bad, I'm judging you.", "Vale, pero si es mala, te voy a criticar.", "いいよ。でも微妙だったら突っ込むよ。", "좋아, 별로면 놀릴 거야."),
+    sceneDialogueLine("B", "随便吐槽，副歌肯定会抓住你。", "Judge away. The chorus will get you.", "Critica lo que quieras. El coro te va a atrapar.", "どうぞ。サビで絶対つかまれるから。", "마음대로 해. 후렴은 분명 꽂힐 거야."),
+    sceneDialogueLine("A", "那我期待一下。", "Now I'm curious.", "Ahora me dio curiosidad.", "ちょっと気になってきた。", "이제 궁금해졌어."),
+    sceneDialogueLine("B", "听完告诉我你最喜欢哪句。", "Tell me your favorite line after you listen.", "Cuando la escuches, dime tu frase favorita.", "聴いたら好きな歌詞教えて。", "듣고 나서 제일 좋은 가사 말해줘."),
+  ],
+  "gaming-chat": [
+    sceneDialogueLine("A", "今晚上线吗？", "You getting on tonight?", "¿Te conectas esta noche?", "今夜ログインする？", "오늘 밤 접속해?"),
+    sceneDialogueLine("B", "看情况，我还有点事没收尾。", "Maybe. I still have a couple things to finish.", "Depende. Todavía tengo un par de cosas que terminar.", "状況次第。まだ少し片付けることがある。", "상황 봐서. 아직 마무리할 일이 좀 있어."),
+    sceneDialogueLine("A", "行，我先热身两把。", "Cool, I'll warm up with a couple rounds.", "Vale, juego un par de partidas para calentar.", "了解、先に何戦か慣らしておく。", "좋아, 나는 먼저 몇 판 몸 풀게."),
+    sceneDialogueLine("B", "别又一热身就打到半夜。", "Don't turn warm-up into playing till midnight again.", "No conviertas el calentamiento en jugar hasta medianoche otra vez.", "またウォームアップが深夜までにならないでね。", "또 몸 푼다면서 자정까지 하지 마."),
+    sceneDialogueLine("A", "那是意外，主要是队友太离谱。", "That was an accident. My teammates were just wild.", "Fue un accidente. Mis compañeros estaban fatal.", "あれは事故。味方がひどすぎた。", "그건 사고였어. 팀원이 너무했어."),
+    sceneDialogueLine("B", "每次都怪队友，懂了。", "Always blaming the team. Got it.", "Siempre culpando al equipo, entendido.", "毎回味方のせいね、了解。", "항상 팀 탓이네, 알겠어."),
+    sceneDialogueLine("A", "今晚你来带飞。", "Then you carry tonight.", "Entonces tú nos cargas esta noche.", "じゃあ今夜は君がキャリーして。", "그럼 오늘 밤 네가 캐리해."),
+    sceneDialogueLine("B", "可以，但输了别甩锅给我。", "Fine, but don't blame me if we lose.", "Vale, pero si perdemos no me culpes.", "いいよ。でも負けても私のせいにしないで。", "좋아, 근데 지면 내 탓 하지 마."),
+  ],
+  "work-vent": [
+    sceneDialogueLine("A", "你今天脸上写着下班两个字。", "Your face says you need to clock out.", "Tu cara dice que necesitas salir del trabajo.", "顔にもう退勤したいって書いてある。", "얼굴에 퇴근하고 싶다고 써 있어."),
+    sceneDialogueLine("B", "太准了，我已经被会议榨干。", "Too accurate. Meetings drained me.", "Demasiado exacto. Las reuniones me dejaron seco.", "当たり。会議で全部吸い取られた。", "정확해. 회의가 나를 다 빼갔어."),
+    sceneDialogueLine("A", "又是那种讲半天没结论的会？", "One of those long meetings with no point?", "¿Otra reunión larga sin conclusión?", "また長いだけで結論ない会議？", "또 길기만 하고 결론 없는 회의?"),
+    sceneDialogueLine("B", "对，最后还多了两个任务。", "Yep, and somehow I got two more tasks.", "Sí, y encima me cayeron dos tareas más.", "そう。しかも最後に仕事が二つ増えた。", "맞아. 마지막에 일 두 개가 더 생겼어."),
+    sceneDialogueLine("A", "太惨了，今晚别看工作消息了。", "Brutal. Don't check work messages tonight.", "Qué duro. No mires mensajes de trabajo esta noche.", "きついね。今夜は仕事のメッセージ見ないで。", "힘들겠다. 오늘 밤은 업무 메시지 보지 마."),
+    sceneDialogueLine("B", "我也想，但手机一直震。", "I want to, but my phone keeps buzzing.", "Quiero, pero el teléfono no deja de vibrar.", "そうしたいけど、携帯がずっと鳴る。", "그러고 싶은데 휴대폰이 계속 울려."),
+    sceneDialogueLine("A", "开勿扰，真的。", "Put it on Do Not Disturb. Seriously.", "Ponlo en no molestar, en serio.", "本当に、おやすみモードにして。", "방해 금지 켜. 진짜로."),
+    sceneDialogueLine("B", "好，我给自己放个假一晚上。", "Okay, I'm giving myself the night off.", "Vale, me doy la noche libre.", "わかった。今夜は自分に休みをあげる。", "좋아, 오늘 밤은 나한테 휴가 줄게."),
+  ],
+  "study-vent": [
+    sceneDialogueLine("A", "学得怎么样了？", "How's studying going?", "¿Cómo va el estudio?", "勉強どう？", "공부 어때?"),
+    sceneDialogueLine("B", "说实话，我刚看完一页就开始走神。", "Honestly, I read one page and immediately zoned out.", "La verdad, leí una página y enseguida me distraje.", "正直、一ページ読んだだけでぼーっとした。", "솔직히 한 페이지 읽자마자 딴생각했어."),
+    sceneDialogueLine("A", "那先别硬啃，换个小目标。", "Then don't force it. Pick a smaller goal.", "Entonces no te fuerces. Ponte una meta más pequeña.", "無理に続けないで、小さい目標にしよう。", "억지로 하지 말고 작은 목표로 바꿔."),
+    sceneDialogueLine("B", "比如？", "Like what?", "¿Como qué?", "例えば？", "예를 들면?"),
+    sceneDialogueLine("A", "先搞懂这一段，别管后面。", "Just understand this one section first. Ignore the rest.", "Primero entiende esta parte. Ignora lo demás.", "まずこの部分だけ理解しよう。後ろは置いておいて。", "일단 이 부분만 이해해. 나머지는 신경 쓰지 말고."),
+    sceneDialogueLine("B", "这样听起来没那么吓人。", "That sounds way less scary.", "Así suena mucho menos pesado.", "それなら怖くない感じがする。", "그렇게 하니까 덜 무섭다."),
+    sceneDialogueLine("A", "等会儿你讲给我听，我帮你卡漏洞。", "Explain it to me later, and I'll catch the gaps.", "Luego me lo explicas y te ayudo a encontrar huecos.", "あとで私に説明して。抜けてるところ見るよ。", "이따 나한테 설명해봐. 빈틈 봐줄게."),
+    sceneDialogueLine("B", "成交，我先把这一段拿下。", "Deal. I'll knock out this section first.", "Hecho. Primero saco esta parte.", "決まり。まずここを片付ける。", "좋아. 이 부분부터 끝낼게."),
+  ],
+  "emotional-support": [
+    sceneDialogueLine("A", "你今天有点不在状态。", "You seem a little off today.", "Hoy te noto un poco apagado.", "今日は少し元気なさそう。", "오늘 좀 평소 같지 않아 보여."),
+    sceneDialogueLine("B", "嗯，有点烦，但也说不上来。", "Yeah, I'm upset, but I can't really explain it.", "Sí, estoy molesto, pero no sé explicarlo.", "うん、もやもやするけど説明しにくい。", "응, 좀 답답한데 설명을 잘 못하겠어."),
+    sceneDialogueLine("A", "不用马上说清楚。", "You don't have to make sense of it right away.", "No tienes que entenderlo todo ahora mismo.", "すぐに整理しなくてもいいよ。", "지금 바로 정리하지 않아도 돼."),
+    sceneDialogueLine("B", "我就是觉得心里堵。", "I just feel heavy.", "Solo siento un peso dentro.", "ただ胸が重い感じ。", "그냥 마음이 무거워."),
+    sceneDialogueLine("A", "那我陪你待会儿，不逼你聊天。", "I'll hang out with you. No pressure to talk.", "Me quedo contigo. No tienes que hablar si no quieres.", "そばにいるよ。話さなくても大丈夫。", "내가 옆에 있을게. 억지로 말 안 해도 돼."),
+    sceneDialogueLine("B", "谢谢，这样就好多了。", "Thanks. That already helps.", "Gracias. Eso ya ayuda.", "ありがとう。それだけで少し楽。", "고마워. 그것만으로도 좀 낫다."),
+    sceneDialogueLine("A", "要不要出去走一小圈？", "Want to take a short walk?", "¿Quieres dar una vuelta corta?", "少し散歩する？", "잠깐 산책할래?"),
+    sceneDialogueLine("B", "好，换个空气也许会好点。", "Yeah, some fresh air might help.", "Sí, un poco de aire fresco puede ayudar.", "うん、空気変えたら少しよくなるかも。", "응, 바람 좀 쐬면 나아질 것 같아."),
+  ],
+  "late-night-chat": [
+    sceneDialogueLine("A", "你怎么还没睡？", "Why are you still up?", "¿Por qué sigues despierto?", "なんでまだ起きてるの？", "왜 아직 안 자?"),
+    sceneDialogueLine("B", "睡不着，脑子一直开小剧场。", "Can't sleep. My brain keeps making up scenarios.", "No puedo dormir. Mi cabeza no para de inventar cosas.", "眠れない。頭が勝手にいろいろ考える。", "잠이 안 와. 머릿속에서 계속 상상해."),
+    sceneDialogueLine("A", "深夜脑子最会加戏。", "Late-night brain is dramatic like that.", "La mente de noche siempre exagera.", "夜中の頭って大げさだよね。", "밤에는 머리가 괜히 과장하지."),
+    sceneDialogueLine("B", "真的，越想越清醒。", "Seriously. The more I think, the more awake I get.", "En serio. Cuanto más pienso, más despierto estoy.", "本当。考えるほど目が覚める。", "진짜. 생각할수록 더 깨어 있어."),
+    sceneDialogueLine("A", "那先别刷手机了。", "Then stop scrolling for a bit.", "Entonces deja el celular un rato.", "じゃあ少しスマホ見るのやめよう。", "그럼 잠깐 폰 내려놔."),
+    sceneDialogueLine("B", "被抓到了，我刚还在刷。", "Caught me. I was literally scrolling.", "Me atrapaste. Justo estaba mirando el celular.", "ばれた。まさに今見てた。", "들켰네. 방금도 보고 있었어."),
+    sceneDialogueLine("A", "我陪你聊五分钟，然后你去睡。", "I'll talk with you for five minutes, then you sleep.", "Hablo contigo cinco minutos y luego duermes.", "五分だけ話そう。そのあと寝て。", "5분만 얘기하고 자자."),
+    sceneDialogueLine("B", "行，五分钟后你要赶我去睡。", "Deal. Kick me off after five.", "Vale. Después de cinco minutos me mandas a dormir.", "わかった。五分後に寝ろって言って。", "좋아. 5분 뒤엔 나 자라고 해줘."),
+  ],
+  "encourage-friend": [
+    sceneDialogueLine("A", "我有点不敢试。", "I'm kind of scared to try.", "Me da un poco de miedo intentarlo.", "ちょっと挑戦するのが怖い。", "시도하기가 좀 무서워."),
+    sceneDialogueLine("B", "怕也正常，但你不是没准备。", "Being scared makes sense, but you're not unprepared.", "Es normal tener miedo, pero no estás sin preparación.", "怖いのは普通。でも準備してないわけじゃない。", "무서운 건 당연해. 그래도 준비 안 한 건 아니잖아."),
+    sceneDialogueLine("A", "我总觉得自己不够好。", "I keep feeling like I'm not good enough.", "Sigo sintiendo que no soy suficiente.", "自分が足りない気がする。", "내가 부족한 것 같아."),
+    sceneDialogueLine("B", "你是在紧张，不是在失败。", "You're nervous, not failing.", "Estás nervioso, no fracasando.", "緊張してるだけで、失敗してるわけじゃない。", "긴장한 거지 실패한 게 아니야."),
+    sceneDialogueLine("A", "这句话有点救我。", "That actually helps.", "Eso sí me ayuda.", "その言葉、ちょっと救われる。", "그 말 좀 도움이 된다."),
+    sceneDialogueLine("B", "先迈一小步，别一次想太远。", "Take one small step. Don't zoom too far ahead.", "Da un paso pequeño. No pienses tan lejos.", "まず一歩だけ。先のことを考えすぎないで。", "작게 한 발만 떼. 너무 멀리 보지 말고."),
+    sceneDialogueLine("A", "好，我先把第一步做了。", "Okay, I'll do the first step.", "Vale, haré el primer paso.", "うん、まず最初の一歩をやる。", "좋아, 첫 단계부터 할게."),
+    sceneDialogueLine("B", "做完告诉我，我给你鼓掌。", "Tell me when it's done. I'll clap for you.", "Cuando lo hagas, dime. Te aplaudo.", "終わったら教えて。拍手するから。", "끝나면 알려줘. 박수 쳐줄게."),
+  ],
+  "shopping-share": [
+    sceneDialogueLine("A", "我刚看到一个东西，差点下单。", "I just saw something and almost bought it.", "Acabo de ver algo y casi lo compro.", "さっき見たもの、危うく買いそうだった。", "방금 뭐 봤는데 거의 살 뻔했어."),
+    sceneDialogueLine("B", "发来，我帮你冷静一下。", "Send it. I'll talk you down.", "Mándalo. Te ayudo a pensarlo.", "送って。冷静にさせてあげる。", "보내봐. 내가 진정시켜줄게."),
+    sceneDialogueLine("A", "但它真的很好看。", "But it's honestly so nice.", "Pero de verdad está muy bonito.", "でも本当にすごくいい。", "근데 진짜 예뻐."),
+    sceneDialogueLine("B", "好看和需要是两回事。", "Cute and necessary are two different things.", "Bonito y necesario son dos cosas distintas.", "かわいいのと必要なのは別。", "예쁜 거랑 필요한 건 다르지."),
+    sceneDialogueLine("A", "你怎么这么清醒。", "Why are you being so reasonable?", "¿Por qué eres tan sensato?", "なんでそんなに冷静なの。", "왜 이렇게 이성적이야."),
+    sceneDialogueLine("B", "因为我上周刚冲动消费过。", "Because I impulse-bought something last week.", "Porque yo compré por impulso la semana pasada.", "先週衝動買いしたばかりだから。", "지난주에 내가 충동구매했거든."),
+    sceneDialogueLine("A", "行，那我先放购物车。", "Fine, I'll just leave it in the cart.", "Vale, lo dejo en el carrito.", "じゃあ一旦カートに入れておく。", "좋아, 일단 장바구니에 넣어둘게."),
+    sceneDialogueLine("B", "明天还想要再买，今天先别冲。", "If you still want it tomorrow, buy it then. Not tonight.", "Si mañana todavía lo quieres, cómpralo. Hoy no.", "明日も欲しかったら買おう。今日はやめて。", "내일도 사고 싶으면 그때 사. 오늘은 참아."),
+  ],
+  "photos-social": [
+    sceneDialogueLine("A", "帮我拍一张，别拍成证件照。", "Take a pic of me, but don't make it look like a passport photo.", "Tómame una foto, pero que no parezca de pasaporte.", "写真撮って。証明写真みたいにはしないで。", "사진 찍어줘. 증명사진처럼 찍지는 말고."),
+    sceneDialogueLine("B", "放心，我有点审美。", "Relax, I have some taste.", "Tranqui, tengo algo de gusto.", "大丈夫、少しはセンスあるから。", "걱정 마, 나 감각 좀 있어."),
+    sceneDialogueLine("A", "这边光线可以吗？", "Is the light okay here?", "¿La luz está bien aquí?", "ここ光いい？", "여기 빛 괜찮아?"),
+    sceneDialogueLine("B", "往左一点，背景更干净。", "Move left a bit. The background's cleaner.", "Muévete un poco a la izquierda. El fondo se ve mejor.", "少し左に。背景がすっきりする。", "왼쪽으로 조금. 배경이 더 깔끔해."),
+    sceneDialogueLine("A", "别拍太近，我会紧张。", "Don't get too close. I'll get awkward.", "No te acerques tanto. Me pongo raro.", "近すぎないで。ぎこちなくなる。", "너무 가까이 찍지 마. 어색해져."),
+    sceneDialogueLine("B", "自然点，假装你没看镜头。", "Act natural, like you're not looking at the camera.", "Hazlo natural, como si no miraras la cámara.", "自然に。カメラ見てないふりして。", "자연스럽게, 카메라 안 보는 척해."),
+    sceneDialogueLine("A", "这张不错，我能发。", "This one's good. I can post it.", "Esta está buena. La puedo subir.", "これいいね。投稿できる。", "이거 괜찮다. 올려도 되겠어."),
+    sceneDialogueLine("B", "我就说我有点东西。", "Told you I know what I'm doing.", "Te dije que sabía lo que hacía.", "言ったでしょ、ちょっとできるって。", "내가 좀 한다고 했지."),
+  ],
+  "ordering-food": [
+    sceneDialogueLine("A", "欢迎光临，想吃点什么？", "Hey, what can I get for you?", "Hola, ¿qué te pongo?", "いらっしゃいませ。何にしますか？", "어서 오세요. 뭐 드릴까요?"),
+    sceneDialogueLine("B", "我先看一下菜单。", "Let me take a quick look at the menu.", "Déjame ver el menú un momento.", "メニューを少し見ます。", "메뉴 좀 볼게요."),
+    sceneDialogueLine("A", "没问题，今天这个套餐卖得很好。", "No rush. This combo's been popular today.", "Sin prisa. Este combo se está vendiendo mucho hoy.", "どうぞ。今日はこのセットが人気です。", "천천히 보세요. 오늘 이 세트가 잘 나가요."),
+    sceneDialogueLine("B", "那我来这个，饮料可以换吗？", "I'll do that one. Can I swap the drink?", "Entonces quiero ese. ¿Puedo cambiar la bebida?", "それにします。飲み物は変えられますか？", "그걸로 할게요. 음료 바꿀 수 있나요?"),
+    sceneDialogueLine("A", "可以，咖啡、茶或者可乐。", "Yep. Coffee, tea, or Coke.", "Sí. Café, té o cola.", "できます。コーヒー、お茶、コーラがあります。", "네. 커피, 차, 콜라 있어요."),
+    sceneDialogueLine("B", "要冰茶，少冰。", "Iced tea, light ice, please.", "Té frío, con poco hielo, por favor.", "アイスティー、氷少なめで。", "아이스티요. 얼음 적게 해 주세요."),
+    sceneDialogueLine("A", "堂食还是带走？", "For here or to go?", "¿Para aquí o para llevar?", "店内ですか、お持ち帰りですか？", "매장에서 드시나요, 포장인가요?"),
+    sceneDialogueLine("B", "带走，谢谢。", "To go, thanks.", "Para llevar, gracias.", "持ち帰りでお願いします。", "포장해 주세요. 감사합니다."),
+  ],
+  "shopping-basic": [
+    sceneDialogueLine("A", "这个有别的颜色吗？", "Does this come in another color?", "¿Esto viene en otro color?", "これ、他の色ありますか？", "이거 다른 색도 있나요?"),
+    sceneDialogueLine("B", "有，黑色和浅蓝色。", "Yeah, black and light blue.", "Sí, negro y azul claro.", "あります。黒と水色です。", "네, 검정색이랑 연파랑 있어요."),
+    sceneDialogueLine("A", "我可以试一下浅蓝色吗？", "Can I try the light blue one?", "¿Puedo probarme el azul claro?", "水色を試着できますか？", "연파랑 입어봐도 될까요?"),
+    sceneDialogueLine("B", "当然，试衣间在右边。", "Of course. Fitting rooms are on the right.", "Claro. Los probadores están a la derecha.", "もちろんです。試着室は右側です。", "물론이죠. 피팅룸은 오른쪽이에요."),
+    sceneDialogueLine("A", "这个有点大，有小一号吗？", "This is a little big. Do you have one size down?", "Me queda un poco grande. ¿Tiene una talla menos?", "少し大きいです。一つ小さいサイズありますか？", "이거 좀 커요. 한 사이즈 작은 거 있나요?"),
+    sceneDialogueLine("B", "我帮你看一下库存。", "Let me check the stock for you.", "Déjame revisar el inventario.", "在庫を確認しますね。", "재고 확인해드릴게요."),
+    sceneDialogueLine("A", "如果有的话我就拿。", "If you have it, I'll take it.", "Si la tienen, me la llevo.", "あったらそれにします。", "있으면 그걸로 할게요."),
+    sceneDialogueLine("B", "有，我拿过来给你。", "We do. I'll bring it over.", "Sí hay. Te la traigo.", "あります。持ってきます。", "있어요. 가져다드릴게요."),
+  ],
+  "directions-transport": [
+    sceneDialogueLine("A", "不好意思，这附近有地铁站吗？", "Excuse me, is there a subway station around here?", "Disculpa, ¿hay una estación de metro por aquí?", "すみません、この辺に地下鉄の駅はありますか？", "실례합니다, 이 근처에 지하철역 있나요?"),
+    sceneDialogueLine("B", "有，走路大概五分钟。", "Yeah, about a five-minute walk.", "Sí, a unos cinco minutos caminando.", "あります。歩いて五分くらいです。", "네, 걸어서 5분 정도예요."),
+    sceneDialogueLine("A", "往哪边走？我有点迷路。", "Which way? I'm a little turned around.", "¿Por dónde? Estoy un poco perdido.", "どっちですか？少し迷っています。", "어느 쪽이에요? 제가 좀 헷갈려서요."),
+    sceneDialogueLine("B", "直走到路口，然后右转。", "Go straight to the corner, then turn right.", "Sigue recto hasta la esquina y gira a la derecha.", "角までまっすぐ行って、右に曲がってください。", "모퉁이까지 쭉 가서 오른쪽으로 도세요."),
+    sceneDialogueLine("A", "右转之后能看到标志吗？", "Will I see a sign after I turn?", "¿Veré un letrero después de girar?", "曲がったら標識が見えますか？", "돌면 표지판이 보이나요?"),
+    sceneDialogueLine("B", "能，入口就在便利店旁边。", "Yep, the entrance is right next to the convenience store.", "Sí, la entrada está al lado de la tienda.", "はい、入口はコンビニのすぐ隣です。", "네, 입구가 편의점 바로 옆에 있어요."),
+    sceneDialogueLine("A", "太好了，谢谢你。", "Perfect, thanks so much.", "Perfecto, muchas gracias.", "助かりました。ありがとうございます。", "좋아요. 정말 감사합니다."),
+    sceneDialogueLine("B", "没事，别走反方向就行。", "No problem. Just don't go the other way.", "De nada. Solo no vayas hacia el otro lado.", "どういたしまして。逆方向に行かなければ大丈夫です。", "괜찮아요. 반대쪽으로만 가지 마세요."),
+  ],
+  "hotel-stay": [
+    sceneDialogueLine("A", "你好，我来办理入住。", "Hi, I'm here to check in.", "Hola, vengo a hacer el check-in.", "こんにちは、チェックインお願いします。", "안녕하세요, 체크인하려고요."),
+    sceneDialogueLine("B", "好的，请问预订姓名？", "Sure. What's the name on the reservation?", "Claro. ¿A nombre de quién está la reserva?", "はい、ご予約のお名前は？", "네. 예약자 성함이 어떻게 되세요?"),
+    sceneDialogueLine("A", "是 Jay，应该订了两晚。", "It's under Jay. It should be for two nights.", "Está a nombre de Jay. Debería ser por dos noches.", "Jayです。二泊のはずです。", "Jay로 예약했어요. 2박일 거예요."),
+    sceneDialogueLine("B", "找到了，房间已经准备好了。", "Got it. Your room is ready.", "Aquí está. Su habitación ya está lista.", "確認できました。お部屋はご用意できています。", "확인됐습니다. 방 준비되어 있어요."),
+    sceneDialogueLine("A", "太好了，Wi-Fi 密码在哪里看？", "Great. Where can I find the Wi-Fi password?", "Genial. ¿Dónde encuentro la contraseña del Wi-Fi?", "よかったです。Wi-Fiのパスワードはどこで見られますか？", "좋아요. 와이파이 비밀번호는 어디서 볼 수 있나요?"),
+    sceneDialogueLine("B", "房卡套上有，也可以扫码。", "It's on the key card sleeve, or you can scan this code.", "Está en la funda de la tarjeta, o puede escanear este código.", "カードケースにあります。こちらのQRコードでも確認できます。", "키 카드 케이스에 있고, 이 QR코드로도 확인할 수 있어요."),
+    sceneDialogueLine("A", "退房时间是几点？", "What time is checkout?", "¿A qué hora es el check-out?", "チェックアウトは何時ですか？", "체크아웃은 몇 시인가요?"),
+    sceneDialogueLine("B", "上午十一点，需要延迟可以告诉我们。", "Eleven in the morning. Let us know if you need a late checkout.", "A las once de la mañana. Avísenos si necesita salida tarde.", "午前11時です。延長が必要ならお知らせください。", "오전 11시입니다. 늦은 체크아웃이 필요하면 말씀해 주세요."),
+  ],
+  "doctor-pharmacy": [
+    sceneDialogueLine("A", "你好，我想买点感冒药。", "Hi, I'm looking for something for a cold.", "Hola, busco algo para el resfriado.", "こんにちは、風邪薬を探しています。", "안녕하세요, 감기약을 찾고 있어요."),
+    sceneDialogueLine("B", "有什么症状？", "What symptoms do you have?", "¿Qué síntomas tienes?", "どんな症状がありますか？", "어떤 증상이 있나요?"),
+    sceneDialogueLine("A", "喉咙痛，还有点头疼。", "Sore throat and a bit of a headache.", "Dolor de garganta y un poco de dolor de cabeza.", "喉が痛くて、少し頭も痛いです。", "목이 아프고 머리도 조금 아파요."),
+    sceneDialogueLine("B", "有发烧吗？", "Any fever?", "¿Tienes fiebre?", "熱はありますか？", "열은 있나요?"),
+    sceneDialogueLine("A", "没有，就是整个人没精神。", "No, I just feel really run-down.", "No, solo me siento sin energía.", "ないです。ただ体がだるいです。", "아니요. 그냥 몸이 많이 축 처져요."),
+    sceneDialogueLine("B", "这个可以缓解喉咙痛，饭后吃。", "This should help with the sore throat. Take it after meals.", "Esto ayuda con la garganta. Tómalo después de comer.", "これは喉の痛みに効きます。食後に飲んでください。", "이건 목 통증에 도움이 돼요. 식후에 드세요."),
+    sceneDialogueLine("A", "一天吃几次？", "How many times a day?", "¿Cuántas veces al día?", "一日何回ですか？", "하루에 몇 번 먹나요?"),
+    sceneDialogueLine("B", "一天两次，如果更严重就去看医生。", "Twice a day. If it gets worse, see a doctor.", "Dos veces al día. Si empeora, ve al médico.", "一日二回です。悪化したら病院へ行ってください。", "하루 두 번이요. 더 심해지면 병원에 가세요."),
+  ],
+  "emergency-help": [
+    sceneDialogueLine("A", "不好意思，可以帮我一下吗？", "Excuse me, could you help me for a second?", "Disculpa, ¿me puedes ayudar un momento?", "すみません、少し助けてもらえますか？", "실례합니다, 잠깐 도와주실 수 있나요?"),
+    sceneDialogueLine("B", "当然，怎么了？", "Of course. What's wrong?", "Claro. ¿Qué pasó?", "もちろんです。どうしましたか？", "물론이죠. 무슨 일이에요?"),
+    sceneDialogueLine("A", "我迷路了，手机也快没电。", "I'm lost, and my phone's almost dead.", "Estoy perdido y mi teléfono casi no tiene batería.", "道に迷って、携帯の電池ももうすぐ切れます。", "길을 잃었고 휴대폰 배터리도 거의 없어요."),
+    sceneDialogueLine("B", "你要去哪里？", "Where are you trying to go?", "¿A dónde necesitas ir?", "どこへ行きたいですか？", "어디로 가려고 하세요?"),
+    sceneDialogueLine("A", "我要去这个地址。", "I'm trying to get to this address.", "Necesito llegar a esta dirección.", "この住所に行きたいです。", "이 주소로 가야 해요."),
+    sceneDialogueLine("B", "这里不远，我帮你叫车更快。", "It's not far. Calling a ride would be faster.", "No está lejos. Pedir un coche sería más rápido.", "ここから遠くないです。車を呼ぶ方が早いです。", "멀지 않아요. 차를 부르는 게 더 빠를 거예요."),
+    sceneDialogueLine("A", "太谢谢了，我有点慌。", "Thank you so much. I was getting nervous.", "Muchas gracias. Me estaba poniendo nervioso.", "本当にありがとうございます。少し焦っていました。", "정말 감사합니다. 좀 당황했어요."),
+    sceneDialogueLine("B", "没事，先站这边安全一点。", "No worries. Stand over here where it's safer.", "No pasa nada. Quédate aquí, es más seguro.", "大丈夫です。まず安全なこちらに立ってください。", "괜찮아요. 우선 이쪽이 더 안전하니 여기 서 계세요."),
+  ],
+};
+
+SCENE_LIBRARY.forEach((scene) => {
+  const dialogue = SCENE_DIALOGUE_UPDATES[scene.id];
+  if (!dialogue) return;
+  scene.items = [];
+  scene.dialogue = dialogue;
+});
 
 function normalizeLearningLanguage(code) {
   return LEARNING_LANGUAGES[code] ? code : "english";
@@ -1669,7 +1883,7 @@ function getSceneById(sceneId) {
 
 function getSceneLearningItems(scene) {
   if (!scene) return [];
-  const sourceItems = [...scene.items, ...scene.dialogue];
+  const sourceItems = scene.dialogue;
   const seen = new Set();
   return sourceItems
     .map((item) => ({
@@ -1771,7 +1985,7 @@ function renderScenes() {
 
     const meta = document.createElement("p");
     meta.className = "scene-meta";
-    meta.textContent = `${scene.items.length} 个核心句 · ${scene.dialogue.length} 句对话`;
+    meta.textContent = `${scene.dialogue.length} 句自然对话`;
 
     const button = document.createElement("button");
     button.type = "button";
@@ -1863,19 +2077,13 @@ function renderSceneDetail(scene, progress) {
 
   actionRow.append(addAllButton, practiceButton);
 
-  const coreTitle = document.createElement("h3");
-  coreTitle.textContent = "核心句";
-  const coreList = document.createElement("div");
-  coreList.className = "scene-lines";
-  scene.items.forEach((item) => appendSceneLine(coreList, item));
-
   const dialogueTitle = document.createElement("h3");
-  dialogueTitle.textContent = "朋友对话";
+  dialogueTitle.textContent = "场景对话";
   const dialogueList = document.createElement("div");
   dialogueList.className = "scene-dialogue";
   scene.dialogue.forEach((line) => appendSceneLine(dialogueList, line, { dialogue: true }));
 
-  sceneDetail.append(header, actionRow, coreTitle, coreList, dialogueTitle, dialogueList);
+  sceneDetail.append(header, actionRow, dialogueTitle, dialogueList);
 }
 
 function normalizeCloudSettings(settings) {
