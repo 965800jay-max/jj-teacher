@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#000000" />
     <title>智语导师</title>
-    <link rel="stylesheet" href="./styles.css?v=20260523-free42" />
+    <link rel="stylesheet" href="./styles.css?v=20260523-free43" />
   </head>
   <body>
     <main class="app-shell">
@@ -243,11 +243,22 @@
           <button class="voice-pip-close" id="voicePipCloseButton" type="button" aria-label="关闭AI解答">×</button>
         </div>
         <p class="voice-pip-question" id="voicePipQuestion"></p>
+        <div class="voice-pip-messages" id="voicePipMessages" aria-live="polite"></div>
         <p class="voice-pip-answer" id="voicePipAnswer"></p>
+        <form class="voice-pip-composer" id="voicePipForm" hidden>
+          <textarea
+            id="voicePipInput"
+            rows="1"
+            placeholder="继续问这句，或者顺着话题聊..."
+            autocomplete="off"
+            spellcheck="false"
+          ></textarea>
+          <button id="voicePipSendButton" type="submit">发送</button>
+        </form>
       </div>
     </section>
 
-    <script src="./config.js?v=20260523-free42"></script>
-    <script src="./app.js?v=20260523-free42"></script>
+    <script src="./config.js?v=20260523-free43"></script>
+    <script src="./app.js?v=20260523-free43"></script>
   </body>
 </html>

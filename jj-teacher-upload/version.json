@@ -1,6 +1,6 @@
 {
-  "versionCode": 42,
-  "versionName": "free42",
-  "apkUrl": "https://files.catbox.moe/2ywxwd.apk",
-  "notes": "调整按钮颜色：添加、打开场景、继续学习改为黄色；开始默写和闲聊模式改为亮橘色；底部句子改为句读。"
+  "versionCode": 43,
+  "versionName": "free43",
+  "apkUrl": "https://files.catbox.moe/o86rtq.apk",
+  "notes": "AI解答改为居中可继续聊天窗口；智语导师语音改为直接录音并由AI转文字，不再使用安卓系统识别。"
 }

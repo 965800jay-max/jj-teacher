@@ -12,6 +12,10 @@ const speechCache = new Map();
 const aiApiKey = process.env.OPENAI_API_KEY || process.env.AI_API_KEY || "";
 const aiModel = process.env.OPENAI_MODEL_OVERRIDE || process.env.AI_MODEL_OVERRIDE || "gpt-5.5";
 const aiResponsesUrl = process.env.AI_RESPONSES_URL || "https://api.openai.com/v1/responses";
+const aiTranscriptionModel =
+  process.env.OPENAI_TRANSCRIPTION_MODEL || process.env.AI_TRANSCRIPTION_MODEL || "gpt-4o-transcribe";
+const aiTranscriptionsUrl =
+  process.env.OPENAI_TRANSCRIPTIONS_URL || process.env.AI_TRANSCRIPTIONS_URL || "https://api.openai.com/v1/audio/transcriptions";
 const aiStreamTimeoutMs = Number(process.env.AI_STREAM_TIMEOUT_MS || 40000);
 const aiReasoningEffort = process.env.OPENAI_REASONING_EFFORT || process.env.AI_REASONING_EFFORT || "low";
 const aiConvertReasoningEffort =
@@ -23,19 +27,13 @@ const aiConvertMaxOutputTokens = Number(
 );
 const aiPromptCacheKeyPrefix = process.env.OPENAI_PROMPT_CACHE_KEY || process.env.AI_PROMPT_CACHE_KEY || "jj-teacher";
 const aiServiceTier = process.env.OPENAI_SERVICE_TIER || process.env.AI_SERVICE_TIER || "";
-const teacherMessageBreak = "\u3010NEXT_MESSAGE\u3011";
-const teacherCorrectionMark = "\u3010CORRECTION\u3011";
-const labelEnglish = "\u82f1\u6587\uff1a";
-const labelMeaning = "\u4e2d\u6587\u610f\u601d\uff1a";
-const labelYouCanSay = "\u4f60\u53ef\u4ee5\u8fd9\u6837\u8bf4\uff1a";
-const labelSentenceMeaning = "\u53e5\u610f\uff1a";
-const labelKeyWords = "\u91cd\u70b9\u8bcd\uff1a";
-const labelExample = "\u4f8b\u53e5\uff1a";
+const teacherMessageBreak = "【NEXT_MESSAGE】";
+const teacherCorrectionMark = "【CORRECTION】";
 const targetLanguages = {
-  english: { label: "English", speech: "en-US" },
-  spanish: { label: "Spanish", speech: "es-ES" },
-  japanese: { label: "Japanese", speech: "ja-JP" },
-  korean: { label: "Korean", speech: "ko-KR" },
+  english: { label: "英语", speech: "en-US" },
+  spanish: { label: "西班牙语", speech: "es-ES" },
+  japanese: { label: "日语", speech: "ja-JP" },
+  korean: { label: "韩语", speech: "ko-KR" },
 };
 const dataDir = process.env.DATA_DIR || path.join(root, "data");
 const userStoreFile = path.join(dataDir, "users.json");
@@ -45,6 +43,7 @@ const adminUserId = "admin";
 const adminUsername = "admin";
 const adminPassword = "admin";
 const maxAdminMessages = 80;
+const maxTranscriptionAudioBytes = Number(process.env.MAX_TRANSCRIPTION_AUDIO_BYTES || 10 * 1024 * 1024);
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -54,6 +53,7 @@ const mimeTypes = {
   ".png": "image/png",
   ".mp3": "audio/mpeg",
   ".wav": "audio/wav",
+  ".webm": "audio/webm",
 };
 
 function loadLocalEnv(filePath) {
@@ -270,29 +270,29 @@ function getBearerToken(request) {
 
 async function requireUser(request) {
   const token = getBearerToken(request);
-  if (!token) throw httpError(401, "Please log in first.");
+  if (!token) throw httpError(401, "请先登录账号。");
 
   const store = await loadUserStore();
   const session = store.sessions[token];
-  if (!session) throw httpError(401, "Your login has expired. Please log in again.");
+  if (!session) throw httpError(401, "登录已失效，请重新登录。");
 
   if (session.expiresAt < Date.now()) {
     delete store.sessions[token];
     await saveUserStore(store);
-    throw httpError(401, "Your login has expired. Please log in again.");
+    throw httpError(401, "登录已过期，请重新登录。");
   }
 
   const user = store.users[session.userId];
   if (!user) {
     delete store.sessions[token];
     await saveUserStore(store);
-    throw httpError(401, "Account not found. Please log in again.");
+    throw httpError(401, "账号不存在，请重新登录。");
   }
 
   if (clearExpiredBan(user)) store._dirty = true;
   const bannedUntil = getActiveBanUntil(user);
   if (bannedUntil && !isAdminUser(user)) {
-    throw httpError(403, `Account is banned until ${new Date(bannedUntil).toISOString()}.`);
+    throw httpError(403, `账号已被封禁到 ${new Date(bannedUntil).toLocaleString("zh-CN")}。`);
   }
 
   session.expiresAt = Date.now() + authTokenTtlMs;
@@ -455,7 +455,7 @@ async function readJsonBody(request, maxLength = 30000) {
   try {
     return JSON.parse(await collectBody(request, maxLength));
   } catch {
-    throw httpError(400, "Invalid request body.");
+    throw httpError(400, "请求内容格式不正确。");
   }
 }
 
@@ -465,12 +465,12 @@ async function handleAuthRegister(request, response) {
   const password = String(payload.password || "");
   const name = limitText(payload.name, 40);
 
-  if (!name) throw httpError(400, "Please enter a display name.");
-  if (!validateEmail(email)) throw httpError(400, "Invalid email address.");
-  if (password.length < 6) throw httpError(400, "Password must be at least 6 characters.");
+  if (!name) throw httpError(400, "请填写昵称。");
+  if (!validateEmail(email)) throw httpError(400, "邮箱格式不正确。");
+  if (password.length < 6) throw httpError(400, "密码至少 6 位。");
 
   const store = await loadUserStore();
-  if (findUserByEmail(store, email)) throw httpError(409, "This email is already registered.");
+  if (findUserByEmail(store, email)) throw httpError(409, "这个邮箱已经注册过。");
 
   const now = Date.now();
   const { salt, hash } = hashPassword(password);
@@ -498,11 +498,11 @@ async function handleAuthLogin(request, response) {
 
   const store = await loadUserStore();
   const user = findUserByLogin(store, login);
-  if (!user || !verifyPassword(password, user)) throw httpError(401, "Incorrect account or password.");
+  if (!user || !verifyPassword(password, user)) throw httpError(401, "账号或密码不正确。");
   if (clearExpiredBan(user)) store._dirty = true;
   const bannedUntil = getActiveBanUntil(user);
   if (bannedUntil && !isAdminUser(user)) {
-    throw httpError(403, `Account is banned until ${new Date(bannedUntil).toISOString()}.`);
+    throw httpError(403, `账号已被封禁到 ${new Date(bannedUntil).toLocaleString("zh-CN")}。`);
   }
 
   const token = createSession(store, user.id);
@@ -545,7 +545,7 @@ async function handleAuthProfile(request, response) {
   const payload = await readJsonBody(request);
   const { store, user } = await requireUser(request);
   const name = limitText(payload.name || user.name, 40);
-  if (!name) throw httpError(400, "Please enter a display name.");
+  if (!name) throw httpError(400, "请填写昵称。");
 
   const currentSettings = sanitizeSettings(user.data?.settings || {
     learningLanguage: user.data?.learningLanguage,
@@ -578,7 +578,7 @@ async function handleListUsers(request, response) {
 }
 
 function requireAdmin(user) {
-  if (!isAdminUser(user)) throw httpError(403, "Admin access is required.");
+  if (!isAdminUser(user)) throw httpError(403, "需要管理员权限。");
 }
 
 function adminUserItem(user) {
@@ -607,8 +607,8 @@ async function handleAdminBan(request, response) {
 
   const targetId = limitText(payload.userId, 120);
   const target = store.users[targetId];
-  if (!target) throw httpError(404, "User not found.");
-  if (isAdminUser(target)) throw httpError(400, "Admin accounts cannot be banned.");
+  if (!target) throw httpError(404, "用户不存在。");
+  if (isAdminUser(target)) throw httpError(400, "不能封禁管理员账号。");
 
   const durationMinutes = Math.min(60 * 24 * 365, Math.max(1, Number(payload.durationMinutes || 0) || 0));
   const now = Date.now();
@@ -627,7 +627,7 @@ async function handleAdminUnban(request, response) {
 
   const targetId = limitText(payload.userId, 120);
   const target = store.users[targetId];
-  if (!target) throw httpError(404, "User not found.");
+  if (!target) throw httpError(404, "用户不存在。");
 
   delete target.bannedUntil;
   delete target.banReason;
@@ -643,8 +643,8 @@ async function handleAdminDelete(request, response) {
 
   const targetId = limitText(payload.userId, 120);
   const target = store.users[targetId];
-  if (!target) throw httpError(404, "User not found.");
-  if (isAdminUser(target)) throw httpError(400, "Admin accounts cannot be deleted.");
+  if (!target) throw httpError(404, "用户不存在。");
+  if (isAdminUser(target)) throw httpError(400, "不能删除管理员账号。");
 
   delete store.users[targetId];
   revokeUserSessions(store, targetId);
@@ -653,9 +653,9 @@ async function handleAdminDelete(request, response) {
 }
 
 function buildAdminMessage(payload) {
-  const title = limitText(payload.title, 60) || "Admin message";
+  const title = limitText(payload.title, 60) || "管理员消息";
   const body = limitText(payload.body || payload.message, 1000);
-  if (!body) throw httpError(400, "Message body is required.");
+  if (!body) throw httpError(400, "消息内容不能为空。");
   return {
     id: crypto.randomUUID(),
     title,
@@ -675,7 +675,7 @@ async function handleAdminMessage(request, response) {
   const targets = targetId
     ? [store.users[targetId]].filter(Boolean)
     : Object.values(store.users).filter((item) => !isAdminUser(item));
-  if (!targets.length) throw httpError(404, "No recipients found.");
+  if (!targets.length) throw httpError(404, "没有可发送的用户。");
 
   const message = buildAdminMessage(payload);
   targets.forEach((target) => {
@@ -777,6 +777,67 @@ async function fetchOnlineSpeech(text, voiceLanguage = "en-US") {
   return Buffer.from(await response.arrayBuffer());
 }
 
+function normalizeTranscriptionLanguage(language) {
+  const code = String(language || "").trim().toLowerCase().split("-")[0];
+  return ["en", "es", "ja", "ko"].includes(code) ? code : "";
+}
+
+function normalizeAudioMimeType(mimeType) {
+  const clean = String(mimeType || "").split(";")[0].trim().toLowerCase();
+  if (clean === "audio/webm") return { mimeType: clean, extension: "webm" };
+  if (clean === "audio/mp4" || clean === "audio/m4a") return { mimeType: clean, extension: "m4a" };
+  if (clean === "audio/mpeg" || clean === "audio/mp3") return { mimeType: "audio/mpeg", extension: "mp3" };
+  if (clean === "audio/wav" || clean === "audio/x-wav") return { mimeType: "audio/wav", extension: "wav" };
+  return { mimeType: "audio/webm", extension: "webm" };
+}
+
+function decodeAudioBase64(audioBase64) {
+  const clean = String(audioBase64 || "").replace(/^data:audio\/[^;]+;base64,/, "").trim();
+  if (!clean) throw httpError(400, "Audio is required");
+
+  const audio = Buffer.from(clean, "base64");
+  if (!audio.length) throw httpError(400, "Audio is empty");
+  if (audio.length > maxTranscriptionAudioBytes) throw httpError(413, "Audio is too large");
+  return audio;
+}
+
+async function handleTranscribe(request, response) {
+  if (!aiApiKey) {
+    sendJson(response, 503, {
+      error: "AI transcription is not configured",
+      message: "AI transcription is not configured.",
+    });
+    return;
+  }
+
+  const payload = await readJsonBody(request, Math.ceil(maxTranscriptionAudioBytes * 1.45) + 2000);
+  const audio = decodeAudioBase64(payload.audioBase64);
+  const audioType = normalizeAudioMimeType(payload.mimeType);
+  const language = normalizeTranscriptionLanguage(payload.language);
+
+  const form = new FormData();
+  form.append("model", aiTranscriptionModel);
+  form.append("file", new Blob([audio], { type: audioType.mimeType }), `speech.${audioType.extension}`);
+  form.append("response_format", "json");
+  if (language) form.append("language", language);
+  form.append("prompt", "Short learner voice input for a language learning app.");
+
+  const aiResponse = await fetch(aiTranscriptionsUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${aiApiKey}`,
+    },
+    body: form,
+  });
+
+  const data = await aiResponse.json().catch(() => ({}));
+  if (!aiResponse.ok) {
+    throw httpError(502, data.error?.message || `Transcription failed: ${aiResponse.status}`);
+  }
+
+  sendJson(response, 200, { text: String(data.text || "").trim() });
+}
+
 async function handleAiTeacher(request, response) {
   let payload;
   try {
@@ -789,7 +850,7 @@ async function handleAiTeacher(request, response) {
   if (!aiApiKey) {
     sendJson(response, 503, {
       error: "AI teacher is not configured",
-      message: "The AI teacher backend is not configured yet. Add the API key on the server to enable it.",
+      message: "JJ老师还没有连接在线AI服务。配置后端密钥后就可以使用。",
     });
     return;
   }
@@ -854,7 +915,7 @@ async function streamAiTeacherResponse(response, prompt, mode, targetLanguage = 
     sendSse(response, "done", { reply: finalizeTeacherReply(fullReply, mode, rawMessage) });
   } catch (error) {
     sendSse(response, "error", {
-      message: error.name === "AbortError" ? "The AI response timed out. Please try again." : error.message || "The AI did not return content.",
+      message: error.name === "AbortError" ? "AI 回复超时了，请再试一次。" : error.message || "AI 暂时没有返回内容。",
     });
   } finally {
     response.end();
@@ -878,13 +939,12 @@ function handleHealth(response) {
 function buildExplainPrompt(sentence, targetLanguage = "english") {
   const language = getTargetLanguageInfo(targetLanguage);
   return [
-    `You are a ${language.label} memorization teacher for native Chinese speakers.`,
-    "Reply in Simplified Chinese. Keep it extremely short for a mobile card.",
-    "Output exactly these three headings, with each section under 18 Chinese characters:",
-    labelSentenceMeaning,
-    labelKeyWords,
-    labelExample,
-    `${language.label} sentence: ${sentence}`,
+    `你是一位中文母语者的${language.label}句子背诵老师。请讲解下面这句${language.label}。`,
+    "要求：中文回答，极简，适合手机小卡片。严格只输出这3个标题，每项不超过18个字：",
+    "句意：",
+    "重点词：",
+    "例句：",
+    `${language.label}句子：${sentence}`,
   ].join("\n");
 }
 
@@ -894,19 +954,19 @@ function buildConvertLanguagePrompt(payload, sourceLanguage = "english", targetL
   const sentences = Array.isArray(payload.sentences) ? payload.sentences.slice(0, 120) : [];
   const teacherMessages = Array.isArray(payload.teacherMessages) ? payload.teacherMessages.slice(-50) : [];
   return [
-    `You are converting one language-learning app user's saved data from ${source.label} study to ${target.label} study.`,
-    "Convert saved sentences and teacher chat history into the target study language without losing progress.",
-    "Rules:",
-    `1. In saved sentences, every text field must become a natural ${target.label} sentence.`,
-    "2. Keep note and explanation fields in Simplified Chinese.",
-    `3. In teacherMessages, leave casual Chinese chat in Simplified Chinese, but convert any old study-language sentences, questions, examples, or translations into ${target.label}.`,
-    `4. If a message contains the app label ${labelEnglish}, keep that exact label, but the content after it must be ${target.label}.`,
-    `5. If a message contains ${labelMeaning}, keep the meaning after it in Simplified Chinese.`,
-    "6. Do not add unrelated content, do not delete user messages, and do not change role values.",
-    "7. Return JSON only. No Markdown, no explanation.",
-    "The JSON shape must be:",
+    `你正在把一个语言学习 App 的用户资料从${source.label}学习切换为${target.label}学习。`,
+    "请把旧的已保存句子和导师聊天内容转换成目标语言，但不要丢失学习进度。",
+    "规则：",
+    `1. saved sentences 里的 text 必须变成自然的${target.label}句子。`,
+    "2. note 和中文解释继续使用简体中文。",
+    `3. teacherMessages 中，用户原本的中文闲聊可以保留中文；原本属于学习语言的句子、问题、例句、翻译要变成${target.label}。`,
+    "4. 如果消息里有“英文：”标签，标签保留为“英文：”，但标签后面的内容必须是目标语言，因为 App 需要这个标签解析。",
+    "5. 如果消息里有“中文意思：”，后面继续写简体中文意思。",
+    "6. 不要新增无关内容，不要删除用户消息，不要改 role。",
+    "7. 只返回 JSON，不要 Markdown，不要解释。",
+    "JSON 格式必须是：",
     '{"sentences":[{"text":"","note":"","learned":false,"learnedAt":null,"aiExplanation":""}],"teacherMessages":[{"role":"assistant","text":""}]}',
-    `Old data: ${JSON.stringify({ sentences, teacherMessages })}`,
+    `旧数据：${JSON.stringify({ sentences, teacherMessages })}`,
   ].join("\n");
 }
 
@@ -914,17 +974,17 @@ function buildChatPrompt(message, history, mode = "chat", targetLanguage = "engl
   const language = getTargetLanguageInfo(targetLanguage);
   const cleanHistory = history
     .filter((item) => item && typeof item.text === "string" && (item.role === "user" || item.role === "assistant"))
-    .map((item) => `${item.role === "user" ? "Student" : "Teacher"}: ${item.text}`)
+    .map((item) => `${item.role === "user" ? "学生" : "老师"}：${item.text}`)
     .join("\n");
 
   return [
-    `Target learning language: ${language.label}.`,
-    mode === "freestyle" ? "Current mode: casual chat." : mode === "topic" ? "Current mode: topic practice." : "Current mode: language learning.",
-    mode === "topic" ? "In topic practice, after each user reply, continue the same topic naturally and ask one related follow-up question." : "",
-    `If you provide a ${language.label} study sentence or translation, put the ${language.label} text after ${labelEnglish} and the Chinese meaning after ${labelMeaning}.`,
-    `${labelEnglish} is only an app display marker; the content after it should still be ${language.label}.`,
-    cleanHistory ? `Recent conversation:\n${cleanHistory}` : "",
-    `User: ${message}`,
+    `当前学习语言：${language.label}`,
+    mode === "freestyle" ? "当前模式：普通聊天。" : mode === "topic" ? "当前模式：话题练习。" : "当前模式：语言学习。",
+    mode === "topic" ? "话题练习里，用户每次回复后，请顺着同一个话题自然接话，并继续问一个相关的小问题。" : "",
+    `如果你给出${language.label}学习句子或翻译，请用“英文：”放${language.label}内容，并用“中文意思：”放中文意思。`,
+    `“英文：”只是 App 的显示标记，后面的内容仍然应该是${language.label}。`,
+    cleanHistory ? `最近对话：\n${cleanHistory}` : "",
+    `用户：${message}`,
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -934,7 +994,7 @@ function compactTeacherReply(reply, mode) {
   return String(reply || "")
     .split(/\n+/)
     .map((line) => line.trim())
-    .map((line) => line.replace(/^\s*(?:[-\u2022*]|\d+[.)\u3001])\s*/, ""))
+    .map((line) => line.replace(/^\s*(?:[-•*]|\d+[.)、])\s*/, ""))
     .filter(Boolean)
     .join(" ")
     .replace(/\s+/g, " ")
@@ -943,26 +1003,26 @@ function compactTeacherReply(reply, mode) {
 
 function isDirectTranslationRequest(message) {
   const clean = String(message || "").trim();
-  return /[\u4e00-\u9fff]/u.test(clean) && /(?:\u600e\u4e48\u8bf4|\u7ffb\u8bd1|\u7ffb\u6210|\u7528.{0,12}\u8bed.{0,8}\u8bf4)/u.test(clean);
+  return /[\u4e00-\u9fff]/u.test(clean) && /(?:怎么说|翻译|翻成|用.{0,12}语.{0,8}说)/u.test(clean);
 }
 
 function trimDirectTranslationReply(reply, message) {
   if (!isDirectTranslationRequest(message)) return reply;
 
-  const englishIndex = reply.indexOf(labelEnglish);
+  const englishIndex = reply.indexOf("英文：");
   if (englishIndex === -1) return reply;
 
-  const targetStart = englishIndex + labelEnglish.length;
-  const meaningIndex = reply.indexOf(labelMeaning, targetStart);
+  const targetStart = englishIndex + "英文：".length;
+  const meaningIndex = reply.indexOf("中文意思：", targetStart);
   if (meaningIndex === -1) return reply.slice(englishIndex).trim();
 
-  const secondEnglishIndex = reply.indexOf(labelEnglish, meaningIndex + labelMeaning.length);
+  const secondEnglishIndex = reply.indexOf("英文：", meaningIndex + "中文意思：".length);
   const target = reply.slice(targetStart, meaningIndex).trim();
   const meaningEnd = secondEnglishIndex === -1 ? reply.length : secondEnglishIndex;
-  const meaning = reply.slice(meaningIndex + labelMeaning.length, meaningEnd).trim();
+  const meaning = reply.slice(meaningIndex + "中文意思：".length, meaningEnd).trim();
 
   if (!target || !meaning) return reply.slice(englishIndex).trim();
-  return `${labelEnglish}${target} ${labelMeaning}${meaning}`;
+  return `英文：${target} 中文意思：${meaning}`;
 }
 
 function finalizeTeacherReply(reply, mode, rawMessage = "") {
@@ -1127,7 +1187,7 @@ function extractAiText(data) {
     }
   }
 
-  return parts.join("\n") || "The AI did not return content.";
+  return parts.join("\n") || "JJ老师暂时没有返回内容。";
 }
 
 async function serveFile(request, response) {
@@ -1240,6 +1300,11 @@ const server = http.createServer(async (request, response) => {
       return;
     }
 
+    if (request.method === "POST" && request.url === "/api/transcribe") {
+      await handleTranscribe(request, response);
+      return;
+    }
+
     if (request.method === "POST" && request.url === "/api/ai-teacher") {
       await handleAiTeacher(request, response);
       return;
@@ -1261,7 +1326,7 @@ const server = http.createServer(async (request, response) => {
     const status = Number(error.status || 500);
     sendJson(response, status, {
       error: status >= 500 ? "Server error" : error.message,
-      message: error.message || "The AI teacher backend is temporarily unavailable.",
+      message: error.message || "JJ老师暂时连接不上",
     });
   }
 });
