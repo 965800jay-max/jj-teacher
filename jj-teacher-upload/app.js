@@ -74,7 +74,6 @@ const refreshFriendsButton = document.querySelector("#refreshFriendsButton");
 const sceneGroupTabs = document.querySelector("#sceneGroupTabs");
 const sceneList = document.querySelector("#sceneList");
 const sceneDetail = document.querySelector("#sceneDetail");
-const sceneBackButton = document.querySelector("#sceneBackButton");
 
 const STORAGE_KEY = "sentence-reader-text";
 const DRAFT_KEY = "sentence-reader-draft";
@@ -101,8 +100,8 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free30";
-const APP_VERSION_CODE = 30;
+const APP_BUILD_TAG = "free31";
+const APP_VERSION_CODE = 31;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
 const UPDATE_DISMISS_KEY = "sentence-reader-dismissed-update";
 const UPDATE_CHECK_TIMEOUT_MS = 6500;
@@ -112,6 +111,9 @@ const LANGUAGE_CONVERT_MESSAGE_LIMIT = 50;
 const TEACHER_OPENING_TOPIC_COOLDOWN_MS = 6 * 60 * 60 * 1000;
 const DOUBLE_TAP_MS = 420;
 const DELETE_CONFIRM_MS = 1500;
+const SCENE_SWIPE_EDGE_PX = 28;
+const SCENE_SWIPE_TRIGGER_PX = 82;
+const SCENE_SWIPE_VERTICAL_LIMIT_PX = 58;
 let currentWord = "";
 let currentAudio = null;
 let nativeAudioAvailable = true;
@@ -131,6 +133,7 @@ let currentExamPosition = 0;
 let currentLearningLanguage = "english";
 let currentSceneGroup = "friends";
 let activeSceneId = "";
+let sceneSwipeState = null;
 let teacherRenderFrame = 0;
 let teacherOpeningTopicTimer = 0;
 let teacherOpeningTopicInFlight = false;
@@ -1941,7 +1944,6 @@ function renderScenes() {
 
   const progress = loadSceneProgress();
   const activeScene = getSceneById(activeSceneId);
-  sceneBackButton.hidden = !activeScene;
   sceneGroupTabs.hidden = Boolean(activeScene);
   sceneList.hidden = Boolean(activeScene);
   sceneDetail.hidden = !activeScene;
@@ -2084,6 +2086,58 @@ function renderSceneDetail(scene, progress) {
   scene.dialogue.forEach((line) => appendSceneLine(dialogueList, line, { dialogue: true }));
 
   sceneDetail.append(header, actionRow, dialogueTitle, dialogueList);
+}
+
+function canUseSceneSwipeBack() {
+  return currentPage === "scenes" && Boolean(activeSceneId) && authSheet?.hidden !== false && updateSheet?.hidden !== false;
+}
+
+function returnToSceneList() {
+  if (!activeSceneId) return;
+
+  activeSceneId = "";
+  renderScenes();
+}
+
+function startSceneEdgeSwipe(event) {
+  if (event.pointerType === "mouse" && event.button !== 0) return;
+  if (!canUseSceneSwipeBack()) return;
+  if (event.clientX > SCENE_SWIPE_EDGE_PX) return;
+  if (event.target.closest("#wordSheet, .auth-card, .update-card, button, input, textarea, select, a")) return;
+
+  sceneSwipeState = {
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+  };
+
+  try {
+    scenesPage.setPointerCapture?.(event.pointerId);
+  } catch {
+    // Some WebViews do not allow capture from this target; the document listener still handles the gesture.
+  }
+}
+
+function moveSceneEdgeSwipe(event) {
+  if (!sceneSwipeState || event.pointerId !== sceneSwipeState.pointerId) return;
+
+  const deltaX = event.clientX - sceneSwipeState.startX;
+  const deltaY = Math.abs(event.clientY - sceneSwipeState.startY);
+  if (deltaX < -8 || (deltaY > SCENE_SWIPE_VERTICAL_LIMIT_PX && deltaY > Math.abs(deltaX))) {
+    sceneSwipeState = null;
+    return;
+  }
+
+  if (deltaX > 12 && deltaY < SCENE_SWIPE_VERTICAL_LIMIT_PX) event.preventDefault();
+  if (deltaX < SCENE_SWIPE_TRIGGER_PX || deltaY > SCENE_SWIPE_VERTICAL_LIMIT_PX) return;
+
+  sceneSwipeState = null;
+  returnToSceneList();
+}
+
+function finishSceneEdgeSwipe(event) {
+  if (!sceneSwipeState || event.pointerId !== sceneSwipeState.pointerId) return;
+  sceneSwipeState = null;
 }
 
 function normalizeCloudSettings(settings) {
@@ -4339,10 +4393,10 @@ sentencesNav.addEventListener("click", () => setPage("sentences"));
 scenesNav.addEventListener("click", () => setPage("scenes"));
 teacherNav.addEventListener("click", () => setPage("teacher"));
 friendsNav.addEventListener("click", () => setPage("friends"));
-sceneBackButton?.addEventListener("click", () => {
-  activeSceneId = "";
-  renderScenes();
-});
+document.addEventListener("pointerdown", startSceneEdgeSwipe);
+document.addEventListener("pointermove", moveSceneEdgeSwipe, { passive: false });
+document.addEventListener("pointerup", finishSceneEdgeSwipe);
+document.addEventListener("pointercancel", finishSceneEdgeSwipe);
 examCheckButton.addEventListener("click", checkExamAnswer);
 examDontKnowButton.addEventListener("click", showExamAnswer);
 examNextButton.addEventListener("click", nextExamQuestion);

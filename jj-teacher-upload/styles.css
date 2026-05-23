@@ -3648,6 +3648,7 @@ textarea::placeholder,
   display: grid;
   gap: 12px;
   padding: 12px;
+  touch-action: pan-y;
 }
 
 .scene-detail[hidden],

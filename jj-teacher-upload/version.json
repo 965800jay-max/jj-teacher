@@ -1,6 +1,6 @@
 {
-  "versionCode": 30,
-  "versionName": "free30",
-  "apkUrl": "https://files.catbox.moe/w85lyo.apk",
-  "notes": "优化场景学习，去掉核心句，扩充为更自然本地化的场景对话。"
+  "versionCode": 31,
+  "versionName": "free31",
+  "apkUrl": "https://files.catbox.moe/3sd9pb.apk",
+  "notes": "场景详情去掉返回按钮，改为从屏幕左边缘右滑返回场景列表。"
 }
