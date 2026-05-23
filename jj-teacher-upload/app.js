@@ -100,8 +100,8 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free31";
-const APP_VERSION_CODE = 31;
+const APP_BUILD_TAG = "free32";
+const APP_VERSION_CODE = 32;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
 const UPDATE_DISMISS_KEY = "sentence-reader-dismissed-update";
 const UPDATE_CHECK_TIMEOUT_MS = 6500;
@@ -111,9 +111,6 @@ const LANGUAGE_CONVERT_MESSAGE_LIMIT = 50;
 const TEACHER_OPENING_TOPIC_COOLDOWN_MS = 6 * 60 * 60 * 1000;
 const DOUBLE_TAP_MS = 420;
 const DELETE_CONFIRM_MS = 1500;
-const SCENE_SWIPE_EDGE_PX = 28;
-const SCENE_SWIPE_TRIGGER_PX = 82;
-const SCENE_SWIPE_VERTICAL_LIMIT_PX = 58;
 let currentWord = "";
 let currentAudio = null;
 let nativeAudioAvailable = true;
@@ -133,7 +130,7 @@ let currentExamPosition = 0;
 let currentLearningLanguage = "english";
 let currentSceneGroup = "friends";
 let activeSceneId = "";
-let sceneSwipeState = null;
+let sceneHistoryFallbackTimer = 0;
 let teacherRenderFrame = 0;
 let teacherOpeningTopicTimer = 0;
 let teacherOpeningTopicInFlight = false;
@@ -1993,10 +1990,7 @@ function renderScenes() {
     button.type = "button";
     button.className = "primary-button";
     button.textContent = progress.completed.includes(scene.id) ? "继续学习" : "打开场景";
-    button.addEventListener("click", () => {
-      activeSceneId = scene.id;
-      renderScenes();
-    });
+    button.addEventListener("click", () => openSceneDetail(scene.id));
 
     card.append(header, description, meta, button);
     sceneList.appendChild(card);
@@ -2005,21 +1999,30 @@ function renderScenes() {
 
 function appendSceneLine(container, item, options = {}) {
   const row = document.createElement("div");
-  row.className = options.dialogue ? "scene-dialogue-line" : "scene-line";
+  const isDialogue = Boolean(options.dialogue);
+  const isUserLine = isDialogue && item.speaker === "B";
+  row.className = isDialogue
+    ? `scene-dialogue-line ${isUserLine ? "is-user" : "is-ai"}`
+    : "scene-line";
 
-  const textWrap = document.createElement("div");
-  if (options.dialogue) {
-    const speaker = document.createElement("span");
-    speaker.className = "scene-speaker";
-    speaker.textContent = item.speaker || "";
-    textWrap.appendChild(speaker);
+  const message = document.createElement("div");
+  message.className = "scene-message";
+
+  if (isDialogue) {
+    const name = document.createElement("span");
+    name.className = "scene-speaker";
+    name.textContent = isUserLine ? getSceneUserDisplayName() : "智语导师";
+    message.appendChild(name);
   }
+
+  const bubble = document.createElement("div");
+  bubble.className = "scene-bubble";
 
   const target = document.createElement("strong");
   target.textContent = getSceneText(item);
   const note = document.createElement("span");
   note.textContent = item.zh || "";
-  textWrap.append(target, note);
+  bubble.append(target, note);
 
   const actions = document.createElement("div");
   actions.className = "scene-line-actions";
@@ -2041,8 +2044,43 @@ function appendSceneLine(container, item, options = {}) {
   });
 
   actions.append(speakButton, addButton);
-  row.append(textWrap, actions);
+  message.appendChild(bubble);
+
+  if (isDialogue) {
+    message.appendChild(actions);
+    const avatar = createSceneAvatar(isUserLine);
+    if (isUserLine) {
+      row.append(message, avatar);
+    } else {
+      row.append(avatar, message);
+    }
+  } else {
+    row.append(message, actions);
+  }
+
   container.appendChild(row);
+}
+
+function getSceneUserDisplayName() {
+  return authUser ? getAuthDisplayName() : "你";
+}
+
+function createSceneAvatar(isUserLine) {
+  const avatar = document.createElement("div");
+  avatar.className = `scene-chat-avatar ${isUserLine ? "is-user" : "is-ai"}`;
+
+  if (!isUserLine) {
+    const mark = document.createElement("span");
+    mark.textContent = "AI";
+    avatar.appendChild(mark);
+    return avatar;
+  }
+
+  const avatarSource = getAvatarSource();
+  avatar.textContent = avatarSource ? "" : (authUser ? getAvatarInitial() : "我");
+  avatar.style.backgroundImage = avatarSource ? `url("${avatarSource}")` : "";
+  avatar.classList.toggle("has-image", Boolean(avatarSource));
+  return avatar;
 }
 
 function renderSceneDetail(scene, progress) {
@@ -2088,57 +2126,82 @@ function renderSceneDetail(scene, progress) {
   sceneDetail.append(header, actionRow, dialogueTitle, dialogueList);
 }
 
-function canUseSceneSwipeBack() {
+function canUseSceneSystemBack() {
   return currentPage === "scenes" && Boolean(activeSceneId) && authSheet?.hidden !== false && updateSheet?.hidden !== false;
 }
 
-function returnToSceneList() {
+function openSceneDetail(sceneId) {
+  if (!getSceneById(sceneId)) return;
+
+  activeSceneId = sceneId;
+  pushSceneDetailHistory(sceneId);
+  renderScenes();
+}
+
+function pushSceneDetailHistory(sceneId) {
+  try {
+    window.history.pushState(
+      { ...(window.history.state || {}), zhiyuSceneDetail: true, sceneId },
+      "",
+      window.location.href
+    );
+  } catch {
+    // History state is a progressive enhancement for native-style back gestures.
+  }
+}
+
+function replaceSceneDetailHistoryWithList() {
+  try {
+    if (!window.history.state?.zhiyuSceneDetail) return;
+    window.history.replaceState(
+      { ...(window.history.state || {}), zhiyuSceneDetail: false, sceneId: "" },
+      "",
+      window.location.href
+    );
+  } catch {
+    // Ignore unsupported history writes.
+  }
+}
+
+function returnToSceneList(options = {}) {
   if (!activeSceneId) return;
 
   activeSceneId = "";
   renderScenes();
+  if (options.replaceHistory) replaceSceneDetailHistoryWithList();
 }
 
-function startSceneEdgeSwipe(event) {
-  if (event.pointerType === "mouse" && event.button !== 0) return;
-  if (!canUseSceneSwipeBack()) return;
-  if (event.clientX > SCENE_SWIPE_EDGE_PX) return;
-  if (event.target.closest("#wordSheet, .auth-card, .update-card, button, input, textarea, select, a")) return;
+function requestSceneSystemBack() {
+  if (!canUseSceneSystemBack()) return false;
 
-  sceneSwipeState = {
-    pointerId: event.pointerId,
-    startX: event.clientX,
-    startY: event.clientY,
-  };
-
-  try {
-    scenesPage.setPointerCapture?.(event.pointerId);
-  } catch {
-    // Some WebViews do not allow capture from this target; the document listener still handles the gesture.
+  clearTimeout(sceneHistoryFallbackTimer);
+  if (window.history.state?.zhiyuSceneDetail && window.history.length > 1) {
+    window.history.back();
+    sceneHistoryFallbackTimer = window.setTimeout(() => {
+      if (activeSceneId) returnToSceneList({ replaceHistory: true });
+    }, 260);
+  } else {
+    returnToSceneList({ replaceHistory: true });
   }
+  return true;
 }
 
-function moveSceneEdgeSwipe(event) {
-  if (!sceneSwipeState || event.pointerId !== sceneSwipeState.pointerId) return;
+function handleScenePopState(event) {
+  clearTimeout(sceneHistoryFallbackTimer);
+  const state = event.state || {};
 
-  const deltaX = event.clientX - sceneSwipeState.startX;
-  const deltaY = Math.abs(event.clientY - sceneSwipeState.startY);
-  if (deltaX < -8 || (deltaY > SCENE_SWIPE_VERTICAL_LIMIT_PX && deltaY > Math.abs(deltaX))) {
-    sceneSwipeState = null;
+  if (activeSceneId && !state.zhiyuSceneDetail) {
+    returnToSceneList();
     return;
   }
 
-  if (deltaX > 12 && deltaY < SCENE_SWIPE_VERTICAL_LIMIT_PX) event.preventDefault();
-  if (deltaX < SCENE_SWIPE_TRIGGER_PX || deltaY > SCENE_SWIPE_VERTICAL_LIMIT_PX) return;
-
-  sceneSwipeState = null;
-  returnToSceneList();
+  if (currentPage === "scenes" && state.zhiyuSceneDetail && getSceneById(state.sceneId)) {
+    activeSceneId = state.sceneId;
+    renderScenes();
+  }
 }
 
-function finishSceneEdgeSwipe(event) {
-  if (!sceneSwipeState || event.pointerId !== sceneSwipeState.pointerId) return;
-  sceneSwipeState = null;
-}
+window.zhiyuHandleNativeBack = requestSceneSystemBack;
 
 function normalizeCloudSettings(settings) {
   const source = settings && typeof settings === "object" ? settings : {};
@@ -3247,6 +3310,11 @@ function setPage(page) {
   const isExam = currentPage === "exam";
   const isScenes = currentPage === "scenes";
   const isFriends = currentPage === "friends";
+
+  if (!isScenes && activeSceneId) {
+    activeSceneId = "";
+    replaceSceneDetailHistoryWithList();
+  }
 
   sentencesPage.classList.toggle("is-active", !isTeacher && !isExam && !isScenes && !isFriends);
   examPage.classList.toggle("is-active", isExam);
@@ -4393,10 +4461,7 @@ sentencesNav.addEventListener("click", () => setPage("sentences"));
 scenesNav.addEventListener("click", () => setPage("scenes"));
 teacherNav.addEventListener("click", () => setPage("teacher"));
 friendsNav.addEventListener("click", () => setPage("friends"));
-document.addEventListener("pointerdown", startSceneEdgeSwipe);
-document.addEventListener("pointermove", moveSceneEdgeSwipe, { passive: false });
-document.addEventListener("pointerup", finishSceneEdgeSwipe);
-document.addEventListener("pointercancel", finishSceneEdgeSwipe);
+window.addEventListener("popstate", handleScenePopState);
 examCheckButton.addEventListener("click", checkExamAnswer);
 examDontKnowButton.addEventListener("click", showExamAnswer);
 examNextButton.addEventListener("click", nextExamQuestion);

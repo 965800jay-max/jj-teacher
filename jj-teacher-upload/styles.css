@@ -3648,7 +3648,6 @@ textarea::placeholder,
   display: grid;
   gap: 12px;
   padding: 12px;
-  touch-action: pan-y;
 }
 
 .scene-detail[hidden],
@@ -3661,7 +3660,7 @@ textarea::placeholder,
 .scene-lines,
 .scene-dialogue {
   display: grid;
-  gap: 8px;
+  gap: 12px;
 }
 
 .scene-actions {
@@ -3674,8 +3673,7 @@ textarea::placeholder,
   width: 100%;
 }
 
-.scene-line,
-.scene-dialogue-line {
+.scene-line {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 10px;
@@ -3686,16 +3684,62 @@ textarea::placeholder,
   background: #000000;
 }
 
+.scene-dialogue-line {
+  display: grid;
+  gap: 8px;
+  align-items: start;
+  background: transparent;
+}
+
+.scene-dialogue-line.is-ai {
+  grid-template-columns: 34px minmax(0, 1fr);
+  justify-items: start;
+}
+
+.scene-dialogue-line.is-user {
+  grid-template-columns: minmax(0, 1fr) 34px;
+  justify-items: end;
+}
+
+.scene-message {
+  display: grid;
+  gap: 5px;
+  max-width: min(82%, 520px);
+}
+
+.scene-dialogue-line.is-user .scene-message {
+  justify-items: end;
+}
+
+.scene-bubble {
+  border-radius: 16px;
+  padding: 10px 12px;
+  background: #171717;
+}
+
+.scene-dialogue-line.is-ai .scene-bubble {
+  border-top-left-radius: 5px;
+}
+
+.scene-dialogue-line.is-user .scene-bubble {
+  border-top-right-radius: 5px;
+  background: #ffffff;
+}
+
 .scene-line strong,
-.scene-dialogue-line strong {
+.scene-bubble strong {
   display: block;
   color: #ffffff;
   font-size: 15px;
   line-height: 1.45;
 }
 
+.scene-dialogue-line.is-user .scene-bubble strong {
+  color: #000000;
+}
+
 .scene-line span,
-.scene-dialogue-line span {
+.scene-bubble span {
   display: block;
   margin-top: 4px;
   color: #a3a3a3;
@@ -3703,28 +3747,101 @@ textarea::placeholder,
   line-height: 1.45;
 }
 
+.scene-dialogue-line.is-user .scene-bubble span {
+  color: #525252;
+}
+
 .scene-speaker {
-  display: inline-grid !important;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  margin: 0 0 6px !important;
-  border: 1px solid #303030;
-  border-radius: 999px;
-  color: #ffffff !important;
+  display: block !important;
+  margin: 0 2px !important;
+  color: #a3a3a3 !important;
   font-size: 11px !important;
   font-weight: 800;
+  line-height: 1.2 !important;
+}
+
+.scene-dialogue-line.is-user .scene-speaker {
+  color: #d4d4d4 !important;
+}
+
+.scene-chat-avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #171717;
+  background-position: center;
+  background-size: cover;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+  overflow: visible;
+}
+
+.scene-chat-avatar.has-image {
+  color: transparent;
+}
+
+.scene-chat-avatar.is-ai {
+  border: 1px solid #5eefff;
+  background:
+    radial-gradient(circle at 50% 62%, #0f172a 0 34%, transparent 36%),
+    linear-gradient(145deg, #0b0b0b, #1e293b);
+  box-shadow: 0 0 14px rgba(94, 239, 255, 0.22);
+}
+
+.scene-chat-avatar.is-ai::before,
+.scene-chat-avatar.is-ai::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  width: 10px;
+  height: 12px;
+  border: 1px solid #5eefff;
+  background: #101827;
+}
+
+.scene-chat-avatar.is-ai::before {
+  left: 4px;
+  border-radius: 9px 3px 5px 5px;
+  transform: rotate(-24deg);
+}
+
+.scene-chat-avatar.is-ai::after {
+  right: 4px;
+  border-radius: 3px 9px 5px 5px;
+  transform: rotate(24deg);
+}
+
+.scene-chat-avatar.is-ai span {
+  position: relative;
+  z-index: 1;
+  color: #ffffff;
+  font-size: 10px;
+  letter-spacing: 0;
+}
+
+.scene-chat-avatar.is-user {
+  background-color: #ffffff;
+  color: #000000;
 }
 
 .scene-line-actions {
-  display: grid;
-  grid-template-columns: 36px 36px;
+  display: inline-grid;
+  grid-template-columns: 28px 28px;
   gap: 6px;
 }
 
+.scene-dialogue-line.is-user .scene-line-actions {
+  justify-content: end;
+}
+
 .scene-line-actions .round-button {
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
+  font-size: 12px;
 }
 
 .account-button:focus-visible,
