@@ -2400,6 +2400,8 @@ async function startVoiceCapture(options) {
     transcript: "",
     finalHandled: false,
     released: false,
+    starting: true,
+    releaseRequested: false,
     stopTimer: 0,
     webRecognition: null,
   };
@@ -2424,14 +2426,19 @@ async function startVoiceCapture(options) {
   if (nativeSpeech?.start) {
     try {
       await nativeSpeech.start({ language: getVoiceLanguageCode() });
+      capture.starting = false;
+      if (voiceCapture === capture && capture.releaseRequested) stopVoiceCapture();
       return;
     } catch (error) {
+      capture.starting = false;
       handleVoiceError(error?.message || "系统语音识别启动失败");
       return;
     }
   }
 
+  capture.starting = false;
   startWebSpeechCapture(capture);
+  if (voiceCapture === capture && capture.releaseRequested) stopVoiceCapture();
 }
 
 function startWebSpeechCapture(capture) {
@@ -2479,6 +2486,14 @@ function stopVoiceCapture() {
   if (!capture) return;
 
   capture.released = true;
+  if (capture.starting) {
+    capture.releaseRequested = true;
+    if (capture.source === "chat") {
+      setChatVoiceListening(true, "正在等待语音权限...");
+    }
+    return;
+  }
+
   if (capture.source === "chat") {
     setChatVoiceListening(true, capture.transcript ? "正在整理语音..." : "正在识别...");
   }

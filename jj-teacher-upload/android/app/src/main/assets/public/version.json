@@ -1,6 +1,6 @@
 {
   "versionCode": 41,
   "versionName": "free41",
-  "apkUrl": "https://files.catbox.moe/7e8srf.apk",
+  "apkUrl": "https://files.catbox.moe/b7f0os.apk",
   "notes": "修复安卓长按语音识别无反应，聊天页按住麦克风显示收听动画并松开发送；句子页语音发送改为AI解答画中画。"
 }
