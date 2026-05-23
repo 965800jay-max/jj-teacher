@@ -89,13 +89,13 @@ const STALE_EMPTY_AI_REPLIES = new Set(["我暂时没有生成内容。", "我�
 const TEACHER_MESSAGE_BREAK = "【NEXT_MESSAGE】";
 const TEACHER_CORRECTION_MARK = "【CORRECTION】";
 const LEARNING_LANGUAGES = {
-  english: { label: "英语", targetLabel: "英文", speech: "en-US", sample: "旅行时使用的英文句子" },
-  spanish: { label: "西班牙语", targetLabel: "西班牙语", speech: "es-ES", sample: "旅行时使用的西班牙语句子" },
-  japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", sample: "旅行时使用的日语句子" },
-  korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", sample: "旅行时使用的韩语句子" },
+  english: { label: "英语", targetLabel: "英文", speech: "en-US", tts: "en", sample: "旅行时使用的英文句子" },
+  spanish: { label: "西班牙语", targetLabel: "西班牙语", speech: "es-ES", tts: "es", sample: "旅行时使用的西班牙语句子" },
+  japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
+  korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free27";
-const APP_VERSION_CODE = 27;
+const APP_BUILD_TAG = "free28";
+const APP_VERSION_CODE = 28;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
 const UPDATE_DISMISS_KEY = "sentence-reader-dismissed-update";
 const UPDATE_CHECK_TIMEOUT_MS = 6500;
@@ -272,6 +272,11 @@ function getLearningLanguageConfig(code = currentLearningLanguage) {
   return LEARNING_LANGUAGES[normalizeLearningLanguage(code)] || LEARNING_LANGUAGES.english;
 }
 
+function getOnlineTtsLanguage() {
+  const language = getLearningLanguageConfig();
+  return language.tts || language.speech;
+}
+
 function getLanguageStorageKey(baseKey, code = currentLearningLanguage) {
   return `${baseKey}:${normalizeLearningLanguage(code)}`;
 }
@@ -364,7 +369,7 @@ async function fetchOnlineSpeech(phrase, mode) {
   for (const chunk of chunks) {
     if (sessionId !== speechSessionId) return;
 
-    const cacheKey = `${currentLearningLanguage}:${mode}:${chunk}`;
+    const cacheKey = `${currentLearningLanguage}:${getOnlineTtsLanguage()}:${mode}:${chunk}`;
     const audioUrl = audioCache.get(cacheKey) || (await fetchSpeechAudioUrl(chunk, mode));
     audioCache.set(cacheKey, audioUrl);
     await playAudio(audioUrl);
@@ -376,7 +381,7 @@ async function fetchSpeechAudioUrl(text, mode) {
     const response = await fetch("/api/speech", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, mode, language: currentLearningLanguage, voiceLanguage: getLearningLanguageConfig().speech }),
+      body: JSON.stringify({ text, mode, language: currentLearningLanguage, voiceLanguage: getOnlineTtsLanguage() }),
     });
 
     if (!response.ok) throw new Error("Speech proxy failed");
@@ -396,7 +401,7 @@ function buildSpeechUrl(text) {
   const params = new URLSearchParams({
     ie: "UTF-8",
     client: "tw-ob",
-    tl: getLearningLanguageConfig().speech,
+    tl: getOnlineTtsLanguage(),
     q: text,
     ttsspeed: "1",
   });
@@ -466,6 +471,7 @@ async function playAudio(audioUrl) {
     currentAudio.pause();
     currentAudio.currentTime = 0;
   }
+  window.speechSynthesis?.cancel?.();
 
   currentAudio = new Audio(audioUrl);
   currentAudio.playbackRate = Number(speedSlider.value || "1");
@@ -482,8 +488,59 @@ function updateSpeedLabel() {
   localStorage.setItem(SPEED_KEY, speedSlider.value);
 }
 
+function canUseSystemSpeech(mode) {
+  return mode === "sentence" && currentLearningLanguage !== "english" && "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+}
+
+function getSystemSpeechVoice(languageCode) {
+  const voices = window.speechSynthesis?.getVoices?.() || [];
+  const exact = languageCode.toLowerCase();
+  const base = exact.split("-")[0];
+  return (
+    voices.find((voice) => voice.lang.toLowerCase() === exact) ||
+    voices.find((voice) => voice.lang.toLowerCase().startsWith(`${base}-`)) ||
+    voices.find((voice) => voice.lang.toLowerCase().startsWith(base)) ||
+    null
+  );
+}
+
+function speakWithSystemVoice(text) {
+  return new Promise((resolve, reject) => {
+    const synth = window.speechSynthesis;
+    if (!synth) {
+      reject(new Error("System speech is unavailable"));
+      return;
+    }
+
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+    synth.cancel();
+
+    const language = getLearningLanguageConfig();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = language.speech;
+    utterance.voice = getSystemSpeechVoice(language.speech);
+    utterance.rate = Math.min(1.15, Math.max(0.72, Number(speedSlider.value || "1") * 0.92));
+    utterance.pitch = currentLearningLanguage === "spanish" ? 1.06 : 1;
+    utterance.onend = resolve;
+    utterance.onerror = reject;
+    synth.speak(utterance);
+  });
+}
+
 async function speak(text, mode = "sentence") {
   const phrase = mode === "sentence" && currentLearningLanguage === "english" ? softenForCasualSpeech(text) : text;
+
+  if (canUseSystemSpeech(mode)) {
+    try {
+      await speakWithSystemVoice(phrase);
+      return;
+    } catch {
+      // Fall back to the existing online audio path below.
+    }
+  }
 
   try {
     await fetchOnlineSpeech(phrase, mode);
@@ -1933,21 +1990,25 @@ function render() {
     const sentenceText = document.createElement("div");
     sentenceText.className = "sentence-text";
 
-    splitTokens(sentence).forEach((token) => {
-      if (currentLearningLanguage === "english" && /^[A-Za-z]+(?:'[A-Za-z]+)?$/.test(token)) {
-        const button = document.createElement("button");
-        button.className = "word-token";
-        button.type = "button";
-        button.textContent = token;
-        button.addEventListener("click", () => showWord(token, button));
-        sentenceText.appendChild(button);
-      } else {
-        const punctuation = document.createElement("span");
-        punctuation.className = "punctuation";
-        punctuation.textContent = token;
-        sentenceText.appendChild(punctuation);
-      }
-    });
+    if (currentLearningLanguage === "english") {
+      splitTokens(sentence).forEach((token) => {
+        if (/^[A-Za-z]+(?:'[A-Za-z]+)?$/.test(token)) {
+          const button = document.createElement("button");
+          button.className = "word-token";
+          button.type = "button";
+          button.textContent = token;
+          button.addEventListener("click", () => showWord(token, button));
+          sentenceText.appendChild(button);
+        } else {
+          const punctuation = document.createElement("span");
+          punctuation.className = "punctuation";
+          punctuation.textContent = token;
+          sentenceText.appendChild(punctuation);
+        }
+      });
+    } else {
+      sentenceText.textContent = sentence;
+    }
 
     const note = document.createElement("textarea");
     note.className = "sentence-note";

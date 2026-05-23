@@ -1,6 +1,6 @@
 {
-  "versionCode": 27,
-  "versionName": "free27",
-  "apkUrl": "https://files.catbox.moe/2ek0f5.apk",
-  "notes": "增强切换学习语言时的内容保留：句子分批转换，导师聊天保留更多历史。"
+  "versionCode": 28,
+  "versionName": "free28",
+  "apkUrl": "https://files.catbox.moe/bybxja.apk",
+  "notes": "修复西语句子显示空格丢失，优化西语朗读自然度。"
 }

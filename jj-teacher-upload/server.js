@@ -215,6 +215,17 @@ function getTargetLanguageInfo(code) {
   return targetLanguages[normalizeTargetLanguage(code)] || targetLanguages.english;
 }
 
+function normalizeSpeechLanguage(code) {
+  const value = String(code || "").trim();
+  const shortCodes = {
+    "en-US": "en",
+    "es-ES": "es",
+    "ja-JP": "ja",
+    "ko-KR": "ko",
+  };
+  return shortCodes[value] || value;
+}
+
 function sanitizeSettings(settings) {
   const source = settings && typeof settings === "object" ? settings : {};
   const avatar = limitText(source.avatar, 16000);
@@ -439,7 +450,7 @@ async function handleSpeech(request, response) {
 
   const text = String(payload.text || "").trim();
   const mode = String(payload.mode || "sentence");
-  const voiceLanguage = limitText(payload.voiceLanguage, 12) || getTargetLanguageInfo(payload.language).speech;
+  const voiceLanguage = normalizeSpeechLanguage(limitText(payload.voiceLanguage, 12) || getTargetLanguageInfo(payload.language).speech);
 
   if (!text) {
     sendJson(response, 400, { error: "Text is required" });
