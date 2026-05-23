@@ -4120,7 +4120,7 @@ textarea::placeholder,
   color: #000000 !important;
 }
 
-/* free40 voice input and floating tutor reply. */
+/* free41 voice input and floating tutor reply. */
 .chat-composer {
   display: grid !important;
   grid-template-columns: minmax(0, 1fr) 54px;
@@ -4135,7 +4135,8 @@ textarea::placeholder,
 }
 
 .voice-mic-button,
-.voice-send-button {
+.voice-send-button,
+.sentence-answer-button {
   position: relative;
   display: inline-grid;
   place-items: center;
@@ -4155,7 +4156,8 @@ textarea::placeholder,
   height: 52px;
 }
 
-.voice-send-button {
+.voice-send-button,
+.sentence-answer-button {
   grid-template-columns: 22px auto;
   gap: 8px;
   width: auto !important;
@@ -4164,6 +4166,10 @@ textarea::placeholder,
   padding: 0 12px;
   font-size: 13px;
   font-weight: 800;
+}
+
+.sentence-answer-button {
+  grid-template-columns: auto;
 }
 
 .mic-icon {
@@ -4198,20 +4204,94 @@ textarea::placeholder,
 }
 
 .voice-mic-button.is-listening,
-.voice-send-button.is-listening {
+.voice-send-button.is-listening,
+.sentence-answer-button.is-listening {
   border-color: #ffffff !important;
   background: #ffffff !important;
   color: #000000 !important;
 }
 
 .voice-mic-button.is-listening::after,
-.voice-send-button.is-listening::after {
+.voice-send-button.is-listening::after,
+.sentence-answer-button.is-listening::after {
   content: "";
   position: absolute;
   inset: -7px;
   border: 1px solid rgba(255, 255, 255, 0.64);
   border-radius: inherit;
   animation: voicePulse 920ms ease-out infinite;
+}
+
+.chat-composer {
+  position: relative;
+}
+
+.chat-composer.is-listening {
+  border-color: rgba(255, 255, 255, 0.72) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.055)),
+    rgba(0, 0, 0, 0.9) !important;
+}
+
+.chat-composer.is-listening .teacher-input {
+  color: transparent !important;
+  caret-color: transparent;
+}
+
+.chat-composer.is-listening .teacher-input::placeholder {
+  color: transparent;
+}
+
+.chat-composer.is-listening .voice-mic-button {
+  z-index: 3;
+}
+
+.chat-composer.is-listening::before,
+.chat-composer.is-listening::after {
+  pointer-events: none;
+}
+
+.chat-composer.is-listening::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 78px;
+  bottom: 11px;
+  z-index: 1;
+  height: 18px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, #ffffff 0 3px, transparent 4px) 0 50% / 22px 100% repeat-x;
+  opacity: 0.72;
+  animation: voiceListeningDots 920ms ease-in-out infinite;
+}
+
+.chat-composer.is-listening::after {
+  content: attr(data-voice-status);
+  position: absolute;
+  left: 16px;
+  right: 78px;
+  top: 11px;
+  z-index: 2;
+  overflow: hidden;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 850;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes voiceListeningDots {
+  0%,
+  100% {
+    transform: translateY(0) scaleX(0.82);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(-3px) scaleX(1);
+    opacity: 1;
+  }
 }
 
 @keyframes voicePulse {

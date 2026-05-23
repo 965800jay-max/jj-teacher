@@ -3,8 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>JJ老师</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <meta name="theme-color" content="#000000" />
+    <title>智语导师</title>
+    <link rel="stylesheet" href="./styles.css?v=20260523-free41" />
   </head>
   <body>
     <main class="app-shell">
@@ -13,7 +14,8 @@
           <p class="eyebrow" id="pageEyebrow">Sentence Reader</p>
           <h1 id="pageTitle">句读</h1>
         </div>
-        <button class="icon-button" id="clearButton" type="button" aria-label="清空内容" title="清空">
+        <button class="account-button" id="accountButton" type="button" aria-label="登录账号" title="登录账号">登</button>
+        <button class="icon-button" id="clearButton" type="button" aria-label="清空内容" title="清空" hidden>
           <span aria-hidden="true">×</span>
         </button>
       </header>
@@ -27,9 +29,17 @@
           <p id="sentenceCount">0 句</p>
           <label class="voice-picker">
             <span>语速</span>
-            <input id="speedSlider" type="range" min="0.5" max="1" step="0.05" value="1" aria-label="调整朗读语速" />
+            <input id="speedSlider" type="range" min="0.5" max="1.5" step="0.05" value="1" aria-label="调整朗读语速" />
             <strong id="speedValue">1.00x</strong>
           </label>
+        </section>
+
+        <section class="review-panel" aria-label="句子复习">
+          <div>
+            <p class="eyebrow">Review</p>
+            <h2>复习当前句子</h2>
+          </div>
+          <button class="ghost-button" id="reviewButton" type="button">开始默写</button>
         </section>
 
         <section class="input-panel" aria-label="添加英文句子">
@@ -78,37 +88,64 @@
         </section>
       </section>
 
-      <section class="page-view teacher-page" id="teacherPage" aria-label="JJ老师">
-        <section class="chat-panel" aria-label="JJ老师聊天">
+      <section class="page-view scenes-page" id="scenesPage" aria-label="单词和场景学习">
+        <section class="scenes-panel">
+          <div class="scenes-header">
+            <div>
+              <p class="eyebrow">Words & Scenes</p>
+              <h2>单词/场景</h2>
+            </div>
+          </div>
+          <div class="scene-mode-tabs" id="sceneModeTabs" aria-label="学习类型"></div>
+          <div class="scene-group-tabs" id="sceneGroupTabs" aria-label="场景分类"></div>
+          <div class="scene-list" id="sceneList" aria-live="polite"></div>
+          <article class="scene-detail" id="sceneDetail" hidden aria-live="polite"></article>
+        </section>
+      </section>
+
+      <section class="page-view teacher-page" id="teacherPage" aria-label="智语导师">
+        <section class="chat-panel" aria-label="智语导师聊天">
           <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
           <div class="quick-prompts" aria-label="快捷问题">
             <button type="button" id="topicButton" data-topic="start">话题</button>
             <button type="button" data-prompt="给我3句适合日常聊天的英文句子。">日常口语句子</button>
-            <button type="button" data-prompt="给我3句适合背诵的高级英文句子，难度中等。">高级背诵句子</button>
-            <button type="button" data-prompt="帮我用英文造3句关于今天心情的自然句子。">按主题造句</button>
+            <button type="button" id="freeChatButton" data-free-chat="start">闲聊模式</button>
           </div>
           <div class="chat-composer">
             <textarea
               class="teacher-input"
               id="teacherInput"
-              placeholder="问JJ老师，比如：给我几句适合旅行时使用的英文句子..."
+              placeholder="问智语导师，比如：给我几句适合旅行时使用的英文句子..."
               rows="1"
               enterkeyhint="send"
               autocomplete="off"
               spellcheck="false"
             ></textarea>
+            <button class="voice-mic-button" id="teacherVoiceButton" type="button" aria-label="长按语音转文字" title="长按语音转文字">
+              <span class="mic-icon" aria-hidden="true"></span>
+            </button>
           </div>
+        </section>
+      </section>
+
+      <section class="page-view friends-page" id="friendsPage" aria-label="好友">
+        <section class="friends-panel">
+          <div class="friends-header">
+            <p class="eyebrow">Community</p>
+            <h2>好友</h2>
+            <button class="ghost-button" id="refreshFriendsButton" type="button">刷新</button>
+          </div>
+          <div class="friend-list" id="friendList" aria-live="polite"></div>
         </section>
       </section>
     </main>
 
     <nav class="bottom-nav" aria-label="页面切换">
       <button class="bottom-nav-button is-active" id="sentencesNav" type="button" aria-current="page">句子</button>
-      <button class="bottom-nav-button" id="examNav" type="button">考试</button>
-      <button class="bottom-nav-button" id="teacherNav" type="button">JJ老师</button>
+      <button class="bottom-nav-button" id="scenesNav" type="button">单词/场景</button>
+      <button class="bottom-nav-button" id="teacherNav" type="button">智语导师</button>
+      <button class="bottom-nav-button" id="friendsNav" type="button">好友</button>
     </nav>
-
-    <div class="barrage-layer" id="barrageLayer" aria-hidden="true"></div>
 
     <aside class="word-sheet" id="wordSheet" aria-live="polite" aria-label="单词释义">
       <div class="sheet-handle"></div>
@@ -125,7 +162,92 @@
       <p class="meaning" id="meaningText"></p>
     </aside>
 
-    <script src="./config.js"></script>
-    <script src="./app.js"></script>
+    <section class="update-sheet" id="updateSheet" hidden>
+      <div class="update-card" role="dialog" aria-modal="true" aria-labelledby="updateVersionText">
+        <p class="update-kicker">App Update</p>
+        <h2 id="updateVersionText">发现新版本</h2>
+        <p id="updateNotesText">新版本已经准备好。</p>
+        <div class="update-actions">
+          <button class="ghost-button" id="updateLaterButton" type="button">稍后</button>
+          <button class="primary-button" id="updateNowButton" type="button">立即更新</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="auth-sheet" id="authSheet" hidden>
+      <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+        <p class="auth-kicker">Account</p>
+        <h2 id="authTitle">登录账号</h2>
+        <p id="authStatusText">登录后会同步你的句子、学习状态和导师聊天记录。</p>
+        <section class="account-profile" id="accountProfile" hidden>
+          <button class="account-avatar-large" id="authAvatarButton" type="button" aria-label="更改头像" title="更改头像">登</button>
+          <input id="authAvatarFile" type="file" accept="image/*" hidden />
+          <div>
+            <strong id="authProfileName">未登录</strong>
+            <span id="authProfileEmail">登录后同步学习内容</span>
+          </div>
+        </section>
+        <button class="ghost-button" id="editProfileButton" type="button" hidden>修改头像和名称</button>
+        <section class="profile-editor" id="profileEditor" hidden>
+          <input class="auth-input" id="profileNameInput" type="text" placeholder="新的昵称" autocomplete="name" />
+          <button class="primary-button" id="saveProfileButton" type="button">保存资料</button>
+        </section>
+        <section class="account-settings" id="accountSettings" hidden>
+          <p class="settings-title">学习语言</p>
+          <div class="language-options" id="languageOptions" aria-label="切换学习语言"></div>
+        </section>
+        <section class="admin-panel" id="adminPanel" hidden>
+          <p class="settings-title">用户管理</p>
+          <div class="admin-message-box">
+            <input class="auth-input" id="adminMessageTitle" type="text" placeholder="推送标题" autocomplete="off" />
+            <textarea class="auth-input admin-message-body" id="adminMessageBody" placeholder="推送内容" rows="3"></textarea>
+            <button class="primary-button" id="adminSendAllButton" type="button">发给全部用户</button>
+          </div>
+          <div class="admin-ban-row">
+            <input class="auth-input" id="adminBanValue" type="number" min="1" value="30" inputmode="numeric" aria-label="封禁时长" />
+            <select class="auth-input" id="adminBanUnit" aria-label="封禁单位">
+              <option value="minutes">分钟</option>
+              <option value="hours">小时</option>
+              <option value="days">天</option>
+            </select>
+          </div>
+          <button class="ghost-button" id="adminRefreshButton" type="button">刷新用户</button>
+          <div class="admin-user-list" id="adminUserList" aria-live="polite"></div>
+        </section>
+        <input class="auth-input" id="authName" type="text" placeholder="昵称" autocomplete="name" hidden />
+        <input class="auth-input" id="authEmail" type="text" placeholder="邮箱或管理员账号" autocomplete="email" />
+        <input class="auth-input" id="authPassword" type="password" placeholder="密码" autocomplete="current-password" />
+        <button class="primary-button" id="authSubmitButton" type="button">登录</button>
+        <button class="ghost-button" id="authModeButton" type="button">还没有账号？注册</button>
+        <button class="ghost-button" id="authLogoutButton" type="button" hidden>退出登录</button>
+        <button class="ghost-button" id="authCancelButton" type="button">稍后</button>
+      </div>
+    </section>
+
+    <section class="admin-message-sheet" id="adminMessageSheet" hidden>
+      <div class="admin-message-card" role="dialog" aria-modal="true" aria-labelledby="adminMessageSheetTitle">
+        <p class="auth-kicker">Admin Message</p>
+        <h2 id="adminMessageSheetTitle">管理员消息</h2>
+        <p id="adminMessageSheetBody"></p>
+        <button class="primary-button" id="adminMessageCloseButton" type="button">知道了</button>
+      </div>
+    </section>
+
+    <section class="voice-pip" id="voicePip" hidden>
+      <div class="voice-pip-card" role="dialog" aria-live="polite" aria-labelledby="voicePipTitle">
+        <div class="voice-pip-header">
+          <div>
+            <p id="voicePipStatus">正在收听</p>
+            <h2 id="voicePipTitle">智语导师</h2>
+          </div>
+          <button class="voice-pip-close" id="voicePipCloseButton" type="button" aria-label="关闭AI解答">×</button>
+        </div>
+        <p class="voice-pip-question" id="voicePipQuestion"></p>
+        <p class="voice-pip-answer" id="voicePipAnswer"></p>
+      </div>
+    </section>
+
+    <script src="./config.js?v=20260523-free41"></script>
+    <script src="./app.js?v=20260523-free41"></script>
   </body>
 </html>
