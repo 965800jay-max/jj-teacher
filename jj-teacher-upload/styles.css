@@ -6,11 +6,11 @@
   --page-secondary: rgb(var(--page-rgb-2));
   --page-bg: #10051c;
   --page-bg-deep: #030105;
-  --bg: #101715;
-  --bg-deep: #050807;
-  --surface: rgba(255, 255, 255, 0.08);
-  --surface-soft: rgba(255, 255, 255, 0.055);
-  --surface-lift: rgba(255, 255, 255, 0.115);
+  --bg: #100617;
+  --bg-deep: #040106;
+  --surface: rgba(255, 255, 255, 0.068);
+  --surface-soft: rgba(255, 255, 255, 0.042);
+  --surface-lift: rgba(255, 255, 255, 0.098);
   --ink: #fbf7eb;
   --ink-soft: #e9e3d3;
   --muted: #aeb8b0;
@@ -27,9 +27,9 @@
   --shadow: 0 30px 80px rgba(0, 0, 0, 0.42);
   --shadow-soft: 0 16px 42px rgba(0, 0, 0, 0.24);
   --shadow-glow: 0 0 28px rgba(var(--page-rgb), 0.22), 0 20px 48px rgba(0, 0, 0, 0.36);
-  --glass: rgba(255, 255, 255, 0.075);
-  --glass-soft: rgba(255, 255, 255, 0.052);
-  --glass-line: rgba(255, 255, 255, 0.14);
+  --glass: rgba(15, 8, 24, 0.44);
+  --glass-soft: rgba(18, 10, 28, 0.32);
+  --glass-line: rgba(255, 255, 255, 0.13);
   --hairline: rgba(255, 255, 255, 0.08);
   --fog-left: 0.26;
   --fog-left-mid: 0.09;
@@ -38,33 +38,33 @@
 }
 
 body[data-page="sentences"] {
-  --page-rgb: 164, 205, 116;
-  --page-rgb-2: 88, 126, 72;
+  --page-rgb: 168, 112, 214;
+  --page-rgb-2: 196, 92, 142;
   --page-accent: rgb(var(--page-rgb));
   --page-secondary: rgb(var(--page-rgb-2));
-  --page-bg: #060906;
-  --page-bg-deep: #010201;
-  --accent-strong: #e3f6cf;
-  --warm: #c8dda4;
-  --fog-left: 0.19;
+  --page-bg: #100617;
+  --page-bg-deep: #040106;
+  --accent-strong: #eadbf6;
+  --warm: #bd9bde;
+  --fog-left: 0.2;
   --fog-left-mid: 0.065;
-  --fog-right: 0.15;
+  --fog-right: 0.16;
   --fog-right-mid: 0.05;
 }
 
 body[data-page="exam"] {
-  --page-rgb: 198, 86, 148;
-  --page-rgb-2: 138, 89, 188;
+  --page-rgb: 168, 112, 214;
+  --page-rgb-2: 196, 92, 142;
   --page-accent: rgb(var(--page-rgb));
   --page-secondary: rgb(var(--page-rgb-2));
-  --page-bg: #13050f;
-  --page-bg-deep: #050104;
-  --accent-strong: #f5d6e8;
-  --warm: #d894ba;
-  --fog-left: 0.22;
-  --fog-left-mid: 0.075;
-  --fog-right: 0.17;
-  --fog-right-mid: 0.055;
+  --page-bg: #100617;
+  --page-bg-deep: #040106;
+  --accent-strong: #eadbf6;
+  --warm: #bd9bde;
+  --fog-left: 0.2;
+  --fog-left-mid: 0.065;
+  --fog-right: 0.16;
+  --fog-right-mid: 0.05;
 }
 
 body[data-page="teacher"] {
@@ -275,17 +275,17 @@ body[data-page="exam"] .top-bar {
   gap: 9px;
   align-items: center;
   margin-bottom: 10px;
-  border: 1px solid rgba(var(--page-rgb), 0.28);
+  border: 1px solid rgba(var(--page-rgb), 0.24);
   border-radius: 8px;
   padding: 8px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.035)),
-    rgba(0, 0, 0, 0.2);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.028)),
+    rgba(12, 5, 20, 0.42);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.14),
     inset 0 0 0 1px rgba(var(--page-rgb), 0.08),
-    0 0 18px rgba(var(--page-rgb), 0.13),
-    var(--shadow-soft);
+    0 0 28px rgba(var(--page-rgb), 0.11),
+    0 18px 48px rgba(0, 0, 0, 0.28);
   backdrop-filter: blur(34px) saturate(185%);
   -webkit-backdrop-filter: blur(34px) saturate(185%);
 }
@@ -343,16 +343,16 @@ body[data-page="exam"] .top-bar {
 
 .input-panel {
   overflow: hidden;
-  border: 1px solid rgba(var(--page-rgb), 0.28);
+  border: 1px solid rgba(var(--page-rgb), 0.24);
   border-radius: 8px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.105), rgba(255, 255, 255, 0.025)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.115), rgba(255, 255, 255, 0.024)),
     var(--glass);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.14),
     inset 0 0 0 1px rgba(var(--page-rgb), 0.08),
-    0 0 20px rgba(var(--page-rgb), 0.13),
-    var(--shadow);
+    0 0 30px rgba(var(--page-rgb), 0.12),
+    0 24px 72px rgba(0, 0, 0, 0.38);
   backdrop-filter: blur(36px) saturate(185%);
   -webkit-backdrop-filter: blur(36px) saturate(185%);
 }
@@ -505,18 +505,17 @@ select {
   grid-template-columns: minmax(0, 1fr) 44px;
   gap: 12px;
   align-items: start;
-  border: 1px solid rgba(var(--page-rgb), 0.25);
+  border: 1px solid rgba(var(--page-rgb), 0.22);
   border-radius: 8px;
   padding: 15px 14px 14px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.105), rgba(255, 255, 255, 0.022)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.022)),
     var(--glass);
-  box-shadow: var(--shadow-soft);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.12),
     inset 0 0 0 1px rgba(var(--page-rgb), 0.07),
-    0 0 18px rgba(var(--page-rgb), 0.12),
-    var(--shadow-soft);
+    0 0 24px rgba(var(--page-rgb), 0.1),
+    0 18px 48px rgba(0, 0, 0, 0.28);
   backdrop-filter: blur(34px) saturate(175%);
   -webkit-backdrop-filter: blur(34px) saturate(175%);
   touch-action: pan-y;
@@ -569,7 +568,7 @@ select {
   border: 1px solid rgba(var(--page-rgb), 0.16);
   border-radius: 8px;
   padding: 11px 12px;
-  background: rgba(255, 255, 255, 0.035);
+  background: rgba(255, 255, 255, 0.028);
   color: var(--ink-soft);
   font-size: 15px;
   line-height: 1.45;
@@ -758,6 +757,85 @@ select {
   transform: translateY(0);
 }
 
+.update-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: end center;
+  padding: 18px max(14px, calc((100vw - 520px) / 2 + 14px)) 22px;
+  background: rgba(3, 1, 6, 0.42);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.update-sheet.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.update-sheet[hidden] {
+  display: none;
+}
+
+.update-card {
+  width: min(100%, 492px);
+  border: 1px solid rgba(var(--page-rgb), 0.26);
+  border-radius: 12px;
+  padding: 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.045)),
+    rgba(12, 5, 20, 0.78);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 0 34px rgba(var(--page-rgb), 0.2),
+    0 24px 72px rgba(0, 0, 0, 0.46);
+  transform: translateY(18px);
+  transition: transform 180ms ease;
+  backdrop-filter: blur(34px) saturate(180%);
+  -webkit-backdrop-filter: blur(34px) saturate(180%);
+}
+
+.update-sheet.is-open .update-card {
+  transform: translateY(0);
+}
+
+.update-kicker {
+  margin-bottom: 5px;
+  color: var(--warm);
+  font-size: 11px;
+  font-weight: 820;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.update-card h2 {
+  margin-bottom: 8px;
+  color: var(--ink);
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.update-card p {
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.52;
+}
+
+.update-actions {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.update-actions .ghost-button,
+.update-actions .primary-button {
+  width: 100%;
+}
+
 .sheet-handle {
   width: 42px;
   height: 4px;
@@ -803,16 +881,16 @@ select {
 
 .exam-hero,
 .exam-card {
-  border: 1px solid rgba(var(--page-rgb), 0.26);
+  border: 1px solid rgba(var(--page-rgb), 0.22);
   border-radius: 8px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.035)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.026)),
     var(--glass);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.14),
     inset 0 0 0 1px rgba(var(--page-rgb), 0.08),
-    0 0 20px rgba(var(--page-rgb), 0.13),
-    var(--shadow-soft);
+    0 0 28px rgba(var(--page-rgb), 0.12),
+    0 22px 62px rgba(0, 0, 0, 0.34);
   backdrop-filter: blur(36px) saturate(185%);
   -webkit-backdrop-filter: blur(36px) saturate(185%);
 }
@@ -851,7 +929,7 @@ select {
   border: 1px solid rgba(var(--page-rgb), 0.2);
   border-radius: 8px;
   padding: 14px;
-  background: rgba(255, 255, 255, 0.035);
+  background: rgba(255, 255, 255, 0.028);
   font-size: 16px;
 }
 
@@ -940,39 +1018,6 @@ select {
   cursor: pointer;
   font-size: 12px;
   box-shadow: inset 0 0 0 1px rgba(var(--page-rgb), 0.18), 0 0 16px rgba(var(--page-rgb), 0.16);
-}
-
-.barrage-layer {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  display: none;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.barrage-layer.is-active {
-  display: block;
-}
-
-.barrage-item {
-  position: absolute;
-  left: 100%;
-  white-space: nowrap;
-  color: var(--warm);
-  font-size: 22px;
-  font-weight: 820;
-  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.65);
-  animation: barrage-fly 1.45s linear forwards;
-}
-
-@keyframes barrage-fly {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(calc(-100vw - 140px));
-  }
 }
 
 .teacher-page {
@@ -1131,6 +1176,60 @@ select {
   color: var(--ink);
   font-size: 14px;
   line-height: 1.58;
+}
+
+.user-translation-card {
+  display: grid;
+  gap: 8px;
+}
+
+.user-chinese-toggle {
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: right;
+  white-space: pre-wrap;
+  font-size: 14px;
+  font-weight: 740;
+  line-height: 1.58;
+}
+
+.user-translation-card.is-open .user-chinese-toggle {
+  color: var(--accent-strong);
+}
+
+.user-translation-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 28px 28px;
+  gap: 8px;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid rgba(var(--page-rgb), 0.22);
+}
+
+.user-translation-panel.is-pending {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.user-translation-panel[hidden] {
+  display: none;
+}
+
+.user-translation-english {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: left;
+  font-size: 14px;
+  font-weight: 760;
+  line-height: 1.42;
+}
+
+.user-translation-english.is-pending {
+  color: rgba(255, 255, 255, 0.62);
+  font-weight: 680;
 }
 
 .teacher-chinese-text {
@@ -1320,11 +1419,12 @@ select {
 
 .quick-prompts button {
   min-height: 30px;
-  border: 1px solid rgba(var(--page-rgb), 0.22);
+  border: 1px solid rgba(var(--page-rgb), 0.2);
   border-radius: 8px;
   padding: 5px 9px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.035));
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.032)),
+    rgba(10, 4, 18, 0.34);
   color: var(--ink);
   cursor: pointer;
   text-align: left;
@@ -1358,30 +1458,46 @@ select {
   box-shadow: 0 0 16px rgba(var(--page-rgb), 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
+.quick-prompts button.is-free {
+  border-color: rgba(255, 138, 76, 0.5);
+  background:
+    linear-gradient(180deg, rgba(255, 190, 132, 0.18), rgba(255, 113, 74, 0.08)),
+    rgba(255, 120, 72, 0.08);
+  color: #ffd7bd;
+  box-shadow:
+    0 0 18px rgba(255, 126, 76, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
 .chat-composer {
   flex: 0 0 auto;
   overflow: hidden;
-  border: 1px solid rgba(var(--page-rgb), 0.28);
+  border: 1px solid rgba(var(--page-rgb), 0.24);
   border-radius: 8px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.035)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.032)),
     var(--glass);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.16),
     inset 0 0 0 1px rgba(var(--page-rgb), 0.08),
-    0 0 18px rgba(var(--page-rgb), 0.12),
-    0 14px 38px rgba(0, 0, 0, 0.2);
+    0 0 26px rgba(var(--page-rgb), 0.13),
+    0 18px 46px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(38px) saturate(190%);
   -webkit-backdrop-filter: blur(38px) saturate(190%);
 }
 
 .teacher-input {
-  min-height: 44px;
-  max-height: 86px;
-  padding: 12px 13px;
+  min-height: 58px;
+  max-height: 112px;
+  padding: 15px 14px 14px;
   resize: none;
-  font-size: 14px;
-  line-height: 1.45;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.teacher-input::placeholder {
+  white-space: normal;
+  color: rgba(255, 255, 255, 0.46);
 }
 
 .chat-composer .primary-button {
@@ -1401,8 +1517,8 @@ select {
   border-radius: 8px;
   padding: 4px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.035)),
-    rgba(7, 10, 9, 0.52);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.125), rgba(255, 255, 255, 0.034)),
+    rgba(9, 3, 16, 0.58);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.14),
     inset 0 0 0 1px rgba(var(--page-rgb), 0.08),
@@ -1444,4 +1560,1969 @@ textarea:focus-visible {
   .app-shell {
     padding-top: 34px;
   }
+}
+
+/* free18 visual refresh: calmer, cleaner, and more app-like. */
+:root {
+  --page-rgb: 136, 119, 255;
+  --page-rgb-2: 93, 224, 186;
+  --page-accent: #8b7cff;
+  --page-secondary: #5de0ba;
+  --page-bg: #0b0b10;
+  --page-bg-deep: #050507;
+  --bg: #0b0b10;
+  --bg-deep: #050507;
+  --surface: rgba(255, 255, 255, 0.075);
+  --surface-soft: rgba(255, 255, 255, 0.045);
+  --surface-lift: rgba(255, 255, 255, 0.105);
+  --ink: #f6f4ee;
+  --ink-soft: #dfddd7;
+  --muted: #a7ada8;
+  --muted-soft: #737b77;
+  --line: rgba(255, 255, 255, 0.105);
+  --accent: var(--page-accent);
+  --accent-strong: #f0ecff;
+  --accent-soft: rgba(139, 124, 255, 0.16);
+  --accent-deep: rgba(139, 124, 255, 0.2);
+  --warm: #5de0ba;
+  --warm-soft: rgba(93, 224, 186, 0.14);
+  --focus: #5de0ba;
+  --shadow: 0 24px 68px rgba(0, 0, 0, 0.36);
+  --shadow-soft: 0 14px 34px rgba(0, 0, 0, 0.22);
+  --shadow-glow: 0 16px 44px rgba(0, 0, 0, 0.28);
+  --glass: rgba(18, 19, 24, 0.58);
+  --glass-soft: rgba(19, 20, 25, 0.42);
+  --glass-line: rgba(255, 255, 255, 0.12);
+  --hairline: rgba(255, 255, 255, 0.075);
+}
+
+body[data-page="sentences"],
+body[data-page="exam"],
+body[data-page="teacher"] {
+  --page-rgb: 136, 119, 255;
+  --page-rgb-2: 93, 224, 186;
+  --page-accent: #8b7cff;
+  --page-secondary: #5de0ba;
+  --page-bg: #0b0b10;
+  --page-bg-deep: #050507;
+  --accent-strong: #f0ecff;
+  --warm: #5de0ba;
+}
+
+body {
+  background:
+    linear-gradient(180deg, rgba(16, 17, 22, 0.98) 0%, #090a0d 48%, #050507 100%),
+    linear-gradient(135deg, rgba(139, 124, 255, 0.08), transparent 36%, rgba(93, 224, 186, 0.045) 100%);
+  background-attachment: fixed;
+}
+
+body::before {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035), transparent 28%, rgba(255, 255, 255, 0.018)),
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 18px);
+  opacity: 0.26;
+}
+
+.app-shell {
+  width: min(100%, 540px);
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.top-bar {
+  min-height: 42px;
+  margin: 0 -2px 10px;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  padding: 6px 0 10px;
+  background: linear-gradient(180deg, rgba(11, 11, 16, 0.88), rgba(11, 11, 16, 0.48));
+}
+
+.top-bar h1 {
+  font-size: 18px;
+  font-weight: 760;
+  text-shadow: none;
+}
+
+.top-bar .icon-button {
+  width: 32px;
+  height: 32px;
+  border-color: rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.view-panel,
+.input-panel,
+.sentence-card,
+.word-sheet,
+.exam-hero,
+.exam-card,
+.teacher-hero,
+.chat-composer,
+.bottom-nav,
+.update-card {
+  border-color: rgba(255, 255, 255, 0.105);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.088), rgba(255, 255, 255, 0.03)),
+    rgba(19, 20, 25, 0.58);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.095),
+    0 18px 52px rgba(0, 0, 0, 0.28);
+}
+
+.view-panel,
+.input-panel,
+.sentence-card,
+.word-sheet,
+.exam-hero,
+.exam-card,
+.chat-composer,
+.bottom-nav {
+  border-radius: 8px;
+}
+
+.view-panel {
+  gap: 10px;
+  padding: 9px;
+}
+
+.view-tabs,
+.view-tab.is-active,
+.view-panel > p,
+.sentence-note,
+.ai-explain,
+#examAnswer,
+.exam-feedback,
+.exam-answer-panel,
+.teacher-sentence-picker,
+.teacher-picker-option,
+.quick-prompts button {
+  border-color: rgba(255, 255, 255, 0.105);
+}
+
+.view-tabs {
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.view-tab {
+  color: rgba(246, 244, 238, 0.58);
+  font-weight: 700;
+}
+
+.view-tab.is-active,
+.bottom-nav-button.is-active,
+.quick-prompts button.is-active {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.055)),
+    rgba(139, 124, 255, 0.13);
+  color: var(--ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.view-panel > p {
+  background: rgba(93, 224, 186, 0.09);
+  color: #abf3dc;
+}
+
+textarea {
+  color: var(--ink);
+  font-size: 16px;
+}
+
+textarea::placeholder,
+.teacher-input::placeholder {
+  color: rgba(246, 244, 238, 0.42);
+}
+
+.primary-button,
+.ghost-button,
+.ai-button,
+.quick-prompts button,
+.bottom-nav-button {
+  font-weight: 720;
+}
+
+.primary-button {
+  border-color: rgba(93, 224, 186, 0.28);
+  background:
+    linear-gradient(180deg, rgba(93, 224, 186, 0.22), rgba(93, 224, 186, 0.1)),
+    rgba(255, 255, 255, 0.055);
+  color: #ecfff9;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.13);
+}
+
+.ghost-button {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.052);
+  color: rgba(246, 244, 238, 0.76);
+}
+
+.sentence-list {
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.sentence-card {
+  grid-template-columns: minmax(0, 1fr) 42px;
+  gap: 10px;
+  padding: 14px;
+}
+
+.sentence-card:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 18px 52px rgba(0, 0, 0, 0.3);
+}
+
+.sentence-text {
+  font-size: 19px;
+  font-weight: 650;
+  line-height: 1.52;
+}
+
+.sentence-note,
+#examAnswer {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.ai-button,
+.speak-button,
+.exam-answer-speak,
+.teacher-line-speak {
+  background: rgba(93, 224, 186, 0.12);
+  color: #d9fff4;
+  box-shadow: inset 0 0 0 1px rgba(93, 224, 186, 0.18);
+}
+
+.delete-button,
+.teacher-line-add {
+  background: rgba(255, 255, 255, 0.055);
+  color: rgba(246, 244, 238, 0.68);
+}
+
+.word-token:active,
+.word-token.is-active {
+  background: rgba(93, 224, 186, 0.12);
+  color: #dcfff5;
+}
+
+.exam-card {
+  gap: 12px;
+  padding: 15px;
+}
+
+.exam-card h2 {
+  font-size: 21px;
+  font-weight: 760;
+}
+
+.exam-feedback.is-correct {
+  border-color: rgba(93, 224, 186, 0.25);
+  background: rgba(93, 224, 186, 0.09);
+  color: #d9fff4;
+}
+
+.exam-feedback.is-wrong {
+  border-color: rgba(255, 138, 138, 0.22);
+  background: rgba(255, 138, 138, 0.08);
+  color: #ffe5e5;
+}
+
+.chat-panel {
+  gap: 8px;
+}
+
+.chat-messages {
+  gap: 9px;
+  padding: 10px 2px 6px;
+}
+
+.chat-bubble {
+  max-width: 84%;
+  border-color: rgba(255, 255, 255, 0.105);
+  border-radius: 18px 18px 18px 6px;
+  padding: 10px 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.105), rgba(255, 255, 255, 0.055)),
+    rgba(29, 30, 36, 0.58);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.095),
+    0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+.chat-bubble.is-user {
+  border-color: rgba(139, 124, 255, 0.2);
+  border-radius: 18px 18px 6px 18px;
+  background:
+    linear-gradient(180deg, rgba(139, 124, 255, 0.18), rgba(139, 124, 255, 0.09)),
+    rgba(35, 31, 51, 0.66);
+}
+
+.chat-bubble::after {
+  opacity: 0.72;
+}
+
+.chat-label {
+  color: #abf3dc;
+  font-size: 10px;
+  font-weight: 760;
+}
+
+.chat-bubble.is-user .chat-label {
+  color: rgba(246, 244, 238, 0.76);
+}
+
+.chat-text,
+.user-chinese-toggle {
+  font-size: 14px;
+  line-height: 1.62;
+}
+
+.teacher-chinese-text {
+  color: rgba(246, 244, 238, 0.86);
+}
+
+.teacher-english-block,
+.user-translation-panel {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.quick-prompts {
+  gap: 7px;
+}
+
+.quick-prompts button {
+  min-height: 32px;
+  border-radius: 8px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.046);
+  color: rgba(246, 244, 238, 0.68);
+  box-shadow: none;
+}
+
+.quick-prompts button.is-free {
+  border-color: rgba(93, 224, 186, 0.28);
+  background:
+    linear-gradient(180deg, rgba(93, 224, 186, 0.16), rgba(93, 224, 186, 0.075)),
+    rgba(255, 255, 255, 0.05);
+  color: #d9fff4;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.chat-composer {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.036)),
+    rgba(18, 19, 24, 0.72);
+}
+
+.teacher-input {
+  min-height: 60px;
+  padding: 16px 15px;
+  font-size: 15px;
+}
+
+.bottom-nav {
+  right: max(16px, calc((100vw - 540px) / 2 + 16px));
+  left: max(16px, calc((100vw - 540px) / 2 + 16px));
+  bottom: 11px;
+  gap: 5px;
+  padding: 5px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.105), rgba(255, 255, 255, 0.04)),
+    rgba(14, 15, 19, 0.78);
+}
+
+.bottom-nav-button {
+  min-height: 38px;
+  color: rgba(246, 244, 238, 0.6);
+}
+
+/* free20 full material shift: cool daylight, editorial cards, and cleaner chat surfaces. */
+:root {
+  color-scheme: light;
+  --page-rgb: 53, 112, 255;
+  --page-rgb-2: 20, 184, 166;
+  --page-accent: #3570ff;
+  --page-secondary: #14b8a6;
+  --page-bg: #f5f7fb;
+  --page-bg-deep: #e9edf5;
+  --bg: #f5f7fb;
+  --bg-deep: #e9edf5;
+  --surface: #ffffff;
+  --surface-soft: #f8fafc;
+  --surface-lift: #ffffff;
+  --ink: #151922;
+  --ink-soft: #374151;
+  --muted: #6b7280;
+  --muted-soft: #9aa3af;
+  --line: #e2e8f0;
+  --accent: #3570ff;
+  --accent-strong: #163da3;
+  --accent-soft: rgba(53, 112, 255, 0.1);
+  --accent-deep: rgba(53, 112, 255, 0.15);
+  --warm: #14b8a6;
+  --warm-soft: rgba(20, 184, 166, 0.12);
+  --focus: #2563eb;
+  --shadow: 0 14px 32px rgba(15, 23, 42, 0.1);
+  --shadow-soft: 0 8px 22px rgba(15, 23, 42, 0.08);
+  --shadow-glow: 0 14px 30px rgba(15, 23, 42, 0.08);
+  --glass: #ffffff;
+  --glass-soft: #f8fafc;
+  --glass-line: #e2e8f0;
+  --hairline: #edf1f6;
+}
+
+body[data-page="sentences"],
+body[data-page="exam"],
+body[data-page="teacher"] {
+  --page-rgb: 53, 112, 255;
+  --page-rgb-2: 20, 184, 166;
+  --page-accent: #3570ff;
+  --page-secondary: #14b8a6;
+  --page-bg: #f5f7fb;
+  --page-bg-deep: #e9edf5;
+  --accent-strong: #163da3;
+  --warm: #14b8a6;
+}
+
+html {
+  background: #f5f7fb;
+}
+
+body {
+  color: var(--ink);
+  background:
+    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 44%, #e8edf5 100%),
+    repeating-linear-gradient(90deg, rgba(15, 23, 42, 0.026) 0 1px, transparent 1px 24px);
+  background-attachment: fixed;
+  background-color: #f5f7fb;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), transparent 38%),
+    repeating-linear-gradient(0deg, rgba(15, 23, 42, 0.018) 0 1px, transparent 1px 28px);
+  opacity: 0.9;
+}
+
+.app-shell {
+  width: min(100%, 560px);
+  padding: 14px 16px 94px;
+}
+
+body[data-page="teacher"] .app-shell {
+  padding: 10px 14px 62px;
+}
+
+.top-bar {
+  min-height: 44px;
+  margin: 0 0 10px;
+  border: 1px solid rgba(226, 232, 240, 0.78);
+  border-radius: 8px;
+  padding: 8px 42px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+}
+
+body[data-page="teacher"] .top-bar {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.top-bar h1 {
+  color: #111827;
+  font-size: 18px;
+  font-weight: 780;
+  text-shadow: none;
+}
+
+.top-bar .icon-button {
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  border-color: #e5eaf2;
+  background: #f8fafc;
+  color: #475569;
+}
+
+.eyebrow,
+.sheet-label,
+.chat-label,
+.update-kicker {
+  color: #14b8a6;
+  font-weight: 760;
+}
+
+.view-panel,
+.input-panel,
+.sentence-card,
+.word-sheet,
+.exam-hero,
+.exam-card,
+.teacher-hero,
+.chat-composer,
+.bottom-nav,
+.update-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.07);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.view-panel {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 10px;
+}
+
+.view-tabs {
+  border-color: #e5eaf2;
+  background: #f1f5f9;
+}
+
+.view-tab {
+  color: #64748b;
+  font-weight: 720;
+}
+
+.view-tab.is-active,
+.bottom-nav-button.is-active,
+.quick-prompts button.is-active {
+  border-color: transparent;
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+.view-panel > p {
+  border-color: #c7f1e9;
+  background: #ecfdf8;
+  color: #0f766e;
+}
+
+.input-panel {
+  overflow: hidden;
+}
+
+textarea {
+  color: #151922;
+  font-size: 16px;
+  line-height: 1.58;
+}
+
+textarea::placeholder,
+.teacher-input::placeholder {
+  color: #9aa3af;
+}
+
+.input-actions {
+  border-top-color: #edf1f6;
+  background: #fbfdff;
+}
+
+.input-actions p,
+.exam-hero p:last-child,
+.teacher-hero p:last-child,
+.teacher-sentence-meaning,
+.teacher-picker-title,
+.teacher-picker-option small,
+.teacher-line-note,
+#phoneticText {
+  color: #6b7280;
+}
+
+.primary-button {
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.18);
+}
+
+.ghost-button,
+.ai-button,
+.quick-prompts button {
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  box-shadow: none;
+}
+
+.sentence-list {
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.sentence-card {
+  grid-template-columns: minmax(0, 1fr) 40px;
+  gap: 12px;
+  padding: 14px;
+}
+
+.sentence-card::before {
+  content: "";
+  grid-row: 1;
+  align-self: stretch;
+  width: 3px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #3570ff, #14b8a6);
+}
+
+.sentence-card {
+  grid-template-columns: 3px minmax(0, 1fr) 40px;
+}
+
+.sentence-content {
+  grid-column: 2;
+}
+
+.sentence-actions {
+  grid-column: 3;
+}
+
+.sentence-text {
+  color: #111827;
+  font-size: 19px;
+  font-weight: 660;
+}
+
+.sentence-note,
+#examAnswer,
+.ai-explain,
+.exam-answer-panel,
+.teacher-sentence-picker,
+.teacher-picker-option {
+  border-color: #e5eaf2;
+  background: #f8fafc;
+  color: #374151;
+}
+
+.word-token {
+  color: #111827;
+}
+
+.word-token:active,
+.word-token.is-active {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.speak-button,
+.exam-answer-speak,
+.teacher-line-speak {
+  border-color: #dbeafe;
+  background: #eff6ff;
+  color: #2563eb;
+  box-shadow: none;
+}
+
+.delete-button,
+.teacher-line-add {
+  border-color: #e2e8f0;
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.delete-button.is-confirming {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+  box-shadow: none;
+}
+
+.word-sheet {
+  right: max(16px, calc((100vw - 560px) / 2 + 16px));
+  left: max(16px, calc((100vw - 560px) / 2 + 16px));
+}
+
+.word-main h2,
+.meaning,
+.exam-card h2,
+.exam-answer-panel strong {
+  color: #111827;
+}
+
+.exam-page.is-active {
+  gap: 12px;
+}
+
+.exam-card {
+  padding: 16px;
+}
+
+.exam-feedback.is-correct {
+  border-color: #b6eee3;
+  background: #ecfdf8;
+  color: #0f766e;
+}
+
+.exam-feedback.is-wrong {
+  border-color: #fecaca;
+  background: #fff1f2;
+  color: #be123c;
+}
+
+.chat-panel {
+  gap: 9px;
+}
+
+.chat-messages {
+  gap: 10px;
+  padding: 10px 2px 8px;
+}
+
+.chat-bubble {
+  max-width: 84%;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.07);
+}
+
+.chat-bubble.is-user {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.18);
+}
+
+.chat-bubble::after {
+  display: none;
+}
+
+.chat-bubble.is-teacher {
+  margin-right: 48px;
+}
+
+.chat-bubble.is-user {
+  margin-left: 48px;
+}
+
+.chat-bubble.is-user .chat-label,
+.chat-bubble.is-user .chat-text,
+.chat-bubble.is-user .teacher-chinese-text,
+.chat-bubble.is-user .user-chinese-toggle {
+  color: #ffffff;
+}
+
+.chat-label {
+  margin-bottom: 5px;
+  color: #0f766e;
+  font-size: 10px;
+  letter-spacing: 0;
+}
+
+.chat-text,
+.user-chinese-toggle {
+  color: #111827;
+  font-size: 14px;
+  line-height: 1.64;
+}
+
+.teacher-chinese-text {
+  color: #1f2937;
+}
+
+.teacher-english-block,
+.user-translation-panel {
+  border-top-color: #e5eaf2;
+}
+
+.teacher-english-sentence,
+.teacher-english-toggle,
+.user-translation-english {
+  color: #111827;
+}
+
+.teacher-english-item.is-open .teacher-english-sentence,
+.user-translation-card.is-open .user-chinese-toggle {
+  color: #1d4ed8;
+}
+
+.quick-prompts {
+  gap: 7px;
+}
+
+.quick-prompts button {
+  min-height: 34px;
+  border-radius: 8px;
+  padding: 7px 11px;
+  color: #475569;
+}
+
+.quick-prompts button.is-free {
+  border-color: #99f6e4;
+  background: #ecfdf8;
+  color: #0f766e;
+  box-shadow: none;
+}
+
+.chat-composer {
+  background: #ffffff;
+}
+
+.teacher-input {
+  min-height: 62px;
+  color: #111827;
+}
+
+.bottom-nav {
+  right: max(16px, calc((100vw - 560px) / 2 + 16px));
+  left: max(16px, calc((100vw - 560px) / 2 + 16px));
+  bottom: 12px;
+  gap: 5px;
+  padding: 5px;
+}
+
+.bottom-nav-button {
+  min-height: 38px;
+  color: #64748b;
+}
+
+.bottom-nav-button.is-active {
+  color: #111827;
+}
+
+.update-sheet {
+  background: rgba(15, 23, 42, 0.22);
+}
+
+.update-card p {
+  color: #475569;
+}
+
+/* free21 ambient frosted redesign: new material system, not a recolor. */
+:root {
+  color-scheme: dark;
+  --page-rgb: 255, 185, 122;
+  --page-rgb-2: 104, 224, 209;
+  --page-accent: #ffb97a;
+  --page-secondary: #68e0d1;
+  --page-bg: #201817;
+  --page-bg-deep: #0d0b0c;
+  --bg: #201817;
+  --bg-deep: #0d0b0c;
+  --surface: rgba(255, 255, 255, 0.12);
+  --surface-soft: rgba(255, 255, 255, 0.075);
+  --surface-lift: rgba(255, 255, 255, 0.18);
+  --ink: #fffaf2;
+  --ink-soft: rgba(255, 250, 242, 0.82);
+  --muted: rgba(255, 250, 242, 0.58);
+  --muted-soft: rgba(255, 250, 242, 0.38);
+  --line: rgba(255, 255, 255, 0.17);
+  --accent: #ffb97a;
+  --accent-strong: #fff7ec;
+  --accent-soft: rgba(255, 185, 122, 0.18);
+  --accent-deep: rgba(255, 185, 122, 0.26);
+  --warm: #68e0d1;
+  --warm-soft: rgba(104, 224, 209, 0.15);
+  --focus: #68e0d1;
+  --shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+  --shadow-soft: 0 18px 48px rgba(0, 0, 0, 0.24);
+  --shadow-glow: 0 0 0 1px rgba(255, 255, 255, 0.09), 0 22px 62px rgba(0, 0, 0, 0.28);
+  --glass: rgba(255, 255, 255, 0.105);
+  --glass-soft: rgba(255, 255, 255, 0.07);
+  --glass-line: rgba(255, 255, 255, 0.2);
+  --hairline: rgba(255, 255, 255, 0.11);
+}
+
+body[data-page="sentences"],
+body[data-page="exam"],
+body[data-page="teacher"] {
+  --page-rgb: 255, 185, 122;
+  --page-rgb-2: 104, 224, 209;
+  --page-accent: #ffb97a;
+  --page-secondary: #68e0d1;
+  --page-bg: #201817;
+  --page-bg-deep: #0d0b0c;
+  --accent-strong: #fff7ec;
+  --warm: #68e0d1;
+}
+
+html {
+  background: #191313;
+}
+
+body {
+  color: var(--ink);
+  background: #191313;
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(180deg, rgba(23, 17, 18, 0.08) 0%, rgba(23, 17, 18, 0.48) 44%, rgba(9, 8, 9, 0.94) 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.022) 0 1px, transparent 1px 22px);
+  opacity: 1;
+  pointer-events: none;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: rgba(22, 16, 16, 0.18);
+  backdrop-filter: blur(22px) saturate(125%);
+  -webkit-backdrop-filter: blur(22px) saturate(125%);
+  pointer-events: none;
+}
+
+.ambient-backdrop {
+  position: fixed;
+  inset: -7%;
+  z-index: -3;
+  background:
+    linear-gradient(112deg, #392a26 0%, #2a2020 22%, #87603e 40%, #1f4750 58%, #201817 74%, #f09346 100%),
+    linear-gradient(28deg, transparent 0%, rgba(255, 203, 142, 0.78) 34%, rgba(30, 118, 128, 0.58) 56%, transparent 86%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0 2px, transparent 2px 12px);
+  filter: blur(18px) saturate(130%);
+  transform: scale(1.05);
+  opacity: 0.92;
+  pointer-events: none;
+}
+
+.app-shell {
+  width: min(100%, 500px);
+  min-height: 100dvh;
+  padding: max(16px, env(safe-area-inset-top)) 16px 102px;
+}
+
+body[data-page="teacher"] .app-shell {
+  height: 100dvh;
+  min-height: 100dvh;
+  padding: max(14px, env(safe-area-inset-top)) 14px 70px;
+}
+
+body[data-page="sentences"] .top-bar,
+body[data-page="exam"] .top-bar {
+  display: flex;
+}
+
+.top-bar {
+  min-height: 48px;
+  margin: 0 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  padding: 9px 44px;
+  background: rgba(255, 255, 255, 0.095);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 18px 48px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(30px) saturate(170%);
+  -webkit-backdrop-filter: blur(30px) saturate(170%);
+}
+
+.top-bar h1 {
+  color: rgba(255, 250, 242, 0.96);
+  font-size: 18px;
+  font-weight: 760;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.28);
+}
+
+.top-bar .icon-button {
+  right: 8px;
+  width: 31px;
+  height: 31px;
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 250, 242, 0.78);
+}
+
+.view-panel,
+.input-panel,
+.sentence-card,
+.word-sheet,
+.exam-hero,
+.exam-card,
+.teacher-hero,
+.chat-bubble,
+.chat-composer,
+.bottom-nav,
+.update-card,
+.teacher-sentence-picker,
+.teacher-picker-option,
+.exam-answer-panel,
+.ai-explain {
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.075)),
+    rgba(255, 255, 255, 0.075);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 20px 58px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(34px) saturate(165%);
+  -webkit-backdrop-filter: blur(34px) saturate(165%);
+}
+
+.view-panel {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 9px;
+}
+
+.view-tabs {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.14);
+}
+
+.view-tab {
+  color: rgba(255, 250, 242, 0.58);
+}
+
+.view-tab.is-active,
+.bottom-nav-button.is-active,
+.quick-prompts button.is-active {
+  border-color: rgba(255, 255, 255, 0.2);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.23), rgba(255, 255, 255, 0.1)),
+    rgba(255, 255, 255, 0.09);
+  color: #fffaf2;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    0 8px 20px rgba(0, 0, 0, 0.16);
+}
+
+.view-panel > p {
+  border-color: rgba(104, 224, 209, 0.32);
+  background: rgba(104, 224, 209, 0.12);
+  color: #cffff7;
+}
+
+.input-panel {
+  min-height: 176px;
+}
+
+textarea,
+.teacher-input,
+#examAnswer {
+  color: rgba(255, 250, 242, 0.95);
+  background: transparent;
+}
+
+textarea::placeholder,
+.teacher-input::placeholder {
+  color: rgba(255, 250, 242, 0.42);
+}
+
+.input-actions {
+  border-top-color: rgba(255, 255, 255, 0.13);
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.input-actions p,
+.exam-hero p:last-child,
+.teacher-hero p:last-child,
+.teacher-sentence-meaning,
+.teacher-picker-title,
+.teacher-picker-option small,
+.teacher-line-note,
+#phoneticText {
+  color: rgba(255, 250, 242, 0.58);
+}
+
+.primary-button,
+.ghost-button,
+.ai-button,
+.quick-prompts button,
+.bottom-nav-button,
+.teacher-line-speak,
+.teacher-line-add,
+.exam-answer-speak,
+.speak-button,
+.delete-button {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.07)),
+    rgba(255, 255, 255, 0.06);
+  color: rgba(255, 250, 242, 0.82);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.17), 0 10px 24px rgba(0, 0, 0, 0.13);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+}
+
+.primary-button {
+  color: #fffaf2;
+  background:
+    linear-gradient(180deg, rgba(255, 210, 158, 0.32), rgba(255, 185, 122, 0.14)),
+    rgba(255, 255, 255, 0.08);
+}
+
+.sentence-list {
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.sentence-card,
+.sentence-card:hover {
+  grid-template-columns: minmax(0, 1fr) 42px;
+  padding: 15px;
+  transform: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 20px 58px rgba(0, 0, 0, 0.24);
+}
+
+.sentence-card::before {
+  display: none;
+}
+
+.sentence-content {
+  grid-column: 1;
+}
+
+.sentence-actions {
+  grid-column: 2;
+}
+
+.sentence-text {
+  color: rgba(255, 250, 242, 0.96);
+  font-size: 19px;
+  font-weight: 660;
+}
+
+.sentence-note {
+  border-color: rgba(255, 255, 255, 0.13);
+  background: rgba(0, 0, 0, 0.08);
+  color: rgba(255, 250, 242, 0.74);
+}
+
+.word-token {
+  color: rgba(255, 250, 242, 0.96);
+}
+
+.word-token:active,
+.word-token.is-active {
+  background: rgba(104, 224, 209, 0.15);
+  color: #d9fff8;
+}
+
+.delete-button.is-confirming {
+  border-color: rgba(104, 224, 209, 0.38);
+  background: rgba(104, 224, 209, 0.13);
+  color: #d9fff8;
+}
+
+.word-sheet {
+  right: max(16px, calc((100vw - 500px) / 2 + 16px));
+  left: max(16px, calc((100vw - 500px) / 2 + 16px));
+  bottom: 92px;
+}
+
+.word-main h2,
+.meaning,
+.exam-card h2,
+.exam-answer-panel strong,
+.teacher-english-sentence,
+.teacher-english-toggle,
+.user-translation-english {
+  color: rgba(255, 250, 242, 0.96);
+}
+
+.exam-page.is-active {
+  gap: 14px;
+}
+
+.exam-card {
+  padding: 16px;
+}
+
+#examAnswer,
+.exam-answer-panel {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.09);
+}
+
+.exam-feedback.is-correct {
+  border-color: rgba(104, 224, 209, 0.34);
+  background: rgba(104, 224, 209, 0.12);
+  color: #d9fff8;
+}
+
+.exam-feedback.is-wrong {
+  border-color: rgba(255, 185, 122, 0.36);
+  background: rgba(255, 185, 122, 0.12);
+  color: #ffe5c8;
+}
+
+.chat-panel {
+  gap: 9px;
+}
+
+.chat-messages {
+  gap: 10px;
+  padding: 12px 2px 8px;
+}
+
+.chat-bubble {
+  max-width: 84%;
+  border-radius: 8px;
+  padding: 11px 13px;
+}
+
+.chat-bubble::after {
+  display: none;
+}
+
+.chat-bubble.is-teacher {
+  margin-right: 48px;
+}
+
+.chat-bubble.is-user {
+  align-self: flex-end;
+  margin-left: 48px;
+  border-color: rgba(255, 255, 255, 0.2);
+  background:
+    linear-gradient(180deg, rgba(255, 210, 158, 0.26), rgba(255, 185, 122, 0.12)),
+    rgba(255, 255, 255, 0.08);
+}
+
+.chat-label {
+  color: #aaf8ee;
+}
+
+.chat-bubble.is-user .chat-label,
+.chat-bubble.is-user .chat-text,
+.chat-bubble.is-user .teacher-chinese-text,
+.chat-bubble.is-user .user-chinese-toggle {
+  color: rgba(255, 250, 242, 0.96);
+}
+
+.chat-text,
+.user-chinese-toggle,
+.teacher-chinese-text {
+  color: rgba(255, 250, 242, 0.9);
+}
+
+.teacher-english-block,
+.user-translation-panel {
+  border-top-color: rgba(255, 255, 255, 0.14);
+}
+
+.teacher-english-item.is-open .teacher-english-sentence,
+.user-translation-card.is-open .user-chinese-toggle {
+  color: #d9fff8;
+}
+
+.quick-prompts {
+  gap: 8px;
+}
+
+.quick-prompts button {
+  min-height: 34px;
+  border-radius: 8px;
+  padding: 7px 11px;
+  color: rgba(255, 250, 242, 0.72);
+  white-space: nowrap;
+}
+
+.quick-prompts button.is-free {
+  border-color: rgba(104, 224, 209, 0.32);
+  background:
+    linear-gradient(180deg, rgba(104, 224, 209, 0.2), rgba(104, 224, 209, 0.08)),
+    rgba(255, 255, 255, 0.07);
+  color: #d9fff8;
+}
+
+.chat-composer {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08)),
+    rgba(255, 255, 255, 0.08);
+}
+
+.teacher-input {
+  min-height: 64px;
+  padding: 16px 15px;
+}
+
+.bottom-nav {
+  right: max(16px, calc((100vw - 500px) / 2 + 16px));
+  left: max(16px, calc((100vw - 500px) / 2 + 16px));
+  bottom: 14px;
+  gap: 6px;
+  border-color: rgba(255, 255, 255, 0.16);
+  padding: 6px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.075)),
+    rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 18px 54px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(34px) saturate(165%);
+  -webkit-backdrop-filter: blur(34px) saturate(165%);
+}
+
+.bottom-nav-button {
+  min-height: 40px;
+  color: rgba(255, 250, 242, 0.62);
+}
+
+.bottom-nav-button.is-active {
+  color: rgba(255, 250, 242, 0.96);
+}
+
+.update-sheet {
+  background: rgba(8, 7, 8, 0.36);
+}
+
+.update-card p {
+  color: rgba(255, 250, 242, 0.68);
+}
+
+@media (min-width: 700px) {
+  .app-shell {
+    padding-top: 22px;
+  }
+}
+
+/* free22 pure black and white reset. */
+:root,
+body[data-page="sentences"],
+body[data-page="exam"],
+body[data-page="teacher"] {
+  color-scheme: dark;
+  --page-rgb: 255, 255, 255;
+  --page-rgb-2: 255, 255, 255;
+  --page-accent: #ffffff;
+  --page-secondary: #ffffff;
+  --page-bg: #000000;
+  --page-bg-deep: #000000;
+  --bg: #000000;
+  --bg-deep: #000000;
+  --surface: #0b0b0b;
+  --surface-soft: #111111;
+  --surface-lift: #171717;
+  --ink: #ffffff;
+  --ink-soft: #e8e8e8;
+  --muted: #a3a3a3;
+  --muted-soft: #737373;
+  --line: #262626;
+  --accent: #ffffff;
+  --accent-strong: #ffffff;
+  --accent-soft: rgba(255, 255, 255, 0.08);
+  --accent-deep: rgba(255, 255, 255, 0.14);
+  --warm: #ffffff;
+  --warm-soft: rgba(255, 255, 255, 0.08);
+  --focus: #ffffff;
+  --shadow: none;
+  --shadow-soft: none;
+  --shadow-glow: none;
+  --glass: #0b0b0b;
+  --glass-soft: #111111;
+  --glass-line: #262626;
+  --hairline: #1f1f1f;
+}
+
+html,
+body {
+  background: #000000 !important;
+}
+
+body {
+  color: #ffffff;
+}
+
+body::before,
+body::after,
+.ambient-backdrop {
+  display: none !important;
+}
+
+.app-shell {
+  width: min(100%, 520px);
+  padding: max(12px, env(safe-area-inset-top)) 14px 92px;
+}
+
+body[data-page="teacher"] .app-shell {
+  padding: max(10px, env(safe-area-inset-top)) 12px 66px;
+}
+
+body[data-page="sentences"] .top-bar,
+body[data-page="exam"] .top-bar {
+  display: flex;
+}
+
+.top-bar,
+.view-panel,
+.input-panel,
+.sentence-card,
+.word-sheet,
+.exam-hero,
+.exam-card,
+.teacher-hero,
+.chat-bubble,
+.chat-composer,
+.bottom-nav,
+.update-card,
+.teacher-sentence-picker,
+.teacher-picker-option,
+.exam-answer-panel,
+.ai-explain {
+  border: 1px solid #262626 !important;
+  border-radius: 8px !important;
+  background: #0b0b0b !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.top-bar {
+  min-height: 46px;
+  margin: 0 0 12px;
+  padding: 8px 42px;
+}
+
+.top-bar h1,
+h1,
+h2,
+.word-main h2,
+.meaning,
+.exam-card h2,
+.exam-answer-panel strong,
+.sentence-text,
+.teacher-english-sentence,
+.teacher-english-toggle,
+.user-translation-english {
+  color: #ffffff !important;
+  text-shadow: none !important;
+}
+
+.top-bar .icon-button,
+.icon-button,
+.round-button,
+.primary-button,
+.ghost-button,
+.ai-button,
+.quick-prompts button,
+.bottom-nav-button,
+.teacher-line-speak,
+.teacher-line-add,
+.exam-answer-speak,
+.speak-button,
+.delete-button {
+  border: 1px solid #303030 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.primary-button,
+.view-tab.is-active,
+.bottom-nav-button.is-active,
+.quick-prompts button.is-active,
+.quick-prompts button.is-free {
+  border-color: #ffffff !important;
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+.view-panel {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 8px;
+}
+
+.view-tabs {
+  border-color: #262626 !important;
+  background: #000000 !important;
+}
+
+.view-tab {
+  color: #a3a3a3 !important;
+}
+
+.view-panel > p {
+  border-color: #303030 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+textarea,
+.teacher-input,
+#examAnswer,
+.sentence-note {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: #262626 !important;
+}
+
+textarea::placeholder,
+.teacher-input::placeholder,
+.sentence-note::placeholder {
+  color: #737373 !important;
+}
+
+.input-actions,
+.teacher-english-block,
+.user-translation-panel {
+  border-top-color: #262626 !important;
+  background: #0b0b0b !important;
+}
+
+.input-actions p,
+.exam-hero p:last-child,
+.teacher-hero p:last-child,
+.teacher-sentence-meaning,
+.teacher-picker-title,
+.teacher-picker-option small,
+.teacher-line-note,
+#phoneticText,
+.chat-label,
+.eyebrow,
+.sheet-label,
+.update-kicker {
+  color: #a3a3a3 !important;
+}
+
+.sentence-list {
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.sentence-card,
+.sentence-card:hover {
+  grid-template-columns: minmax(0, 1fr) 40px;
+  gap: 10px;
+  padding: 14px;
+  transform: none !important;
+}
+
+.sentence-card::before {
+  display: none !important;
+}
+
+.sentence-content {
+  grid-column: 1;
+}
+
+.sentence-actions {
+  grid-column: 2;
+}
+
+.word-token,
+.chat-text,
+.user-chinese-toggle,
+.teacher-chinese-text {
+  color: #ffffff !important;
+}
+
+.word-token:active,
+.word-token.is-active,
+.teacher-english-item.is-open .teacher-english-sentence,
+.user-translation-card.is-open .user-chinese-toggle {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+.chat-bubble {
+  max-width: 84%;
+  padding: 10px 12px;
+}
+
+.chat-bubble::after {
+  display: none !important;
+}
+
+.chat-bubble.is-user {
+  margin-left: 48px;
+  border-color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+.chat-bubble.is-user .chat-label,
+.chat-bubble.is-user .chat-text,
+.chat-bubble.is-user .teacher-chinese-text,
+.chat-bubble.is-user .user-chinese-toggle {
+  color: #000000 !important;
+}
+
+.chat-bubble.is-teacher {
+  margin-right: 48px;
+}
+
+.quick-prompts {
+  gap: 7px;
+}
+
+.quick-prompts button {
+  min-height: 34px;
+  padding: 7px 11px;
+  white-space: nowrap;
+}
+
+.chat-composer {
+  background: #0b0b0b !important;
+}
+
+.teacher-input {
+  min-height: 62px;
+  padding: 15px 14px;
+}
+
+.bottom-nav {
+  right: max(14px, calc((100vw - 520px) / 2 + 14px));
+  left: max(14px, calc((100vw - 520px) / 2 + 14px));
+  bottom: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+  padding: 5px;
+}
+
+.bottom-nav-button {
+  min-height: 38px;
+  padding: 0 6px;
+  font-size: 12px;
+}
+
+.exam-feedback.is-correct,
+.exam-feedback.is-wrong {
+  border-color: #303030 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+.update-sheet {
+  background: rgba(0, 0, 0, 0.72) !important;
+}
+
+.update-card p {
+  color: #d4d4d4 !important;
+}
+
+/* free23 account sync sheet. */
+.account-button {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 38px;
+  height: 38px;
+  transform: translateY(-50%);
+  overflow: hidden;
+  border: 1px solid #303030;
+  border-radius: 50%;
+  padding: 0;
+  background: #111111;
+  background-position: center;
+  background-size: cover;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 760;
+  line-height: 1;
+}
+
+.account-button.has-image {
+  color: transparent;
+}
+
+.auth-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: end center;
+  padding: 18px max(14px, calc((100vw - 520px) / 2 + 14px)) 22px;
+  background: rgba(0, 0, 0, 0.72);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+
+.auth-sheet.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.auth-sheet[hidden] {
+  display: none;
+}
+
+.auth-card {
+  display: grid;
+  gap: 10px;
+  width: min(100%, 492px);
+  border: 1px solid #262626;
+  border-radius: 8px;
+  padding: 16px;
+  background: #0b0b0b;
+  color: #ffffff;
+  transform: translateY(18px);
+  transition: transform 180ms ease;
+}
+
+.auth-sheet.is-open .auth-card {
+  transform: translateY(0);
+}
+
+.auth-kicker {
+  margin: 0;
+  color: #a3a3a3;
+  font-size: 11px;
+  font-weight: 820;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.auth-card h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+.auth-card p {
+  margin: 0 0 4px;
+  color: #d4d4d4;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.account-profile {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 72px;
+  border: 1px solid #262626;
+  border-radius: 8px;
+  padding: 10px;
+  background: #050505;
+}
+
+.account-profile[hidden],
+.account-settings[hidden],
+.profile-editor[hidden] {
+  display: none;
+}
+
+.account-avatar-large {
+  width: 56px;
+  height: 56px;
+  border: 1px solid #3a3a3a;
+  border-radius: 50%;
+  background: #151515;
+  background-position: center;
+  background-size: cover;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 820;
+}
+
+.account-avatar-large.has-image {
+  color: transparent;
+}
+
+.account-profile strong,
+.account-profile span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-profile strong {
+  color: #ffffff;
+  font-size: 16px;
+}
+
+.account-profile span {
+  margin-top: 4px;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.account-settings {
+  display: grid;
+  gap: 8px;
+  border: 1px solid #262626;
+  border-radius: 8px;
+  padding: 10px;
+  background: #050505;
+}
+
+.profile-editor {
+  display: grid;
+  gap: 8px;
+  border: 1px solid #262626;
+  border-radius: 8px;
+  padding: 10px;
+  background: #050505;
+}
+
+.friends-page {
+  display: none;
+  min-height: 0;
+}
+
+.friends-page.is-active {
+  display: grid;
+}
+
+.friends-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 12px;
+  min-height: 0;
+  border: 1px solid #262626;
+  border-radius: 8px;
+  padding: 14px;
+  background: #050505;
+}
+
+.friends-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+}
+
+.friends-header .eyebrow,
+.friends-header h2 {
+  margin: 0;
+}
+
+.friends-header h2 {
+  color: #ffffff;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.friend-list {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.friend-card {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-height: 62px;
+  border: 1px solid #262626;
+  border-radius: 8px;
+  padding: 9px;
+  background: #0b0b0b;
+}
+
+.friend-avatar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #3a3a3a;
+  border-radius: 50%;
+  background: #151515;
+  background-position: center;
+  background-size: cover;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 820;
+}
+
+.friend-avatar.has-image {
+  color: transparent;
+}
+
+.friend-card strong,
+.friend-card span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.friend-card strong {
+  color: #ffffff;
+  font-size: 15px;
+}
+
+.friend-card span,
+.friend-empty {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.friend-empty {
+  margin: 0;
+  border: 1px solid #262626;
+  border-radius: 8px;
+  padding: 14px;
+  background: #0b0b0b;
+  line-height: 1.6;
+}
+
+.settings-title {
+  color: #ffffff !important;
+  font-size: 13px !important;
+  font-weight: 800;
+}
+
+.language-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.language-option {
+  min-height: 40px;
+  border: 1px solid #303030;
+  border-radius: 8px;
+  background: #000000;
+  color: #d4d4d4;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 760;
+}
+
+.language-option.is-active {
+  border-color: #ffffff;
+  background: #ffffff;
+  color: #000000;
+}
+
+.auth-input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #303030;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: #000000;
+  color: #ffffff;
+  outline: none;
+  font: inherit;
+}
+
+.auth-input::placeholder {
+  color: #737373;
+}
+
+.auth-input:focus {
+  border-color: #ffffff;
+}
+
+.account-button:focus-visible,
+.account-avatar-large:focus-visible,
+.language-option:focus-visible,
+.auth-input:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
 }

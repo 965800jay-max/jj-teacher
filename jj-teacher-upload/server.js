@@ -610,7 +610,7 @@ function buildConvertLanguagePrompt(payload, sourceLanguage = "english", targetL
   const source = getTargetLanguageInfo(sourceLanguage);
   const target = getTargetLanguageInfo(targetLanguage);
   const sentences = Array.isArray(payload.sentences) ? payload.sentences.slice(0, 120) : [];
-  const teacherMessages = Array.isArray(payload.teacherMessages) ? payload.teacherMessages.slice(-24) : [];
+  const teacherMessages = Array.isArray(payload.teacherMessages) ? payload.teacherMessages.slice(-50) : [];
   return [
     `You are converting one language-learning app user's saved data from ${source.label} study to ${target.label} study.`,
     "Convert saved sentences and teacher chat history into the target study language without losing progress.",

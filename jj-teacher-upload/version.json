@@ -1,6 +1,6 @@
 {
-  "versionCode": 26,
-  "versionName": "free26",
-  "apkUrl": "https://files.catbox.moe/rqvfol.apk",
-  "notes": "Fix language switching, friends list, and profile editing."
+  "versionCode": 27,
+  "versionName": "free27",
+  "apkUrl": "https://files.catbox.moe/2ek0f5.apk",
+  "notes": "增强切换学习语言时的内容保留：句子分批转换，导师聊天保留更多历史。"
 }
