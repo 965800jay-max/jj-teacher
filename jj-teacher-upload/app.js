@@ -100,8 +100,8 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free33";
-const APP_VERSION_CODE = 33;
+const APP_BUILD_TAG = "free34";
+const APP_VERSION_CODE = 34;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
 const UPDATE_DISMISS_KEY = "sentence-reader-dismissed-update";
 const UPDATE_CHECK_TIMEOUT_MS = 6500;
@@ -3712,7 +3712,7 @@ function buildTeacherRequestMessage(message, mode) {
           "如果我说累了、不想学、想唠嗑、想吐槽、想聊天、让我陪你说说话：立刻切到陪聊模式。陪聊模式只用中文，像真人朋友一样回2到3句短句，可以轻轻开玩笑或共情，最后只问一个中文小问题。陪聊模式不要输出“英文：”，不要输出“中文意思：”，不要纠错，不要给学习任务。",
           "如果我还在正常话题练习，再先接住我刚说的内容，不要重新开话题。",
           "正常话题练习里，先用一句自然中文回应我，语气像真人聊天，可以轻松一点。",
-          `如果我只是问“怎么说”、翻译、翻成${language.label}，不要复述我的中文原句，不要问正式还是非正式，直接写“英文：”给最常用的${language.label}说法，再写“中文意思：”给对应中文。`,
+          `如果我只是问“怎么说”、翻译、翻成${language.label}，不要复述我的中文原句，不要问正式还是非正式，不要加开场白；只输出两行：“英文：”给最常用的${language.label}说法，“中文意思：”给对应中文。`,
           `如果我用${language.label}回复且有明显语法、时态、拼写或表达错误，必须输出两条消息，并用 ${TEACHER_MESSAGE_BREAK} 分隔。`,
           `第一条以 ${TEACHER_CORRECTION_MARK} 开头，只纠错：一句中文说明问题，不要重复我的错误原句；然后写“英文：”给正确自然的${language.label}说法，再写“中文意思：”。`,
           "第二条继续当前话题：一句自然中文接话，然后写“英文：”只给1句相关追问，再写“中文意思：”。",
@@ -3727,7 +3727,7 @@ function buildTeacherRequestMessage(message, mode) {
   }
 
   const limitRule =
-    `回复要非常简单，像朋友一样说话。目标学习语言是${language.label}。不要解释你的思路，不要说“先…再…最后…”。如果我问“怎么说”、翻译、翻成${language.label}，不要复述我的中文原句，不要问我要正式还是非正式，直接写“英文：”给最常用的${language.label}说法，再写“中文意思：”给对应中文。如果我让你造句，就只说“可以，下面这几句很自然：”然后写“英文：”给${language.label}句子，最后写“中文意思：”并按顺序给对应中文；如果我问中文怎么说，也按“英文：... 中文意思：...”输出。注意：“英文：”只是 App 解析标签，标签后面的内容必须是${language.label}。`;
+    `回复要非常简单，像朋友一样说话。目标学习语言是${language.label}。不要解释你的思路，不要说“先…再…最后…”。如果我问“怎么说”、翻译、翻成${language.label}，不要复述我的中文原句，不要问我要正式还是非正式，不要加开场白；只输出两行：“英文：”给最常用的${language.label}说法，“中文意思：”给对应中文。如果我让你造句，就只说“可以，下面这几句很自然：”然后写“英文：”给${language.label}句子，最后写“中文意思：”并按顺序给对应中文；如果我问中文怎么说，也按“英文：... 中文意思：...”输出。注意：“英文：”只是 App 解析标签，标签后面的内容必须是${language.label}。`;
 
   return `${message}\n\n${limitRule}`;
 }
