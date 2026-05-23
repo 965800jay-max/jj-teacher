@@ -1,6 +1,6 @@
 {
-  "versionCode": 32,
-  "versionName": "free32",
-  "apkUrl": "https://files.catbox.moe/ltcaqa.apk",
-  "notes": "适配安卓系统返回手势，场景对话改为微信式左右气泡，并同步用户头像和昵称。"
+  "versionCode": 33,
+  "versionName": "free33",
+  "apkUrl": "https://files.catbox.moe/t27f38.apk",
+  "notes": "优化AI聊天翻译显示，移除句子页多余X按钮，并统一安卓顶部状态栏颜色。"
 }

@@ -100,8 +100,8 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free32";
-const APP_VERSION_CODE = 32;
+const APP_BUILD_TAG = "free33";
+const APP_VERSION_CODE = 33;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
 const UPDATE_DISMISS_KEY = "sentence-reader-dismissed-update";
 const UPDATE_CHECK_TIMEOUT_MS = 6500;
@@ -3513,7 +3513,7 @@ function buildTeacherOpeningTopicPrompt() {
 
   return [
     prompt,
-    `只需要一句自然中文开场，再写“英文：”并给一句简单${language.label}问题。`,
+    `只需要一句自然中文开场，再写“英文：”并给一句简单${language.label}问题，最后写“中文意思：”给这句${language.label}的中文。`,
     "不要自我回答，不要连续问两个问题，不要列表编号。",
   ].join("\n");
 }
@@ -3712,6 +3712,7 @@ function buildTeacherRequestMessage(message, mode) {
           "如果我说累了、不想学、想唠嗑、想吐槽、想聊天、让我陪你说说话：立刻切到陪聊模式。陪聊模式只用中文，像真人朋友一样回2到3句短句，可以轻轻开玩笑或共情，最后只问一个中文小问题。陪聊模式不要输出“英文：”，不要输出“中文意思：”，不要纠错，不要给学习任务。",
           "如果我还在正常话题练习，再先接住我刚说的内容，不要重新开话题。",
           "正常话题练习里，先用一句自然中文回应我，语气像真人聊天，可以轻松一点。",
+          `如果我只是问“怎么说”、翻译、翻成${language.label}，不要复述我的中文原句，不要问正式还是非正式，直接写“英文：”给最常用的${language.label}说法，再写“中文意思：”给对应中文。`,
           `如果我用${language.label}回复且有明显语法、时态、拼写或表达错误，必须输出两条消息，并用 ${TEACHER_MESSAGE_BREAK} 分隔。`,
           `第一条以 ${TEACHER_CORRECTION_MARK} 开头，只纠错：一句中文说明问题，不要重复我的错误原句；然后写“英文：”给正确自然的${language.label}说法，再写“中文意思：”。`,
           "第二条继续当前话题：一句自然中文接话，然后写“英文：”只给1句相关追问，再写“中文意思：”。",
@@ -3726,7 +3727,7 @@ function buildTeacherRequestMessage(message, mode) {
   }
 
   const limitRule =
-    `回复要非常简单，像朋友一样说话。目标学习语言是${language.label}。不要解释你的思路，不要说“先…再…最后…”。如果我让你造句，就只说“可以，下面这几句很自然：”然后写“英文：”给${language.label}句子，最后写“中文意思：”并按顺序给对应中文；如果我问中文怎么说，就说“可以这样说：”然后给${language.label}。注意：“英文：”只是 App 解析标签，标签后面的内容必须是${language.label}。`;
+    `回复要非常简单，像朋友一样说话。目标学习语言是${language.label}。不要解释你的思路，不要说“先…再…最后…”。如果我问“怎么说”、翻译、翻成${language.label}，不要复述我的中文原句，不要问我要正式还是非正式，直接写“英文：”给最常用的${language.label}说法，再写“中文意思：”给对应中文。如果我让你造句，就只说“可以，下面这几句很自然：”然后写“英文：”给${language.label}句子，最后写“中文意思：”并按顺序给对应中文；如果我问中文怎么说，也按“英文：... 中文意思：...”输出。注意：“英文：”只是 App 解析标签，标签后面的内容必须是${language.label}。`;
 
   return `${message}\n\n${limitRule}`;
 }
@@ -3851,6 +3852,17 @@ function splitChineseMeanings(text) {
     .map(cleanChineseMeaningText);
 }
 
+function isTeacherTranslationMeta(text) {
+  const clean = String(text || "").trim();
+  if (!clean) return false;
+
+  return (
+    /(?:想把|要把|把|将)[^。！？]{0,80}(?:翻(?:成|译成)?|怎么说|用[^。！？]{0,24}说)/u.test(clean) ||
+    /(?:我给你|给你)(?:一个|一条)?(?:比较|更)?(?:常用|自然|地道)?(?:的)?说法/u.test(clean) ||
+    /(?:你可以这样说|可以这样说)[：:]?$/u.test(clean)
+  );
+}
+
 function cleanChineseMeaningText(text) {
   let clean = String(text || "").trim();
   const dashParts = clean.split(/[—–-]/).map((item) => item.trim()).filter(Boolean);
@@ -3868,10 +3880,16 @@ function cleanChineseMeaningText(text) {
     .trim();
 }
 
+function extractEchoedChineseMeaning(text) {
+  const match = String(text || "").match(/(?:把|将)\s*[“"']([^“”"'\n]{1,60})[”"']\s*(?:翻(?:成|译成)?|译成|怎么说|用[^。！？\n]{0,24}说)/u);
+  if (!match || !/[\u4e00-\u9fa5]/.test(match[1])) return "";
+  return cleanChineseMeaningText(match[1]);
+}
+
 function extractChineseMeanings(text, expectedCount) {
   const markerMatch = String(text || "").match(/(?:中文意思|意思|翻译)\s*[：:]\s*([\s\S]+)$/u);
   if (markerMatch) {
-    const meanings = splitChineseMeanings(markerMatch[1]);
+    const meanings = splitChineseMeanings(markerMatch[1]).filter((item) => !isTeacherTranslationMeta(item));
     if (meanings.length) return meanings.slice(0, expectedCount);
   }
 
@@ -3880,8 +3898,11 @@ function extractChineseMeanings(text, expectedCount) {
     .replace(/可以[，,]?\s*下面这几句(?:更简单)?很自然[：:]?/g, "")
     .replace(/可以[，,]?\s*这(?:样|么)说(?:就很自然)?[：:]?/g, "")
     .trim();
-  const fallback = splitChineseMeanings(compact);
-  return fallback.slice(Math.max(0, fallback.length - expectedCount));
+  const fallback = splitChineseMeanings(compact).filter((item) => !isTeacherTranslationMeta(item));
+  if (fallback.length) return fallback.slice(Math.max(0, fallback.length - expectedCount));
+
+  const echoedMeaning = extractEchoedChineseMeaning(text);
+  return echoedMeaning ? Array.from({ length: expectedCount }, () => echoedMeaning) : [];
 }
 
 function simplifyTeacherChinese(text, englishCount) {
@@ -3913,20 +3934,43 @@ function simplifyTopicIntro(text) {
   return topicSentence || sentences[0] || "我们来聊聊这个话题吧。";
 }
 
+function cleanTeacherChineseDisplay(text, sourceText) {
+  const clean = String(text || "")
+    .replace(/(?:你是?想把|你想把|是不是想把|是否想把|你要把)[^。！？]{0,160}[。！？]?/gu, " ")
+    .replace(/(?:我给你|给你)(?:一个|一条)?(?:比较|更)?(?:常用|自然|地道)?(?:的)?说法[。！？]?/gu, " ")
+    .replace(/(?:你可以这样说|可以这样说)[：:]?/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (isTeacherTranslationMeta(text) && /(?:英文|目标语|西班牙语|日语|韩语)\s*[：:]|你可以这样说/u.test(sourceText)) {
+    return "";
+  }
+
+  return clean;
+}
+
+function isTeacherMetaTargetSentence(sentence, sourceText) {
+  const lower = String(sentence || "").toLowerCase();
+  if (!/(formal|informal|formale|informelle|フォーマル|인포멀|격식)/u.test(lower)) return false;
+  return /(?:想把|翻(?:成|译成)?|怎么说|你可以这样说|可以这样说|常用说法)/u.test(sourceText);
+}
+
 function buildTeacherDisplay(text) {
   const cleanText = compactTeacherReply(text);
   const visibleText = removeMeaningSection(cleanText);
-  const allEnglishSentences = extractTargetSentences(visibleText);
+  const detectedTargetSentences = extractTargetSentences(visibleText);
+  const allEnglishSentences = detectedTargetSentences.filter((sentence) => !isTeacherMetaTargetSentence(sentence, visibleText));
   let englishSentences = allEnglishSentences;
   const isTopicStarter = /我们来聊聊|聊聊|话题/.test(visibleText) && englishSentences.some((sentence) => sentence.endsWith("?"));
   if (isTopicStarter) {
     englishSentences = [englishSentences.find((sentence) => sentence.endsWith("?")) || englishSentences[0]].filter(Boolean);
   }
   const meanings = extractChineseMeanings(cleanText, englishSentences.length);
-  const rawChineseText = removeEnglishFromTeacherText(visibleText, allEnglishSentences);
-  const chineseText = isTopicStarter
-    ? simplifyTopicIntro(rawChineseText)
-    : simplifyTeacherChinese(rawChineseText, englishSentences.length);
+  const rawChineseText = removeEnglishFromTeacherText(visibleText, detectedTargetSentences);
+  const chineseText = cleanTeacherChineseDisplay(
+    isTopicStarter ? simplifyTopicIntro(rawChineseText) : simplifyTeacherChinese(rawChineseText, englishSentences.length),
+    cleanText
+  );
 
   return {
     cleanText,
@@ -3969,11 +4013,9 @@ function renderTeacherLinePair(container, pair) {
   const note = document.createElement("p");
   note.className = "teacher-line-note";
   note.textContent = pair.note || "暂无中文意思";
-  note.hidden = true;
 
   englishButton.addEventListener("click", () => {
-    note.hidden = !note.hidden;
-    card.classList.toggle("is-open", !note.hidden);
+    speak(pair.sentence, "sentence");
   });
   speakButton.addEventListener("click", (event) => {
     event.stopPropagation();
@@ -3985,7 +4027,7 @@ function renderTeacherLinePair(container, pair) {
   });
 
   row.append(englishButton, speakButton, addButton);
-  card.append(row, note);
+  card.append(note, row);
   container.appendChild(card);
 }
 
@@ -4043,22 +4085,21 @@ function renderTeacherMessageContent(bubble, part, role) {
       const item = document.createElement("div");
       item.className = "teacher-english-item";
 
+      const meaning = document.createElement("p");
+      meaning.className = "teacher-sentence-meaning";
+      meaning.textContent = suggestion.note || "中文意思待补充。";
+
       const sentenceButton = document.createElement("button");
       sentenceButton.className = "teacher-english-sentence";
       sentenceButton.type = "button";
       sentenceButton.textContent = suggestion.sentence;
-
-      const meaning = document.createElement("p");
-      meaning.className = "teacher-sentence-meaning";
-      meaning.textContent = suggestion.note || "中文意思待补充。";
-      meaning.hidden = true;
+      sentenceButton.setAttribute("aria-label", `朗读：${suggestion.sentence}`);
 
       sentenceButton.addEventListener("click", () => {
-        meaning.hidden = !meaning.hidden;
-        item.classList.toggle("is-open", !meaning.hidden);
+        speak(suggestion.sentence, "sentence");
       });
 
-      item.append(sentenceButton, meaning);
+      item.append(meaning, sentenceButton);
       englishBlock.appendChild(item);
     });
     bubble.appendChild(englishBlock);
@@ -4097,15 +4138,15 @@ function renderTeacherMessageContent(bubble, part, role) {
     option.className = "teacher-picker-option";
     option.type = "button";
 
-    const english = document.createElement("span");
-    english.textContent = suggestion.sentence;
-    option.appendChild(english);
-
     if (suggestion.note) {
       const note = document.createElement("small");
       note.textContent = suggestion.note;
       option.appendChild(note);
     }
+
+    const english = document.createElement("span");
+    english.textContent = suggestion.sentence;
+    option.appendChild(english);
 
     option.addEventListener("click", (event) => {
       event.stopPropagation();
@@ -4155,7 +4196,8 @@ function renderUserMessageContent(bubble, part) {
 
   const panel = document.createElement("div");
   panel.className = "user-translation-panel";
-  panel.hidden = true;
+  panel.hidden = false;
+  card.classList.add("is-open");
 
   const english = document.createElement("p");
   english.className = "user-translation-english";

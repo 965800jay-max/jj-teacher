@@ -3851,3 +3851,48 @@ textarea::placeholder,
   outline: 2px solid #ffffff;
   outline-offset: 2px;
 }
+
+#clearButton {
+  display: none !important;
+}
+
+.teacher-english-block {
+  gap: 10px;
+}
+
+.teacher-english-item {
+  display: grid;
+  gap: 5px;
+}
+
+.teacher-sentence-meaning,
+.teacher-line-note {
+  margin: 0;
+  color: #ffffff !important;
+  font-size: 14px;
+  font-weight: 780;
+  line-height: 1.5;
+}
+
+.teacher-english-item .teacher-english-sentence,
+.teacher-line-card .teacher-english-toggle {
+  min-height: 0;
+  color: #d4d4d4 !important;
+  font-size: 14px;
+  font-weight: 720;
+  line-height: 1.45;
+}
+
+.teacher-english-item .teacher-english-sentence {
+  padding: 0;
+}
+
+.teacher-picker-option small {
+  order: 0;
+  color: #ffffff !important;
+}
+
+.teacher-picker-option span {
+  order: 1;
+  color: #d4d4d4;
+}
