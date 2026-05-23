@@ -1,6 +1,6 @@
 {
-  "versionCode": 36,
-  "versionName": "free36",
-  "apkUrl": "https://files.catbox.moe/wj0az7.apk",
-  "notes": "清理AI聊天过度引导提示词，仅保留双语显示能力，并统一用户翻译卡片颜色。"
+  "versionCode": 37,
+  "versionName": "free37",
+  "apkUrl": "https://files.catbox.moe/0rad6r.apk",
+  "notes": "话题模式会自然延续同一话题，并修复从场景默写练习使用安卓系统手势返回场景详情。"
 }

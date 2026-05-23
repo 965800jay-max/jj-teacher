@@ -100,8 +100,8 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free36";
-const APP_VERSION_CODE = 36;
+const APP_BUILD_TAG = "free37";
+const APP_VERSION_CODE = 37;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
 const UPDATE_DISMISS_KEY = "sentence-reader-dismissed-update";
 const UPDATE_CHECK_TIMEOUT_MS = 6500;
@@ -130,6 +130,7 @@ let currentExamPosition = 0;
 let currentLearningLanguage = "english";
 let currentSceneGroup = "friends";
 let activeSceneId = "";
+let examReturnSceneId = "";
 let sceneHistoryFallbackTimer = 0;
 let teacherRenderFrame = 0;
 let teacherOpeningTopicTimer = 0;
@@ -2111,8 +2112,7 @@ function renderSceneDetail(scene, progress) {
   practiceButton.className = "ghost-button";
   practiceButton.textContent = "默写练习";
   practiceButton.addEventListener("click", () => {
-    addSceneToLearning(scene.id);
-    setPage("exam");
+    openScenePractice(scene.id);
   });
 
   actionRow.append(addAllButton, practiceButton);
@@ -2128,6 +2128,18 @@ function renderSceneDetail(scene, progress) {
 
 function canUseSceneSystemBack() {
   return currentPage === "scenes" && Boolean(activeSceneId) && authSheet?.hidden !== false && updateSheet?.hidden !== false;
+}
+
+function canReturnFromSceneExam() {
+  return currentPage === "exam" && Boolean(examReturnSceneId) && authSheet?.hidden !== false && updateSheet?.hidden !== false;
+}
+
+function openScenePractice(sceneId) {
+  if (!getSceneById(sceneId)) return;
+
+  addSceneToLearning(sceneId);
+  examReturnSceneId = sceneId;
+  setPage("exam");
 }
 
 function openSceneDetail(sceneId) {
@@ -2171,6 +2183,19 @@ function returnToSceneList(options = {}) {
   if (options.replaceHistory) replaceSceneDetailHistoryWithList();
 }
 
+function returnToSceneFromExam() {
+  const scene = getSceneById(examReturnSceneId);
+  if (!scene) return false;
+
+  examReturnSceneId = "";
+  currentSceneGroup = scene.group || currentSceneGroup;
+  activeSceneId = scene.id;
+  setPage("scenes");
+  pushSceneDetailHistory(scene.id);
+  renderScenes();
+  return true;
+}
+
 function requestSceneSystemBack() {
   if (!canUseSceneSystemBack()) return false;
 
@@ -2184,6 +2209,11 @@ function requestSceneSystemBack() {
     returnToSceneList({ replaceHistory: true });
   }
   return true;
+}
+
+function requestAppSystemBack() {
+  if (canReturnFromSceneExam()) return returnToSceneFromExam();
+  return requestSceneSystemBack();
 }
 
 function handleScenePopState(event) {
@@ -2201,7 +2231,7 @@ function handleScenePopState(event) {
   }
 }
 
-window.zhiyuHandleNativeBack = requestSceneSystemBack;
+window.zhiyuHandleNativeBack = requestAppSystemBack;
 
 function normalizeCloudSettings(settings) {
   const source = settings && typeof settings === "object" ? settings : {};
@@ -3314,6 +3344,10 @@ function setPage(page) {
   if (!isScenes && activeSceneId) {
     activeSceneId = "";
     replaceSceneDetailHistoryWithList();
+  }
+
+  if (!isExam && !isScenes) {
+    examReturnSceneId = "";
   }
 
   sentencesPage.classList.toggle("is-active", !isTeacher && !isExam && !isScenes && !isFriends);

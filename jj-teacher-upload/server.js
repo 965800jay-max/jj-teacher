@@ -675,6 +675,7 @@ function buildChatPrompt(message, history, mode = "chat", targetLanguage = "engl
   return [
     `Target learning language: ${language.label}.`,
     mode === "freestyle" ? "Current mode: casual chat." : mode === "topic" ? "Current mode: topic practice." : "Current mode: language learning.",
+    mode === "topic" ? "In topic practice, after each user reply, continue the same topic naturally and ask one related follow-up question." : "",
     `If you provide a ${language.label} study sentence or translation, put the ${language.label} text after ${labelEnglish} and the Chinese meaning after ${labelMeaning}.`,
     `${labelEnglish} is only an app display marker; the content after it should still be ${language.label}.`,
     cleanHistory ? `Recent conversation:\n${cleanHistory}` : "",
