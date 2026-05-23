@@ -71,8 +71,15 @@ const adminMessageCloseButton = document.querySelector("#adminMessageCloseButton
 const chatMessagesEl = document.querySelector("#chatMessages");
 const teacherInput = document.querySelector("#teacherInput");
 const teacherSendButton = document.querySelector("#teacherSendButton");
+const teacherVoiceButton = document.querySelector("#teacherVoiceButton");
 const topicButton = document.querySelector("#topicButton");
 const freeChatButton = document.querySelector("#freeChatButton");
+const voicePip = document.querySelector("#voicePip");
+const voicePipTitle = document.querySelector("#voicePipTitle");
+const voicePipStatus = document.querySelector("#voicePipStatus");
+const voicePipQuestion = document.querySelector("#voicePipQuestion");
+const voicePipAnswer = document.querySelector("#voicePipAnswer");
+const voicePipCloseButton = document.querySelector("#voicePipCloseButton");
 const examProgress = document.querySelector("#examProgress");
 const examPrompt = document.querySelector("#examPrompt");
 const examAnswer = document.querySelector("#examAnswer");
@@ -113,8 +120,8 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free39";
-const APP_VERSION_CODE = 39;
+const APP_BUILD_TAG = "free40";
+const APP_VERSION_CODE = 40;
 const AUTH_REQUIRED = true;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
 const UPDATE_DISMISS_KEY = "sentence-reader-dismissed-update";
@@ -160,6 +167,9 @@ let adminUsers = [];
 let adminLoadedAt = 0;
 let adminMessagePollTimer = 0;
 let adminMessageAlertActive = false;
+let voiceCapture = null;
+let voiceListenersReady = false;
+let voicePipReplyInFlight = false;
 let pendingUpdateInfo = null;
 let authToken = "";
 let authUser = null;
@@ -2340,6 +2350,298 @@ function triggerAdminMessageFeedback() {
   }
 }
 
+function getNativeSpeechPlugin() {
+  return window.Capacitor?.Plugins?.NativeSpeech || null;
+}
+
+function getVoiceLanguageCode() {
+  return getLearningLanguageConfig().speech || navigator.language || "en-US";
+}
+
+function setVoiceButtonListening(button, isListening) {
+  if (!button) return;
+  button.classList.toggle("is-listening", isListening);
+  button.setAttribute("aria-pressed", String(isListening));
+}
+
+function installVoiceListeners() {
+  if (voiceListenersReady) return;
+  const nativeSpeech = getNativeSpeechPlugin();
+  if (!nativeSpeech?.addListener) return;
+
+  voiceListenersReady = true;
+  nativeSpeech.addListener("speechReady", () => {
+    if (!voiceCapture) return;
+    setVoiceButtonListening(voiceCapture.button, true);
+    updateVoicePipStatus("正在收听");
+  });
+  nativeSpeech.addListener("speechPartial", (event) => handleVoicePartial(event?.text || ""));
+  nativeSpeech.addListener("speechResult", (event) => handleVoiceFinal(event?.text || ""));
+  nativeSpeech.addListener("speechError", (event) => handleVoiceError(event?.message || "语音识别暂时不可用"));
+}
+
+async function startVoiceCapture(options) {
+  if (voiceCapture) return;
+
+  const capture = {
+    ...options,
+    transcript: "",
+    finalHandled: false,
+    stopTimer: 0,
+    webRecognition: null,
+  };
+  voiceCapture = capture;
+  setVoiceButtonListening(capture.button, true);
+
+  if (capture.source === "sentence") {
+    showVoicePip({
+      title: "语音发送",
+      status: "正在收听",
+      question: "按住说出你想问的问题，松开后发送给智语导师。",
+      answer: "",
+    });
+  }
+
+  installVoiceListeners();
+  const nativeSpeech = getNativeSpeechPlugin();
+  if (nativeSpeech?.start) {
+    try {
+      await nativeSpeech.start({ language: getVoiceLanguageCode() });
+      return;
+    } catch (error) {
+      handleVoiceError(error?.message || "系统语音识别启动失败");
+      return;
+    }
+  }
+
+  startWebSpeechCapture(capture);
+}
+
+function startWebSpeechCapture(capture) {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    handleVoiceError("这台设备暂时不支持语音识别。");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  capture.webRecognition = recognition;
+  recognition.lang = getVoiceLanguageCode();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
+  recognition.onresult = (event) => {
+    let transcript = "";
+    for (let index = event.resultIndex; index < event.results.length; index += 1) {
+      transcript += event.results[index][0]?.transcript || "";
+    }
+    const clean = transcript.trim();
+    if (!clean) return;
+    if (event.results[event.results.length - 1]?.isFinal) {
+      handleVoiceFinal(clean);
+    } else {
+      handleVoicePartial(clean);
+    }
+  };
+  recognition.onerror = (event) => handleVoiceError(event.error || "语音识别失败");
+  recognition.onend = () => {
+    if (voiceCapture === capture && capture.transcript && !capture.finalHandled) {
+      handleVoiceFinal(capture.transcript);
+    }
+  };
+
+  try {
+    recognition.start();
+  } catch (error) {
+    handleVoiceError(error?.message || "语音识别启动失败");
+  }
+}
+
+function stopVoiceCapture() {
+  const capture = voiceCapture;
+  if (!capture) return;
+
+  const nativeSpeech = getNativeSpeechPlugin();
+  if (nativeSpeech?.stop) {
+    nativeSpeech.stop().catch(() => {});
+  }
+  try {
+    capture.webRecognition?.stop();
+  } catch {
+    // The browser fallback may already be stopped.
+  }
+
+  clearTimeout(capture.stopTimer);
+  capture.stopTimer = window.setTimeout(() => {
+    if (voiceCapture !== capture || capture.finalHandled) return;
+    if (capture.transcript) {
+      handleVoiceFinal(capture.transcript);
+    } else {
+      handleVoiceError("没有听清，再按住说一次。");
+    }
+  }, 1300);
+}
+
+function handleVoicePartial(text) {
+  const capture = voiceCapture;
+  if (!capture || !text.trim()) return;
+
+  capture.transcript = text.trim();
+  if (capture.source === "chat") {
+    teacherInput.value = capture.transcript;
+  } else {
+    updateVoicePipStatus("正在收听");
+    if (voicePipQuestion) voicePipQuestion.textContent = capture.transcript;
+  }
+}
+
+function handleVoiceFinal(text) {
+  const capture = voiceCapture;
+  const transcript = String(text || capture?.transcript || "").trim();
+  if (!capture || capture.finalHandled) return;
+
+  capture.finalHandled = true;
+  clearTimeout(capture.stopTimer);
+  setVoiceButtonListening(capture.button, false);
+  voiceCapture = null;
+
+  if (!transcript) {
+    if (capture.source === "sentence") {
+      showVoicePip({
+        title: "语音发送",
+        status: "没有听清",
+        question: "",
+        answer: "没有听清，再按住说一次。",
+      });
+    }
+    return;
+  }
+
+  if (capture.source === "chat") {
+    teacherInput.value = transcript;
+    teacherInput.dispatchEvent(new Event("input", { bubbles: true }));
+    return;
+  }
+
+  sendSentenceVoiceQuestion(capture.sentenceText, transcript);
+}
+
+function handleVoiceError(message) {
+  const capture = voiceCapture;
+  if (!capture) return;
+  if (capture.transcript && !capture.finalHandled) {
+    handleVoiceFinal(capture.transcript);
+    return;
+  }
+
+  clearTimeout(capture.stopTimer);
+  setVoiceButtonListening(capture.button, false);
+  voiceCapture = null;
+
+  if (capture.source === "sentence") {
+    showVoicePip({
+      title: "语音发送",
+      status: "没有听清",
+      question: capture.transcript || "",
+      answer: message || "语音识别暂时不可用。",
+    });
+  }
+}
+
+function bindHoldVoiceButton(button, options) {
+  if (!button) return;
+  let pressTimer = 0;
+  let started = false;
+
+  button.addEventListener("contextmenu", (event) => event.preventDefault());
+  button.addEventListener("pointerdown", (event) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    event.preventDefault();
+    started = false;
+    button.setPointerCapture?.(event.pointerId);
+    pressTimer = window.setTimeout(() => {
+      started = true;
+      startVoiceCapture({ ...options, button });
+    }, 180);
+  });
+
+  const endPress = () => {
+    clearTimeout(pressTimer);
+    if (started) stopVoiceCapture();
+    started = false;
+  };
+
+  button.addEventListener("pointerup", endPress);
+  button.addEventListener("pointercancel", endPress);
+  button.addEventListener("lostpointercapture", () => {
+    clearTimeout(pressTimer);
+  });
+}
+
+function showVoicePip({ title, status, question, answer }) {
+  if (!voicePip) return;
+  if (voicePipTitle) voicePipTitle.textContent = title || "智语导师";
+  if (voicePipStatus) voicePipStatus.textContent = status || "";
+  if (voicePipQuestion) voicePipQuestion.textContent = question || "";
+  if (voicePipAnswer) voicePipAnswer.textContent = answer || "";
+  voicePip.hidden = false;
+  requestAnimationFrame(() => voicePip.classList.add("is-open"));
+}
+
+function hideVoicePip() {
+  if (!voicePip) return;
+  voicePip.classList.remove("is-open");
+  setTimeout(() => {
+    if (!voicePipReplyInFlight) voicePip.hidden = true;
+  }, 160);
+}
+
+function updateVoicePipStatus(status) {
+  if (voicePipStatus) voicePipStatus.textContent = status;
+}
+
+async function sendSentenceVoiceQuestion(sentenceText, question) {
+  const language = getLearningLanguageConfig();
+  const prompt = [
+    `用户正在学习这句${language.label}：${sentenceText}`,
+    `用户用语音问的问题：${question}`,
+    "语音转文字可能有少量误识别，请结合句子上下文判断用户真正想问什么。",
+    "请直接回答，不要写开场白。先用中文解释，再给出简短目标语言示范。",
+  ].join("\n");
+
+  showVoicePip({
+    title: "智语导师",
+    status: "AI 正在回复",
+    question,
+    answer: "正在生成回复...",
+  });
+  voicePipReplyInFlight = true;
+
+  try {
+    const data = await requestAiTeacherStream(
+      {
+        mode: "chat",
+        message: prompt,
+        messages: [],
+      },
+      {
+        onDelta: (_delta, text) => {
+          if (!text.trim() || !voicePipAnswer) return;
+          voicePipAnswer.textContent = renameTeacherText(text);
+        },
+      }
+    );
+    const reply = compactTeacherReply(data.reply) || voicePipAnswer?.textContent || "这次没有拿到回复，请再试一次。";
+    if (voicePipAnswer) voicePipAnswer.textContent = reply;
+    updateVoicePipStatus("回复完成");
+  } catch (error) {
+    if (voicePipAnswer) voicePipAnswer.textContent = renameTeacherText(error.message || "智语导师暂时连接不上。");
+    updateVoicePipStatus("回复失败");
+  } finally {
+    voicePipReplyInFlight = false;
+  }
+}
+
 function normalizeCloudSentence(item) {
   if (typeof item === "string") {
     return { text: item.trim(), note: "", learned: false, learnedAt: null, aiExplanation: "" };
@@ -2847,6 +3149,7 @@ function openSceneDetail(sceneId) {
   activeSceneId = sceneId;
   pushSceneDetailHistory(sceneId);
   renderScenes();
+  scrollAppToTop();
 }
 
 function pushSceneDetailHistory(sceneId) {
@@ -2916,6 +3219,7 @@ function returnToSceneFromExam(options = {}) {
     pushSceneDetailHistory(scene.id);
   }
   renderScenes();
+  scrollAppToTop();
   return true;
 }
 
@@ -3768,19 +4072,14 @@ function render() {
     const aiTools = document.createElement("div");
     aiTools.className = "sentence-ai-tools";
 
-    const aiButton = document.createElement("button");
-    aiButton.className = "ai-button";
-    aiButton.type = "button";
-    aiButton.textContent = openAiIndex === index && item.aiExplanation ? "收起导师讲解" : item.aiExplanation ? "查看导师讲解" : "问智语导师";
-
-    const aiPanel = document.createElement("div");
-    aiPanel.className = "ai-explain";
-    aiPanel.setAttribute("aria-live", "polite");
-    if (openAiIndex === index && item.aiExplanation) {
-      renderAiText(aiPanel, item.aiExplanation);
-    }
-    aiButton.addEventListener("click", () => explainSentence(index, sentence, aiPanel, aiButton));
-    aiTools.appendChild(aiButton);
+    const voiceButton = document.createElement("button");
+    voiceButton.className = "ai-button voice-send-button";
+    voiceButton.type = "button";
+    voiceButton.innerHTML = '<span class="mic-icon" aria-hidden="true"></span><span>语音发送</span>';
+    voiceButton.setAttribute("aria-label", "长按语音提问");
+    voiceButton.title = "长按语音提问";
+    bindHoldVoiceButton(voiceButton, { source: "sentence", sentenceText: sentence });
+    aiTools.appendChild(voiceButton);
 
     const speakButton = document.createElement("button");
     speakButton.className = "speak-button";
@@ -3802,7 +4101,7 @@ function render() {
     attachDoubleTapToDelete(deleteButton, index);
 
     actions.append(speakButton, deleteButton);
-    content.append(sentenceText, note, aiTools, aiPanel);
+    content.append(sentenceText, note, aiTools);
     card.append(content, actions);
     list.appendChild(card);
   });
@@ -4090,6 +4389,20 @@ function nextExamQuestion() {
   examAnswer.focus();
 }
 
+function scrollAppToTop() {
+  requestAnimationFrame(() => {
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    } catch {
+      window.scrollTo(0, 0);
+    }
+    document.scrollingElement?.scrollTo?.(0, 0);
+    document.querySelector(".app-shell")?.scrollTo?.(0, 0);
+    scenesPage?.scrollTo?.(0, 0);
+    examPage?.scrollTo?.(0, 0);
+  });
+}
+
 function setPage(page) {
   const wasTeacher = teacherPage.classList.contains("is-active");
   currentPage = page === "teacher" || page === "exam" || page === "scenes" || page === "friends" ? page : "sentences";
@@ -4153,7 +4466,7 @@ function setPage(page) {
   if (isExam) {
     closeWordSheet();
     renderExam(true);
-    examAnswer.focus();
+    scrollAppToTop();
   }
 
   if (isScenes) {
@@ -5232,6 +5545,8 @@ refreshFriendsButton?.addEventListener("click", () => loadFriends(true));
 adminRefreshButton?.addEventListener("click", () => loadAdminUsers(true));
 adminSendAllButton?.addEventListener("click", () => sendAdminMessage(""));
 adminMessageCloseButton?.addEventListener("click", hideAdminMessage);
+voicePipCloseButton?.addEventListener("click", hideVoicePip);
+bindHoldVoiceButton(teacherVoiceButton, { source: "chat" });
 authModeButton?.addEventListener("click", () => {
   if (authMode === "account") {
     pullCloudDataAndMerge();

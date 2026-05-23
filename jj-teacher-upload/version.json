@@ -1,6 +1,6 @@
 {
-  "versionCode": 39,
-  "versionName": "free39",
-  "apkUrl": "https://files.catbox.moe/81ui6v.apk",
-  "notes": "新增强制登录、管理员用户管理、封禁/删除用户、管理员消息提醒，并延长启动封面停留时间。"
+  "versionCode": 40,
+  "versionName": "free40",
+  "apkUrl": "https://files.catbox.moe/ggnmoq.apk",
+  "notes": "优化场景打开位置和默写键盘行为，新增长按语音转文字与句子页语音提问画中画回复。"
 }
