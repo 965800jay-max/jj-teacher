@@ -10,7 +10,7 @@ loadLocalEnv(path.join(root, ".env"));
 const port = Number(process.env.PORT || 4173);
 const speechCache = new Map();
 const aiApiKey = process.env.OPENAI_API_KEY || process.env.AI_API_KEY || "";
-const aiModel = process.env.OPENAI_MODEL || process.env.AI_MODEL || "gpt-5.5";
+const aiModel = process.env.OPENAI_MODEL_OVERRIDE || process.env.AI_MODEL_OVERRIDE || "gpt-5.5";
 const aiResponsesUrl = process.env.AI_RESPONSES_URL || "https://api.openai.com/v1/responses";
 const aiStreamTimeoutMs = Number(process.env.AI_STREAM_TIMEOUT_MS || 40000);
 const aiReasoningEffort = process.env.OPENAI_REASONING_EFFORT || process.env.AI_REASONING_EFFORT || "low";
