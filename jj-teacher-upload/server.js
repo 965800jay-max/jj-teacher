@@ -293,6 +293,20 @@ function sanitizeLanguages(languages) {
   }, {});
 }
 
+function sanitizeSceneProgress(progress) {
+  const source = progress && typeof progress === "object" ? progress : {};
+  return Object.keys(targetLanguages).reduce((all, code) => {
+    const item = source[code] && typeof source[code] === "object" ? source[code] : {};
+    all[code] = {
+      completed: Array.isArray(item.completed)
+        ? item.completed.map((id) => limitText(id, 80)).filter(Boolean).slice(0, 200)
+        : [],
+      lastSceneId: limitText(item.lastSceneId, 80),
+    };
+    return all;
+  }, {});
+}
+
 function sanitizeUserData(payload) {
   const source = payload && typeof payload === "object" ? payload : {};
   const settings = sanitizeSettings(source.settings || {
@@ -300,6 +314,7 @@ function sanitizeUserData(payload) {
     avatar: source.avatar,
   });
   const languages = sanitizeLanguages(source.languages);
+  const sceneProgress = sanitizeSceneProgress(source.sceneProgress);
   const currentLanguage = normalizeTargetLanguage(settings.learningLanguage || source.learningLanguage);
   if (!languages[currentLanguage].sentences.length && Array.isArray(source.sentences)) {
     languages[currentLanguage].sentences = source.sentences.map(sanitizeSentence).filter(Boolean).slice(0, 1000);
@@ -313,6 +328,7 @@ function sanitizeUserData(payload) {
     savedAt: Date.now(),
     settings,
     learningLanguage: currentLanguage,
+    sceneProgress,
     languages,
     sentences: languages[currentLanguage].sentences,
     teacherMessages: languages[currentLanguage].teacherMessages,

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>智语导师</title>
-    <link rel="stylesheet" href="./styles.css?v=20260522-free28" />
+    <link rel="stylesheet" href="./styles.css?v=20260522-free29" />
   </head>
   <body>
     <main class="app-shell">
@@ -31,6 +31,14 @@
             <input id="speedSlider" type="range" min="0.5" max="1.5" step="0.05" value="1" aria-label="调整朗读语速" />
             <strong id="speedValue">1.00x</strong>
           </label>
+        </section>
+
+        <section class="review-panel" aria-label="句子复习">
+          <div>
+            <p class="eyebrow">Review</p>
+            <h2>复习当前句子</h2>
+          </div>
+          <button class="ghost-button" id="reviewButton" type="button">开始默写</button>
         </section>
 
         <section class="input-panel" aria-label="添加英文句子">
@@ -79,6 +87,21 @@
         </section>
       </section>
 
+      <section class="page-view scenes-page" id="scenesPage" aria-label="场景学习">
+        <section class="scenes-panel">
+          <div class="scenes-header">
+            <div>
+              <p class="eyebrow">Daily Scenes</p>
+              <h2>场景学习</h2>
+            </div>
+            <button class="ghost-button" id="sceneBackButton" type="button" hidden>返回</button>
+          </div>
+          <div class="scene-group-tabs" id="sceneGroupTabs" aria-label="场景分类"></div>
+          <div class="scene-list" id="sceneList" aria-live="polite"></div>
+          <article class="scene-detail" id="sceneDetail" hidden aria-live="polite"></article>
+        </section>
+      </section>
+
       <section class="page-view teacher-page" id="teacherPage" aria-label="智语导师">
         <section class="chat-panel" aria-label="智语导师聊天">
           <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
@@ -115,7 +138,7 @@
 
     <nav class="bottom-nav" aria-label="页面切换">
       <button class="bottom-nav-button is-active" id="sentencesNav" type="button" aria-current="page">句子</button>
-      <button class="bottom-nav-button" id="examNav" type="button">考试</button>
+      <button class="bottom-nav-button" id="scenesNav" type="button">场景</button>
       <button class="bottom-nav-button" id="teacherNav" type="button">智语导师</button>
       <button class="bottom-nav-button" id="friendsNav" type="button">好友</button>
     </nav>
@@ -179,7 +202,7 @@
       </div>
     </section>
 
-    <script src="./config.js?v=20260522-free28"></script>
-    <script src="./app.js?v=20260522-free28"></script>
+    <script src="./config.js?v=20260522-free29"></script>
+    <script src="./app.js?v=20260522-free29"></script>
   </body>
 </html>

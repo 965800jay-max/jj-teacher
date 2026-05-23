@@ -1,6 +1,6 @@
 {
-  "versionCode": 28,
-  "versionName": "free28",
-  "apkUrl": "https://files.catbox.moe/bybxja.apk",
-  "notes": "修复西语句子显示空格丢失，优化西语朗读自然度。"
+  "versionCode": 29,
+  "versionName": "free29",
+  "apkUrl": "https://files.catbox.moe/1q6y57.apk",
+  "notes": "新增场景学习页，把考试整合为句子复习，内置朋友闲聊和生活高频场景。"
 }

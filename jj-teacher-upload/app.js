@@ -9,6 +9,7 @@ const pageTitle = document.querySelector("#pageTitle");
 const accountButton = document.querySelector("#accountButton");
 const sentencesPage = document.querySelector("#sentencesPage");
 const examPage = document.querySelector("#examPage");
+const scenesPage = document.querySelector("#scenesPage");
 const teacherPage = document.querySelector("#teacherPage");
 const friendsPage = document.querySelector("#friendsPage");
 const inputPanel = document.querySelector(".input-panel");
@@ -16,8 +17,9 @@ const addButton = document.querySelector("#addButton");
 const clearButton = document.querySelector("#clearButton");
 const learningTab = document.querySelector("#learningTab");
 const learnedTab = document.querySelector("#learnedTab");
+const reviewButton = document.querySelector("#reviewButton");
 const sentencesNav = document.querySelector("#sentencesNav");
-const examNav = document.querySelector("#examNav");
+const scenesNav = document.querySelector("#scenesNav");
 const teacherNav = document.querySelector("#teacherNav");
 const friendsNav = document.querySelector("#friendsNav");
 const speedSlider = document.querySelector("#speedSlider");
@@ -69,6 +71,10 @@ const examFeedback = document.querySelector("#examFeedback");
 const examAnswerPanel = document.querySelector("#examAnswerPanel");
 const friendList = document.querySelector("#friendList");
 const refreshFriendsButton = document.querySelector("#refreshFriendsButton");
+const sceneGroupTabs = document.querySelector("#sceneGroupTabs");
+const sceneList = document.querySelector("#sceneList");
+const sceneDetail = document.querySelector("#sceneDetail");
+const sceneBackButton = document.querySelector("#sceneBackButton");
 
 const STORAGE_KEY = "sentence-reader-text";
 const DRAFT_KEY = "sentence-reader-draft";
@@ -81,6 +87,7 @@ const TEACHER_TOPIC_KEY = "sentence-reader-topic-mode";
 const TEACHER_FREE_KEY = "sentence-reader-free-chat-mode";
 const TEACHER_OPENING_TOPIC_KEY = "sentence-reader-opening-topic-at-free25";
 const EXAM_INDEX_KEY = "sentence-reader-exam-index";
+const SCENE_PROGRESS_KEY = "sentence-reader-scene-progress";
 const AUTH_TOKEN_KEY = "sentence-reader-auth-token";
 const AUTH_USER_KEY = "sentence-reader-auth-user";
 const AUTH_AVATAR_KEY = "sentence-reader-auth-avatar";
@@ -94,8 +101,8 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free28";
-const APP_VERSION_CODE = 28;
+const APP_BUILD_TAG = "free29";
+const APP_VERSION_CODE = 29;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
 const UPDATE_DISMISS_KEY = "sentence-reader-dismissed-update";
 const UPDATE_CHECK_TIMEOUT_MS = 6500;
@@ -122,6 +129,8 @@ let currentView = "learning";
 let currentPage = "sentences";
 let currentExamPosition = 0;
 let currentLearningLanguage = "english";
+let currentSceneGroup = "friends";
+let activeSceneId = "";
 let teacherRenderFrame = 0;
 let teacherOpeningTopicTimer = 0;
 let teacherOpeningTopicInFlight = false;
@@ -263,6 +272,377 @@ const dictionary = {
   you: ["juː", "你；你们"],
   your: ["jʊr", "你的；你们的"],
 };
+
+const SCENE_GROUPS = [
+  { id: "friends", label: "朋友闲聊" },
+  { id: "food", label: "吃喝玩乐" },
+  { id: "workstudy", label: "学习工作" },
+  { id: "care", label: "情绪关系" },
+  { id: "life", label: "生活实用" },
+];
+
+const SCENE_LIBRARY = [
+  {
+    id: "daily-checkin",
+    group: "friends",
+    level: "入门",
+    title: "今天过得怎么样",
+    description: "朋友见面或聊天开头最常用。",
+    items: [
+      { zh: "今天过得怎么样？", english: "How was your day?", spanish: "¿Cómo estuvo tu día?", japanese: "今日はどうだった？", korean: "오늘 하루 어땠어?" },
+      { zh: "我今天有点累。", english: "I'm a little tired today.", spanish: "Hoy estoy un poco cansado.", japanese: "今日は少し疲れた。", korean: "오늘은 조금 피곤해." },
+      { zh: "今天还不错。", english: "Today was pretty good.", spanish: "Hoy estuvo bastante bien.", japanese: "今日はけっこうよかった。", korean: "오늘은 꽤 괜찮았어." },
+      { zh: "发生了一件挺有意思的事。", english: "Something pretty interesting happened.", spanish: "Pasó algo bastante interesante.", japanese: "ちょっと面白いことがあった。", korean: "꽤 재미있는 일이 있었어." },
+    ],
+    dialogue: [
+      { speaker: "A", zh: "今天过得怎么样？", english: "How was your day?", spanish: "¿Cómo estuvo tu día?", japanese: "今日はどうだった？", korean: "오늘 하루 어땠어?" },
+      { speaker: "B", zh: "还可以，就是有点累。", english: "It was okay, just a little tiring.", spanish: "Estuvo bien, solo un poco cansado.", japanese: "まあまあ。ちょっと疲れた。", korean: "괜찮았어. 조금 피곤했을 뿐이야." },
+      { speaker: "A", zh: "晚上早点休息吧。", english: "Try to rest early tonight.", spanish: "Descansa temprano esta noche.", japanese: "今夜は早めに休んでね。", korean: "오늘 밤은 일찍 쉬어." },
+    ],
+  },
+  {
+    id: "weekend-plans",
+    group: "friends",
+    level: "入门",
+    title: "周末计划",
+    description: "约朋友、安排周末、轻松开话题。",
+    items: [
+      { zh: "周末打算做什么？", english: "What are you doing this weekend?", spanish: "¿Qué vas a hacer este fin de semana?", japanese: "週末は何をする予定？", korean: "주말에 뭐 할 거야?" },
+      { zh: "要不要出去走走？", english: "Do you want to go out for a walk?", spanish: "¿Quieres salir a caminar?", japanese: "外に散歩しに行かない？", korean: "나가서 좀 걸을래?" },
+      { zh: "我想在家休息。", english: "I want to rest at home.", spanish: "Quiero descansar en casa.", japanese: "家で休みたい。", korean: "집에서 쉬고 싶어." },
+      { zh: "下次一起去吧。", english: "Let's go together next time.", spanish: "Vamos juntos la próxima vez.", japanese: "次は一緒に行こう。", korean: "다음에 같이 가자." },
+    ],
+    dialogue: [
+      { speaker: "A", zh: "周末有安排吗？", english: "Do you have plans this weekend?", spanish: "¿Tienes planes este fin de semana?", japanese: "週末は予定ある？", korean: "주말에 약속 있어?" },
+      { speaker: "B", zh: "还没有，可能在家休息。", english: "Not yet. I might just rest at home.", spanish: "Todavía no. Quizás descanse en casa.", japanese: "まだない。家で休むかも。", korean: "아직 없어. 집에서 쉴지도 몰라." },
+      { speaker: "A", zh: "那有空一起吃饭。", english: "Then let's eat together if you're free.", spanish: "Entonces comamos juntos si tienes tiempo.", japanese: "じゃあ時間があれば一緒にご飯を食べよう。", korean: "그럼 시간 되면 같이 밥 먹자." },
+    ],
+  },
+  {
+    id: "food-chat",
+    group: "food",
+    level: "入门",
+    title: "吃饭与美食",
+    description: "聊今天吃什么、推荐餐厅、约饭。",
+    items: [
+      { zh: "今天吃了什么？", english: "What did you eat today?", spanish: "¿Qué comiste hoy?", japanese: "今日は何を食べた？", korean: "오늘 뭐 먹었어?" },
+      { zh: "这家店很好吃。", english: "This place is really good.", spanish: "Este lugar es muy bueno.", japanese: "この店はすごくおいしい。", korean: "이 집 정말 맛있어." },
+      { zh: "我有点饿了。", english: "I'm getting a little hungry.", spanish: "Me está dando un poco de hambre.", japanese: "ちょっとお腹が空いてきた。", korean: "나 조금 배고파졌어." },
+      { zh: "下次一起去吃。", english: "Let's go eat there together next time.", spanish: "Vamos a comer allí juntos la próxima vez.", japanese: "次は一緒に食べに行こう。", korean: "다음에 같이 먹으러 가자." },
+    ],
+    dialogue: [
+      { speaker: "A", zh: "你今天吃了什么？", english: "What did you eat today?", spanish: "¿Qué comiste hoy?", japanese: "今日は何を食べた？", korean: "오늘 뭐 먹었어?" },
+      { speaker: "B", zh: "吃了面，味道还不错。", english: "I had noodles. They were pretty good.", spanish: "Comí fideos. Estaban bastante buenos.", japanese: "麺を食べた。けっこうおいしかった。", korean: "면 먹었어. 꽤 맛있었어." },
+      { speaker: "A", zh: "听起来不错，下次带我去。", english: "Sounds good. Take me there next time.", spanish: "Suena bien. Llévame la próxima vez.", japanese: "よさそう。次連れて行って。", korean: "좋다. 다음에 나도 데려가." },
+    ],
+  },
+  {
+    id: "coffee-tea",
+    group: "food",
+    level: "入门",
+    title: "咖啡奶茶",
+    description: "点饮料、聊口味、一起买一杯。",
+    items: [
+      { zh: "你想喝咖啡还是奶茶？", english: "Do you want coffee or milk tea?", spanish: "¿Quieres café o té con leche?", japanese: "コーヒーとミルクティー、どっちが飲みたい？", korean: "커피 마실래, 밀크티 마실래?" },
+      { zh: "我要少冰少糖。", english: "I want less ice and less sugar.", spanish: "Quiero menos hielo y menos azúcar.", japanese: "氷少なめ、砂糖少なめで。", korean: "얼음 적게, 당도 낮게 해 주세요." },
+      { zh: "这家店排队很久。", english: "The line here is really long.", spanish: "La fila aquí es muy larga.", japanese: "この店、すごく並んでいる。", korean: "이 가게 줄이 엄청 길어." },
+      { zh: "买一杯边走边聊吧。", english: "Let's get a drink and talk while we walk.", spanish: "Compremos algo y hablemos mientras caminamos.", japanese: "一杯買って歩きながら話そう。", korean: "한 잔 사서 걸으면서 얘기하자." },
+    ],
+    dialogue: [
+      { speaker: "A", zh: "你想喝点什么？", english: "What do you want to drink?", spanish: "¿Qué quieres tomar?", japanese: "何か飲みたい？", korean: "뭐 마시고 싶어?" },
+      { speaker: "B", zh: "我想喝奶茶，少糖。", english: "I want milk tea, less sugar.", spanish: "Quiero té con leche, con menos azúcar.", japanese: "ミルクティーが飲みたい。砂糖少なめで。", korean: "밀크티 마시고 싶어. 당도 낮게." },
+      { speaker: "A", zh: "好，我们买了边走边聊。", english: "Okay, let's get it and walk while we talk.", spanish: "Bien, compremos y caminemos mientras hablamos.", japanese: "いいね。買って歩きながら話そう。", korean: "좋아. 사서 걸으면서 얘기하자." },
+    ],
+  },
+  {
+    id: "movies-shows",
+    group: "friends",
+    level: "常用",
+    title: "电影电视剧",
+    description: "聊最近在看什么，避免剧透。",
+    items: [
+      { zh: "最近看了什么剧？", english: "What shows have you watched lately?", spanish: "¿Qué series has visto últimamente?", japanese: "最近どんなドラマを見た？", korean: "요즘 무슨 드라마 봤어?" },
+      { zh: "这个剧好看吗？", english: "Is this show good?", spanish: "¿Esta serie está buena?", japanese: "このドラマ面白い？", korean: "이 드라마 재미있어?" },
+      { zh: "别剧透。", english: "No spoilers.", spanish: "No me hagas spoiler.", japanese: "ネタバレしないで。", korean: "스포하지 마." },
+      { zh: "有空一起看。", english: "Let's watch it together sometime.", spanish: "Veámosla juntos algún día.", japanese: "今度一緒に見よう。", korean: "나중에 같이 보자." },
+    ],
+    dialogue: [
+      { speaker: "A", zh: "最近有什么好看的剧吗？", english: "Any good shows lately?", spanish: "¿Hay alguna serie buena últimamente?", japanese: "最近何か面白いドラマある？", korean: "요즘 볼 만한 드라마 있어?" },
+      { speaker: "B", zh: "有一个很好看，但我不剧透。", english: "There's a really good one, but I won't spoil it.", spanish: "Hay una muy buena, pero no haré spoiler.", japanese: "すごく面白いのがあるけど、ネタバレはしない。", korean: "엄청 재미있는 거 있어. 근데 스포는 안 할게." },
+      { speaker: "A", zh: "那周末一起看。", english: "Then let's watch it together this weekend.", spanish: "Entonces veámosla juntos este fin de semana.", japanese: "じゃあ週末一緒に見よう。", korean: "그럼 주말에 같이 보자." },
+    ],
+  },
+  {
+    id: "music-share",
+    group: "friends",
+    level: "常用",
+    title: "音乐分享",
+    description: "推荐歌曲、聊歌手、分享心情。",
+    items: [
+      { zh: "最近在听什么歌？", english: "What songs are you listening to lately?", spanish: "¿Qué canciones escuchas últimamente?", japanese: "最近どんな曲を聞いている？", korean: "요즘 무슨 노래 들어?" },
+      { zh: "这首歌很洗脑。", english: "This song is really catchy.", spanish: "Esta canción es muy pegadiza.", japanese: "この曲、すごく耳に残る。", korean: "이 노래 진짜 중독성 있어." },
+      { zh: "推荐我一首歌。", english: "Recommend a song to me.", spanish: "Recomiéndame una canción.", japanese: "一曲おすすめして。", korean: "노래 하나 추천해 줘." },
+      { zh: "我想去看演唱会。", english: "I want to go to a concert.", spanish: "Quiero ir a un concierto.", japanese: "ライブに行きたい。", korean: "콘서트 보러 가고 싶어." },
+    ],
+    dialogue: [
+      { speaker: "A", zh: "最近在听什么？", english: "What are you listening to lately?", spanish: "¿Qué escuchas últimamente?", japanese: "最近何を聞いている？", korean: "요즘 뭐 들어?" },
+      { speaker: "B", zh: "有首歌很上头，我发给你。", english: "There's a really catchy song. I'll send it to you.", spanish: "Hay una canción muy pegadiza. Te la mando.", japanese: "すごくハマる曲がある。送るね。", korean: "진짜 중독성 있는 노래 있어. 보내줄게." },
+      { speaker: "A", zh: "好，我等下听。", english: "Great, I'll listen to it later.", spanish: "Genial, la escucharé luego.", japanese: "いいね、あとで聞く。", korean: "좋아, 이따 들어볼게." },
+    ],
+  },
+  {
+    id: "gaming-chat",
+    group: "friends",
+    level: "常用",
+    title: "游戏闲聊",
+    description: "约朋友上线、输赢吐槽、轻松聊天。",
+    items: [
+      { zh: "最近在玩什么游戏？", english: "What games are you playing lately?", spanish: "¿Qué juegos estás jugando últimamente?", japanese: "最近どんなゲームをしている？", korean: "요즘 무슨 게임 해?" },
+      { zh: "这局太难了。", english: "This round is too hard.", spanish: "Esta partida es demasiado difícil.", japanese: "この試合、難しすぎる。", korean: "이번 판 너무 어려워." },
+      { zh: "晚上一起玩吗？", english: "Do you want to play together tonight?", spanish: "¿Quieres jugar juntos esta noche?", japanese: "今夜一緒にゲームしない？", korean: "오늘 밤 같이 게임할래?" },
+      { zh: "别急，我马上上线。", english: "Hold on, I'll be online soon.", spanish: "Espera, me conecto enseguida.", japanese: "待って、すぐログインする。", korean: "잠깐만, 곧 접속할게." },
+    ],
+    dialogue: [
+      { speaker: "A", zh: "晚上一起玩吗？", english: "Want to play together tonight?", spanish: "¿Jugamos juntos esta noche?", japanese: "今夜一緒にやる？", korean: "오늘 밤 같이 할래?" },
+      { speaker: "B", zh: "可以，我吃完饭上线。", english: "Sure, I'll get online after dinner.", spanish: "Claro, me conecto después de cenar.", japanese: "いいよ。ご飯のあとログインする。", korean: "좋아. 저녁 먹고 접속할게." },
+      { speaker: "A", zh: "好，别让我等太久。", english: "Okay, don't make me wait too long.", spanish: "Bien, no me hagas esperar mucho.", japanese: "わかった。あまり待たせないでね。", korean: "좋아, 너무 오래 기다리게 하지 마." },
+    ],
+  },
+  {
+    id: "work-vent",
+    group: "workstudy",
+    level: "常用",
+    title: "工作吐槽",
+    description: "下班聊天、开会太久、表达疲惫。",
+    items: [
+      { zh: "今天工作好多。", english: "I had so much work today.", spanish: "Hoy tuve muchísimo trabajo.", japanese: "今日は仕事が多すぎた。", korean: "오늘 일이 너무 많았어." },
+      { zh: "开会开太久了。", english: "The meeting went on for too long.", spanish: "La reunión duró demasiado.", japanese: "会議が長すぎた。", korean: "회의가 너무 길었어." },
+      { zh: "终于下班了。", english: "I'm finally off work.", spanish: "Por fin salí del trabajo.", japanese: "やっと仕事が終わった。", korean: "드디어 퇴근했어." },
+      { zh: "明天还要早起。", english: "I still have to wake up early tomorrow.", spanish: "Mañana todavía tengo que levantarme temprano.", japanese: "明日も早起きしなきゃ。", korean: "내일도 일찍 일어나야 해." },
+    ],
+    dialogue: [
+      { speaker: "A", zh: "你今天看起来很累。", english: "You look really tired today.", spanish: "Hoy te ves muy cansado.", japanese: "今日はすごく疲れて見える。", korean: "오늘 많이 피곤해 보여." },
+      { speaker: "B", zh: "开了一下午会。", english: "I had meetings all afternoon.", spanish: "Tuve reuniones toda la tarde.", japanese: "午後ずっと会議だった。", korean: "오후 내내 회의했어." },
+      { speaker: "A", zh: "那今晚早点休息。", english: "Then rest early tonight.", spanish: "Entonces descansa temprano esta noche.", japanese: "じゃあ今夜は早く休んで。", korean: "그럼 오늘은 일찍 쉬어." },
+    ],
+  },
+  {
+    id: "study-vent",
+    group: "workstudy",
+    level: "常用",
+    title: "学习吐槽",
+    description: "学不进去、求助、一起复习。",
+    items: [
+      { zh: "今天学不进去。", english: "I can't focus on studying today.", spanish: "Hoy no puedo concentrarme para estudiar.", japanese: "今日は勉強に集中できない。", korean: "오늘은 공부가 잘 안 돼." },
+      { zh: "这个太难了。", english: "This is too hard.", spanish: "Esto es demasiado difícil.", japanese: "これは難しすぎる。", korean: "이거 너무 어려워." },
+      { zh: "我终于弄懂了。", english: "I finally figured it out.", spanish: "Por fin lo entendí.", japanese: "やっと理解できた。", korean: "드디어 이해했어." },
+      { zh: "一起复习吗？", english: "Do you want to review together?", spanish: "¿Quieres repasar juntos?", japanese: "一緒に復習しない？", korean: "같이 복습할래?" },
+    ],
+    dialogue: [
+      { speaker: "A", zh: "你学到哪里了？", english: "How far did you get with studying?", spanish: "¿Hasta dónde estudiaste?", japanese: "どこまで勉強した？", korean: "어디까지 공부했어?" },
+      { speaker: "B", zh: "卡住了，这个太难。", english: "I'm stuck. This is too hard.", spanish: "Estoy atascado. Esto es muy difícil.", japanese: "詰まってる。これ難しすぎる。", korean: "막혔어. 이거 너무 어려워." },
+      { speaker: "A", zh: "我们一起看一遍。", english: "Let's go through it together.", spanish: "Vamos a verlo juntos.", japanese: "一緒に見てみよう。", korean: "같이 한번 보자." },
+    ],
+  },
+  {
+    id: "emotional-support",
+    group: "care",
+    level: "常用",
+    title: "情绪陪伴",
+    description: "朋友不开心时，用自然的话接住对方。",
+    items: [
+      { zh: "你还好吗？", english: "Are you okay?", spanish: "¿Estás bien?", japanese: "大丈夫？", korean: "괜찮아?" },
+      { zh: "想聊聊吗？", english: "Do you want to talk about it?", spanish: "¿Quieres hablar de eso?", japanese: "話したい？", korean: "얘기하고 싶어?" },
+      { zh: "没关系，慢慢来。", english: "It's okay. Take your time.", spanish: "Está bien. Tómate tu tiempo.", japanese: "大丈夫。ゆっくりでいいよ。", korean: "괜찮아. 천천히 해." },
+      { zh: "我懂你的感觉。", english: "I understand how you feel.", spanish: "Entiendo cómo te sientes.", japanese: "その気持ちわかるよ。", korean: "네 기분 이해해." },
+    ],
+    dialogue: [
+      { speaker: "A", zh: "你今天有点安静。", english: "You're a little quiet today.", spanish: "Hoy estás un poco callado.", japanese: "今日は少し静かだね。", korean: "오늘 좀 조용하네." },
+      { speaker: "B", zh: "嗯，心情不太好。", english: "Yeah, I'm not feeling great.", spanish: "Sí, no me siento muy bien.", japanese: "うん、あまり気分がよくない。", korean: "응, 기분이 별로야." },
+      { speaker: "A", zh: "想聊聊吗？我在。", english: "Do you want to talk? I'm here.", spanish: "¿Quieres hablar? Estoy aquí.", japanese: "話したい？そばにいるよ。", korean: "얘기하고 싶어? 나 여기 있어." },
+    ],
+  },
+  {
+    id: "late-night-chat",
+    group: "care",
+    level: "常用",
+    title: "深夜聊天",
+    description: "睡不着、陪朋友聊几句、提醒休息。",
+    items: [
+      { zh: "你还没睡吗？", english: "Are you still awake?", spanish: "¿Sigues despierto?", japanese: "まだ起きてる？", korean: "아직 안 자?" },
+      { zh: "我有点睡不着。", english: "I can't really fall asleep.", spanish: "No puedo dormir muy bien.", japanese: "ちょっと眠れない。", korean: "잠이 잘 안 와." },
+      { zh: "陪我聊一会儿。", english: "Talk with me for a bit.", spanish: "Habla conmigo un rato.", japanese: "少し話し相手になって。", korean: "나랑 잠깐 얘기해 줘." },
+      { zh: "早点休息。", english: "Get some rest soon.", spanish: "Descansa pronto.", japanese: "早めに休んで。", korean: "일찍 쉬어." },
+    ],
+    dialogue: [
+      { speaker: "A", zh: "你还没睡吗？", english: "Are you still awake?", spanish: "¿Sigues despierto?", japanese: "まだ起きてる？", korean: "아직 안 자?" },
+      { speaker: "B", zh: "睡不着，脑子停不下来。", english: "I can't sleep. My mind won't stop.", spanish: "No puedo dormir. Mi mente no para.", japanese: "眠れない。頭が止まらない。", korean: "잠이 안 와. 생각이 멈추질 않아." },
+      { speaker: "A", zh: "那我陪你聊一会儿。", english: "Then I'll talk with you for a bit.", spanish: "Entonces hablo contigo un rato.", japanese: "じゃあ少し話そう。", korean: "그럼 내가 잠깐 얘기해 줄게." },
+    ],
+  },
+  {
+    id: "encourage-friend",
+    group: "care",
+    level: "入门",
+    title: "鼓励朋友",
+    description: "给朋友打气，不空泛也不尴尬。",
+    items: [
+      { zh: "你可以的。", english: "You can do it.", spanish: "Tú puedes.", japanese: "あなたならできる。", korean: "너라면 할 수 있어." },
+      { zh: "别太着急。", english: "Don't rush too much.", spanish: "No te apresures demasiado.", japanese: "あまり焦らないで。", korean: "너무 조급해하지 마." },
+      { zh: "已经很好了。", english: "You're already doing well.", spanish: "Ya lo estás haciendo muy bien.", japanese: "もう十分よくできているよ。", korean: "이미 잘하고 있어." },
+      { zh: "我支持你。", english: "I support you.", spanish: "Te apoyo.", japanese: "応援しているよ。", korean: "내가 응원할게." },
+    ],
+    dialogue: [
+      { speaker: "A", zh: "我怕自己做不好。", english: "I'm afraid I won't do it well.", spanish: "Me da miedo no hacerlo bien.", japanese: "うまくできないかもって不安。", korean: "잘 못할까 봐 걱정돼." },
+      { speaker: "B", zh: "别急，你已经很好了。", english: "Don't rush. You're already doing well.", spanish: "No te apresures. Ya lo haces muy bien.", japanese: "焦らないで。もう十分できているよ。", korean: "조급해하지 마. 이미 잘하고 있어." },
+      { speaker: "A", zh: "谢谢，我会再试试。", english: "Thanks. I'll try again.", spanish: "Gracias. Lo intentaré otra vez.", japanese: "ありがとう。もう一度やってみる。", korean: "고마워. 다시 해볼게." },
+    ],
+  },
+  {
+    id: "shopping-share",
+    group: "friends",
+    level: "常用",
+    title: "购物分享",
+    description: "分享新买的东西、询问价格和体验。",
+    items: [
+      { zh: "我买了个新东西。", english: "I bought something new.", spanish: "Compré algo nuevo.", japanese: "新しいものを買った。", korean: "새로운 걸 샀어." },
+      { zh: "这个好用吗？", english: "Is this easy to use?", spanish: "¿Esto es fácil de usar?", japanese: "これ使いやすい？", korean: "이거 쓰기 좋아?" },
+      { zh: "多少钱买的？", english: "How much did you pay for it?", spanish: "¿Cuánto pagaste por eso?", japanese: "いくらで買ったの？", korean: "얼마에 샀어?" },
+      { zh: "看起来很适合你。", english: "It looks great on you.", spanish: "Te queda muy bien.", japanese: "すごく似合っている。", korean: "너한테 잘 어울려." },
+    ],
+    dialogue: [
+      { speaker: "A", zh: "你看，我买了个新包。", english: "Look, I bought a new bag.", spanish: "Mira, compré una bolsa nueva.", japanese: "見て、新しいバッグを買った。", korean: "봐, 새 가방 샀어." },
+      { speaker: "B", zh: "很好看，多少钱？", english: "It looks nice. How much was it?", spanish: "Está muy bonita. ¿Cuánto costó?", japanese: "いいね。いくらだった？", korean: "예쁘다. 얼마였어?" },
+      { speaker: "A", zh: "打折买的，还挺划算。", english: "I got it on sale. It was a good deal.", spanish: "La compré en oferta. Fue buena compra.", japanese: "セールで買った。けっこうお得だった。", korean: "세일해서 샀어. 꽤 괜찮은 가격이었어." },
+    ],
+  },
+  {
+    id: "photos-social",
+    group: "friends",
+    level: "常用",
+    title: "拍照与发朋友圈",
+    description: "拍照、夸照片、发动态。",
+    items: [
+      { zh: "帮我拍一张。", english: "Take a picture of me.", spanish: "Tómame una foto.", japanese: "写真を撮ってくれる？", korean: "사진 한 장 찍어 줘." },
+      { zh: "这张照片很好看。", english: "This photo looks really good.", spanish: "Esta foto se ve muy bien.", japanese: "この写真すごくいい。", korean: "이 사진 정말 잘 나왔어." },
+      { zh: "这个角度不错。", english: "This angle is good.", spanish: "Este ángulo está bien.", japanese: "この角度いいね。", korean: "이 각도 괜찮다." },
+      { zh: "我要发朋友圈。", english: "I'm going to post this.", spanish: "Voy a publicar esto.", japanese: "これを投稿する。", korean: "이거 올릴 거야." },
+    ],
+    dialogue: [
+      { speaker: "A", zh: "帮我拍一张。", english: "Take a picture of me.", spanish: "Tómame una foto.", japanese: "写真を撮って。", korean: "사진 좀 찍어 줘." },
+      { speaker: "B", zh: "站这边，光线更好。", english: "Stand here. The light is better.", spanish: "Párate aquí. La luz es mejor.", japanese: "こっちに立って。光がいい。", korean: "여기 서 봐. 빛이 더 좋아." },
+      { speaker: "A", zh: "这张可以，我要发。", english: "This one works. I'll post it.", spanish: "Esta está bien. La voy a publicar.", japanese: "これいいね。投稿する。", korean: "이거 괜찮다. 올릴게." },
+    ],
+  },
+  {
+    id: "ordering-food",
+    group: "life",
+    level: "实用",
+    title: "点餐",
+    description: "餐厅、咖啡店、外卖都能用。",
+    items: [
+      { zh: "我想要这个。", english: "I'd like this one.", spanish: "Quisiera este.", japanese: "これをお願いします。", korean: "이걸로 주세요." },
+      { zh: "可以少放糖吗？", english: "Can you make it less sweet?", spanish: "¿Puede ponerle menos azúcar?", japanese: "甘さ控えめにできますか？", korean: "덜 달게 해 주실 수 있나요?" },
+      { zh: "我要打包。", english: "I'd like it to go.", spanish: "Para llevar, por favor.", japanese: "持ち帰りでお願いします。", korean: "포장해 주세요." },
+      { zh: "可以刷卡吗？", english: "Can I pay by card?", spanish: "¿Puedo pagar con tarjeta?", japanese: "カードで払えますか？", korean: "카드로 결제할 수 있나요?" },
+    ],
+    dialogue: [
+      { speaker: "A", zh: "你好，想点什么？", english: "Hi, what would you like?", spanish: "Hola, ¿qué desea pedir?", japanese: "こんにちは。ご注文は？", korean: "안녕하세요. 무엇을 주문하시겠어요?" },
+      { speaker: "B", zh: "我想要一杯咖啡，少糖。", english: "I'd like a coffee with less sugar.", spanish: "Quisiera un café con menos azúcar.", japanese: "コーヒーを一杯、砂糖少なめでお願いします。", korean: "커피 한 잔 주세요. 덜 달게요." },
+      { speaker: "A", zh: "好的，堂食还是打包？", english: "Sure. For here or to go?", spanish: "Claro. ¿Para aquí o para llevar?", japanese: "かしこまりました。店内ですか、お持ち帰りですか？", korean: "네. 매장에서 드시나요, 포장인가요?" },
+    ],
+  },
+  {
+    id: "shopping-basic",
+    group: "life",
+    level: "实用",
+    title: "购物付款",
+    description: "问价格、试穿、颜色尺码、付款。",
+    items: [
+      { zh: "这个多少钱？", english: "How much is this?", spanish: "¿Cuánto cuesta esto?", japanese: "これはいくらですか？", korean: "이거 얼마예요?" },
+      { zh: "可以试一下吗？", english: "Can I try it on?", spanish: "¿Puedo probármelo?", japanese: "試着できますか？", korean: "입어 봐도 될까요?" },
+      { zh: "有别的颜色吗？", english: "Do you have another color?", spanish: "¿Tiene otro color?", japanese: "他の色はありますか？", korean: "다른 색도 있나요?" },
+      { zh: "太贵了。", english: "It's too expensive.", spanish: "Es demasiado caro.", japanese: "高すぎます。", korean: "너무 비싸요." },
+    ],
+    dialogue: [
+      { speaker: "A", zh: "这个多少钱？", english: "How much is this?", spanish: "¿Cuánto cuesta esto?", japanese: "これはいくらですか？", korean: "이거 얼마예요?" },
+      { speaker: "B", zh: "二十美元。", english: "It's twenty dollars.", spanish: "Son veinte dólares.", japanese: "20ドルです。", korean: "20달러입니다." },
+      { speaker: "A", zh: "有别的颜色吗？", english: "Do you have another color?", spanish: "¿Tiene otro color?", japanese: "他の色はありますか？", korean: "다른 색 있나요?" },
+    ],
+  },
+  {
+    id: "directions-transport",
+    group: "life",
+    level: "实用",
+    title: "问路交通",
+    description: "出门、坐车、迷路时最常用。",
+    items: [
+      { zh: "这里怎么走？", english: "How do I get there?", spanish: "¿Cómo llego allí?", japanese: "そこへはどう行けばいいですか？", korean: "거기 어떻게 가나요?" },
+      { zh: "地铁站在哪里？", english: "Where is the subway station?", spanish: "¿Dónde está la estación de metro?", japanese: "地下鉄の駅はどこですか？", korean: "지하철역이 어디예요?" },
+      { zh: "我要去这个地址。", english: "I need to go to this address.", spanish: "Necesito ir a esta dirección.", japanese: "この住所に行きたいです。", korean: "이 주소로 가야 해요." },
+      { zh: "我迷路了。", english: "I'm lost.", spanish: "Estoy perdido.", japanese: "道に迷いました。", korean: "길을 잃었어요." },
+    ],
+    dialogue: [
+      { speaker: "A", zh: "不好意思，地铁站在哪里？", english: "Excuse me, where is the subway station?", spanish: "Disculpe, ¿dónde está la estación de metro?", japanese: "すみません、地下鉄の駅はどこですか？", korean: "실례합니다, 지하철역이 어디예요?" },
+      { speaker: "B", zh: "一直走，然后左转。", english: "Go straight, then turn left.", spanish: "Siga recto y luego gire a la izquierda.", japanese: "まっすぐ行って、左に曲がってください。", korean: "쭉 가다가 왼쪽으로 도세요." },
+      { speaker: "A", zh: "谢谢，帮大忙了。", english: "Thanks, that's very helpful.", spanish: "Gracias, me ayuda mucho.", japanese: "ありがとうございます。助かります。", korean: "감사합니다. 큰 도움이 됐어요." },
+    ],
+  },
+  {
+    id: "hotel-stay",
+    group: "life",
+    level: "实用",
+    title: "酒店住宿",
+    description: "入住、Wi-Fi、房间问题、退房。",
+    items: [
+      { zh: "我有预订。", english: "I have a reservation.", spanish: "Tengo una reserva.", japanese: "予約しています。", korean: "예약했어요." },
+      { zh: "可以办理入住吗？", english: "Can I check in?", spanish: "¿Puedo hacer el check-in?", japanese: "チェックインできますか？", korean: "체크인할 수 있나요?" },
+      { zh: "Wi-Fi 密码是多少？", english: "What is the Wi-Fi password?", spanish: "¿Cuál es la contraseña del Wi-Fi?", japanese: "Wi-Fiのパスワードは何ですか？", korean: "와이파이 비밀번호가 뭐예요?" },
+      { zh: "房间有点问题。", english: "There is a problem with the room.", spanish: "Hay un problema con la habitación.", japanese: "部屋に少し問題があります。", korean: "방에 문제가 조금 있어요." },
+    ],
+    dialogue: [
+      { speaker: "A", zh: "你好，我有预订。", english: "Hello, I have a reservation.", spanish: "Hola, tengo una reserva.", japanese: "こんにちは。予約しています。", korean: "안녕하세요. 예약했어요." },
+      { speaker: "B", zh: "请问您的名字？", english: "May I have your name?", spanish: "¿Cuál es su nombre?", japanese: "お名前をお願いします。", korean: "성함이 어떻게 되세요?" },
+      { speaker: "A", zh: "我还想问一下 Wi-Fi 密码。", english: "I'd also like to ask for the Wi-Fi password.", spanish: "También quisiera preguntar la contraseña del Wi-Fi.", japanese: "Wi-Fiのパスワードも教えてください。", korean: "와이파이 비밀번호도 알려 주세요." },
+    ],
+  },
+  {
+    id: "doctor-pharmacy",
+    group: "life",
+    level: "实用",
+    title: "看病买药",
+    description: "描述不舒服、买药、询问用法。",
+    items: [
+      { zh: "我不舒服。", english: "I don't feel well.", spanish: "No me siento bien.", japanese: "具合が悪いです。", korean: "몸이 안 좋아요." },
+      { zh: "我头疼。", english: "I have a headache.", spanish: "Me duele la cabeza.", japanese: "頭が痛いです。", korean: "머리가 아파요." },
+      { zh: "这个药怎么吃？", english: "How should I take this medicine?", spanish: "¿Cómo debo tomar este medicamento?", japanese: "この薬はどう飲めばいいですか？", korean: "이 약은 어떻게 먹어야 하나요?" },
+      { zh: "需要看医生吗？", english: "Do I need to see a doctor?", spanish: "¿Necesito ver a un médico?", japanese: "医者に診てもらう必要がありますか？", korean: "의사를 봐야 하나요?" },
+    ],
+    dialogue: [
+      { speaker: "A", zh: "我不舒服，有点头疼。", english: "I don't feel well. I have a headache.", spanish: "No me siento bien. Me duele la cabeza.", japanese: "具合が悪くて、少し頭が痛いです。", korean: "몸이 안 좋고 머리가 좀 아파요." },
+      { speaker: "B", zh: "有发烧吗？", english: "Do you have a fever?", spanish: "¿Tiene fiebre?", japanese: "熱はありますか？", korean: "열이 있나요?" },
+      { speaker: "A", zh: "没有，我想买点药。", english: "No. I'd like to buy some medicine.", spanish: "No. Quisiera comprar un medicamento.", japanese: "いいえ。薬を買いたいです。", korean: "아니요. 약을 좀 사고 싶어요." },
+    ],
+  },
+  {
+    id: "emergency-help",
+    group: "life",
+    level: "实用",
+    title: "紧急求助",
+    description: "手机没电、迷路、需要帮助时使用。",
+    items: [
+      { zh: "请帮帮我。", english: "Please help me.", spanish: "Por favor, ayúdeme.", japanese: "助けてください。", korean: "도와주세요." },
+      { zh: "我手机没电了。", english: "My phone is out of battery.", spanish: "Mi teléfono se quedó sin batería.", japanese: "携帯の充電が切れました。", korean: "휴대폰 배터리가 없어요." },
+      { zh: "请说慢一点。", english: "Please speak more slowly.", spanish: "Por favor, hable más despacio.", japanese: "もう少しゆっくり話してください。", korean: "조금 천천히 말해 주세요." },
+      { zh: "我需要去医院。", english: "I need to go to a hospital.", spanish: "Necesito ir al hospital.", japanese: "病院に行く必要があります。", korean: "병원에 가야 해요." },
+    ],
+    dialogue: [
+      { speaker: "A", zh: "不好意思，请帮帮我。", english: "Excuse me, please help me.", spanish: "Disculpe, por favor ayúdeme.", japanese: "すみません、助けてください。", korean: "실례합니다, 도와주세요." },
+      { speaker: "B", zh: "发生什么事了？", english: "What happened?", spanish: "¿Qué pasó?", japanese: "どうしましたか？", korean: "무슨 일이에요?" },
+      { speaker: "A", zh: "我迷路了，手机也没电。", english: "I'm lost, and my phone is out of battery.", spanish: "Estoy perdido y mi teléfono no tiene batería.", japanese: "道に迷って、携帯の充電も切れました。", korean: "길을 잃었고 휴대폰 배터리도 없어요." },
+    ],
+  },
+];
 
 function normalizeLearningLanguage(code) {
   return LEARNING_LANGUAGES[code] ? code : "english";
@@ -806,6 +1186,7 @@ async function setLearningLanguage(code, options = {}) {
   updateTeacherTopicUi();
   render();
   renderChatMessages();
+  if (currentPage === "scenes") renderScenes();
   updateAuthUi(`正在转换成${getLearningLanguageConfig().label}...`);
 
   try {
@@ -824,6 +1205,7 @@ async function setLearningLanguage(code, options = {}) {
     updateLanguageUi();
     render();
     renderChatMessages();
+    if (currentPage === "scenes") renderScenes();
     if (options.sync !== false) queueCloudSync(true);
   }
 }
@@ -1235,6 +1617,267 @@ function normalizeCloudTeacherMessages(messages) {
     .slice(-50);
 }
 
+function normalizeSceneProgress(progress) {
+  const source = progress && typeof progress === "object" ? progress : {};
+  return {
+    completed: Array.isArray(source.completed)
+      ? source.completed
+          .map((id) => String(id || "").trim())
+          .filter((id) => SCENE_LIBRARY.some((scene) => scene.id === id))
+          .slice(0, 200)
+      : [],
+    lastSceneId: typeof source.lastSceneId === "string" ? source.lastSceneId : "",
+  };
+}
+
+function loadSceneProgress(languageCode = currentLearningLanguage) {
+  try {
+    return normalizeSceneProgress(JSON.parse(localStorage.getItem(getLanguageStorageKey(SCENE_PROGRESS_KEY, languageCode)) || "{}"));
+  } catch {
+    return normalizeSceneProgress({});
+  }
+}
+
+function saveSceneProgress(languageCode, progress, options = {}) {
+  localStorage.setItem(getLanguageStorageKey(SCENE_PROGRESS_KEY, languageCode), JSON.stringify(normalizeSceneProgress(progress)));
+  if (options.sync !== false) queueCloudSync();
+}
+
+function getAllSceneProgress() {
+  return Object.keys(LEARNING_LANGUAGES).reduce((all, code) => {
+    all[code] = loadSceneProgress(code);
+    return all;
+  }, {});
+}
+
+function mergeSceneProgress(localProgress, remoteProgress) {
+  const local = normalizeSceneProgress(localProgress);
+  const remote = normalizeSceneProgress(remoteProgress);
+  return {
+    completed: Array.from(new Set([...local.completed, ...remote.completed])),
+    lastSceneId: remote.lastSceneId || local.lastSceneId,
+  };
+}
+
+function getSceneText(item) {
+  return item?.[currentLearningLanguage] || item?.english || "";
+}
+
+function getSceneById(sceneId) {
+  return SCENE_LIBRARY.find((scene) => scene.id === sceneId) || null;
+}
+
+function getSceneLearningItems(scene) {
+  if (!scene) return [];
+  const sourceItems = [...scene.items, ...scene.dialogue];
+  const seen = new Set();
+  return sourceItems
+    .map((item) => ({
+      text: getSceneText(item).trim(),
+      note: item.zh || "",
+      learned: false,
+      learnedAt: null,
+      aiExplanation: "",
+    }))
+    .filter((item) => {
+      const key = item.text.toLowerCase();
+      if (!item.text || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
+
+function addSceneItemToLearning(item, options = {}) {
+  const text = getSceneText(item).trim();
+  if (!text) return false;
+
+  const key = text.toLowerCase();
+  if (savedSentences.some((sentence) => sentence.text.toLowerCase() === key)) return false;
+
+  savedSentences = [
+    { text, note: item.zh || "", learned: false, learnedAt: null, aiExplanation: "" },
+    ...savedSentences,
+  ];
+  saveSentences({ sync: options.sync });
+  render();
+  return true;
+}
+
+function addSceneToLearning(sceneId, options = {}) {
+  const scene = getSceneById(sceneId);
+  if (!scene) return 0;
+
+  const existing = new Set(savedSentences.map((item) => item.text.toLowerCase()));
+  const additions = getSceneLearningItems(scene).filter((item) => !existing.has(item.text.toLowerCase()));
+  if (additions.length) {
+    savedSentences = [...additions, ...savedSentences];
+    saveSentences({ sync: options.sync });
+    render();
+  }
+
+  const progress = loadSceneProgress();
+  if (!progress.completed.includes(scene.id)) progress.completed.push(scene.id);
+  progress.lastSceneId = scene.id;
+  saveSceneProgress(currentLearningLanguage, progress, { sync: options.sync });
+  return additions.length;
+}
+
+function renderScenes() {
+  if (!sceneGroupTabs || !sceneList || !sceneDetail) return;
+
+  const progress = loadSceneProgress();
+  const activeScene = getSceneById(activeSceneId);
+  sceneBackButton.hidden = !activeScene;
+  sceneGroupTabs.hidden = Boolean(activeScene);
+  sceneList.hidden = Boolean(activeScene);
+  sceneDetail.hidden = !activeScene;
+
+  sceneGroupTabs.innerHTML = "";
+  SCENE_GROUPS.forEach((group) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "scene-group-tab";
+    button.classList.toggle("is-active", group.id === currentSceneGroup);
+    button.textContent = group.label;
+    button.addEventListener("click", () => {
+      currentSceneGroup = group.id;
+      activeSceneId = "";
+      renderScenes();
+    });
+    sceneGroupTabs.appendChild(button);
+  });
+
+  if (activeScene) {
+    renderSceneDetail(activeScene, progress);
+    return;
+  }
+
+  sceneList.innerHTML = "";
+  SCENE_LIBRARY.filter((scene) => scene.group === currentSceneGroup).forEach((scene) => {
+    const card = document.createElement("article");
+    card.className = "scene-card";
+    card.classList.toggle("is-complete", progress.completed.includes(scene.id));
+
+    const header = document.createElement("div");
+    header.className = "scene-card-header";
+    const title = document.createElement("h3");
+    title.textContent = scene.title;
+    const tag = document.createElement("span");
+    tag.textContent = scene.level;
+    header.append(title, tag);
+
+    const description = document.createElement("p");
+    description.textContent = scene.description;
+
+    const meta = document.createElement("p");
+    meta.className = "scene-meta";
+    meta.textContent = `${scene.items.length} 个核心句 · ${scene.dialogue.length} 句对话`;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "primary-button";
+    button.textContent = progress.completed.includes(scene.id) ? "继续学习" : "打开场景";
+    button.addEventListener("click", () => {
+      activeSceneId = scene.id;
+      renderScenes();
+    });
+
+    card.append(header, description, meta, button);
+    sceneList.appendChild(card);
+  });
+}
+
+function appendSceneLine(container, item, options = {}) {
+  const row = document.createElement("div");
+  row.className = options.dialogue ? "scene-dialogue-line" : "scene-line";
+
+  const textWrap = document.createElement("div");
+  if (options.dialogue) {
+    const speaker = document.createElement("span");
+    speaker.className = "scene-speaker";
+    speaker.textContent = item.speaker || "";
+    textWrap.appendChild(speaker);
+  }
+
+  const target = document.createElement("strong");
+  target.textContent = getSceneText(item);
+  const note = document.createElement("span");
+  note.textContent = item.zh || "";
+  textWrap.append(target, note);
+
+  const actions = document.createElement("div");
+  actions.className = "scene-line-actions";
+  const speakButton = document.createElement("button");
+  speakButton.type = "button";
+  speakButton.className = "round-button";
+  speakButton.textContent = "▶";
+  speakButton.setAttribute("aria-label", "朗读");
+  speakButton.addEventListener("click", () => speak(getSceneText(item), "sentence"));
+
+  const addButton = document.createElement("button");
+  addButton.type = "button";
+  addButton.className = "round-button";
+  addButton.textContent = "+";
+  addButton.setAttribute("aria-label", "加入句子");
+  addButton.addEventListener("click", () => {
+    addSceneItemToLearning(item);
+    addButton.textContent = "✓";
+  });
+
+  actions.append(speakButton, addButton);
+  row.append(textWrap, actions);
+  container.appendChild(row);
+}
+
+function renderSceneDetail(scene, progress) {
+  sceneDetail.innerHTML = "";
+
+  const header = document.createElement("div");
+  header.className = "scene-detail-header";
+  const title = document.createElement("h2");
+  title.textContent = scene.title;
+  const description = document.createElement("p");
+  description.textContent = scene.description;
+  header.append(title, description);
+
+  const actionRow = document.createElement("div");
+  actionRow.className = "scene-actions";
+  const addAllButton = document.createElement("button");
+  addAllButton.type = "button";
+  addAllButton.className = "primary-button";
+  addAllButton.textContent = progress.completed.includes(scene.id) ? "已加入，继续复习" : "加入学习";
+  addAllButton.addEventListener("click", () => {
+    const count = addSceneToLearning(scene.id);
+    updateAuthUi(count ? `已加入 ${count} 句。` : "这个场景已经在句子里。");
+    renderScenes();
+  });
+
+  const practiceButton = document.createElement("button");
+  practiceButton.type = "button";
+  practiceButton.className = "ghost-button";
+  practiceButton.textContent = "默写练习";
+  practiceButton.addEventListener("click", () => {
+    addSceneToLearning(scene.id);
+    setPage("exam");
+  });
+
+  actionRow.append(addAllButton, practiceButton);
+
+  const coreTitle = document.createElement("h3");
+  coreTitle.textContent = "核心句";
+  const coreList = document.createElement("div");
+  coreList.className = "scene-lines";
+  scene.items.forEach((item) => appendSceneLine(coreList, item));
+
+  const dialogueTitle = document.createElement("h3");
+  dialogueTitle.textContent = "朋友对话";
+  const dialogueList = document.createElement("div");
+  dialogueList.className = "scene-dialogue";
+  scene.dialogue.forEach((line) => appendSceneLine(dialogueList, line, { dialogue: true }));
+
+  sceneDetail.append(header, actionRow, coreTitle, coreList, dialogueTitle, dialogueList);
+}
+
 function normalizeCloudSettings(settings) {
   const source = settings && typeof settings === "object" ? settings : {};
   return {
@@ -1283,6 +1926,7 @@ function getCloudPayload() {
       avatar: getAvatarSource(),
     },
     learningLanguage: currentLearningLanguage,
+    sceneProgress: getAllSceneProgress(),
     languages,
     sentences: languages[currentLearningLanguage].sentences,
     teacherMessages: languages[currentLearningLanguage].teacherMessages,
@@ -1324,6 +1968,10 @@ async function pullCloudDataAndMerge() {
       const remoteMessages = remoteLanguages[code].teacherMessages;
       const mergedMessages = remoteMessages.length > localMessages.length ? remoteMessages : localMessages;
       saveTeacherMessagesForLanguage(code, mergedMessages);
+
+      if (remoteData.sceneProgress && typeof remoteData.sceneProgress === "object") {
+        saveSceneProgress(code, mergeSceneProgress(loadSceneProgress(code), remoteData.sceneProgress[code]), { sync: false });
+      }
     });
 
     if (remoteSettings.learningLanguage && !localStorage.getItem(LEARNING_LANGUAGE_KEY)) {
@@ -1339,6 +1987,7 @@ async function pullCloudDataAndMerge() {
     updateLanguageUi();
     render();
     renderChatMessages();
+    if (currentPage === "scenes") renderScenes();
     updateAuthUi();
     updateAuthUi("同步完成。");
     queueCloudSync(true);
@@ -2331,26 +2980,36 @@ function nextExamQuestion() {
 
 function setPage(page) {
   const wasTeacher = teacherPage.classList.contains("is-active");
-  currentPage = page === "teacher" || page === "exam" || page === "friends" ? page : "sentences";
+  currentPage = page === "teacher" || page === "exam" || page === "scenes" || page === "friends" ? page : "sentences";
   const isTeacher = currentPage === "teacher";
   const isExam = currentPage === "exam";
+  const isScenes = currentPage === "scenes";
   const isFriends = currentPage === "friends";
 
-  sentencesPage.classList.toggle("is-active", !isTeacher && !isExam && !isFriends);
+  sentencesPage.classList.toggle("is-active", !isTeacher && !isExam && !isScenes && !isFriends);
   examPage.classList.toggle("is-active", isExam);
+  scenesPage.classList.toggle("is-active", isScenes);
   teacherPage.classList.toggle("is-active", isTeacher);
   friendsPage.classList.toggle("is-active", isFriends);
-  sentencesNav.classList.toggle("is-active", !isTeacher && !isExam && !isFriends);
-  examNav.classList.toggle("is-active", isExam);
+  sentencesNav.classList.toggle("is-active", !isTeacher && !isExam && !isScenes && !isFriends);
+  scenesNav.classList.toggle("is-active", isScenes);
   teacherNav.classList.toggle("is-active", isTeacher);
   friendsNav.classList.toggle("is-active", isFriends);
-  sentencesNav.setAttribute("aria-current", !isTeacher && !isExam && !isFriends ? "page" : "false");
-  examNav.setAttribute("aria-current", isExam ? "page" : "false");
+  sentencesNav.setAttribute("aria-current", !isTeacher && !isExam && !isScenes && !isFriends ? "page" : "false");
+  scenesNav.setAttribute("aria-current", isScenes ? "page" : "false");
   teacherNav.setAttribute("aria-current", isTeacher ? "page" : "false");
   friendsNav.setAttribute("aria-current", isFriends ? "page" : "false");
-  clearButton.classList.toggle("is-hidden", isTeacher || isExam || isFriends);
-  pageEyebrow.textContent = isTeacher ? (teacherFreeMode ? "Off-duty AI" : "AI Teacher") : isExam ? "Sentence Quiz" : isFriends ? "Community" : "Sentence Reader";
-  pageTitle.textContent = isTeacher ? (teacherFreeMode ? "闲聊模式" : "智语导师") : isExam ? "考试" : isFriends ? "好友" : "句读";
+  clearButton.classList.toggle("is-hidden", isTeacher || isExam || isScenes || isFriends);
+  pageEyebrow.textContent = isTeacher
+    ? (teacherFreeMode ? "Off-duty AI" : "AI Teacher")
+    : isExam
+      ? "Sentence Review"
+      : isScenes
+        ? "Daily Scenes"
+        : isFriends
+          ? "Community"
+          : "Sentence Reader";
+  pageTitle.textContent = isTeacher ? (teacherFreeMode ? "闲聊模式" : "智语导师") : isExam ? "复习" : isScenes ? "场景" : isFriends ? "好友" : "句读";
   document.body.dataset.page = currentPage;
   localStorage.setItem(APP_PAGE_KEY, currentPage);
 
@@ -2370,6 +3029,11 @@ function setPage(page) {
     closeWordSheet();
     renderExam(true);
     examAnswer.focus();
+  }
+
+  if (isScenes) {
+    closeWordSheet();
+    renderScenes();
   }
 
   if (isFriends) {
@@ -3461,11 +4125,16 @@ document.addEventListener("pointerdown", (event) => {
 });
 learningTab.addEventListener("click", () => setCurrentView("learning"));
 learnedTab.addEventListener("click", () => setCurrentView("learned"));
+reviewButton?.addEventListener("click", () => setPage("exam"));
 speedSlider.addEventListener("input", updateSpeedLabel);
 sentencesNav.addEventListener("click", () => setPage("sentences"));
-examNav.addEventListener("click", () => setPage("exam"));
+scenesNav.addEventListener("click", () => setPage("scenes"));
 teacherNav.addEventListener("click", () => setPage("teacher"));
 friendsNav.addEventListener("click", () => setPage("friends"));
+sceneBackButton?.addEventListener("click", () => {
+  activeSceneId = "";
+  renderScenes();
+});
 examCheckButton.addEventListener("click", checkExamAnswer);
 examDontKnowButton.addEventListener("click", showExamAnswer);
 examNextButton.addEventListener("click", nextExamQuestion);
@@ -3512,7 +4181,7 @@ teacherFreeMode = localStorage.getItem(TEACHER_FREE_KEY) === "true";
 if (teacherFreeMode) teacherTopicMode = false;
 currentView = localStorage.getItem(VIEW_KEY) === "learned" ? "learned" : "learning";
 currentExamPosition = Number(localStorage.getItem(getLanguageStorageKey(EXAM_INDEX_KEY)) || localStorage.getItem(EXAM_INDEX_KEY) || "0") || 0;
-currentPage = ["teacher", "exam", "friends"].includes(localStorage.getItem(APP_PAGE_KEY))
+currentPage = ["teacher", "exam", "scenes", "friends"].includes(localStorage.getItem(APP_PAGE_KEY))
   ? localStorage.getItem(APP_PAGE_KEY)
   : "sentences";
 updateSpeedLabel();
