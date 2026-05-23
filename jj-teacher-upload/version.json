@@ -1,6 +1,6 @@
 {
-  "versionCode": 38,
-  "versionName": "free38",
-  "apkUrl": "https://files.catbox.moe/ipvthv.apk",
-  "notes": "单词/场景页新增高频生活单词分类，场景默写不再自动加入句子，并扩展离线点词词库。"
+  "versionCode": 39,
+  "versionName": "free39",
+  "apkUrl": "https://files.catbox.moe/81ui6v.apk",
+  "notes": "新增强制登录、管理员用户管理、封禁/删除用户、管理员消息提醒，并延长启动封面停留时间。"
 }

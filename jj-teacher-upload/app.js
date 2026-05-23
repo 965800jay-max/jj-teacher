@@ -56,6 +56,18 @@ const authSubmitButton = document.querySelector("#authSubmitButton");
 const authModeButton = document.querySelector("#authModeButton");
 const authLogoutButton = document.querySelector("#authLogoutButton");
 const authCancelButton = document.querySelector("#authCancelButton");
+const adminPanel = document.querySelector("#adminPanel");
+const adminUserList = document.querySelector("#adminUserList");
+const adminRefreshButton = document.querySelector("#adminRefreshButton");
+const adminMessageTitle = document.querySelector("#adminMessageTitle");
+const adminMessageBody = document.querySelector("#adminMessageBody");
+const adminSendAllButton = document.querySelector("#adminSendAllButton");
+const adminBanValue = document.querySelector("#adminBanValue");
+const adminBanUnit = document.querySelector("#adminBanUnit");
+const adminMessageSheet = document.querySelector("#adminMessageSheet");
+const adminMessageSheetTitle = document.querySelector("#adminMessageSheetTitle");
+const adminMessageSheetBody = document.querySelector("#adminMessageSheetBody");
+const adminMessageCloseButton = document.querySelector("#adminMessageCloseButton");
 const chatMessagesEl = document.querySelector("#chatMessages");
 const teacherInput = document.querySelector("#teacherInput");
 const teacherSendButton = document.querySelector("#teacherSendButton");
@@ -101,8 +113,9 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free38";
-const APP_VERSION_CODE = 38;
+const APP_BUILD_TAG = "free39";
+const APP_VERSION_CODE = 39;
+const AUTH_REQUIRED = true;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
 const UPDATE_DISMISS_KEY = "sentence-reader-dismissed-update";
 const UPDATE_CHECK_TIMEOUT_MS = 6500;
@@ -110,6 +123,7 @@ const CLOUD_SYNC_DEBOUNCE_MS = 900;
 const LANGUAGE_CONVERT_SENTENCE_BATCH_SIZE = 40;
 const LANGUAGE_CONVERT_MESSAGE_LIMIT = 50;
 const TEACHER_OPENING_TOPIC_COOLDOWN_MS = 6 * 60 * 60 * 1000;
+const ADMIN_MESSAGE_POLL_MS = 30000;
 const DOUBLE_TAP_MS = 420;
 const DELETE_CONFIRM_MS = 1500;
 let currentWord = "";
@@ -142,6 +156,10 @@ let teacherOpeningTopicInFlight = false;
 let languageSwitchInFlight = false;
 let friends = [];
 let friendsLoadedAt = 0;
+let adminUsers = [];
+let adminLoadedAt = 0;
+let adminMessagePollTimer = 0;
+let adminMessageAlertActive = false;
 let pendingUpdateInfo = null;
 let authToken = "";
 let authUser = null;
@@ -1543,11 +1561,15 @@ function saveAuthSession(data) {
   localStorage.setItem(AUTH_TOKEN_KEY, authToken);
   localStorage.setItem(AUTH_USER_KEY, JSON.stringify(authUser));
   updateAuthUi("已登录，正在同步学习内容。");
+  startAdminMessagePolling();
 }
 
 function clearAuthSession() {
   authToken = "";
   authUser = null;
+  stopAdminMessagePolling();
+  adminUsers = [];
+  adminLoadedAt = 0;
   localStorage.removeItem(AUTH_TOKEN_KEY);
   localStorage.removeItem(AUTH_USER_KEY);
   updateAuthUi();
@@ -1555,6 +1577,16 @@ function clearAuthSession() {
 
 function getAuthDisplayName() {
   return authUser?.name || authUser?.email || "账号";
+}
+
+function isAdminAccount() {
+  return Boolean(authUser?.isAdmin || authUser?.role === "admin");
+}
+
+function enforceAuthGate(message = "请先登录后使用智语导师。") {
+  if (!AUTH_REQUIRED || authToken) return;
+  showAuthSheet("login");
+  if (authStatusText) authStatusText.textContent = message;
 }
 
 function updateAuthUi(status = "") {
@@ -1568,6 +1600,7 @@ function updateAuthUi(status = "") {
   if (authProfileEmail) authProfileEmail.textContent = authUser?.email || "登录后同步学习内容";
   if (profileNameInput && authUser) profileNameInput.value = authUser.name || "";
   if (authStatusText && status) authStatusText.textContent = status;
+  if (adminPanel) adminPanel.hidden = !(authMode === "account" && isAdminAccount());
 }
 
 function setAuthMode(mode) {
@@ -1583,6 +1616,7 @@ function setAuthMode(mode) {
   editProfileButton.hidden = !isAccount;
   profileEditor.hidden = true;
   accountSettings.hidden = !isAccount;
+  if (adminPanel) adminPanel.hidden = !(isAccount && isAdminAccount());
   authName.hidden = !isRegister;
   authEmail.hidden = isAccount;
   authPassword.hidden = isAccount;
@@ -1591,8 +1625,16 @@ function setAuthMode(mode) {
   authSubmitButton.textContent = isRegister ? "注册并同步" : "登录";
   authModeButton.textContent = isAccount ? "立即同步" : isRegister ? "已有账号？登录" : "还没有账号？注册";
   authCancelButton.textContent = isAccount ? "关闭" : "稍后";
+  authCancelButton.hidden = AUTH_REQUIRED && !authToken;
+  if (authEmail) {
+    authEmail.placeholder = isRegister ? "邮箱" : "邮箱或管理员账号";
+  }
+  if (authPassword) {
+    authPassword.placeholder = isRegister ? "密码，至少 6 位" : "密码";
+  }
   renderLanguageOptions();
   updateAuthUi();
+  if (isAccount && isAdminAccount()) loadAdminUsers();
 
   if (!isAccount) {
     authPassword.value = "";
@@ -1835,12 +1877,16 @@ function showAuthSheet(mode = authUser ? "account" : "login") {
   if (!authSheet) return;
 
   authSheet.hidden = false;
-  setAuthMode(mode);
+  setAuthMode(authUser || mode !== "account" ? mode : "login");
   requestAnimationFrame(() => authSheet.classList.add("is-open"));
 }
 
-function hideAuthSheet() {
+function hideAuthSheet(options = {}) {
   if (!authSheet) return;
+  if (AUTH_REQUIRED && !authToken && !options.force) {
+    enforceAuthGate();
+    return;
+  }
 
   authSheet.classList.remove("is-open");
   setTimeout(() => {
@@ -1854,7 +1900,7 @@ async function submitAuth() {
   const password = authPassword.value;
 
   if (!email || !password || (authMode === "register" && !name)) {
-    authStatusText.textContent = authMode === "register" ? "昵称、邮箱和密码都要填。" : "邮箱和密码都要填。";
+    authStatusText.textContent = authMode === "register" ? "昵称、邮箱和密码都要填。" : "账号和密码都要填。";
     return;
   }
 
@@ -1870,6 +1916,7 @@ async function submitAuth() {
     hideAuthSheet();
     await pullCloudDataAndMerge();
     await loadFriends(true);
+    if (isAdminAccount()) await loadAdminUsers(true);
   } catch (error) {
     authStatusText.textContent = error.message || "登录失败，请稍后再试。";
   } finally {
@@ -1883,7 +1930,8 @@ async function logoutAuth() {
   friends = [];
   friendsLoadedAt = 0;
   renderFriends();
-  hideAuthSheet();
+  hideAuthSheet({ force: true });
+  if (AUTH_REQUIRED) setTimeout(() => enforceAuthGate("已退出登录，请重新登录。"), 180);
 
   if (!token) return;
   try {
@@ -2013,6 +2061,282 @@ async function loadFriends(force = false) {
     empty.className = "friend-empty";
     empty.textContent = error.message || "好友列表暂时加载失败。";
     friendList.appendChild(empty);
+  }
+}
+
+async function verifyAuthSession() {
+  if (!authToken) {
+    enforceAuthGate();
+    return;
+  }
+
+  try {
+    const data = await authApiRequest("/api/auth/me", { method: "GET" });
+    authUser = { ...(authUser || {}), ...(data.user || {}) };
+    if (authUser) {
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(authUser));
+      updateAuthUi();
+    }
+    startAdminMessagePolling();
+    await pullCloudDataAndMerge();
+    await loadFriends(true);
+    if (isAdminAccount()) await loadAdminUsers(true);
+  } catch (error) {
+    clearAuthSession();
+    enforceAuthGate(error.message || "登录已失效，请重新登录。");
+  }
+}
+
+function getAdminBanMinutes() {
+  const value = Math.max(1, Number(adminBanValue?.value || 30) || 30);
+  const unit = adminBanUnit?.value || "minutes";
+  if (unit === "days") return Math.round(value * 24 * 60);
+  if (unit === "hours") return Math.round(value * 60);
+  return Math.round(value);
+}
+
+function formatAdminUserStatus(user) {
+  if (user?.bannedUntil && Number(user.bannedUntil) > Date.now()) {
+    return `封禁到 ${new Date(Number(user.bannedUntil)).toLocaleString()}`;
+  }
+  return user?.isAdmin ? "管理员" : "正常";
+}
+
+function renderAdminUsers(status = "") {
+  if (!adminUserList) return;
+
+  adminUserList.innerHTML = "";
+  if (status) {
+    const line = document.createElement("p");
+    line.className = "friend-empty";
+    line.textContent = status;
+    adminUserList.appendChild(line);
+    return;
+  }
+
+  const visibleUsers = adminUsers.filter((user) => !user.isAdmin);
+  if (!visibleUsers.length) {
+    const empty = document.createElement("p");
+    empty.className = "friend-empty";
+    empty.textContent = "还没有普通用户。";
+    adminUserList.appendChild(empty);
+    return;
+  }
+
+  visibleUsers.forEach((user) => {
+    const card = document.createElement("article");
+    card.className = "admin-user-card";
+
+    const main = document.createElement("div");
+    main.className = "admin-user-main";
+
+    const info = document.createElement("div");
+    const name = document.createElement("strong");
+    name.textContent = user.name || "未命名用户";
+    const email = document.createElement("span");
+    email.textContent = user.email || user.id;
+    info.append(name, email);
+
+    const statusText = document.createElement("span");
+    statusText.className = "admin-user-status";
+    statusText.classList.toggle("is-banned", Boolean(user.bannedUntil && Number(user.bannedUntil) > Date.now()));
+    statusText.textContent = formatAdminUserStatus(user);
+    main.append(info, statusText);
+
+    const actions = document.createElement("div");
+    actions.className = "admin-user-actions";
+
+    const messageButton = document.createElement("button");
+    messageButton.type = "button";
+    messageButton.className = "ghost-button";
+    messageButton.textContent = "发消息";
+    messageButton.addEventListener("click", () => sendAdminMessage(user.id));
+
+    const banButton = document.createElement("button");
+    banButton.type = "button";
+    banButton.className = "ghost-button";
+    banButton.textContent = user.bannedUntil && Number(user.bannedUntil) > Date.now() ? "改封禁" : "封禁";
+    banButton.addEventListener("click", () => banAdminUser(user.id));
+
+    const unbanButton = document.createElement("button");
+    unbanButton.type = "button";
+    unbanButton.className = "ghost-button";
+    unbanButton.textContent = "解封";
+    unbanButton.disabled = !(user.bannedUntil && Number(user.bannedUntil) > Date.now());
+    unbanButton.addEventListener("click", () => unbanAdminUser(user.id));
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "ghost-button";
+    deleteButton.textContent = "删除";
+    deleteButton.addEventListener("click", () => deleteAdminUser(user.id, user.name || user.email || "这个用户"));
+
+    actions.append(messageButton, banButton, unbanButton, deleteButton);
+    card.append(main, actions);
+    adminUserList.appendChild(card);
+  });
+}
+
+async function loadAdminUsers(force = false) {
+  if (!authToken || !isAdminAccount() || (!force && Date.now() - adminLoadedAt < 8000)) return;
+
+  renderAdminUsers("正在加载用户...");
+  try {
+    const data = await authApiRequest("/api/admin/users", { method: "GET" });
+    adminUsers = Array.isArray(data.users) ? data.users : [];
+    adminLoadedAt = Date.now();
+    renderAdminUsers();
+  } catch (error) {
+    renderAdminUsers(error.message || "用户管理暂时加载失败。");
+  }
+}
+
+async function banAdminUser(userId) {
+  if (!userId) return;
+
+  renderAdminUsers("正在封禁用户...");
+  try {
+    await authApiRequest("/api/admin/ban", {
+      method: "POST",
+      body: JSON.stringify({ userId, durationMinutes: getAdminBanMinutes() }),
+    });
+    await loadAdminUsers(true);
+  } catch (error) {
+    renderAdminUsers(error.message || "封禁失败。");
+  }
+}
+
+async function unbanAdminUser(userId) {
+  if (!userId) return;
+
+  renderAdminUsers("正在解封用户...");
+  try {
+    await authApiRequest("/api/admin/unban", {
+      method: "POST",
+      body: JSON.stringify({ userId }),
+    });
+    await loadAdminUsers(true);
+  } catch (error) {
+    renderAdminUsers(error.message || "解封失败。");
+  }
+}
+
+async function deleteAdminUser(userId, label) {
+  if (!userId) return;
+  if (!window.confirm(`确定删除 ${label} 吗？这个账号会被移除。`)) return;
+
+  renderAdminUsers("正在删除用户...");
+  try {
+    await authApiRequest("/api/admin/delete", {
+      method: "POST",
+      body: JSON.stringify({ userId }),
+    });
+    await loadAdminUsers(true);
+  } catch (error) {
+    renderAdminUsers(error.message || "删除失败。");
+  }
+}
+
+async function sendAdminMessage(userId = "") {
+  const title = adminMessageTitle?.value.trim() || "智语导师管理员消息";
+  const body = adminMessageBody?.value.trim();
+  if (!body) {
+    renderAdminUsers("先填写推送内容。");
+    return;
+  }
+
+  renderAdminUsers("正在发送消息...");
+  try {
+    const data = await authApiRequest("/api/admin/message", {
+      method: "POST",
+      body: JSON.stringify({ userId, title, body }),
+    });
+    renderAdminUsers(`已发送给 ${data.count || 0} 个用户。`);
+    await loadAdminUsers(true);
+  } catch (error) {
+    renderAdminUsers(error.message || "消息发送失败。");
+  }
+}
+
+function startAdminMessagePolling() {
+  stopAdminMessagePolling();
+  if (!authToken || isAdminAccount()) return;
+  pollAdminMessages();
+  adminMessagePollTimer = window.setInterval(pollAdminMessages, ADMIN_MESSAGE_POLL_MS);
+}
+
+function stopAdminMessagePolling() {
+  if (!adminMessagePollTimer) return;
+  window.clearInterval(adminMessagePollTimer);
+  adminMessagePollTimer = 0;
+}
+
+async function pollAdminMessages() {
+  if (!authToken || isAdminAccount() || adminMessageAlertActive) return;
+
+  try {
+    const data = await authApiRequest("/api/messages", { method: "GET" });
+    const messages = Array.isArray(data.messages) ? data.messages : [];
+    if (!messages.length) return;
+
+    const latest = messages[messages.length - 1];
+    showAdminMessage(latest.title || "管理员消息", latest.body || "");
+    triggerAdminMessageFeedback();
+    await authApiRequest("/api/messages/read", {
+      method: "POST",
+      body: JSON.stringify({ ids: messages.map((message) => message.id).filter(Boolean) }),
+    });
+  } catch (error) {
+    if (/登录|失效|过期|banned|ban|封禁/i.test(error.message || "")) {
+      clearAuthSession();
+      enforceAuthGate(error.message || "请重新登录。");
+    }
+  }
+}
+
+function showAdminMessage(title, body) {
+  if (!adminMessageSheet) return;
+  adminMessageAlertActive = true;
+  adminMessageSheetTitle.textContent = title;
+  adminMessageSheetBody.textContent = body || "管理员给你发来一条消息。";
+  adminMessageSheet.hidden = false;
+  requestAnimationFrame(() => adminMessageSheet.classList.add("is-open"));
+}
+
+function hideAdminMessage() {
+  if (!adminMessageSheet) return;
+  adminMessageSheet.classList.remove("is-open");
+  adminMessageAlertActive = false;
+  setTimeout(() => {
+    adminMessageSheet.hidden = true;
+  }, 160);
+}
+
+function triggerAdminMessageFeedback() {
+  try {
+    navigator.vibrate?.([420, 120, 420]);
+  } catch {
+    // Vibration is best-effort and depends on the device.
+  }
+
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    const context = new AudioContextClass();
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    oscillator.type = "sine";
+    oscillator.frequency.value = 880;
+    gain.gain.setValueAtTime(0.001, context.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.18, context.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.34);
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.start();
+    oscillator.stop(context.currentTime + 0.36);
+    setTimeout(() => context.close(), 520);
+  } catch {
+    // Some mobile webviews only allow sound after a user gesture.
   }
 }
 
@@ -2513,6 +2837,7 @@ function openScenePractice(sceneId) {
   sceneExamItems = getSceneLearningItems(scene);
   currentExamPosition = 0;
   examReturnSceneId = sceneId;
+  pushScenePracticeHistory(sceneId);
   setPage("exam");
 }
 
@@ -2549,6 +2874,18 @@ function replaceSceneDetailHistoryWithList() {
   }
 }
 
+function pushScenePracticeHistory(sceneId) {
+  try {
+    window.history.pushState(
+      { ...(window.history.state || {}), zhiyuSceneDetail: false, zhiyuScenePractice: true, sceneId },
+      "",
+      window.location.href
+    );
+  } catch {
+    // History state is a progressive enhancement for native-style back gestures.
+  }
+}
+
 function returnToSceneList(options = {}) {
   if (!activeSceneId) return;
 
@@ -2557,7 +2894,7 @@ function returnToSceneList(options = {}) {
   if (options.replaceHistory) replaceSceneDetailHistoryWithList();
 }
 
-function returnToSceneFromExam() {
+function returnToSceneFromExam(options = {}) {
   const scene = getSceneById(examReturnSceneId);
   if (!scene) return false;
 
@@ -2565,8 +2902,35 @@ function returnToSceneFromExam() {
   currentSceneGroup = scene.group || currentSceneGroup;
   activeSceneId = scene.id;
   setPage("scenes");
-  pushSceneDetailHistory(scene.id);
+  if (options.replaceHistory) {
+    try {
+      window.history.replaceState(
+        { ...(window.history.state || {}), zhiyuSceneDetail: true, zhiyuScenePractice: false, sceneId: scene.id },
+        "",
+        window.location.href
+      );
+    } catch {
+      // Ignore unsupported history writes.
+    }
+  } else {
+    pushSceneDetailHistory(scene.id);
+  }
   renderScenes();
+  return true;
+}
+
+function requestSceneExamBack() {
+  if (!canReturnFromSceneExam()) return false;
+
+  clearTimeout(sceneHistoryFallbackTimer);
+  if (window.history.state?.zhiyuScenePractice && window.history.length > 1) {
+    window.history.back();
+    sceneHistoryFallbackTimer = window.setTimeout(() => {
+      if (examReturnSceneId) returnToSceneFromExam({ replaceHistory: true });
+    }, 260);
+  } else {
+    returnToSceneFromExam({ replaceHistory: true });
+  }
   return true;
 }
 
@@ -2586,13 +2950,18 @@ function requestSceneSystemBack() {
 }
 
 function requestAppSystemBack() {
-  if (canReturnFromSceneExam()) return returnToSceneFromExam();
+  if (canReturnFromSceneExam()) return requestSceneExamBack();
   return requestSceneSystemBack();
 }
 
 function handleScenePopState(event) {
   clearTimeout(sceneHistoryFallbackTimer);
   const state = event.state || {};
+
+  if (currentPage === "exam" && examReturnSceneId && !state.zhiyuScenePractice) {
+    returnToSceneFromExam({ replaceHistory: true });
+    return;
+  }
 
   if (activeSceneId && !state.zhiyuSceneDetail) {
     returnToSceneList();
@@ -4860,6 +5229,9 @@ authSubmitButton?.addEventListener("click", submitAuth);
 editProfileButton?.addEventListener("click", () => setProfileEditing(profileEditor?.hidden !== false));
 saveProfileButton?.addEventListener("click", saveProfile);
 refreshFriendsButton?.addEventListener("click", () => loadFriends(true));
+adminRefreshButton?.addEventListener("click", () => loadAdminUsers(true));
+adminSendAllButton?.addEventListener("click", () => sendAdminMessage(""));
+adminMessageCloseButton?.addEventListener("click", hideAdminMessage);
 authModeButton?.addEventListener("click", () => {
   if (authMode === "account") {
     pullCloudDataAndMerge();
@@ -4944,5 +5316,9 @@ updateAuthUi();
 render();
 renderChatMessages();
 setPage(currentPage);
-if (authToken) setTimeout(pullCloudDataAndMerge, 700);
+if (authToken) {
+  setTimeout(verifyAuthSession, 450);
+} else {
+  setTimeout(() => enforceAuthGate("请先登录后使用智语导师。"), 300);
+}
 setTimeout(checkForAppUpdate, 900);

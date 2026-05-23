@@ -3306,7 +3306,8 @@ textarea::placeholder,
 
 .account-profile[hidden],
 .account-settings[hidden],
-.profile-editor[hidden] {
+.profile-editor[hidden],
+.admin-panel[hidden] {
   display: none;
 }
 
@@ -3353,6 +3354,91 @@ textarea::placeholder,
   border-radius: 8px;
   padding: 10px;
   background: #050505;
+}
+
+.admin-panel {
+  display: grid;
+  gap: 9px;
+  max-height: min(42vh, 420px);
+  overflow: auto;
+  border: 1px solid #262626;
+  border-radius: 8px;
+  padding: 10px;
+  background: #050505;
+}
+
+.admin-message-box {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-message-body {
+  min-height: 82px;
+  padding-top: 10px;
+  resize: vertical;
+}
+
+.admin-ban-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px;
+  gap: 8px;
+}
+
+.admin-user-list {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-user-card {
+  display: grid;
+  gap: 8px;
+  border: 1px solid #262626;
+  border-radius: 8px;
+  padding: 10px;
+  background: #0b0b0b;
+}
+
+.admin-user-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: start;
+}
+
+.admin-user-main strong,
+.admin-user-main span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-user-main strong {
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.admin-user-main span,
+.admin-user-status {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.admin-user-status.is-banned {
+  color: #fca5a5;
+}
+
+.admin-user-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.admin-user-actions .ghost-button,
+.admin-user-actions .primary-button {
+  min-height: 36px;
+  padding: 0 8px;
+  font-size: 12px;
 }
 
 .profile-editor {
@@ -3517,6 +3603,57 @@ textarea::placeholder,
 
 .auth-input:focus {
   border-color: #ffffff;
+}
+
+.admin-message-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: end center;
+  padding: 18px max(14px, calc((100vw - 520px) / 2 + 14px)) 22px;
+  background: rgba(0, 0, 0, 0.76);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+
+.admin-message-sheet.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.admin-message-sheet[hidden] {
+  display: none;
+}
+
+.admin-message-card {
+  display: grid;
+  gap: 10px;
+  width: min(100%, 492px);
+  border: 1px solid #303030;
+  border-radius: 8px;
+  padding: 16px;
+  background: #0b0b0b;
+  color: #ffffff;
+  transform: translateY(18px);
+  transition: transform 180ms ease;
+}
+
+.admin-message-sheet.is-open .admin-message-card {
+  transform: translateY(0);
+}
+
+.admin-message-card h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 20px;
+}
+
+.admin-message-card p {
+  margin: 0;
+  color: #d4d4d4;
+  line-height: 1.55;
 }
 
 .review-panel,

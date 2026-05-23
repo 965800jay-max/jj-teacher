@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#000000" />
     <title>智语导师</title>
-    <link rel="stylesheet" href="./styles.css?v=20260523-free38" />
+    <link rel="stylesheet" href="./styles.css?v=20260523-free39" />
   </head>
   <body>
     <main class="app-shell">
@@ -193,9 +193,27 @@
           <p class="settings-title">学习语言</p>
           <div class="language-options" id="languageOptions" aria-label="切换学习语言"></div>
         </section>
+        <section class="admin-panel" id="adminPanel" hidden>
+          <p class="settings-title">用户管理</p>
+          <div class="admin-message-box">
+            <input class="auth-input" id="adminMessageTitle" type="text" placeholder="推送标题" autocomplete="off" />
+            <textarea class="auth-input admin-message-body" id="adminMessageBody" placeholder="推送内容" rows="3"></textarea>
+            <button class="primary-button" id="adminSendAllButton" type="button">发给全部用户</button>
+          </div>
+          <div class="admin-ban-row">
+            <input class="auth-input" id="adminBanValue" type="number" min="1" value="30" inputmode="numeric" aria-label="封禁时长" />
+            <select class="auth-input" id="adminBanUnit" aria-label="封禁单位">
+              <option value="minutes">分钟</option>
+              <option value="hours">小时</option>
+              <option value="days">天</option>
+            </select>
+          </div>
+          <button class="ghost-button" id="adminRefreshButton" type="button">刷新用户</button>
+          <div class="admin-user-list" id="adminUserList" aria-live="polite"></div>
+        </section>
         <input class="auth-input" id="authName" type="text" placeholder="昵称" autocomplete="name" hidden />
-        <input class="auth-input" id="authEmail" type="email" placeholder="邮箱" autocomplete="email" />
-        <input class="auth-input" id="authPassword" type="password" placeholder="密码，至少 6 位" autocomplete="current-password" />
+        <input class="auth-input" id="authEmail" type="text" placeholder="邮箱或管理员账号" autocomplete="email" />
+        <input class="auth-input" id="authPassword" type="password" placeholder="密码" autocomplete="current-password" />
         <button class="primary-button" id="authSubmitButton" type="button">登录</button>
         <button class="ghost-button" id="authModeButton" type="button">还没有账号？注册</button>
         <button class="ghost-button" id="authLogoutButton" type="button" hidden>退出登录</button>
@@ -203,7 +221,16 @@
       </div>
     </section>
 
-    <script src="./config.js?v=20260523-free38"></script>
-    <script src="./app.js?v=20260523-free38"></script>
+    <section class="admin-message-sheet" id="adminMessageSheet" hidden>
+      <div class="admin-message-card" role="dialog" aria-modal="true" aria-labelledby="adminMessageSheetTitle">
+        <p class="auth-kicker">Admin Message</p>
+        <h2 id="adminMessageSheetTitle">管理员消息</h2>
+        <p id="adminMessageSheetBody"></p>
+        <button class="primary-button" id="adminMessageCloseButton" type="button">知道了</button>
+      </div>
+    </section>
+
+    <script src="./config.js?v=20260523-free39"></script>
+    <script src="./app.js?v=20260523-free39"></script>
   </body>
 </html>

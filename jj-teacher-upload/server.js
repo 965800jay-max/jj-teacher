@@ -41,6 +41,10 @@ const dataDir = process.env.DATA_DIR || path.join(root, "data");
 const userStoreFile = path.join(dataDir, "users.json");
 const authTokenTtlMs = 1000 * 60 * 60 * 24 * 30;
 const maxUserDataBytes = 1000 * 1000;
+const adminUserId = "admin";
+const adminUsername = "admin";
+const adminPassword = "admin";
+const maxAdminMessages = 80;
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -113,20 +117,24 @@ async function loadUserStore() {
   try {
     const raw = await fs.readFile(userStoreFile, "utf8");
     const store = JSON.parse(raw);
-    return {
+    const cleanStore = {
       users: store && typeof store.users === "object" ? store.users : {},
       sessions: store && typeof store.sessions === "object" ? store.sessions : {},
     };
+    cleanStore._dirty = ensureAdminUser(cleanStore);
+    return cleanStore;
   } catch (error) {
     if (error.code !== "ENOENT") throw error;
-    return { users: {}, sessions: {} };
+    const cleanStore = { users: {}, sessions: {} };
+    cleanStore._dirty = ensureAdminUser(cleanStore);
+    return cleanStore;
   }
 }
 
 async function saveUserStore(store) {
   await fs.mkdir(dataDir, { recursive: true });
   const tempFile = `${userStoreFile}.${process.pid}.tmp`;
-  await fs.writeFile(tempFile, JSON.stringify(store, null, 2));
+  await fs.writeFile(tempFile, JSON.stringify({ users: store.users || {}, sessions: store.sessions || {} }, null, 2));
   await fs.rename(tempFile, userStoreFile);
 }
 
@@ -153,6 +161,94 @@ function verifyPassword(password, user) {
   const expected = Buffer.from(user.passwordHash, "hex");
   const actual = Buffer.from(hash, "hex");
   return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
+}
+
+function ensureAdminUser(store) {
+  const now = Date.now();
+  let changed = false;
+  let user = store.users[adminUserId];
+  if (!user) {
+    const credentials = hashPassword(adminPassword);
+    user = {
+      id: adminUserId,
+      email: adminUsername,
+      username: adminUsername,
+      name: "admin",
+      role: "admin",
+      passwordSalt: credentials.salt,
+      passwordHash: credentials.hash,
+      adminPasswordVersion: 1,
+      createdAt: now,
+      updatedAt: now,
+      data: sanitizeUserData({}),
+      adminMessages: [],
+    };
+    store.users[adminUserId] = user;
+    changed = true;
+  }
+
+  if (user.email !== adminUsername) {
+    user.email = adminUsername;
+    changed = true;
+  }
+  if (user.username !== adminUsername) {
+    user.username = adminUsername;
+    changed = true;
+  }
+  if (user.name !== "admin") {
+    user.name = "admin";
+    changed = true;
+  }
+  if (user.role !== "admin") {
+    user.role = "admin";
+    changed = true;
+  }
+  if (user.adminPasswordVersion !== 1 || !user.passwordSalt || !user.passwordHash) {
+    const credentials = hashPassword(adminPassword);
+    user.passwordSalt = credentials.salt;
+    user.passwordHash = credentials.hash;
+    user.adminPasswordVersion = 1;
+    changed = true;
+  }
+  if (!user.data || typeof user.data !== "object") {
+    user.data = sanitizeUserData({});
+    changed = true;
+  }
+  if (!Array.isArray(user.adminMessages)) {
+    user.adminMessages = [];
+    changed = true;
+  }
+  if (changed) user.updatedAt = now;
+  return changed;
+}
+
+function isAdminUser(user) {
+  return user?.role === "admin" || user?.id === adminUserId || user?.username === adminUsername;
+}
+
+function getActiveBanUntil(user) {
+  const bannedUntil = Number(user?.bannedUntil || 0);
+  return Number.isFinite(bannedUntil) && bannedUntil > Date.now() ? bannedUntil : 0;
+}
+
+function clearExpiredBan(user) {
+  if (!user?.bannedUntil || Number(user.bannedUntil) > Date.now()) return false;
+  delete user.bannedUntil;
+  delete user.banReason;
+  user.updatedAt = Date.now();
+  return true;
+}
+
+function revokeUserSessions(store, userId) {
+  Object.entries(store.sessions || {}).forEach(([token, session]) => {
+    if (session?.userId === userId) delete store.sessions[token];
+  });
+}
+
+function findUserByLogin(store, login) {
+  const value = String(login || "").trim().toLowerCase();
+  if (value === adminUsername) return store.users[adminUserId] || null;
+  return findUserByEmail(store, normalizeEmail(value));
 }
 
 function createSession(store, userId) {
@@ -193,6 +289,12 @@ async function requireUser(request) {
     throw httpError(401, "Account not found. Please log in again.");
   }
 
+  if (clearExpiredBan(user)) store._dirty = true;
+  const bannedUntil = getActiveBanUntil(user);
+  if (bannedUntil && !isAdminUser(user)) {
+    throw httpError(403, `Account is banned until ${new Date(bannedUntil).toISOString()}.`);
+  }
+
   session.expiresAt = Date.now() + authTokenTtlMs;
   return { store, user, token };
 }
@@ -208,6 +310,10 @@ function publicUser(user) {
     name: user.name,
     avatar: settings.avatar,
     learningLanguage: settings.learningLanguage,
+    role: user.role || "user",
+    isAdmin: isAdminUser(user),
+    bannedUntil: getActiveBanUntil(user) || 0,
+    banReason: limitText(user.banReason, 160),
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
@@ -387,12 +493,17 @@ async function handleAuthRegister(request, response) {
 
 async function handleAuthLogin(request, response) {
   const payload = await readJsonBody(request);
-  const email = normalizeEmail(payload.email);
+  const login = limitText(payload.email || payload.username || payload.identifier, 120);
   const password = String(payload.password || "");
 
   const store = await loadUserStore();
-  const user = findUserByEmail(store, email);
-  if (!user || !verifyPassword(password, user)) throw httpError(401, "Incorrect email or password.");
+  const user = findUserByLogin(store, login);
+  if (!user || !verifyPassword(password, user)) throw httpError(401, "Incorrect account or password.");
+  if (clearExpiredBan(user)) store._dirty = true;
+  const bannedUntil = getActiveBanUntil(user);
+  if (bannedUntil && !isAdminUser(user)) {
+    throw httpError(403, `Account is banned until ${new Date(bannedUntil).toISOString()}.`);
+  }
 
   const token = createSession(store, user.id);
   await saveUserStore(store);
@@ -460,9 +571,143 @@ async function handleListUsers(request, response) {
   const { store } = await requireUser(request);
   await saveUserStore(store);
   const users = Object.values(store.users)
+    .filter((user) => !isAdminUser(user))
     .map(publicUser)
     .sort((left, right) => String(left.name || "").localeCompare(String(right.name || ""), "zh-Hans-CN"));
   sendJson(response, 200, { users });
+}
+
+function requireAdmin(user) {
+  if (!isAdminUser(user)) throw httpError(403, "Admin access is required.");
+}
+
+function adminUserItem(user) {
+  const messages = Array.isArray(user.adminMessages) ? user.adminMessages : [];
+  return {
+    ...publicUser(user),
+    messageCount: messages.length,
+    unreadMessageCount: messages.filter((message) => !message.readAt).length,
+  };
+}
+
+async function handleAdminUsers(request, response) {
+  const { store, user } = await requireUser(request);
+  requireAdmin(user);
+  await saveUserStore(store);
+  const users = Object.values(store.users)
+    .map(adminUserItem)
+    .sort((left, right) => String(left.name || "").localeCompare(String(right.name || ""), "zh-Hans-CN"));
+  sendJson(response, 200, { users });
+}
+
+async function handleAdminBan(request, response) {
+  const payload = await readJsonBody(request);
+  const { store, user } = await requireUser(request);
+  requireAdmin(user);
+
+  const targetId = limitText(payload.userId, 120);
+  const target = store.users[targetId];
+  if (!target) throw httpError(404, "User not found.");
+  if (isAdminUser(target)) throw httpError(400, "Admin accounts cannot be banned.");
+
+  const durationMinutes = Math.min(60 * 24 * 365, Math.max(1, Number(payload.durationMinutes || 0) || 0));
+  const now = Date.now();
+  target.bannedUntil = now + durationMinutes * 60 * 1000;
+  target.banReason = limitText(payload.reason, 160);
+  target.updatedAt = now;
+  revokeUserSessions(store, target.id);
+  await saveUserStore(store);
+  sendJson(response, 200, { ok: true, user: adminUserItem(target) });
+}
+
+async function handleAdminUnban(request, response) {
+  const payload = await readJsonBody(request);
+  const { store, user } = await requireUser(request);
+  requireAdmin(user);
+
+  const targetId = limitText(payload.userId, 120);
+  const target = store.users[targetId];
+  if (!target) throw httpError(404, "User not found.");
+
+  delete target.bannedUntil;
+  delete target.banReason;
+  target.updatedAt = Date.now();
+  await saveUserStore(store);
+  sendJson(response, 200, { ok: true, user: adminUserItem(target) });
+}
+
+async function handleAdminDelete(request, response) {
+  const payload = await readJsonBody(request);
+  const { store, user } = await requireUser(request);
+  requireAdmin(user);
+
+  const targetId = limitText(payload.userId, 120);
+  const target = store.users[targetId];
+  if (!target) throw httpError(404, "User not found.");
+  if (isAdminUser(target)) throw httpError(400, "Admin accounts cannot be deleted.");
+
+  delete store.users[targetId];
+  revokeUserSessions(store, targetId);
+  await saveUserStore(store);
+  sendJson(response, 200, { ok: true });
+}
+
+function buildAdminMessage(payload) {
+  const title = limitText(payload.title, 60) || "Admin message";
+  const body = limitText(payload.body || payload.message, 1000);
+  if (!body) throw httpError(400, "Message body is required.");
+  return {
+    id: crypto.randomUUID(),
+    title,
+    body,
+    from: adminUsername,
+    createdAt: Date.now(),
+    readAt: null,
+  };
+}
+
+async function handleAdminMessage(request, response) {
+  const payload = await readJsonBody(request);
+  const { store, user } = await requireUser(request);
+  requireAdmin(user);
+
+  const targetId = limitText(payload.userId, 120);
+  const targets = targetId
+    ? [store.users[targetId]].filter(Boolean)
+    : Object.values(store.users).filter((item) => !isAdminUser(item));
+  if (!targets.length) throw httpError(404, "No recipients found.");
+
+  const message = buildAdminMessage(payload);
+  targets.forEach((target) => {
+    const messages = Array.isArray(target.adminMessages) ? target.adminMessages : [];
+    target.adminMessages = [{ ...message }, ...messages].slice(0, maxAdminMessages);
+    target.updatedAt = Date.now();
+  });
+  await saveUserStore(store);
+  sendJson(response, 200, { ok: true, count: targets.length });
+}
+
+async function handleGetMessages(request, response) {
+  const { store, user } = await requireUser(request);
+  const messages = Array.isArray(user.adminMessages)
+    ? user.adminMessages.filter((message) => message && !message.readAt).slice().reverse()
+    : [];
+  await saveUserStore(store);
+  sendJson(response, 200, { messages });
+}
+
+async function handleReadMessages(request, response) {
+  const payload = await readJsonBody(request);
+  const { store, user } = await requireUser(request);
+  const ids = new Set(Array.isArray(payload.ids) ? payload.ids.map((id) => String(id)) : []);
+  if (Array.isArray(user.adminMessages)) {
+    const now = Date.now();
+    user.adminMessages.forEach((message) => {
+      if (!message.readAt && (!ids.size || ids.has(String(message.id)))) message.readAt = now;
+    });
+  }
+  await saveUserStore(store);
+  sendJson(response, 200, { ok: true });
 }
 
 async function handleSpeech(request, response) {
@@ -942,6 +1187,41 @@ const server = http.createServer(async (request, response) => {
 
     if (request.method === "GET" && request.url === "/api/users") {
       await handleListUsers(request, response);
+      return;
+    }
+
+    if (request.method === "GET" && request.url === "/api/admin/users") {
+      await handleAdminUsers(request, response);
+      return;
+    }
+
+    if (request.method === "POST" && request.url === "/api/admin/ban") {
+      await handleAdminBan(request, response);
+      return;
+    }
+
+    if (request.method === "POST" && request.url === "/api/admin/unban") {
+      await handleAdminUnban(request, response);
+      return;
+    }
+
+    if (request.method === "POST" && request.url === "/api/admin/delete") {
+      await handleAdminDelete(request, response);
+      return;
+    }
+
+    if (request.method === "POST" && request.url === "/api/admin/message") {
+      await handleAdminMessage(request, response);
+      return;
+    }
+
+    if (request.method === "GET" && request.url === "/api/messages") {
+      await handleGetMessages(request, response);
+      return;
+    }
+
+    if (request.method === "POST" && request.url === "/api/messages/read") {
+      await handleReadMessages(request, response);
       return;
     }
 
