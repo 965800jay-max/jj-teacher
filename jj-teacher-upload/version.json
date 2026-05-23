@@ -1,6 +1,6 @@
 {
-  "versionCode": 34,
-  "versionName": "free34",
-  "apkUrl": "https://files.catbox.moe/sqxc5r.apk",
-  "notes": "优化AI聊天翻译显示，移除句子页多余X按钮，并统一安卓顶部状态栏颜色。"
+  "versionCode": 35,
+  "versionName": "free35",
+  "apkUrl": "https://files.catbox.moe/22ym9u.apk",
+  "notes": "升级AI模型到GPT-5.5，优化流式回复和中文消息翻译请求，降低回复等待感。"
 }

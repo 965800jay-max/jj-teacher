@@ -10,9 +10,19 @@ loadLocalEnv(path.join(root, ".env"));
 const port = Number(process.env.PORT || 4173);
 const speechCache = new Map();
 const aiApiKey = process.env.OPENAI_API_KEY || process.env.AI_API_KEY || "";
-const aiModel = process.env.OPENAI_MODEL || process.env.AI_MODEL || "gpt-5-mini";
+const aiModel = process.env.OPENAI_MODEL || process.env.AI_MODEL || "gpt-5.5";
 const aiResponsesUrl = process.env.AI_RESPONSES_URL || "https://api.openai.com/v1/responses";
 const aiStreamTimeoutMs = Number(process.env.AI_STREAM_TIMEOUT_MS || 40000);
+const aiReasoningEffort = process.env.OPENAI_REASONING_EFFORT || process.env.AI_REASONING_EFFORT || "low";
+const aiConvertReasoningEffort =
+  process.env.OPENAI_CONVERT_REASONING_EFFORT || process.env.AI_CONVERT_REASONING_EFFORT || "medium";
+const aiTextVerbosity = process.env.OPENAI_TEXT_VERBOSITY || process.env.AI_TEXT_VERBOSITY || "low";
+const aiMaxOutputTokens = Number(process.env.OPENAI_MAX_OUTPUT_TOKENS || process.env.AI_MAX_OUTPUT_TOKENS || 700);
+const aiConvertMaxOutputTokens = Number(
+  process.env.OPENAI_CONVERT_MAX_OUTPUT_TOKENS || process.env.AI_CONVERT_MAX_OUTPUT_TOKENS || 2600
+);
+const aiPromptCacheKeyPrefix = process.env.OPENAI_PROMPT_CACHE_KEY || process.env.AI_PROMPT_CACHE_KEY || "jj-teacher";
+const aiServiceTier = process.env.OPENAI_SERVICE_TIER || process.env.AI_SERVICE_TIER || "";
 const teacherMessageBreak = "\u3010NEXT_MESSAGE\u3011";
 const teacherCorrectionMark = "\u3010CORRECTION\u3011";
 const labelEnglish = "\u82f1\u6587\uff1a";
@@ -769,11 +779,7 @@ async function askAiTeacher(prompt, mode = "chat", targetLanguage = "english") {
       Authorization: `Bearer ${aiApiKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      model: aiModel,
-      input: prompt,
-      instructions: buildAiInstructions(mode, targetLanguage),
-    }),
+    body: JSON.stringify(buildAiRequestBody(prompt, mode, targetLanguage)),
   });
 
   const data = await aiResponse.json().catch(() => ({}));
@@ -795,12 +801,7 @@ async function askAiTeacherStream(prompt, mode = "chat", targetLanguage = "engli
         Authorization: `Bearer ${aiApiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model: aiModel,
-        input: prompt,
-        instructions: buildAiInstructions(mode, targetLanguage),
-        stream: true,
-      }),
+      body: JSON.stringify(buildAiRequestBody(prompt, mode, targetLanguage, true)),
       signal: controller.signal,
     });
 
@@ -848,6 +849,37 @@ async function askAiTeacherStream(prompt, mode = "chat", targetLanguage = "engli
   } finally {
     clearTimeout(timeout);
   }
+}
+
+function buildAiRequestBody(prompt, mode = "chat", targetLanguage = "english", stream = false) {
+  const body = {
+    model: aiModel,
+    input: prompt,
+    instructions: buildAiInstructions(mode, targetLanguage),
+    reasoning: {
+      effort: getAiReasoningEffort(mode),
+    },
+    text: {
+      verbosity: aiTextVerbosity,
+    },
+    max_output_tokens: getAiMaxOutputTokens(mode),
+    prompt_cache_key: `${aiPromptCacheKeyPrefix}:${mode}:${targetLanguage}`,
+  };
+
+  if (aiServiceTier) body.service_tier = aiServiceTier;
+  if (stream) {
+    body.stream = true;
+    body.stream_options = { include_obfuscation: false };
+  }
+  return body;
+}
+
+function getAiReasoningEffort(mode) {
+  return mode === "convert-language" ? aiConvertReasoningEffort : aiReasoningEffort;
+}
+
+function getAiMaxOutputTokens(mode) {
+  return mode === "convert-language" ? aiConvertMaxOutputTokens : aiMaxOutputTokens;
 }
 
 function buildAiInstructions(mode = "chat", targetLanguage = "english") {

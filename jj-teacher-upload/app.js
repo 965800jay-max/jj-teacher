@@ -100,8 +100,8 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free34";
-const APP_VERSION_CODE = 34;
+const APP_BUILD_TAG = "free35";
+const APP_VERSION_CODE = 35;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
 const UPDATE_DISMISS_KEY = "sentence-reader-dismissed-update";
 const UPDATE_CHECK_TIMEOUT_MS = 6500;
@@ -3736,7 +3736,12 @@ function shouldTranslateUserMessage(message, mode, displayText) {
   if (displayText) return false;
   if (!/[\u4e00-\u9fff]/.test(message)) return false;
   if (/^话题$/.test(message.trim())) return false;
+  if (isDirectTranslationQuestion(message)) return false;
   return ["topic", "chat"].includes(mode);
+}
+
+function isDirectTranslationQuestion(message) {
+  return /(?:怎么说|翻译|翻成|用.{0,12}语.{0,8}说)/u.test(String(message || ""));
 }
 
 function buildUserTranslationRequest(message) {
@@ -4340,23 +4345,27 @@ async function sendTeacherMessage(prompt, modeOverride = "", displayText = "") {
   if (mode === "freestyle") userMessage.mode = mode;
   const shouldTranslateMessage = shouldTranslateUserMessage(message, mode, displayText);
   if (shouldTranslateMessage) userMessage.translationPending = true;
-  const translationPromise = shouldTranslateMessage
-    ? requestAiTeacher({ mode: "chat", message: buildUserTranslationRequest(message), messages: [] })
-        .then((translationData) => extractUserTranslation(translationData.reply || "", userMessage.text))
-        .then((translation) => {
-          userMessage.translationPending = false;
-          if (translation) userMessage.translation = translation;
-          saveTeacherMessages();
-          scheduleChatMessagesRender();
-          return translation;
-        })
-        .catch(() => {
-          userMessage.translationPending = false;
-          saveTeacherMessages();
-          scheduleChatMessagesRender();
-          return null;
-        })
-    : Promise.resolve(null);
+  let userTranslationStarted = false;
+  const startDeferredUserTranslation = () => {
+    if (!shouldTranslateMessage || userTranslationStarted) return Promise.resolve(null);
+
+    userTranslationStarted = true;
+    return requestAiTeacher({ mode: "chat", message: buildUserTranslationRequest(message), messages: [] })
+      .then((translationData) => extractUserTranslation(translationData.reply || "", userMessage.text))
+      .then((translation) => {
+        userMessage.translationPending = false;
+        if (translation) userMessage.translation = translation;
+        saveTeacherMessages();
+        scheduleChatMessagesRender();
+        return translation;
+      })
+      .catch(() => {
+        userMessage.translationPending = false;
+        saveTeacherMessages();
+        scheduleChatMessagesRender();
+        return null;
+      });
+  };
 
   const pendingMessage = {
     role: "assistant",
@@ -4373,6 +4382,7 @@ async function sendTeacherMessage(prompt, modeOverride = "", displayText = "") {
   try {
     const historySource = teacherMessages
       .filter((item) => !item.pending)
+      .filter((item) => item !== userMessage)
       .filter((item) => (mode === "freestyle" ? item.mode === "freestyle" : item.mode !== "freestyle"));
     const history = historySource
       .slice(-10)
@@ -4380,8 +4390,8 @@ async function sendTeacherMessage(prompt, modeOverride = "", displayText = "") {
     const data = await requestAiTeacherStream(
       {
         mode,
-      message: buildTeacherRequestMessage(message, mode),
-      messages: history,
+        message: buildTeacherRequestMessage(message, mode),
+        messages: history,
       },
       {
         onDelta: (_delta, text) => {
@@ -4412,6 +4422,7 @@ async function sendTeacherMessage(prompt, modeOverride = "", displayText = "") {
     if (teacherSendButton) teacherSendButton.disabled = false;
     saveTeacherMessages();
     renderChatMessages();
+    startDeferredUserTranslation();
   }
 }
 
