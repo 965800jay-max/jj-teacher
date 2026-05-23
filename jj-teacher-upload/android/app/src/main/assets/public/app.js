@@ -121,8 +121,8 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free41";
-const APP_VERSION_CODE = 41;
+const APP_BUILD_TAG = "free42";
+const APP_VERSION_CODE = 42;
 const AUTH_REQUIRED = true;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
 const UPDATE_DISMISS_KEY = "sentence-reader-dismissed-update";
@@ -3089,7 +3089,7 @@ function renderScenes() {
 
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "primary-button";
+    button.className = "primary-button scene-open-button";
     button.textContent = progress.completed.includes(scene.id) ? "继续学习" : "打开场景";
     button.addEventListener("click", () => openSceneDetail(scene.id));
 

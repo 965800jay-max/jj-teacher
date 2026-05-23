@@ -1,6 +1,6 @@
 {
-  "versionCode": 41,
-  "versionName": "free41",
-  "apkUrl": "https://files.catbox.moe/b7f0os.apk",
-  "notes": "修复安卓长按语音识别无反应，聊天页按住麦克风显示收听动画并松开发送；句子页语音发送改为AI解答画中画。"
+  "versionCode": 42,
+  "versionName": "free42",
+  "apkUrl": "https://files.catbox.moe/2ywxwd.apk",
+  "notes": "调整按钮颜色：添加、打开场景、继续学习改为黄色；开始默写和闲聊模式改为亮橘色；底部句子改为句读。"
 }
