@@ -568,15 +568,15 @@ async function handleAiTeacher(request, response) {
 
   const history = Array.isArray(payload.messages) ? payload.messages.slice(-10) : [];
   if (payload.stream === true) {
-    await streamAiTeacherResponse(response, buildChatPrompt(message, history, mode, targetLanguage), mode, targetLanguage);
+    await streamAiTeacherResponse(response, buildChatPrompt(message, history, mode, targetLanguage), mode, targetLanguage, message);
     return;
   }
 
-  const reply = compactTeacherReply(await askAiTeacher(buildChatPrompt(message, history, mode, targetLanguage), mode, targetLanguage), mode);
+  const reply = finalizeTeacherReply(await askAiTeacher(buildChatPrompt(message, history, mode, targetLanguage), mode, targetLanguage), mode, message);
   sendJson(response, 200, { reply });
 }
 
-async function streamAiTeacherResponse(response, prompt, mode, targetLanguage = "english") {
+async function streamAiTeacherResponse(response, prompt, mode, targetLanguage = "english", rawMessage = "") {
   response.writeHead(200, {
     "Content-Type": "text/event-stream; charset=utf-8",
     "Cache-Control": "no-cache, no-transform",
@@ -596,7 +596,7 @@ async function streamAiTeacherResponse(response, prompt, mode, targetLanguage = 
       sendSse(response, "delta", { delta, text: accumulated });
     });
 
-    sendSse(response, "done", { reply: compactTeacherReply(fullReply, mode) });
+    sendSse(response, "done", { reply: finalizeTeacherReply(fullReply, mode, rawMessage) });
   } catch (error) {
     sendSse(response, "error", {
       message: error.name === "AbortError" ? "The AI response timed out. Please try again." : error.message || "The AI did not return content.",
@@ -732,6 +732,34 @@ function compactTeacherReply(reply, mode) {
     .join(" ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function isDirectTranslationRequest(message) {
+  const clean = String(message || "").trim();
+  return /[\u4e00-\u9fff]/u.test(clean) && /(?:\u600e\u4e48\u8bf4|\u7ffb\u8bd1|\u7ffb\u6210|\u7528.{0,12}\u8bed.{0,8}\u8bf4)/u.test(clean);
+}
+
+function trimDirectTranslationReply(reply, message) {
+  if (!isDirectTranslationRequest(message)) return reply;
+
+  const englishIndex = reply.indexOf(labelEnglish);
+  if (englishIndex === -1) return reply;
+
+  const targetStart = englishIndex + labelEnglish.length;
+  const meaningIndex = reply.indexOf(labelMeaning, targetStart);
+  if (meaningIndex === -1) return reply.slice(englishIndex).trim();
+
+  const secondEnglishIndex = reply.indexOf(labelEnglish, meaningIndex + labelMeaning.length);
+  const target = reply.slice(targetStart, meaningIndex).trim();
+  const meaningEnd = secondEnglishIndex === -1 ? reply.length : secondEnglishIndex;
+  const meaning = reply.slice(meaningIndex + labelMeaning.length, meaningEnd).trim();
+
+  if (!target || !meaning) return reply.slice(englishIndex).trim();
+  return `${labelEnglish}${target} ${labelMeaning}${meaning}`;
+}
+
+function finalizeTeacherReply(reply, mode, rawMessage = "") {
+  return trimDirectTranslationReply(compactTeacherReply(reply, mode), rawMessage);
 }
 
 async function askAiTeacher(prompt, mode = "chat", targetLanguage = "english") {
