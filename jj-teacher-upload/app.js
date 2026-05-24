@@ -126,8 +126,8 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free50";
-const APP_VERSION_CODE = 50;
+const APP_BUILD_TAG = "free51";
+const APP_VERSION_CODE = 51;
 const DAILY_CHAT_REPEAT_KEY = "sentence-reader-daily-chat-last";
 const AUTH_REQUIRED = true;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
@@ -5431,8 +5431,20 @@ function renameFreeChatText(text) {
   return String(text || "").replace(/吹牛逼模式/g, "闲聊模式");
 }
 
+function stripTeacherMetaLines(text) {
+  const metaPattern =
+    /(?:兴趣爱好|真实聊天的开头|更像真实聊天|日常聊天里|这样问很自然|这种问法|这个问法|这句问法|像朋友在关心|适合作为|可以作为|话题设计|开场问题|开头|比\s*[“"'][^”"']{1,32}[”"']\s*更)/u;
+
+  return String(text || "")
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter((line) => line && !metaPattern.test(line))
+    .join("\n")
+    .trim();
+}
+
 function compactTeacherReply(text) {
-  const lines = renameFreeChatText(renameTeacherText(text))
+  const lines = stripTeacherMetaLines(renameFreeChatText(renameTeacherText(text)))
     .split(/\n+/)
     .map((line) => line.trim())
     .map((line) => line.replace(/^\s*(?:[-•*]|\d+[.)、])\s*/, ""))
@@ -5452,7 +5464,7 @@ function cleanFreestyleReply(text) {
 }
 
 function cleanTopicReply(text) {
-  const lines = renameFreeChatText(renameTeacherText(text))
+  const lines = stripTeacherMetaLines(renameFreeChatText(renameTeacherText(text)))
     .split(/\n+/)
     .map((line) => line.trim())
     .map((line) => line.replace(/^\s*(?:[-•*]|\d+[.)、])\s*/, ""))
@@ -5466,11 +5478,12 @@ function buildTeacherRequestMessage(message, mode) {
   if (mode === "topic") {
     const language = getLearningLanguageConfig();
     return [
-      `学生刚才的回答：${message}`,
-      `请继续当前${language.label}话题练习。`,
-      "像一个会聊天、情商高、反应聪明的朋友一样回复：先抓住学生回答里的具体信息，再自然接下去。",
-      "不要只说“很好”，不要重复学生原句当作主要回复，不要写“追问/问题/继续话题”这些标签。",
-      "给一句能跟读的自然表达，然后顺势问一个具体、好回答的小问题，让学生愿意继续开口。",
+      `学生消息：${message}`,
+      `请继续当前${language.label}口语聊天。`,
+      "把它当成真实朋友聊天：如果学生问你问题，先直接回答这个问题；如果学生分享内容，先接住一个具体细节。",
+      "不要讲解话题设计，不要评价“这个问法更自然”，不要提到“兴趣爱好/开头/真实聊天”这些幕后判断。",
+      "回复控制在2-4句，最后自然问一个具体、好回答的小问题，让学生愿意继续开口。",
+      `如果给${language.label}跟读句，只给一句并单独成行，不要写“问题/追问/继续话题/英文/中文意思”这些标签。`,
     ].join("\n");
   }
 
@@ -5687,7 +5700,7 @@ function simplifyTopicIntro(text) {
 }
 
 function cleanTeacherChineseDisplay(text, sourceText) {
-  const clean = String(text || "")
+  const clean = stripTeacherMetaLines(text)
     .replace(/(?:你是?想把|你想把|是不是想把|是否想把|你要把)[^。！？]{0,160}[。！？]?/gu, " ")
     .replace(/(?:我给你|给你)(?:一个|一条)?(?:比较|更)?(?:常用|自然|地道)?(?:的)?说法[。！？]?/gu, " ")
     .replace(/(?:你可以这样说|可以这样说)[：:]?/gu, " ")
@@ -5708,7 +5721,7 @@ function isTeacherMetaTargetSentence(sentence, sourceText) {
 }
 
 function buildTeacherDisplay(text) {
-  const cleanText = compactTeacherReply(text);
+  const cleanText = stripTeacherMetaLines(compactTeacherReply(text));
   const visibleText = removeMeaningSection(cleanText);
   const detectedTargetSentences = extractTargetSentences(visibleText);
   const allEnglishSentences = detectedTargetSentences.filter((sentence) => !isTeacherMetaTargetSentence(sentence, visibleText));
@@ -6187,8 +6200,9 @@ function startTopicPractice() {
   const language = getLearningLanguageConfig();
   sendTeacherMessage(
     [
-      `我们开始一个轻松自然的${language.label}日常话题吧。`,
-      "请先抛出一个生活化问题。之后学生每次回答，你都要顺着他的内容继续追问，帮助他练口语。",
+      `直接开启一个轻松自然的${language.label}日常聊天。`,
+      "只发一个生活化问题，不要解释为什么选这个话题。",
+      "之后学生每次回复，都先像朋友一样接话，再顺着内容问一个具体小问题。",
     ].join("\n"),
     "topic",
     "话题"

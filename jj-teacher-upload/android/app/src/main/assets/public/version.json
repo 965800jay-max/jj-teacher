@@ -1,6 +1,6 @@
 {
-  "versionCode": 50,
-  "versionName": "free50",
-  "apkUrl": "https://files.catbox.moe/ia813c.apk",
-  "notes": "替换场景对话库为新的日常口语场景，并支持在场景英文句子中点击单词直接朗读。"
+  "versionCode": 51,
+  "versionName": "free51",
+  "apkUrl": "https://files.catbox.moe/pv35db.apk",
+  "notes": "修复话题模式中AI暴露提示词和不接话题的问题，让对话更像真实聊天。"
 }
