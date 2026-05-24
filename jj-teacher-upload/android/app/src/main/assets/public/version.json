@@ -1,6 +1,6 @@
 {
-  "versionCode": 51,
-  "versionName": "free51",
-  "apkUrl": "https://files.catbox.moe/pv35db.apk",
-  "notes": "修复话题模式中AI暴露提示词和不接话题的问题，让对话更像真实聊天。"
+  "versionCode": 52,
+  "versionName": "free52",
+  "apkUrl": "https://files.catbox.moe/0r3ozg.apk",
+  "notes": "修复智语导师问句中中文意思待补充的问题，AI解答只保留完整中英问句，减少多余英文短语。"
 }

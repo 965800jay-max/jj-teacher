@@ -126,8 +126,8 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free51";
-const APP_VERSION_CODE = 51;
+const APP_BUILD_TAG = "free52";
+const APP_VERSION_CODE = 52;
 const DAILY_CHAT_REPEAT_KEY = "sentence-reader-daily-chat-last";
 const AUTH_REQUIRED = true;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
@@ -2770,12 +2770,14 @@ function getVoicePipSentenceSuggestions(text) {
   const cleanText = cleanSentenceAiText(text);
   const sentences = extractTargetSentences(cleanText)
     .filter((sentence) => sentence && !isTeacherMetaTargetSentence(sentence, cleanText))
+    .filter((sentence) => !isSameTargetSentence(sentence, sentenceAiChatState?.sentenceText || ""))
+    .filter((sentence) => isLikelyFullTargetSentence(sentence))
     .filter((sentence, index, items) => items.indexOf(sentence) === index)
-    .slice(0, 6);
+    .slice(0, 1);
 
   return sentences.map((sentence) => ({
     sentence,
-    note: inferSuggestionNote(cleanText, sentence) || "",
+    note: inferChineseQuestionNote(cleanText, sentence) || inferSuggestionNote(cleanText, sentence) || inferFallbackChineseMeaning(cleanText),
   }));
 }
 
@@ -2940,9 +2942,9 @@ async function openSentenceAiAnswer(sentenceText, note = "") {
     note ? `用户保存的中文句意: ${note}` : "",
     "请只做两件事：",
     "1. 用中文讲这句话最重要的重点：意思、使用场景、一个关键词或口语点。控制在3-5句内。",
-    `2. 最后给一条自然聊天问句，问句要和原句有关，并同时给出一句${language.label}版本。`,
-    `让${language.label}句子单独成行，方便 App 添加朗读和收藏按钮。`,
-    "不要写“继续话题：”“问题：”“追问：”这些标题，不要表格，不要 markdown 星号，不要输出很多例句。",
+    `2. 最后只给一条自然聊天问句，先写中文问句，再写同一个问题的${language.label}版本。`,
+    `中文问句和${language.label}问句要意思一致；${language.label}问句单独成行，方便 App 添加朗读和收藏按钮。`,
+    "不要拆词组，不要列短语，不要写多个英文句子，不要写“继续话题：”“问题：”“追问：”这些标题，不要表格，不要 markdown 星号。",
   ]
     .filter(Boolean)
     .join("\n");
@@ -2981,7 +2983,8 @@ async function sendSentenceAiChatMessage() {
     `用户刚才说: ${text}`,
     "请不要重新完整讲解原句，除非用户问。",
     "像真实聊天一样接住用户的具体内容，语气自然、高情商，不要敷衍夸奖。",
-    `最多给一句对应的自然${language.label}说法，句子单独成行，方便 App 朗读和收藏。`,
+    `如果给${language.label}问句或说法，先给中文意思，再给同一句${language.label}，且只给一句完整句子。`,
+    "不要拆词组，不要列短语。",
     "最后自然地把话题递回给用户，但不要写“问题/追问/继续话题”这些标签。",
   ]
     .filter(Boolean)
@@ -5483,7 +5486,8 @@ function buildTeacherRequestMessage(message, mode) {
       "把它当成真实朋友聊天：如果学生问你问题，先直接回答这个问题；如果学生分享内容，先接住一个具体细节。",
       "不要讲解话题设计，不要评价“这个问法更自然”，不要提到“兴趣爱好/开头/真实聊天”这些幕后判断。",
       "回复控制在2-4句，最后自然问一个具体、好回答的小问题，让学生愿意继续开口。",
-      `如果给${language.label}跟读句，只给一句并单独成行，不要写“问题/追问/继续话题/英文/中文意思”这些标签。`,
+      `最后的小问题先用中文问；如果给${language.label}跟读句，只给同一个问题的${language.label}版本，并单独成行。`,
+      "不要写“问题/追问/继续话题/英文/中文意思”这些标签，不要拆词组或列短语。",
     ].join("\n");
   }
 
@@ -5540,6 +5544,36 @@ function extractEnglishSentences(text) {
   return sentences.slice(0, 8);
 }
 
+function normalizeTargetSentenceKey(text) {
+  return String(text || "")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, "")
+    .trim();
+}
+
+function isSameTargetSentence(a, b) {
+  const left = normalizeTargetSentenceKey(a);
+  const right = normalizeTargetSentenceKey(b);
+  return Boolean(left && right && left === right);
+}
+
+function isLikelyFullTargetSentence(sentence) {
+  const clean = String(sentence || "").trim();
+  if (!clean) return false;
+
+  if (currentLearningLanguage === "english" || currentLearningLanguage === "spanish") {
+    const words = clean.match(/\p{L}+/gu) || [];
+    const bare = clean.replace(/[.!?]+$/g, "").trim();
+    if (/[?]$/.test(clean) && words.length >= 3) return true;
+    if (words.length < 4) return false;
+    if (/^[a-z]/.test(clean)) return false;
+    if (/\b(?:a|an|the|to|at|for|from|with|of|in|on|by|and|or|but)$/i.test(bare)) return false;
+    return /[.!?]$/.test(clean);
+  }
+
+  return clean.length >= 4;
+}
+
 function extractTargetSection(text) {
   const match = String(text || "").match(/(?:英文|目标语|西班牙语|日语|韩语)\s*[：:]\s*([\s\S]*?)(?=(?:中文意思|意思|翻译)\s*[：:]|$)/u);
   return match ? match[1].trim() : "";
@@ -5583,6 +5617,79 @@ function inferSuggestionNote(text, sentence) {
   if (beforeMatch) return cleanSuggestionNote(beforeMatch[1]);
 
   return "";
+}
+
+function normalizeChineseQuestionNote(text) {
+  let clean = String(text || "")
+    .replace(/^(?:中文问句|中文问题|中文意思|意思|翻译|问题|追问)\s*[：:]\s*/u, "")
+    .trim();
+  const colonParts = clean.split(/[：:]/).map((item) => item.trim()).filter(Boolean);
+  if (colonParts.length > 1) {
+    clean = [...colonParts].reverse().find((item) => /[\u4e00-\u9fa5]/.test(item)) || clean;
+  }
+  clean = clean.replace(/^[，,。！？；;：:\s]+/, "").replace(/\s+/g, " ").trim();
+  if (!clean) return "";
+  if (!/[。！？?]$/.test(clean)) clean += /(?:吗|么|什么|哪|怎么|如何|还是|有没有|会不会|能不能|要不要|是不是)/u.test(clean) ? "？" : "。";
+  return clean;
+}
+
+function inferChineseQuestionNote(text, targetSentence = "") {
+  let clean = String(text || "");
+  extractTargetSentences(clean).forEach((sentence) => {
+    clean = clean.split(sentence).join(" ");
+  });
+  if (targetSentence) clean = clean.split(targetSentence).join(" ");
+
+  const labeledMatch = clean.match(/(?:中文问句|中文问题|中文意思|意思|翻译)\s*[：:]\s*([^.!?\n。！？]{2,90}[？?。]?)/u);
+  if (labeledMatch && /[\u4e00-\u9fa5]/.test(labeledMatch[1])) {
+    return normalizeChineseQuestionNote(labeledMatch[1]);
+  }
+
+  const parts = clean
+    .split(/\n+|(?<=[。！？?])\s*|[；;]/u)
+    .map((item) => normalizeChineseQuestionNote(item))
+    .filter((item) => /[\u4e00-\u9fa5]/.test(item));
+  const question = [...parts].reverse().find((item) => /[？?]$/.test(item));
+  if (question) return question;
+
+  return [...parts]
+    .reverse()
+    .find((item) => /(?:吗|么|什么|哪|怎么|如何|还是|有没有|会不会|能不能|要不要|是不是)/u.test(item)) || "";
+}
+
+function removeChineseMeaningFromText(text, meaning) {
+  const note = String(meaning || "").trim();
+  if (!note) return text;
+  const noteCore = note.replace(/[。！？?]+$/u, "").trim();
+  return String(text || "")
+    .split(/(?<=[。！？?])\s*/u)
+    .filter((part) => {
+      const clean = part.trim();
+      return clean && !clean.includes(note) && !(noteCore && clean.includes(noteCore));
+    })
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function inferFallbackChineseMeaning(...sources) {
+  for (const source of sources) {
+    let clean = String(source || "").trim();
+    if (!clean) continue;
+    extractTargetSentences(clean).forEach((sentence) => {
+      clean = clean.split(sentence).join(" ");
+    });
+    const parts = clean
+      .split(/\n+|(?<=[。！？?])\s*|[；;]/u)
+      .map((item) => normalizeChineseQuestionNote(item))
+      .filter((item) => /[\u4e00-\u9fa5]/.test(item) && item.length <= 90);
+    const question = [...parts].reverse().find((item) => /[？?]$/.test(item));
+    if (question) return question;
+    const statement = [...parts].reverse().find(Boolean);
+    if (statement) return statement;
+  }
+
+  return "这句是上面中文内容的自然表达。";
 }
 
 function removeEnglishFromTeacherText(text, englishSentences) {
@@ -5720,20 +5827,25 @@ function isTeacherMetaTargetSentence(sentence, sourceText) {
   return /(?:想把|翻(?:成|译成)?|怎么说|你可以这样说|可以这样说|常用说法)/u.test(sourceText);
 }
 
-function buildTeacherDisplay(text) {
+function buildTeacherDisplay(text, mode = "") {
   const cleanText = stripTeacherMetaLines(compactTeacherReply(text));
   const visibleText = removeMeaningSection(cleanText);
   const detectedTargetSentences = extractTargetSentences(visibleText);
   const allEnglishSentences = detectedTargetSentences.filter((sentence) => !isTeacherMetaTargetSentence(sentence, visibleText));
   let englishSentences = allEnglishSentences;
+  const isTopicMode = mode === "topic";
   const isTopicStarter = /我们来聊聊|聊聊|话题/.test(visibleText) && englishSentences.some((sentence) => sentence.endsWith("?"));
-  if (isTopicStarter) {
+  if (isTopicMode || isTopicStarter) {
     englishSentences = [englishSentences.find((sentence) => sentence.endsWith("?")) || englishSentences[0]].filter(Boolean);
   }
-  const meanings = extractChineseMeanings(cleanText, englishSentences.length);
   const rawChineseText = removeEnglishFromTeacherText(visibleText, detectedTargetSentences);
+  const pairedQuestionNote = isTopicMode ? inferChineseQuestionNote(rawChineseText, englishSentences[0] || "") : "";
+  const meanings = pairedQuestionNote ? [pairedQuestionNote] : extractChineseMeanings(cleanText, englishSentences.length);
+  const chineseDisplaySource = pairedQuestionNote ? removeChineseMeaningFromText(rawChineseText, pairedQuestionNote) : rawChineseText;
   const chineseText = cleanTeacherChineseDisplay(
-    isTopicStarter ? simplifyTopicIntro(rawChineseText) : simplifyTeacherChinese(rawChineseText, englishSentences.length),
+    isTopicMode || isTopicStarter
+      ? simplifyTopicIntro(chineseDisplaySource)
+      : simplifyTeacherChinese(chineseDisplaySource, englishSentences.length),
     cleanText
   );
 
@@ -5743,7 +5855,11 @@ function buildTeacherDisplay(text) {
     englishSentences,
     suggestions: englishSentences.map((sentence, index) => ({
       sentence,
-      note: meanings[index] || inferSuggestionNote(cleanText, sentence) || "",
+      note:
+        meanings[index] ||
+        inferChineseQuestionNote(cleanText, sentence) ||
+        inferSuggestionNote(cleanText, sentence) ||
+        inferFallbackChineseMeaning(chineseText, rawChineseText, cleanText),
     })),
   };
 }
@@ -5896,7 +6012,7 @@ function renderTeacherMessageContent(bubble, part, role) {
     return;
   }
 
-  const display = buildTeacherDisplay(text);
+  const display = buildTeacherDisplay(text, part.mode);
 
   if (display.chineseText || !display.englishSentences.length) {
     appendReadableText(bubble, display.chineseText || display.cleanText, "chat-text teacher-chinese-text");
@@ -5911,7 +6027,7 @@ function renderTeacherMessageContent(bubble, part, role) {
 
       const meaning = document.createElement("p");
       meaning.className = "teacher-sentence-meaning";
-      meaning.textContent = suggestion.note || "中文意思待补充。";
+      meaning.textContent = suggestion.note || inferFallbackChineseMeaning(display.chineseText, display.cleanText);
 
       const row = document.createElement("div");
       row.className = "teacher-english-row";
@@ -6201,7 +6317,7 @@ function startTopicPractice() {
   sendTeacherMessage(
     [
       `直接开启一个轻松自然的${language.label}日常聊天。`,
-      "只发一个生活化问题，不要解释为什么选这个话题。",
+      `只发一个生活化问题：先中文问句，再给同一个问题的${language.label}版本，不要解释为什么选这个话题。`,
       "之后学生每次回复，都先像朋友一样接话，再顺着内容问一个具体小问题。",
     ].join("\n"),
     "topic",
