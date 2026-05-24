@@ -980,7 +980,16 @@ function buildChatPrompt(message, history, mode = "chat", targetLanguage = "engl
   return [
     `当前学习语言：${language.label}`,
     mode === "freestyle" ? "当前模式：普通聊天。" : mode === "topic" ? "当前模式：话题练习。" : "当前模式：语言学习。",
-    mode === "topic" ? "话题练习里，用户每次回复后，请顺着同一个话题自然接话，并继续问一个相关的小问题。" : "",
+    mode === "topic"
+      ? [
+          "话题练习规则：",
+          "1. 用户每次回复后，必须顺着用户的具体内容继续聊，不要只说“很好”。",
+          "2. 不要把用户原句重复一遍当作主要回复。",
+          "3. 回复要包含：自然回应、可跟读的目标语言表达、继续追问。",
+          "4. 目标是让用户不断开口练口语，所以最后一定问一个生活化小问题。",
+          `建议格式：回应：... ${language.label}：... 追问：...`,
+        ].join("\n")
+      : "",
     `如果你给出${language.label}学习句子或翻译，请用“英文：”放${language.label}内容，并用“中文意思：”放中文意思。`,
     `“英文：”只是 App 的显示标记，后面的内容仍然应该是${language.label}。`,
     cleanHistory ? `最近对话：\n${cleanHistory}` : "",
@@ -1023,6 +1032,57 @@ function trimDirectTranslationReply(reply, message) {
 
   if (!target || !meaning) return reply.slice(englishIndex).trim();
   return `英文：${target} 中文意思：${meaning}`;
+}
+
+function extractJsonObject(text) {
+  const clean = String(text || "").trim();
+  const start = clean.indexOf("{");
+  const end = clean.lastIndexOf("}");
+  if (start === -1 || end === -1 || end <= start) return null;
+
+  try {
+    return JSON.parse(clean.slice(start, end + 1));
+  } catch {
+    return null;
+  }
+}
+
+async function handleWordLookup(request, response) {
+  if (!aiApiKey) {
+    sendJson(response, 503, {
+      error: "AI word lookup is not configured",
+      message: "AI word lookup is not configured.",
+    });
+    return;
+  }
+
+  const payload = await readJsonBody(request);
+  const word = String(payload.word || "").trim().toLowerCase();
+  if (!/^[a-z]+(?:'[a-z]+)?$/.test(word) || word.length > 40) {
+    sendJson(response, 400, { error: "Invalid word" });
+    return;
+  }
+
+  const prompt = [
+    "Look up this English word for a Chinese language learner.",
+    "Return only compact JSON, no Markdown.",
+    'Required shape: {"phonetic":"","meaning":""}',
+    "phonetic: IPA without slashes if you know it, otherwise empty string.",
+    "meaning: concise Simplified Chinese meanings, 1 line, include common spoken usage if helpful.",
+    `word: ${word}`,
+  ].join("\n");
+
+  const raw = await askAiTeacher(prompt, "word-lookup", "english");
+  const data = extractJsonObject(raw) || {};
+  const phonetic = String(data.phonetic || "").replace(/^\/|\/$/g, "").trim().slice(0, 80);
+  const meaning = String(data.meaning || "").trim().slice(0, 160);
+
+  if (!meaning) {
+    sendJson(response, 502, { error: "No meaning returned" });
+    return;
+  }
+
+  sendJson(response, 200, { word, phonetic, meaning });
 }
 
 function finalizeTeacherReply(reply, mode, rawMessage = "") {
@@ -1143,6 +1203,12 @@ function buildAiInstructions(mode = "chat", targetLanguage = "english") {
   const language = getTargetLanguageInfo(targetLanguage);
   if (mode === "convert-language") {
     return "You convert app learning data between languages. Return valid JSON only, with no Markdown or explanation.";
+  }
+  if (mode === "word-lookup") {
+    return "You are a compact English-to-Simplified-Chinese dictionary. Return JSON only.";
+  }
+  if (mode === "topic") {
+    return `You are ZhiYu Tutor, a spoken ${language.label} practice partner. Always extend the conversation with a natural follow-up question. Do not merely praise or repeat the student's answer.`;
   }
 
   return `You are ZhiYu Tutor, a natural language-learning assistant. The user is learning ${language.label}.`;
@@ -1302,6 +1368,11 @@ const server = http.createServer(async (request, response) => {
 
     if (request.method === "POST" && request.url === "/api/transcribe") {
       await handleTranscribe(request, response);
+      return;
+    }
+
+    if (request.method === "POST" && request.url === "/api/word-lookup") {
+      await handleWordLookup(request, response);
       return;
     }
 

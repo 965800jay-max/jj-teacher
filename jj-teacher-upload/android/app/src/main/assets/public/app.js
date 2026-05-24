@@ -116,6 +116,7 @@ const AUTH_TOKEN_KEY = "sentence-reader-auth-token";
 const AUTH_USER_KEY = "sentence-reader-auth-user";
 const AUTH_AVATAR_KEY = "sentence-reader-auth-avatar";
 const LEARNING_LANGUAGE_KEY = "sentence-reader-learning-language";
+const WORD_LOOKUP_CACHE_KEY = "sentence-reader-word-lookup-cache";
 const STALE_EMPTY_AI_REPLIES = new Set(["我暂时没有生成内容。", "我暂时没有生成内容"]);
 const TEACHER_MESSAGE_BREAK = "【NEXT_MESSAGE】";
 const TEACHER_CORRECTION_MARK = "【CORRECTION】";
@@ -125,8 +126,8 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free43";
-const APP_VERSION_CODE = 43;
+const APP_BUILD_TAG = "free44";
+const APP_VERSION_CODE = 44;
 const AUTH_REQUIRED = true;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
 const UPDATE_DISMISS_KEY = "sentence-reader-dismissed-update";
@@ -222,7 +223,7 @@ const dictionary = {
   good: ["ɡʊd", "好的"],
   had: ["hæd", "有；have 的过去式"],
   has: ["hæz", "有"],
-  have: ["hæv", "有；经历"],
+  have: ["hæv", "有；吃；喝；经历"],
   he: ["hiː", "他"],
   help: ["help", "帮助"],
   her: ["hər", "她的；她"],
@@ -459,7 +460,106 @@ const HIGH_FREQUENCY_DICTIONARY = {
   wrong: ["rɔːŋ", "错误的；不对的"],
 };
 
+const EXTRA_COMMON_DICTIONARY = {
+  accept: ["əkˈsept", "接受；同意"],
+  actually: ["ˈæktʃuəli", "其实；实际上"],
+  add: ["æd", "添加；加上"],
+  after: ["ˈæftər", "在...之后"],
+  ago: ["əˈɡoʊ", "以前"],
+  air: ["er", "空气"],
+  airport: ["ˈerpɔːrt", "机场"],
+  also: ["ˈɔːlsoʊ", "也；而且"],
+  answer: ["ˈænsər", "回答；答案"],
+  app: ["æp", "应用；软件"],
+  around: ["əˈraʊnd", "周围；大约"],
+  ask: ["æsk", "问；请求"],
+  back: ["bæk", "回来；后面"],
+  bathroom: ["ˈbæθruːm", "浴室；厕所"],
+  because: ["bɪˈkɔːz", "因为"],
+  before: ["bɪˈfɔːr", "在...之前"],
+  better: ["ˈbetər", "更好的；好些"],
+  bit: ["bɪt", "一点；小块"],
+  boring: ["ˈbɔːrɪŋ", "无聊的"],
+  breakfast: ["ˈbrekfəst", "早餐"],
+  cafe: ["kæˈfeɪ", "咖啡馆"],
+  care: ["ker", "关心；照顾"],
+  change: ["tʃeɪndʒ", "改变；零钱"],
+  class: ["klæs", "课；班级"],
+  close: ["kloʊz", "关闭；靠近"],
+  clothes: ["kloʊðz", "衣服"],
+  cool: ["kuːl", "酷的；不错的"],
+  could: ["kʊd", "可以；能够"],
+  day: ["deɪ", "一天；白天"],
+  delicious: ["dɪˈlɪʃəs", "好吃的；美味的"],
+  different: ["ˈdɪfrənt", "不同的"],
+  easy: ["ˈiːzi", "容易的；轻松的"],
+  else: ["els", "其他；另外"],
+  enjoy: ["ɪnˈdʒɔɪ", "享受；喜欢"],
+  evening: ["ˈiːvnɪŋ", "晚上；傍晚"],
+  everything: ["ˈevriθɪŋ", "所有事；一切"],
+  example: ["ɪɡˈzæmpəl", "例子"],
+  excited: ["ɪkˈsaɪtɪd", "兴奋的；期待的"],
+  fast: ["fæst", "快的；快速地"],
+  few: ["fjuː", "几个；少数"],
+  finish: ["ˈfɪnɪʃ", "完成；结束"],
+  fun: ["fʌn", "有趣；好玩"],
+  going: ["ˈɡoʊɪŋ", "go 的现在分词；去；进展"],
+  great: ["ɡreɪt", "很棒的；伟大的"],
+  guess: ["ɡes", "猜；估计"],
+  have: ["hæv", "有；吃；喝；经历"],
+  hello: ["həˈloʊ", "你好"],
+  help: ["help", "帮助"],
+  hope: ["hoʊp", "希望"],
+  hungry: ["ˈhʌŋɡri", "饿的"],
+  interesting: ["ˈɪntrəstɪŋ", "有趣的"],
+  job: ["dʒɑːb", "工作"],
+  just: ["dʒʌst", "只是；刚刚"],
+  learn: ["lɜːrn", "学习"],
+  little: ["ˈlɪtəl", "小的；一点"],
+  long: ["lɔːŋ", "长的；久的"],
+  lunch: ["lʌntʃ", "午饭"],
+  make: ["meɪk", "做；制造；让"],
+  many: ["ˈmeni", "许多"],
+  meal: ["miːl", "一餐；饭"],
+  meat: ["miːt", "肉"],
+  meet: ["miːt", "见面；认识"],
+  most: ["moʊst", "最；大多数"],
+  much: ["mʌtʃ", "很多；非常"],
+  next: ["nekst", "下一个；接下来"],
+  nice: ["naɪs", "好的；令人愉快的"],
+  noodle: ["ˈnuːdəl", "面条"],
+  noodles: ["ˈnuːdəlz", "面条"],
+  normal: ["ˈnɔːrməl", "正常的；普通的"],
+  often: ["ˈɔːfən", "经常"],
+  open: ["ˈoʊpən", "打开；开放的"],
+  pasta: ["ˈpɑːstə", "意大利面"],
+  pizza: ["ˈpiːtsə", "披萨"],
+  question: ["ˈkwestʃən", "问题"],
+  quick: ["kwɪk", "快的；迅速的"],
+  quite: ["kwaɪt", "相当；很"],
+  reply: ["rɪˈplaɪ", "回复；回答"],
+  restaurant: ["ˈrestərɑːnt", "餐厅"],
+  salad: ["ˈsæləd", "沙拉"],
+  same: ["seɪm", "相同的"],
+  simple: ["ˈsɪmpəl", "简单的"],
+  sleep: ["sliːp", "睡觉"],
+  small: ["smɔːl", "小的"],
+  sound: ["saʊnd", "听起来；声音"],
+  steak: ["steɪk", "牛排"],
+  study: ["ˈstʌdi", "学习；研究"],
+  sure: ["ʃʊr", "当然；确定"],
+  thing: ["θɪŋ", "事情；东西"],
+  usually: ["ˈjuːʒuəli", "通常；平常"],
+  wait: ["weɪt", "等待"],
+  yes: ["jes", "是的；对"],
+  yesterday: ["ˈjestərdeɪ", "昨天"],
+};
+
 Object.entries(HIGH_FREQUENCY_DICTIONARY).forEach(([word, entry]) => {
+  if (!dictionary[word]) dictionary[word] = entry;
+});
+
+Object.entries(EXTRA_COMMON_DICTIONARY).forEach(([word, entry]) => {
   if (!dictionary[word]) dictionary[word] = entry;
 });
 
@@ -1240,13 +1340,65 @@ function getWordLookupVariants(word) {
   return [...new Set(variants.filter(Boolean))];
 }
 
+function loadWordLookupCache() {
+  try {
+    const cache = JSON.parse(localStorage.getItem(WORD_LOOKUP_CACHE_KEY) || "{}");
+    if (!cache || typeof cache !== "object") return {};
+    Object.entries(cache).forEach(([word, entry]) => {
+      if (!word || !entry || typeof entry.meaning !== "string") return;
+      dictionary[word] = [entry.phonetic || "", entry.meaning];
+    });
+    return cache;
+  } catch {
+    return {};
+  }
+}
+
+function saveWordLookupCache(word, entry) {
+  const cleanWord = normalizeWord(word);
+  if (!cleanWord || !entry?.meaning) return;
+
+  const cache = loadWordLookupCache();
+  cache[cleanWord] = {
+    phonetic: String(entry.phonetic || "").trim(),
+    meaning: String(entry.meaning || "").trim(),
+    savedAt: Date.now(),
+  };
+
+  const trimmedEntries = Object.entries(cache)
+    .sort((a, b) => Number(b[1]?.savedAt || 0) - Number(a[1]?.savedAt || 0))
+    .slice(0, 500);
+  localStorage.setItem(WORD_LOOKUP_CACHE_KEY, JSON.stringify(Object.fromEntries(trimmedEntries)));
+  dictionary[cleanWord] = [cache[cleanWord].phonetic, cache[cleanWord].meaning];
+}
+
 function lookupWord(word) {
   const variants = getWordLookupVariants(word);
   for (const variant of variants) {
-    if (dictionary[variant]) return dictionary[variant];
+    if (dictionary[variant]) {
+      const [phonetic, meaning] = dictionary[variant];
+      return { phonetic, meaning, variant, source: "local" };
+    }
   }
 
-  return ["", "这个词还在离线词库扩展中。你可以先问智语导师，也可以继续点其它常用词。"];
+  return null;
+}
+
+async function lookupWordOnline(word) {
+  const cleanWord = normalizeWord(word).replace(/[’‘]/g, "'");
+  if (!/^[a-z]+(?:'[a-z]+)?$/i.test(cleanWord)) return null;
+
+  const data = await authApiRequest("/api/word-lookup", {
+    method: "POST",
+    body: JSON.stringify({ word: cleanWord }),
+  });
+  const entry = {
+    phonetic: String(data.phonetic || "").trim(),
+    meaning: String(data.meaning || "").trim(),
+  };
+  if (!entry.meaning) return null;
+  saveWordLookupCache(cleanWord, entry);
+  return entry;
 }
 
 function softenForCasualSpeech(text) {
@@ -4479,12 +4631,27 @@ function showWord(word, target) {
   target.classList.add("is-active");
 
   currentWord = word;
-  const [phonetic, meaning] = lookupWord(word);
+  const lookup = lookupWord(word);
   selectedWord.textContent = word;
-  phoneticText.textContent = phonetic ? `/${phonetic}/` : "音标待查询";
-  meaningText.textContent = meaning;
+  phoneticText.textContent = lookup?.phonetic ? `/${lookup.phonetic}/` : "在线查询中";
+  meaningText.textContent = lookup?.meaning || "正在查询中文意思...";
   wordSheet.classList.add("is-open");
   speak(word, "word");
+
+  if (lookup?.meaning) return;
+
+  const queryWord = word;
+  lookupWordOnline(word)
+    .then((entry) => {
+      if (currentWord !== queryWord || !entry) return;
+      phoneticText.textContent = entry.phonetic ? `/${entry.phonetic}/` : "音标待查询";
+      meaningText.textContent = entry.meaning;
+    })
+    .catch(() => {
+      if (currentWord !== queryWord) return;
+      phoneticText.textContent = "音标待查询";
+      meaningText.textContent = "这个词暂时没查到。你可以稍后再点一次，或直接问智语导师。";
+    });
 }
 
 function closeWordSheet() {
@@ -5146,7 +5313,28 @@ function cleanFreestyleReply(text) {
   return compact;
 }
 
+function cleanTopicReply(text) {
+  const lines = renameFreeChatText(renameTeacherText(text))
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .map((line) => line.replace(/^\s*(?:[-•*]|\d+[.)、])\s*/, ""))
+    .filter(Boolean);
+  const clean = lines.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+  if (/^很好[！!。]?$/.test(clean)) return "";
+  return clean || compactTeacherReply(text);
+}
+
 function buildTeacherRequestMessage(message, mode) {
+  if (mode === "topic") {
+    const language = getLearningLanguageConfig();
+    return [
+      `学生刚才的回答：${message}`,
+      `请继续当前${language.label}话题练习。`,
+      "不要只说“很好”，不要重复学生原句当作主要回复。",
+      "先自然接话，再给一句更地道的表达，最后继续问一个相关问题，让学生能继续练口语。",
+    ].join("\n");
+  }
+
   return message;
 }
 
@@ -5819,7 +6007,12 @@ async function sendTeacherMessage(prompt, modeOverride = "", displayText = "") {
         },
       }
     );
-    const reply = mode === "freestyle" ? cleanFreestyleReply(data.reply) : compactTeacherReply(data.reply);
+    const reply =
+      mode === "freestyle"
+        ? cleanFreestyleReply(data.reply)
+        : mode === "topic"
+          ? cleanTopicReply(data.reply)
+          : compactTeacherReply(data.reply);
     if (!reply) {
       throw new Error("智语导师连上了线上接口，但这次没有拿到回复内容。请再试一次。");
     }
@@ -5839,8 +6032,8 @@ async function sendTeacherMessage(prompt, modeOverride = "", displayText = "") {
     teacherSendInFlight = false;
     if (teacherSendButton) teacherSendButton.disabled = false;
     saveTeacherMessages();
-    renderChatMessages();
-    startDeferredUserTranslation();
+  renderChatMessages();
+  startDeferredUserTranslation();
   }
 }
 
@@ -5848,7 +6041,10 @@ function startTopicPractice() {
   setTeacherTopicMode(true);
   const language = getLearningLanguageConfig();
   sendTeacherMessage(
-    `我们开始一个轻松自然的${language.label}日常话题吧。`,
+    [
+      `我们开始一个轻松自然的${language.label}日常话题吧。`,
+      "请先抛出一个生活化问题。之后学生每次回答，你都要顺着他的内容继续追问，帮助他练口语。",
+    ].join("\n"),
     "topic",
     "话题"
   );
@@ -5984,6 +6180,7 @@ document.querySelectorAll(".quick-prompts button").forEach((button) => {
 loadAuthSession();
 currentLearningLanguage = normalizeLearningLanguage(localStorage.getItem(LEARNING_LANGUAGE_KEY) || authUser?.learningLanguage || "english");
 localStorage.setItem(LEARNING_LANGUAGE_KEY, currentLearningLanguage);
+loadWordLookupCache();
 savedSentences = loadSavedSentences();
 teacherMessages = loadTeacherMessages();
 migrateOldTextStorage();

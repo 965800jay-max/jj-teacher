@@ -4521,3 +4521,16 @@ textarea::placeholder,
     inset 0 1px 0 rgba(255, 255, 255, 0.42),
     0 0 20px rgba(255, 123, 27, 0.42) !important;
 }
+
+/* free44: voice input is temporarily disabled until native recording is rebuilt. */
+#teacherVoiceButton {
+  display: none !important;
+}
+
+.chat-composer {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.chat-composer .teacher-input {
+  padding-right: 12px !important;
+}

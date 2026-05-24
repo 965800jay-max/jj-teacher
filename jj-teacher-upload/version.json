@@ -1,6 +1,6 @@
 {
-  "versionCode": 43,
-  "versionName": "free43",
-  "apkUrl": "https://files.catbox.moe/o86rtq.apk",
-  "notes": "AI解答改为居中可继续聊天窗口；智语导师语音改为直接录音并由AI转文字，不再使用安卓系统识别。"
+  "versionCode": 44,
+  "versionName": "free44",
+  "apkUrl": "https://files.catbox.moe/32kik7.apk",
+  "notes": "修复单词查询不足，新增AI在线查词缓存；优化话题模式持续追问；暂时关闭不可用的语音按钮。"
 }
