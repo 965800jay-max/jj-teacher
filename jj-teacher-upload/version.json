@@ -1,6 +1,6 @@
 {
-  "versionCode": 53,
-  "versionName": "free53",
-  "apkUrl": "https://files.catbox.moe/r7xhg3.apk",
-  "notes": "修复话题首句暴露幕后说明的问题，英语日常句子按钮只输出英文句子本身。"
+  "versionCode": 54,
+  "versionName": "free54",
+  "apkUrl": "https://files.catbox.moe/wl71il.apk",
+  "notes": "英语日常句子补回对应中文意思，保留无开头和无结尾说明的简洁显示。"
 }

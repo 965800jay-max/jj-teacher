@@ -126,8 +126,8 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free53";
-const APP_VERSION_CODE = 53;
+const APP_BUILD_TAG = "free54";
+const APP_VERSION_CODE = 54;
 const DAILY_CHAT_REPEAT_KEY = "sentence-reader-daily-chat-last";
 const AUTH_REQUIRED = true;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
@@ -5301,7 +5301,9 @@ function getDailyLineTarget(line) {
 
 function buildDailySentenceMessage() {
   const lines = selectDailyChatLines(3);
-  return lines.map(getDailyLineTarget).join("\n");
+  const targetLines = lines.map((line, index) => `${index + 1}. ${getDailyLineTarget(line)}`);
+  const meaningLines = lines.map((line, index) => `${index + 1}. ${line.zh}`);
+  return ["英文：", ...targetLines, "中文意思：", ...meaningLines].join("\n");
 }
 
 async function startTeacherOpeningTopic() {
@@ -6047,12 +6049,14 @@ function renderTeacherMessageContent(bubble, part, role) {
       });
 
       row.append(sentenceText, speakButton, addButton);
-      if (part.mode === "daily-sentences") {
+      const meaningText =
+        suggestion.note || (part.mode === "daily-sentences" ? "" : inferFallbackChineseMeaning(display.chineseText, display.cleanText));
+      if (!meaningText) {
         item.append(row);
       } else {
         const meaning = document.createElement("p");
         meaning.className = "teacher-sentence-meaning";
-        meaning.textContent = suggestion.note || inferFallbackChineseMeaning(display.chineseText, display.cleanText);
+        meaning.textContent = meaningText;
         item.append(meaning, row);
       }
       englishBlock.appendChild(item);
