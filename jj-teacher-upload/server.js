@@ -970,6 +970,11 @@ function buildConvertLanguagePrompt(payload, sourceLanguage = "english", targetL
   ].join("\n");
 }
 
+function isDailySentenceRequest(message) {
+  const clean = String(message || "");
+  return /(?:3|三).{0,8}句/u.test(clean) && /(?:日常|聊天|口语|朋友)/u.test(clean) && /句子/u.test(clean);
+}
+
 function buildChatPrompt(message, history, mode = "chat", targetLanguage = "english") {
   const language = getTargetLanguageInfo(targetLanguage);
   const cleanHistory = history
@@ -980,6 +985,15 @@ function buildChatPrompt(message, history, mode = "chat", targetLanguage = "engl
   return [
     `当前学习语言：${language.label}`,
     mode === "freestyle" ? "当前模式：普通聊天。" : mode === "topic" ? "当前模式：话题练习。" : "当前模式：语言学习。",
+    isDailySentenceRequest(message)
+      ? [
+          "日常句子请求规则：",
+          "1. 必须刚好给 3 句，不要只给 1 句。",
+          "2. 句子要像真实朋友聊天，不要总是天气、吃什么、你在做什么。",
+          "3. 主题可以包含作息、计划、手机、消费、心情、健身、音乐、房间、周末、短途旅行、社交边界。",
+          `4. 格式必须是：英文：1. ... 2. ... 3. ... 中文意思：1. ... 2. ... 3. ...`,
+        ].join("\n")
+      : "",
     mode === "topic"
       ? [
           "话题练习规则：",

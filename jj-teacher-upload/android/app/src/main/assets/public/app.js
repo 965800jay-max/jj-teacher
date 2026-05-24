@@ -126,8 +126,9 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free44";
-const APP_VERSION_CODE = 44;
+const APP_BUILD_TAG = "free45";
+const APP_VERSION_CODE = 45;
+const DAILY_CHAT_REPEAT_KEY = "sentence-reader-daily-chat-last";
 const AUTH_REQUIRED = true;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
 const UPDATE_DISMISS_KEY = "sentence-reader-dismissed-update";
@@ -1833,9 +1834,8 @@ function updateLanguageUi() {
   input.placeholder = `输入或粘贴要添加的${language.label}句子...`;
   examAnswer.placeholder = `输入完整${language.label}句子...`;
   emptyCopy.textContent = currentView === "learned" ? "学会的句子会放在这里。" : `整句点右侧按钮，${language.label === "英语" ? "单词直接点英文" : "可以直接播放整句"}。`;
-  document.querySelectorAll("[data-prompt]").forEach((button) => {
+  document.querySelectorAll("[data-daily-prompt]").forEach((button) => {
     button.textContent = `${language.label}日常句子`;
-    button.dataset.prompt = `给我3句适合日常聊天的${language.label}句子。`;
   });
   teacherPage.setAttribute("aria-label", `智语${language.label}导师`);
   teacherInput.placeholder = teacherFreeMode
@@ -5174,6 +5174,268 @@ function getTeacherOpeningFallback() {
   return fallbacks[Math.floor(Math.random() * fallbacks.length)];
 }
 
+function dailyChatLine(zh, english, spanish, japanese, korean) {
+  return { zh, english, spanish, japanese, korean };
+}
+
+const DAILY_CHAT_LIBRARY = [
+  dailyChatLine(
+    "我最近一直想把生活节奏调回来。",
+    "I've been trying to get back into a routine lately.",
+    "He estado intentando volver a una buena rutina ultimamente.",
+    "最近、生活リズムを戻そうとしている。",
+    "요즘 다시 생활 리듬을 잡으려고 하고 있어."
+  ),
+  dailyChatLine(
+    "如果你也想轻松一点，我可以配合。",
+    "I'm down for something low-key if you are.",
+    "Si quieres algo tranquilo, yo tambien me apunto.",
+    "君も気楽な感じがいいなら、僕もそれでいいよ。",
+    "너도 편한 게 좋으면 나도 좋아."
+  ),
+  dailyChatLine(
+    "听起来像是什么事都比预想更费时间的一天。",
+    "That sounds like one of those days where everything takes longer than it should.",
+    "Suena como uno de esos dias en los que todo tarda mas de lo normal.",
+    "何をしても思ったより時間がかかる日みたいだね。",
+    "뭘 해도 예상보다 오래 걸리는 날 같네."
+  ),
+  dailyChatLine(
+    "我最近在睡前少刷手机。",
+    "I've been cutting down on scrolling before bed.",
+    "Estoy intentando mirar menos el movil antes de dormir.",
+    "最近、寝る前にスマホを見る時間を減らしている。",
+    "요즘 자기 전에 폰 보는 시간을 줄이고 있어."
+  ),
+  dailyChatLine(
+    "我需要的是休整日，不是更忙的一天。",
+    "I need a reset day, not another busy day.",
+    "Necesito un dia para resetearme, no otro dia ocupado.",
+    "必要なのはリセットする日で、さらに忙しい日じゃない。",
+    "나한테 필요한 건 쉬는 날이지, 더 바쁜 날이 아니야."
+  ),
+  dailyChatLine(
+    "我这个月想更认真地存钱。",
+    "I'm trying to be better about saving money this month.",
+    "Este mes estoy intentando ahorrar mejor.",
+    "今月はもっとちゃんとお金を貯めようとしている。",
+    "이번 달에는 돈을 좀 더 잘 모아보려고 해."
+  ),
+  dailyChatLine(
+    "我找到一家真的没有被吹过头的小店。",
+    "I found a little place that actually lives up to the hype.",
+    "Encontre un sitio pequeno que de verdad vale la fama que tiene.",
+    "評判どおりに本当に良い小さなお店を見つけた。",
+    "입소문만큼 진짜 괜찮은 작은 가게를 찾았어."
+  ),
+  dailyChatLine(
+    "我现在想吃舒服一点的，不想吃太正式的。",
+    "I'm in the mood for something comforting, not fancy.",
+    "Me apetece algo reconfortante, no algo elegante.",
+    "今はおしゃれなものより、ほっとするものが食べたい。",
+    "지금은 근사한 것보다 편하게 먹는 음식이 당겨."
+  ),
+  dailyChatLine(
+    "今天早上莫名其妙效率很高。",
+    "I had one of those weirdly productive mornings.",
+    "Tuve una de esas mananas raramente productivas.",
+    "今朝はなぜか妙に効率がよかった。",
+    "오늘 아침은 이상하게 생산적이었어."
+  ),
+  dailyChatLine(
+    "我最近想多自己做饭，少点外卖。",
+    "I've been trying to cook more instead of ordering in.",
+    "Estoy intentando cocinar mas y pedir menos comida a domicilio.",
+    "最近はデリバリーより自炊を増やそうとしている。",
+    "요즘 배달보다 집에서 요리하려고 하고 있어."
+  ),
+  dailyChatLine(
+    "我最近有点不想去太挤的地方。",
+    "I'm kind of over crowded places lately.",
+    "Ultimamente me cansan un poco los sitios muy llenos.",
+    "最近、人が多すぎる場所はちょっと疲れる。",
+    "요즘은 너무 붐비는 곳이 좀 질려."
+  ),
+  dailyChatLine(
+    "我们简单安排一下，别把它搞得太复杂。",
+    "Let's do something simple and not make it a whole thing.",
+    "Hagamos algo sencillo y no lo compliquemos demasiado.",
+    "シンプルにしよう。大ごとにしなくていい。",
+    "간단하게 하자. 너무 크게 만들 필요 없어."
+  ),
+  dailyChatLine(
+    "今天有件事把我笑得比它本身还夸张。",
+    "I saw something today that made me laugh way harder than it should have.",
+    "Hoy vi algo que me hizo reir mucho mas de lo normal.",
+    "今日、思った以上に笑ってしまうことがあった。",
+    "오늘 뭔가 보고 생각보다 훨씬 크게 웃었어."
+  ),
+  dailyChatLine(
+    "我最近想让周末别排得太满。",
+    "I'm trying to keep my weekends a little more open.",
+    "Estoy intentando dejar mis fines de semana un poco mas libres.",
+    "最近、週末の予定を少し空けておこうとしている。",
+    "요즘 주말 일정을 조금 비워두려고 해."
+  ),
+  dailyChatLine(
+    "我现在很适合散个步再喝杯咖啡。",
+    "I could use a walk and a coffee.",
+    "Me vendria bien dar un paseo y tomar un cafe.",
+    "散歩してコーヒーを飲むのが今ちょうどよさそう。",
+    "산책하고 커피 한 잔 하면 딱 좋을 것 같아."
+  ),
+  dailyChatLine(
+    "我最近一直单曲循环同一首歌。",
+    "I've been listening to the same song on repeat.",
+    "He estado escuchando la misma cancion en bucle.",
+    "最近、同じ曲をずっとリピートしている。",
+    "요즘 같은 노래만 계속 반복해서 듣고 있어."
+  ),
+  dailyChatLine(
+    "那个软件挺有用，但太容易刷着刷着就没时间了。",
+    "That app is useful, but it's way too easy to lose time on it.",
+    "Esa app es util, pero es demasiado facil perder tiempo en ella.",
+    "あのアプリは便利だけど、時間を溶かしやすい。",
+    "그 앱은 유용한데 시간이 너무 쉽게 사라져."
+  ),
+  dailyChatLine(
+    "我在练习拒绝别人时不要有负罪感。",
+    "I'm trying to get better at saying no without feeling bad.",
+    "Estoy intentando aprender a decir que no sin sentirme mal.",
+    "罪悪感なしに断れるようになりたい。",
+    "미안해하지 않고 거절하는 걸 연습 중이야."
+  ),
+  dailyChatLine(
+    "我得先收拾房间，不然它快变成问题了。",
+    "I need to clean my room before it turns into a problem.",
+    "Tengo que ordenar mi cuarto antes de que se convierta en un problema.",
+    "部屋が大変なことになる前に片付けないと。",
+    "방이 문제가 되기 전에 치워야 해."
+  ),
+  dailyChatLine(
+    "我不是困，就是今天脑子已经下班了。",
+    "I'm not tired, I'm just mentally done for the day.",
+    "No estoy cansado, simplemente mi mente ya termino por hoy.",
+    "眠いわけじゃなくて、今日はもう頭が限界なだけ。",
+    "졸린 건 아닌데 오늘은 머리가 이미 퇴근했어."
+  ),
+  dailyChatLine(
+    "我想保持稳定，哪怕每天只做一点点。",
+    "I'm trying to stay consistent, even if it's just a little every day.",
+    "Estoy intentando ser constante, aunque sea un poco cada dia.",
+    "毎日少しだけでも続けるようにしている。",
+    "매일 조금이라도 꾸준히 하려고 해."
+  ),
+  dailyChatLine(
+    "我突然特别想吃点辣的。",
+    "I'm craving something spicy.",
+    "Se me antoja algo picante.",
+    "急に辛いものが食べたくなった。",
+    "갑자기 매운 게 엄청 당겨."
+  ),
+  dailyChatLine(
+    "我在想最近找个时间短途旅行一下。",
+    "I'm thinking about taking a short trip soon.",
+    "Estoy pensando en hacer un viaje corto pronto.",
+    "近いうちに短い旅行をしようかなと思っている。",
+    "조만간 짧게 여행을 다녀올까 생각 중이야."
+  ),
+  dailyChatLine(
+    "我喜欢那种加入轻松、走也轻松的安排。",
+    "I like plans that feel easy to join and easy to leave.",
+    "Me gustan los planes a los que es facil unirse y tambien irse.",
+    "参加しやすくて帰りやすい予定が好き。",
+    "편하게 합류하고 편하게 빠질 수 있는 약속이 좋아."
+  ),
+  dailyChatLine(
+    "那家店不错，就是排队永远很夸张。",
+    "That place is good, but the line is always insane.",
+    "Ese sitio es bueno, pero la fila siempre es una locura.",
+    "あのお店はいいけど、いつも行列がすごい。",
+    "그 가게는 좋은데 줄이 항상 말도 안 되게 길어."
+  ),
+  dailyChatLine(
+    "我最近在努力像个成熟的人一样多喝水。",
+    "I've been trying to drink more water like a responsible person.",
+    "Estoy intentando beber mas agua como una persona responsable.",
+    "最近、ちゃんとした人みたいに水をもっと飲もうとしている。",
+    "요즘 책임감 있는 사람처럼 물을 더 마시려고 해."
+  ),
+  dailyChatLine(
+    "我现在处在想把整个房间都换掉的阶段。",
+    "I'm in that phase where I want to change my whole room.",
+    "Estoy en esa fase en la que quiero cambiar toda mi habitacion.",
+    "今、部屋を全部変えたい気分の時期にいる。",
+    "지금 방 전체를 바꾸고 싶은 시기야."
+  ),
+  dailyChatLine(
+    "我宁愿轻松待一晚，也不想硬逼自己出门。",
+    "I'd rather have a chill night than force myself to go out.",
+    "Prefiero una noche tranquila a obligarme a salir.",
+    "無理に出かけるより、ゆっくりした夜にしたい。",
+    "억지로 나가는 것보다 편하게 보내는 밤이 좋아."
+  ),
+  dailyChatLine(
+    "我需要一个不用一直盯着屏幕的爱好。",
+    "I need a hobby that doesn't involve staring at a screen.",
+    "Necesito un hobby que no implique mirar una pantalla todo el tiempo.",
+    "画面を見続けなくていい趣味が必要だ。",
+    "계속 화면만 보는 게 아닌 취미가 필요해."
+  ),
+  dailyChatLine(
+    "我在努力少买网上那些莫名其妙的小东西。",
+    "I'm trying to stop buying random stuff online.",
+    "Estoy intentando dejar de comprar cosas aleatorias por internet.",
+    "ネットでよくわからないものを買うのをやめようとしている。",
+    "온라인에서 쓸데없는 걸 사는 걸 줄이려고 해."
+  ),
+];
+
+function shuffleItems(items) {
+  return [...items]
+    .map((item) => ({ item, sort: Math.random() }))
+    .sort((left, right) => left.sort - right.sort)
+    .map(({ item }) => item);
+}
+
+function selectDailyChatLines(count = 3) {
+  let recent = [];
+  try {
+    recent = JSON.parse(localStorage.getItem(DAILY_CHAT_REPEAT_KEY) || "[]");
+  } catch {
+    recent = [];
+  }
+  if (!Array.isArray(recent)) recent = [];
+
+  const recentSet = new Set(recent);
+  let pool = DAILY_CHAT_LIBRARY.filter((item) => !recentSet.has(item.english));
+  if (pool.length < count) pool = DAILY_CHAT_LIBRARY;
+
+  const selected = shuffleItems(pool).slice(0, count);
+  localStorage.setItem(DAILY_CHAT_REPEAT_KEY, JSON.stringify(selected.map((item) => item.english)));
+  return selected;
+}
+
+function getDailyLineTarget(line) {
+  return line[currentLearningLanguage] || line.english;
+}
+
+function buildDailySentenceMessage() {
+  const language = getLearningLanguageConfig();
+  const lines = selectDailyChatLines(3);
+  const targetLines = lines.map((line, index) => `${index + 1}. ${getDailyLineTarget(line)}`);
+  const meaningLines = lines.map((line, index) => `${index + 1}. ${line.zh}`);
+
+  return [
+    `这三句更像朋友真实聊天，主题会轮换，不只聊天气和吃什么。`,
+    "英文：",
+    ...targetLines,
+    "中文意思：",
+    ...meaningLines,
+    `可以直接选一句用${language.label}接着聊。`,
+  ].join("\n");
+}
+
 async function startTeacherOpeningTopic() {
   if (!shouldStartTeacherOpeningTopic()) return;
 
@@ -5440,6 +5702,7 @@ function removeEnglishFromTeacherText(text, englishSentences) {
 
   return chinese
     .replace(/(?:英文|目标语|西班牙语|日语|韩语)\s*[：:]\s*/g, "")
+    .replace(/(?:^|\s)\d+[.)、]\s*/g, " ")
     .replace(/(?:这个|这句)?可以(?:这么|这样)?说(?:成|为)?\s*[：:]?\s*(?=(意思|就是|中文|$))/g, "")
     .replace(/\s*[—–-]\s*/g, " ")
     .replace(/\s+/g, " ")
@@ -5594,6 +5857,71 @@ function buildTeacherDisplay(text) {
   };
 }
 
+function stripChatMarkdown(text) {
+  return String(text || "")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/__([^_]+)__/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/^\s{0,3}#{1,6}\s+/gm, "")
+    .replace(/^\s*>\s?/gm, "")
+    .replace(/^\s*(?:[-*•]|\d+[.)、])\s+/gm, "");
+}
+
+function formatReadableChatText(text) {
+  const protectedText = stripChatMarkdown(text)
+    .replace(/\r/g, "")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\s+([，。！？；：,.!?;:])/g, "$1")
+    .trim();
+
+  return protectedText
+    .replace(/([。！？；])\s*(?=[\u4e00-\u9fa5])/g, "$1\n\n")
+    .replace(/([.!?])\s+(?=[A-Z])/g, "$1\n\n")
+    .replace(/\s+(?=(?:首先|其次|另外|然后|最后|重点|建议|比如|简单说|如果|英文|中文意思|追问|可以回答)[：:])/g, "\n\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function renderSpeakableText(container, text) {
+  const value = String(text || "");
+  const tokenPattern = /[A-Za-zÀ-ÖØ-öø-ÿ]+(?:['’][A-Za-zÀ-ÖØ-öø-ÿ]+)?/g;
+  let index = 0;
+  let match = tokenPattern.exec(value);
+
+  while (match) {
+    if (match.index > index) {
+      container.appendChild(document.createTextNode(value.slice(index, match.index)));
+    }
+
+    const token = match[0];
+    const button = document.createElement("button");
+    button.className = "chat-word-token";
+    button.type = "button";
+    button.textContent = token;
+    button.setAttribute("aria-label", `朗读单词：${token}`);
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      speak(token.replace(/’/g, "'"), "word");
+    });
+    container.appendChild(button);
+
+    index = match.index + token.length;
+    match = tokenPattern.exec(value);
+  }
+
+  if (index < value.length) {
+    container.appendChild(document.createTextNode(value.slice(index)));
+  }
+}
+
+function appendReadableText(container, text, className = "chat-text") {
+  const textEl = document.createElement("p");
+  textEl.className = className;
+  renderSpeakableText(textEl, formatReadableChatText(text));
+  container.appendChild(textEl);
+  return textEl;
+}
+
 function renderTeacherLinePair(container, pair) {
   const language = getLearningLanguageConfig();
   const card = document.createElement("div");
@@ -5673,20 +6001,14 @@ function renderTeacherMessageContent(bubble, part, role) {
   }
 
   if (part.mode === "freestyle") {
-    const textEl = document.createElement("p");
-    textEl.className = "chat-text teacher-chinese-text";
-    textEl.textContent = part.pending ? text : cleanFreestyleReply(text);
-    bubble.appendChild(textEl);
+    appendReadableText(bubble, part.pending ? text : cleanFreestyleReply(text), "chat-text teacher-chinese-text");
     return;
   }
 
   const display = buildTeacherDisplay(text);
 
   if (display.chineseText || !display.englishSentences.length) {
-    const textEl = document.createElement("p");
-    textEl.className = "chat-text teacher-chinese-text";
-    textEl.textContent = display.chineseText || display.cleanText;
-    bubble.appendChild(textEl);
+    appendReadableText(bubble, display.chineseText || display.cleanText, "chat-text teacher-chinese-text");
   }
 
   if (display.englishSentences.length) {
@@ -5700,17 +6022,12 @@ function renderTeacherMessageContent(bubble, part, role) {
       meaning.className = "teacher-sentence-meaning";
       meaning.textContent = suggestion.note || "中文意思待补充。";
 
-      const sentenceButton = document.createElement("button");
-      sentenceButton.className = "teacher-english-sentence";
-      sentenceButton.type = "button";
-      sentenceButton.textContent = suggestion.sentence;
-      sentenceButton.setAttribute("aria-label", `朗读：${suggestion.sentence}`);
+      const sentenceText = document.createElement("div");
+      sentenceText.className = "teacher-english-sentence";
+      sentenceText.setAttribute("aria-label", suggestion.sentence);
+      renderSpeakableText(sentenceText, suggestion.sentence);
 
-      sentenceButton.addEventListener("click", () => {
-        speak(suggestion.sentence, "sentence");
-      });
-
-      item.append(meaning, sentenceButton);
+      item.append(meaning, sentenceText);
       englishBlock.appendChild(item);
     });
     bubble.appendChild(englishBlock);
@@ -5789,10 +6106,7 @@ function renderUserMessageContent(bubble, part) {
   const translationPending = Boolean(part.translationPending && !translation);
 
   if (!translation && !translationPending) {
-    const textEl = document.createElement("p");
-    textEl.className = "chat-text";
-    textEl.textContent = part.text || "";
-    bubble.appendChild(textEl);
+    appendReadableText(bubble, part.text || "", "chat-text");
     return;
   }
 
@@ -5813,7 +6127,7 @@ function renderUserMessageContent(bubble, part) {
   const english = document.createElement("p");
   english.className = "user-translation-english";
   if (translationPending) english.classList.add("is-pending");
-  english.textContent = translationPending ? `正在生成${language.label}表达...` : translation.sentence;
+  renderSpeakableText(english, translationPending ? `正在生成${language.label}表达...` : translation.sentence);
 
   if (translationPending) {
     panel.classList.add("is-pending");
@@ -6069,6 +6383,17 @@ function startFreeChatMode() {
   renderChatMessages();
 }
 
+function startDailySentencePractice() {
+  if (teacherSendInFlight) return;
+
+  setTeacherTeachingMode();
+  const language = getLearningLanguageConfig();
+  teacherMessages.push({ role: "user", text: `${language.label}日常句子` });
+  teacherMessages.push({ role: "assistant", text: buildDailySentenceMessage(), mode: "chat" });
+  saveTeacherMessages();
+  renderChatMessages();
+}
+
 input.addEventListener("input", () => {
   localStorage.setItem(DRAFT_KEY, input.value);
 });
@@ -6169,6 +6494,11 @@ document.querySelectorAll(".quick-prompts button").forEach((button) => {
 
     if (button.dataset.freeChat === "start") {
       startFreeChatMode();
+      return;
+    }
+
+    if (button.dataset.dailyPrompt === "start") {
+      startDailySentencePractice();
       return;
     }
 

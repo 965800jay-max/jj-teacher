@@ -1,6 +1,6 @@
 {
-  "versionCode": 44,
-  "versionName": "free44",
-  "apkUrl": "https://files.catbox.moe/32kik7.apk",
-  "notes": "修复单词查询不足，新增AI在线查词缓存；优化话题模式持续追问；暂时关闭不可用的语音按钮。"
+  "versionCode": 45,
+  "versionName": "free45",
+  "apkUrl": "https://files.catbox.moe/agifhb.apk",
+  "notes": "聊天界面改为通栏阅读样式；日常句子固定生成3句并扩展真实聊天题材；聊天内点击英文单词可直接朗读。"
 }

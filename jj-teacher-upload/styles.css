@@ -4534,3 +4534,141 @@ textarea::placeholder,
 .chat-composer .teacher-input {
   padding-right: 12px !important;
 }
+
+/* free45: ChatGPT-style full-width chat, readable spacing, and tap-to-speak words. */
+.chat-messages {
+  gap: 22px !important;
+  padding: 16px 0 10px !important;
+}
+
+.chat-bubble {
+  width: 100% !important;
+  max-width: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 2px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.chat-bubble.is-teacher,
+.chat-bubble.is-user {
+  align-self: stretch !important;
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+}
+
+.chat-bubble::after {
+  display: none !important;
+}
+
+.chat-label {
+  margin: 0 0 7px !important;
+  color: #9ca3af !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  letter-spacing: 0 !important;
+}
+
+.chat-bubble.is-user .chat-label {
+  color: #d4d4d4 !important;
+  text-align: right !important;
+}
+
+.chat-text,
+.teacher-chinese-text,
+.user-chinese-toggle {
+  color: #f5f5f5 !important;
+  font-size: 15px !important;
+  line-height: 1.76 !important;
+  white-space: pre-wrap !important;
+}
+
+.teacher-chinese-text {
+  font-weight: 780 !important;
+}
+
+.chat-bubble.is-user .chat-text,
+.chat-bubble.is-user .teacher-chinese-text,
+.chat-bubble.is-user .user-chinese-toggle {
+  color: #ffffff !important;
+  text-align: right !important;
+}
+
+.teacher-english-block {
+  gap: 18px !important;
+  margin-top: 14px !important;
+  padding-top: 0 !important;
+  border-top: 0 !important;
+}
+
+.teacher-english-item {
+  display: grid !important;
+  gap: 6px !important;
+}
+
+.teacher-sentence-meaning,
+.teacher-line-note {
+  color: #ffffff !important;
+  font-size: 15px !important;
+  font-weight: 820 !important;
+  line-height: 1.68 !important;
+}
+
+.teacher-english-sentence,
+.teacher-english-toggle,
+.user-translation-english {
+  color: #d4d4d4 !important;
+  font-size: 15px !important;
+  font-weight: 720 !important;
+  line-height: 1.68 !important;
+}
+
+.user-translation-card {
+  width: 100% !important;
+  justify-items: stretch !important;
+}
+
+.user-chinese-toggle {
+  width: 100% !important;
+  text-align: right !important;
+}
+
+.user-translation-panel,
+.chat-bubble.is-user .user-translation-panel {
+  width: 100% !important;
+  border-top: 0 !important;
+  background: transparent !important;
+  padding-top: 8px !important;
+}
+
+.chat-bubble.is-user .user-translation-english {
+  color: #ffffff !important;
+  text-align: right !important;
+}
+
+.teacher-inline-actions {
+  margin-top: 12px !important;
+}
+
+.chat-word-token {
+  display: inline;
+  border: 0;
+  border-radius: 0;
+  padding: 0 1px;
+  margin: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  text-align: inherit;
+  text-decoration: none;
+}
+
+.chat-word-token:active {
+  color: #ffd43b;
+}
