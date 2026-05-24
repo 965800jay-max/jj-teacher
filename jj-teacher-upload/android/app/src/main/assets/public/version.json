@@ -1,6 +1,6 @@
 {
-  "versionCode": 47,
-  "versionName": "free47",
-  "apkUrl": "https://files.catbox.moe/fftgpi.apk",
-  "notes": "修复AI聊天用户消息白条；英文多句回复改为每句独立播放和收藏；AI解答只讲重点并接一条聊天问句；高频单词扩展到316个。"
+  "versionCode": 48,
+  "versionName": "free48",
+  "apkUrl": "https://files.catbox.moe/knwl4s.apk",
+  "notes": "继续修复智语导师用户消息白色长条，用户消息改为纯文本透明显示；好友入口移到右上角，底部只保留三个主按钮。"
 }

@@ -126,8 +126,8 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free47";
-const APP_VERSION_CODE = 47;
+const APP_BUILD_TAG = "free48";
+const APP_VERSION_CODE = 48;
 const DAILY_CHAT_REPEAT_KEY = "sentence-reader-daily-chat-last";
 const AUTH_REQUIRED = true;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
@@ -6408,11 +6408,9 @@ function renderUserMessageContent(bubble, part) {
   const card = document.createElement("div");
   card.className = "user-translation-card";
 
-  const chineseButton = document.createElement("button");
-  chineseButton.className = "user-chinese-toggle";
-  chineseButton.type = "button";
-  chineseButton.textContent = part.text || "";
-  chineseButton.setAttribute("aria-label", `查看${language.label}表达`);
+  const chineseText = document.createElement("div");
+  chineseText.className = "user-message-text";
+  chineseText.textContent = part.text || "";
 
   const panel = document.createElement("div");
   panel.className = "user-translation-panel";
@@ -6427,7 +6425,7 @@ function renderUserMessageContent(bubble, part) {
   if (translationPending) {
     panel.classList.add("is-pending");
     panel.appendChild(english);
-    card.append(chineseButton, panel);
+    card.append(chineseText, panel);
     bubble.appendChild(card);
     return;
   }
@@ -6454,13 +6452,8 @@ function renderUserMessageContent(bubble, part) {
     addTeacherSentence(translation, addButton);
   });
 
-  chineseButton.addEventListener("click", () => {
-    panel.hidden = !panel.hidden;
-    card.classList.toggle("is-open", !panel.hidden);
-  });
-
   panel.append(english, speakButton, addButton);
-  card.append(chineseButton, panel);
+  card.append(chineseText, panel);
   bubble.appendChild(card);
 }
 
