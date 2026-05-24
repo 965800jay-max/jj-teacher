@@ -939,11 +939,13 @@ function handleHealth(response) {
 function buildExplainPrompt(sentence, targetLanguage = "english") {
   const language = getTargetLanguageInfo(targetLanguage);
   return [
-    `你是一位中文母语者的${language.label}句子背诵老师。请讲解下面这句${language.label}。`,
-    "要求：中文回答，极简，适合手机小卡片。严格只输出这3个标题，每项不超过18个字：",
-    "句意：",
-    "重点词：",
-    "例句：",
+    `You are ZhiYu Tutor, a warm and emotionally intelligent ${language.label} coach for a Chinese native speaker.`,
+    `Explain this ${language.label} sentence in Simplified Chinese for a phone screen.`,
+    "Be clear, specific, conversational, and useful. Do not sound like a template.",
+    "First explain the meaning, when to use it, and one key phrase.",
+    `If you include ${language.label} example sentences, put each sentence on its own line.`,
+    "After the explanation, naturally continue the conversation from the sentence and invite the user to answer.",
+    "Do not write robotic labels such as '继续话题:', '问题:', '追问:', 'follow-up:', or markdown tables.",
     `${language.label}句子：${sentence}`,
   ].join("\n");
 }
@@ -985,6 +987,14 @@ function buildChatPrompt(message, history, mode = "chat", targetLanguage = "engl
   return [
     `当前学习语言：${language.label}`,
     mode === "freestyle" ? "当前模式：普通聊天。" : mode === "topic" ? "当前模式：话题练习。" : "当前模式：语言学习。",
+    [
+      "Conversation quality rules:",
+      "1. Be specific, warm, emotionally intelligent, and context-aware.",
+      "2. Answer the user's real intent before teaching.",
+      "3. Avoid empty praise, robotic labels, repeated wording, and generic small talk.",
+      "4. Use short readable paragraphs on mobile.",
+      "5. When continuing a conversation, pick up one concrete detail from the user and ask one natural next question.",
+    ].join("\n"),
     isDailySentenceRequest(message)
       ? [
           "日常句子请求规则：",
@@ -999,9 +1009,8 @@ function buildChatPrompt(message, history, mode = "chat", targetLanguage = "engl
           "话题练习规则：",
           "1. 用户每次回复后，必须顺着用户的具体内容继续聊，不要只说“很好”。",
           "2. 不要把用户原句重复一遍当作主要回复。",
-          "3. 回复要包含：自然回应、可跟读的目标语言表达、继续追问。",
-          "4. 目标是让用户不断开口练口语，所以最后一定问一个生活化小问题。",
-          `建议格式：回应：... ${language.label}：... 追问：...`,
+          "3. 像会聊天的人一样自然接话，必要时给一句可跟读的目标语言表达。",
+          "4. 最后自然递出一个具体、好回答的小问题，但不要写“问题/追问/继续话题”这些标签。",
         ].join("\n")
       : "",
     `如果你给出${language.label}学习句子或翻译，请用“英文：”放${language.label}内容，并用“中文意思：”放中文意思。`,
@@ -1222,10 +1231,10 @@ function buildAiInstructions(mode = "chat", targetLanguage = "english") {
     return "You are a compact English-to-Simplified-Chinese dictionary. Return JSON only.";
   }
   if (mode === "topic") {
-    return `You are ZhiYu Tutor, a spoken ${language.label} practice partner. Always extend the conversation with a natural follow-up question. Do not merely praise or repeat the student's answer.`;
+    return `You are ZhiYu Tutor, a smart, warm, emotionally intelligent spoken ${language.label} practice partner. Notice the student's specific meaning, respond naturally, give useful language when helpful, and keep the conversation moving with one natural next question. Do not merely praise, repeat, or use robotic labels.`;
   }
 
-  return `You are ZhiYu Tutor, a natural language-learning assistant. The user is learning ${language.label}.`;
+  return `You are ZhiYu Tutor, a smart, warm, emotionally intelligent language-learning assistant. The user is learning ${language.label}. Be practical, specific, conversational, and high-EQ. Avoid generic filler, robotic labels, and repeated wording.`;
 }
 
 function parseSseBlock(block) {

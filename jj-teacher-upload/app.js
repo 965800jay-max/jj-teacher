@@ -126,8 +126,8 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free45";
-const APP_VERSION_CODE = 45;
+const APP_BUILD_TAG = "free46";
+const APP_VERSION_CODE = 46;
 const DAILY_CHAT_REPEAT_KEY = "sentence-reader-daily-chat-last";
 const AUTH_REQUIRED = true;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
@@ -2967,12 +2967,101 @@ function setVoicePipChatMode(enabled) {
 }
 
 function cleanSentenceAiText(text) {
-  return renameTeacherText(text)
-    .replace(/\s+(讲解|重点|继续话题|问题|回答)([:：])/g, "\n\n$1$2")
+  return renameTeacherText(stripChatMarkdown(text))
+    .replace(/(?:^|\n|\s)(?:继续话题|延伸话题|自然延伸|追问|问题)\s*[:：]\s*/gu, "\n\n")
+    .replace(/\s+(讲解|句意|重点|用法|回答)([:：])/g, "\n\n$1$2")
     .replace(/\s+(中文|中文意思|英文|英语|西班牙语|日语|韩语)([:：])/g, "\n$1$2")
     .replace(/\s+(\d+[.)、])/g, "\n$1")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
+}
+
+function getVoicePipSentenceSuggestions(text) {
+  const cleanText = cleanSentenceAiText(text);
+  const sentences = extractTargetSentences(cleanText)
+    .filter((sentence) => sentence && !isTeacherMetaTargetSentence(sentence, cleanText))
+    .filter((sentence, index, items) => items.indexOf(sentence) === index)
+    .slice(0, 6);
+
+  return sentences.map((sentence) => ({
+    sentence,
+    note: inferSuggestionNote(cleanText, sentence) || "",
+  }));
+}
+
+function removeVoicePipSentencesFromText(text, suggestions) {
+  let clean = cleanSentenceAiText(text);
+  suggestions.forEach((suggestion) => {
+    clean = clean.split(suggestion.sentence).join(" ");
+  });
+
+  return clean
+    .replace(/(?:英文|目标语|英语|西班牙语|日语|韩语)\s*[：:]\s*/g, "")
+    .replace(/(?:中文意思|意思|翻译)\s*[：:]\s*/g, "")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n\s+/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function renderVoicePipSentenceList(container, suggestions) {
+  if (!suggestions.length) return;
+
+  const list = document.createElement("div");
+  list.className = "voice-pip-sentence-list";
+  suggestions.forEach((suggestion) => {
+    const item = document.createElement("div");
+    item.className = "voice-pip-sentence-item";
+
+    if (suggestion.note) {
+      const note = document.createElement("p");
+      note.className = "voice-pip-sentence-note";
+      note.textContent = suggestion.note;
+      item.appendChild(note);
+    }
+
+    const row = document.createElement("div");
+    row.className = "voice-pip-sentence-row";
+
+    const sentence = document.createElement("div");
+    sentence.className = "voice-pip-sentence-text";
+    renderSpeakableText(sentence, suggestion.sentence);
+
+    const speakButton = document.createElement("button");
+    speakButton.className = "teacher-line-speak";
+    speakButton.type = "button";
+    speakButton.title = "朗读句子";
+    speakButton.setAttribute("aria-label", `朗读：${suggestion.sentence}`);
+    speakButton.textContent = "▶";
+    speakButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      speak(suggestion.sentence, "sentence");
+    });
+
+    const addButton = document.createElement("button");
+    addButton.className = "teacher-line-add";
+    addButton.type = "button";
+    addButton.title = "加入句子";
+    addButton.setAttribute("aria-label", `加入句子：${suggestion.sentence}`);
+    addButton.textContent = "+";
+    addButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      addTeacherSentence(suggestion, addButton);
+    });
+
+    row.append(sentence, speakButton, addButton);
+    item.appendChild(row);
+    list.appendChild(item);
+  });
+
+  container.appendChild(list);
+}
+
+function renderVoicePipAssistantContent(container, text, pending = false) {
+  const suggestions = pending ? [] : getVoicePipSentenceSuggestions(text);
+  const readableText = pending ? cleanSentenceAiText(text) : removeVoicePipSentencesFromText(text, suggestions);
+  if (readableText) appendReadableText(container, readableText, "voice-pip-text");
+  renderVoicePipSentenceList(container, suggestions);
 }
 
 function renderVoicePipMessages() {
@@ -2985,10 +3074,16 @@ function renderVoicePipMessages() {
     const label = document.createElement("span");
     label.textContent = message.role === "user" ? "你" : "智语导师";
 
-    const bubble = document.createElement("p");
-    bubble.textContent = message.text || (message.pending ? "正在回复..." : "");
+    const content = document.createElement("div");
+    content.className = "voice-pip-message-content";
+    const messageText = message.text || (message.pending ? "正在回复..." : "");
+    if (message.role === "assistant") {
+      renderVoicePipAssistantContent(content, messageText, message.pending);
+    } else {
+      appendReadableText(content, messageText, "voice-pip-text");
+    }
 
-    row.append(label, bubble);
+    row.append(label, content);
     voicePipMessages.appendChild(row);
   });
   voicePipMessages.scrollTop = voicePipMessages.scrollHeight;
@@ -3053,19 +3148,11 @@ async function openSentenceAiAnswer(sentenceText, note = "") {
   const prompt = [
     `用户正在学习这句${language.label}: ${sentenceText}`,
     note ? `用户保存的中文句意: ${note}` : "",
-    "请严格按下面结构回复，保持换行，不要写成一整段，不要用表格:",
-    "讲解:",
-    "中文: 用1-2句讲清这句话是什么意思和适合什么时候说。",
-    `${language.label}: 给出这句或很自然的同义表达。`,
-    "重点:",
-    "1. 讲一个最重要的词或表达。",
-    "2. 讲一个语气/口语用法。",
-    "继续话题:",
-    `中文: 顺着原句自然接一句话。`,
-    `${language.label}: 同一句话的目标语言版本。`,
-    "问题:",
-    `中文: 问用户一个能继续聊的小问题。`,
-    `${language.label}: 同一个问题的目标语言版本。`,
+    "请像一个聪明、高情商、会聊天的语言导师来回答。中文为主，短段落，适合手机阅读。",
+    "先讲清这句话的意思、使用场景、一个最重要的词或口语点。",
+    `需要出现可跟读的${language.label}句子时，让句子单独成行，方便 App 添加朗读和收藏按钮。`,
+    "讲解结束后，直接顺着这句话自然延伸一个真实聊天话题，等用户回答后再继续聊。",
+    "不要写“继续话题：”“问题：”“追问：”这些标题，不要表格，不要 markdown 星号，不要像机器人。",
   ]
     .filter(Boolean)
     .join("\n");
@@ -3103,11 +3190,9 @@ async function sendSentenceAiChatMessage() {
     sentenceAiChatState.note ? `中文句意: ${sentenceAiChatState.note}` : "",
     `用户刚才说: ${text}`,
     "请不要重新完整讲解原句，除非用户问。",
-    "请自然接话，并继续把话题往下聊。",
-    "回复格式保持清楚换行:",
-    "中文: 先用中文自然回应。",
-    `${language.label}: 再给对应的自然目标语言说法。`,
-    "问题: 最后问一个简短、好回答的小问题。",
+    "像真实聊天一样接住用户的具体内容，语气自然、高情商，不要敷衍夸奖。",
+    `可以给一句对应的自然${language.label}说法，句子单独成行，方便 App 朗读和收藏。`,
+    "最后自然地把话题递回给用户，但不要写“问题/追问/继续话题”这些标签。",
   ]
     .filter(Boolean)
     .join("\n");
@@ -5592,8 +5677,9 @@ function buildTeacherRequestMessage(message, mode) {
     return [
       `学生刚才的回答：${message}`,
       `请继续当前${language.label}话题练习。`,
-      "不要只说“很好”，不要重复学生原句当作主要回复。",
-      "先自然接话，再给一句更地道的表达，最后继续问一个相关问题，让学生能继续练口语。",
+      "像一个会聊天、情商高、反应聪明的朋友一样回复：先抓住学生回答里的具体信息，再自然接下去。",
+      "不要只说“很好”，不要重复学生原句当作主要回复，不要写“追问/问题/继续话题”这些标签。",
+      "给一句能跟读的自然表达，然后顺势问一个具体、好回答的小问题，让学生愿意继续开口。",
     ].join("\n");
   }
 

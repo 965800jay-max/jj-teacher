@@ -4672,3 +4672,108 @@ textarea::placeholder,
 .chat-word-token:active {
   color: #ffd43b;
 }
+
+/* free46: AI answer window uses the same full-width reading style. */
+.voice-pip {
+  padding: max(14px, env(safe-area-inset-top)) 8px max(84px, env(safe-area-inset-bottom)) !important;
+}
+
+.voice-pip-card {
+  width: min(98vw, 760px) !important;
+  max-height: min(88vh, 820px) !important;
+  grid-template-rows: auto auto minmax(280px, 1fr) auto auto !important;
+  gap: 12px !important;
+}
+
+.voice-pip-question {
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 2px 10px !important;
+  background: transparent !important;
+  color: #d4d4d4 !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+}
+
+.voice-pip-messages {
+  gap: 22px !important;
+  padding: 4px 2px 10px !important;
+}
+
+.voice-pip-message {
+  width: 100% !important;
+  max-width: none !important;
+  gap: 7px !important;
+}
+
+.voice-pip-message.is-user {
+  justify-self: stretch !important;
+}
+
+.voice-pip-message span {
+  color: #9ca3af !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+}
+
+.voice-pip-message.is-user span {
+  color: #d4d4d4 !important;
+  text-align: right !important;
+}
+
+.voice-pip-message-content {
+  width: 100%;
+  display: grid;
+  gap: 12px;
+}
+
+.voice-pip-message p,
+.voice-pip-text {
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: #f5f5f5 !important;
+  font-size: 15px !important;
+  line-height: 1.76 !important;
+  white-space: pre-wrap !important;
+}
+
+.voice-pip-message.is-user .voice-pip-text {
+  color: #ffffff !important;
+  text-align: right !important;
+}
+
+.voice-pip-sentence-list {
+  display: grid;
+  gap: 16px;
+  margin-top: 2px;
+}
+
+.voice-pip-sentence-item {
+  display: grid;
+  gap: 7px;
+}
+
+.voice-pip-sentence-note {
+  margin: 0;
+  color: #ffffff !important;
+  font-size: 15px;
+  font-weight: 820;
+  line-height: 1.62;
+}
+
+.voice-pip-sentence-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 30px 30px;
+  gap: 8px;
+  align-items: start;
+}
+
+.voice-pip-sentence-text {
+  color: #d4d4d4;
+  font-size: 15px;
+  font-weight: 730;
+  line-height: 1.68;
+}

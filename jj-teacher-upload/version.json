@@ -1,6 +1,6 @@
 {
-  "versionCode": 45,
-  "versionName": "free45",
-  "apkUrl": "https://files.catbox.moe/agifhb.apk",
-  "notes": "聊天界面改为通栏阅读样式；日常句子固定生成3句并扩展真实聊天题材；聊天内点击英文单词可直接朗读。"
+  "versionCode": 46,
+  "versionName": "free46",
+  "apkUrl": "https://files.catbox.moe/zjastt.apk",
+  "notes": "提升AI聊天提示词，让回复更自然高情商；AI解答窗口改成通栏阅读样式，句子支持播放、收藏和点词朗读。"
 }
