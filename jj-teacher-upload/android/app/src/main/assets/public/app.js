@@ -126,8 +126,8 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free52";
-const APP_VERSION_CODE = 52;
+const APP_BUILD_TAG = "free53";
+const APP_VERSION_CODE = 53;
 const DAILY_CHAT_REPEAT_KEY = "sentence-reader-daily-chat-last";
 const AUTH_REQUIRED = true;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
@@ -5300,19 +5300,8 @@ function getDailyLineTarget(line) {
 }
 
 function buildDailySentenceMessage() {
-  const language = getLearningLanguageConfig();
   const lines = selectDailyChatLines(3);
-  const targetLines = lines.map((line, index) => `${index + 1}. ${getDailyLineTarget(line)}`);
-  const meaningLines = lines.map((line, index) => `${index + 1}. ${line.zh}`);
-
-  return [
-    `这三句更像朋友真实聊天，主题会轮换，不只聊天气和吃什么。`,
-    "英文：",
-    ...targetLines,
-    "中文意思：",
-    ...meaningLines,
-    `可以直接选一句用${language.label}接着聊。`,
-  ].join("\n");
+  return lines.map(getDailyLineTarget).join("\n");
 }
 
 async function startTeacherOpeningTopic() {
@@ -5436,7 +5425,7 @@ function renameFreeChatText(text) {
 
 function stripTeacherMetaLines(text) {
   const metaPattern =
-    /(?:兴趣爱好|真实聊天的开头|更像真实聊天|日常聊天里|这样问很自然|这种问法|这个问法|这句问法|像朋友在关心|适合作为|可以作为|话题设计|开场问题|开头|比\s*[“"'][^”"']{1,32}[”"']\s*更)/u;
+    /(?:兴趣爱好|真实聊天的开头|更像真实聊天|日常聊天里|这样问很自然|这种问法|这个问法|这句问法|像朋友在关心|适合作为|可以作为|话题设计|开场问题|开头|比\s*[“"'][^”"']{1,32}[”"']\s*更|(?:这种|这个|这类)(?:话题|问题).{0,48}(?:容易|适合|自然|真实|生活状态|聊出|接话)|(?:很)?容易.{0,24}(?:聊出|展开|延伸))/u;
 
   return String(text || "")
     .split(/\n+/)
@@ -5483,6 +5472,8 @@ function buildTeacherRequestMessage(message, mode) {
     return [
       `学生消息：${message}`,
       `请继续当前${language.label}口语聊天。`,
+      "只输出真正要发给学生看的聊天内容，不要解释你为什么选这个话题或这个问题。",
+      "不要写“这种话题很容易…”“这个问题适合…”“这个开头更自然…”这类幕后说明。",
       "把它当成真实朋友聊天：如果学生问你问题，先直接回答这个问题；如果学生分享内容，先接住一个具体细节。",
       "不要讲解话题设计，不要评价“这个问法更自然”，不要提到“兴趣爱好/开头/真实聊天”这些幕后判断。",
       "回复控制在2-4句，最后自然问一个具体、好回答的小问题，让学生愿意继续开口。",
@@ -6025,10 +6016,6 @@ function renderTeacherMessageContent(bubble, part, role) {
       const item = document.createElement("div");
       item.className = "teacher-english-item";
 
-      const meaning = document.createElement("p");
-      meaning.className = "teacher-sentence-meaning";
-      meaning.textContent = suggestion.note || inferFallbackChineseMeaning(display.chineseText, display.cleanText);
-
       const row = document.createElement("div");
       row.className = "teacher-english-row";
 
@@ -6060,7 +6047,14 @@ function renderTeacherMessageContent(bubble, part, role) {
       });
 
       row.append(sentenceText, speakButton, addButton);
-      item.append(meaning, row);
+      if (part.mode === "daily-sentences") {
+        item.append(row);
+      } else {
+        const meaning = document.createElement("p");
+        meaning.className = "teacher-sentence-meaning";
+        meaning.textContent = suggestion.note || inferFallbackChineseMeaning(display.chineseText, display.cleanText);
+        item.append(meaning, row);
+      }
       englishBlock.appendChild(item);
     });
     bubble.appendChild(englishBlock);
@@ -6350,7 +6344,7 @@ function startDailySentencePractice() {
   setTeacherTeachingMode();
   const language = getLearningLanguageConfig();
   teacherMessages.push({ role: "user", text: `${language.label}日常句子` });
-  teacherMessages.push({ role: "assistant", text: buildDailySentenceMessage(), mode: "chat" });
+  teacherMessages.push({ role: "assistant", text: buildDailySentenceMessage(), mode: "daily-sentences" });
   saveTeacherMessages();
   renderChatMessages();
 }
