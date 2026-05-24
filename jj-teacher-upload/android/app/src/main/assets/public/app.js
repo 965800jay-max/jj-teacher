@@ -126,8 +126,8 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free46";
-const APP_VERSION_CODE = 46;
+const APP_BUILD_TAG = "free47";
+const APP_VERSION_CODE = 47;
 const DAILY_CHAT_REPEAT_KEY = "sentence-reader-daily-chat-last";
 const AUTH_REQUIRED = true;
 const AI_RESPONSE_TIMEOUT_MS = 45000;
@@ -566,12 +566,20 @@ Object.entries(EXTRA_COMMON_DICTIONARY).forEach(([word, entry]) => {
 
 const VOCAB_GROUPS = [
   { id: "core", label: "基础高频" },
+  { id: "actions", label: "常用动作" },
   { id: "people", label: "人和关系" },
+  { id: "daily", label: "生活物品" },
   { id: "food", label: "吃喝" },
+  { id: "body", label: "身体健康" },
   { id: "time", label: "时间日常" },
+  { id: "weather", label: "天气环境" },
   { id: "travel", label: "出门交通" },
   { id: "shopping", label: "购物付款" },
+  { id: "workstudy", label: "工作学习" },
   { id: "feelings", label: "情绪状态" },
+  { id: "qualities", label: "常用形容" },
+  { id: "internet", label: "网络社交" },
+  { id: "numbers", label: "数字数量" },
 ];
 
 function vocabWord(group, zh, english, spanish, japanese, korean, note = "高频单词") {
@@ -591,6 +599,42 @@ const VOCAB_LIBRARY = [
   vocabWord("core", "真的", "really", "de verdad", "本当に", "정말", "语气"),
   vocabWord("core", "也许", "maybe", "quizás", "たぶん", "아마", "语气"),
   vocabWord("core", "只是", "just", "solo", "ただ", "그냥", "语气"),
+  vocabWord("core", "全部", "all", "todo", "全部", "전부", "范围"),
+  vocabWord("core", "每个", "every", "cada", "毎", "모든", "范围"),
+  vocabWord("core", "一些", "some", "algo de", "いくつか", "몇몇", "数量"),
+  vocabWord("core", "很多", "many", "muchos", "たくさん", "많은", "数量"),
+  vocabWord("core", "一点", "a little", "un poco", "少し", "조금", "数量"),
+  vocabWord("core", "更多", "more", "más", "もっと", "더", "比较"),
+  vocabWord("core", "更少", "less", "menos", "より少なく", "덜", "比较"),
+  vocabWord("core", "因为", "because", "porque", "なぜなら", "왜냐하면", "连接"),
+  vocabWord("core", "所以", "so", "entonces", "だから", "그래서", "连接"),
+  vocabWord("core", "但是", "but", "pero", "でも", "하지만", "连接"),
+  vocabWord("core", "如果", "if", "si", "もし", "만약", "连接"),
+  vocabWord("core", "然后", "then", "entonces", "それから", "그다음", "连接"),
+  vocabWord("core", "已经", "already", "ya", "もう", "이미", "时间"),
+  vocabWord("core", "还没", "not yet", "todavía no", "まだ", "아직", "时间"),
+  vocabWord("actions", "去", "go", "ir", "行く", "가다", "动作"),
+  vocabWord("actions", "来", "come", "venir", "来る", "오다", "动作"),
+  vocabWord("actions", "做", "do", "hacer", "する", "하다", "动作"),
+  vocabWord("actions", "拿", "take", "tomar", "取る", "가지다", "动作"),
+  vocabWord("actions", "给", "give", "dar", "あげる", "주다", "动作"),
+  vocabWord("actions", "找", "find", "encontrar", "探す", "찾다", "动作"),
+  vocabWord("actions", "看", "look", "mirar", "見る", "보다", "动作"),
+  vocabWord("actions", "听", "listen", "escuchar", "聞く", "듣다", "动作"),
+  vocabWord("actions", "说", "say", "decir", "言う", "말하다", "动作"),
+  vocabWord("actions", "问", "ask", "preguntar", "聞く", "묻다", "动作"),
+  vocabWord("actions", "回答", "answer", "responder", "答える", "대답하다", "动作"),
+  vocabWord("actions", "打开", "open", "abrir", "開ける", "열다", "动作"),
+  vocabWord("actions", "关闭", "close", "cerrar", "閉める", "닫다", "动作"),
+  vocabWord("actions", "开始", "start", "empezar", "始める", "시작하다", "动作"),
+  vocabWord("actions", "结束", "finish", "terminar", "終わる", "끝내다", "动作"),
+  vocabWord("actions", "等待", "wait", "esperar", "待つ", "기다리다", "动作"),
+  vocabWord("actions", "尝试", "try", "intentar", "試す", "시도하다", "动作"),
+  vocabWord("actions", "需要", "need", "necesitar", "必要とする", "필요하다", "动作"),
+  vocabWord("actions", "想要", "want", "querer", "欲しい", "원하다", "动作"),
+  vocabWord("actions", "喜欢", "like", "gustar", "好き", "좋아하다", "动作"),
+  vocabWord("actions", "记得", "remember", "recordar", "覚えている", "기억하다", "动作"),
+  vocabWord("actions", "忘记", "forget", "olvidar", "忘れる", "잊다", "动作"),
   vocabWord("people", "朋友", "friend", "amigo", "友達", "친구", "关系"),
   vocabWord("people", "家人", "family", "familia", "家族", "가족", "关系"),
   vocabWord("people", "名字", "name", "nombre", "名前", "이름", "个人信息"),
@@ -601,6 +645,34 @@ const VOCAB_LIBRARY = [
   vocabWord("people", "家", "home", "casa", "家", "집", "地点"),
   vocabWord("people", "帮助", "help", "ayuda", "助け", "도움", "求助"),
   vocabWord("people", "想法", "idea", "idea", "アイデア", "생각", "聊天"),
+  vocabWord("people", "同事", "coworker", "compañero de trabajo", "同僚", "동료", "关系"),
+  vocabWord("people", "同学", "classmate", "compañero de clase", "クラスメート", "반 친구", "关系"),
+  vocabWord("people", "邻居", "neighbor", "vecino", "近所の人", "이웃", "关系"),
+  vocabWord("people", "老板", "boss", "jefe", "上司", "상사", "工作"),
+  vocabWord("people", "客人", "customer", "cliente", "お客さん", "손님", "工作"),
+  vocabWord("people", "父母", "parents", "padres", "両親", "부모님", "关系"),
+  vocabWord("people", "孩子", "child", "niño", "子ども", "아이", "关系"),
+  vocabWord("people", "男朋友", "boyfriend", "novio", "彼氏", "남자친구", "关系"),
+  vocabWord("people", "女朋友", "girlfriend", "novia", "彼女", "여자친구", "关系"),
+  vocabWord("people", "陌生人", "stranger", "desconocido", "知らない人", "낯선 사람", "关系"),
+  vocabWord("daily", "钥匙", "key", "llave", "鍵", "열쇠", "物品"),
+  vocabWord("daily", "钱包", "wallet", "cartera", "財布", "지갑", "物品"),
+  vocabWord("daily", "耳机", "headphones", "auriculares", "イヤホン", "이어폰", "物品"),
+  vocabWord("daily", "充电器", "charger", "cargador", "充電器", "충전기", "物品"),
+  vocabWord("daily", "电脑", "computer", "computadora", "パソコン", "컴퓨터", "物品"),
+  vocabWord("daily", "桌子", "table", "mesa", "テーブル", "테이블", "物品"),
+  vocabWord("daily", "椅子", "chair", "silla", "椅子", "의자", "物品"),
+  vocabWord("daily", "床", "bed", "cama", "ベッド", "침대", "物品"),
+  vocabWord("daily", "衣服", "clothes", "ropa", "服", "옷", "物品"),
+  vocabWord("daily", "鞋子", "shoes", "zapatos", "靴", "신발", "物品"),
+  vocabWord("daily", "雨伞", "umbrella", "paraguas", "傘", "우산", "物品"),
+  vocabWord("daily", "灯", "light", "luz", "明かり", "불", "物品"),
+  vocabWord("daily", "门", "door", "puerta", "ドア", "문", "物品"),
+  vocabWord("daily", "窗户", "window", "ventana", "窓", "창문", "物品"),
+  vocabWord("daily", "厨房", "kitchen", "cocina", "キッチン", "주방", "地点"),
+  vocabWord("daily", "浴室", "bathroom", "baño", "浴室", "욕실", "地点"),
+  vocabWord("daily", "房租", "rent", "alquiler", "家賃", "월세", "生活"),
+  vocabWord("daily", "账单", "bill", "factura", "請求書", "고지서", "生活"),
   vocabWord("food", "水", "water", "agua", "水", "물", "饮品"),
   vocabWord("food", "咖啡", "coffee", "café", "コーヒー", "커피", "饮品"),
   vocabWord("food", "茶", "tea", "té", "お茶", "차", "饮品"),
@@ -613,6 +685,41 @@ const VOCAB_LIBRARY = [
   vocabWord("food", "辣的", "spicy", "picante", "辛い", "매운", "口味"),
   vocabWord("food", "甜的", "sweet", "dulce", "甘い", "달콤한", "口味"),
   vocabWord("food", "晚饭", "dinner", "cena", "夕食", "저녁", "吃饭"),
+  vocabWord("food", "早餐", "breakfast", "desayuno", "朝食", "아침밥", "吃饭"),
+  vocabWord("food", "午餐", "lunch", "almuerzo", "昼食", "점심", "吃饭"),
+  vocabWord("food", "面条", "noodles", "fideos", "麺", "면", "主食"),
+  vocabWord("food", "面包", "bread", "pan", "パン", "빵", "主食"),
+  vocabWord("food", "鸡蛋", "egg", "huevo", "卵", "계란", "食物"),
+  vocabWord("food", "牛肉", "beef", "carne de res", "牛肉", "소고기", "食物"),
+  vocabWord("food", "猪肉", "pork", "cerdo", "豚肉", "돼지고기", "食物"),
+  vocabWord("food", "鱼", "fish", "pescado", "魚", "생선", "食物"),
+  vocabWord("food", "蔬菜", "vegetables", "verduras", "野菜", "채소", "食物"),
+  vocabWord("food", "水果", "fruit", "fruta", "果物", "과일", "食物"),
+  vocabWord("food", "汤", "soup", "sopa", "スープ", "국", "食物"),
+  vocabWord("food", "酱汁", "sauce", "salsa", "ソース", "소스", "口味"),
+  vocabWord("food", "咸的", "salty", "salado", "しょっぱい", "짠", "口味"),
+  vocabWord("food", "酸的", "sour", "ácido", "酸っぱい", "신", "口味"),
+  vocabWord("food", "热的", "hot", "caliente", "熱い", "뜨거운", "温度"),
+  vocabWord("food", "冷的", "cold", "frío", "冷たい", "차가운", "温度"),
+  vocabWord("body", "头", "head", "cabeza", "頭", "머리", "身体"),
+  vocabWord("body", "脸", "face", "cara", "顔", "얼굴", "身体"),
+  vocabWord("body", "眼睛", "eyes", "ojos", "目", "눈", "身体"),
+  vocabWord("body", "耳朵", "ears", "orejas", "耳", "귀", "身体"),
+  vocabWord("body", "嘴", "mouth", "boca", "口", "입", "身体"),
+  vocabWord("body", "手", "hand", "mano", "手", "손", "身体"),
+  vocabWord("body", "脚", "foot", "pie", "足", "발", "身体"),
+  vocabWord("body", "背", "back", "espalda", "背中", "등", "身体"),
+  vocabWord("body", "胃", "stomach", "estómago", "胃", "위", "身体"),
+  vocabWord("body", "疼痛", "pain", "dolor", "痛み", "통증", "健康"),
+  vocabWord("body", "头疼", "headache", "dolor de cabeza", "頭痛", "두통", "健康"),
+  vocabWord("body", "感冒", "cold", "resfriado", "風邪", "감기", "健康"),
+  vocabWord("body", "发烧", "fever", "fiebre", "熱", "열", "健康"),
+  vocabWord("body", "药", "medicine", "medicina", "薬", "약", "健康"),
+  vocabWord("body", "医生", "doctor", "doctor", "医者", "의사", "健康"),
+  vocabWord("body", "医院", "hospital", "hospital", "病院", "병원", "健康"),
+  vocabWord("body", "睡眠", "sleep", "sueño", "睡眠", "수면", "健康"),
+  vocabWord("body", "运动", "exercise", "ejercicio", "運動", "운동", "健康"),
+  vocabWord("body", "健康", "health", "salud", "健康", "건강", "健康"),
   vocabWord("time", "今天", "today", "hoy", "今日", "오늘", "时间"),
   vocabWord("time", "明天", "tomorrow", "mañana", "明日", "내일", "时间"),
   vocabWord("time", "周末", "weekend", "fin de semana", "週末", "주말", "时间"),
@@ -622,6 +729,36 @@ const VOCAB_LIBRARY = [
   vocabWord("time", "小时", "hour", "hora", "時間", "시간", "时间"),
   vocabWord("time", "早的", "early", "temprano", "早い", "이른", "时间"),
   vocabWord("time", "晚的", "late", "tarde", "遅い", "늦은", "时间"),
+  vocabWord("time", "昨天", "yesterday", "ayer", "昨日", "어제", "时间"),
+  vocabWord("time", "今晚", "tonight", "esta noche", "今夜", "오늘 밤", "时间"),
+  vocabWord("time", "下周", "next week", "la próxima semana", "来週", "다음 주", "时间"),
+  vocabWord("time", "月份", "month", "mes", "月", "달", "时间"),
+  vocabWord("time", "年份", "year", "año", "年", "년", "时间"),
+  vocabWord("time", "日期", "date", "fecha", "日付", "날짜", "时间"),
+  vocabWord("time", "时间", "time", "tiempo", "時間", "시간", "时间"),
+  vocabWord("time", "刚才", "just now", "hace un momento", "さっき", "방금", "时间"),
+  vocabWord("time", "马上", "soon", "pronto", "すぐ", "곧", "时间"),
+  vocabWord("time", "经常", "often", "a menudo", "よく", "자주", "频率"),
+  vocabWord("time", "有时", "sometimes", "a veces", "時々", "가끔", "频率"),
+  vocabWord("time", "总是", "always", "siempre", "いつも", "항상", "频率"),
+  vocabWord("time", "从不", "never", "nunca", "決してない", "절대 안", "频率"),
+  vocabWord("weather", "天气", "weather", "clima", "天気", "날씨", "天气"),
+  vocabWord("weather", "晴天", "sunny", "soleado", "晴れ", "맑은", "天气"),
+  vocabWord("weather", "阴天", "cloudy", "nublado", "曇り", "흐린", "天气"),
+  vocabWord("weather", "下雨", "rain", "lluvia", "雨", "비", "天气"),
+  vocabWord("weather", "下雪", "snow", "nieve", "雪", "눈", "天气"),
+  vocabWord("weather", "风", "wind", "viento", "風", "바람", "天气"),
+  vocabWord("weather", "热", "warm", "cálido", "暖かい", "따뜻한", "天气"),
+  vocabWord("weather", "冷", "cold", "frío", "寒い", "추운", "天气"),
+  vocabWord("weather", "温度", "temperature", "temperatura", "気温", "기온", "天气"),
+  vocabWord("weather", "季节", "season", "temporada", "季節", "계절", "天气"),
+  vocabWord("weather", "春天", "spring", "primavera", "春", "봄", "季节"),
+  vocabWord("weather", "夏天", "summer", "verano", "夏", "여름", "季节"),
+  vocabWord("weather", "秋天", "fall", "otoño", "秋", "가을", "季节"),
+  vocabWord("weather", "冬天", "winter", "invierno", "冬", "겨울", "季节"),
+  vocabWord("weather", "空气", "air", "aire", "空気", "공기", "环境"),
+  vocabWord("weather", "安静", "quiet", "tranquilo", "静か", "조용한", "环境"),
+  vocabWord("weather", "吵闹", "noisy", "ruidoso", "うるさい", "시끄러운", "环境"),
   vocabWord("travel", "地方", "place", "lugar", "場所", "장소", "地点"),
   vocabWord("travel", "地址", "address", "dirección", "住所", "주소", "地点"),
   vocabWord("travel", "街道", "street", "calle", "通り", "거리", "地点"),
@@ -634,6 +771,20 @@ const VOCAB_LIBRARY = [
   vocabWord("travel", "票", "ticket", "boleto", "チケット", "표", "交通"),
   vocabWord("travel", "左边", "left", "izquierda", "左", "왼쪽", "方向"),
   vocabWord("travel", "右边", "right", "derecha", "右", "오른쪽", "方向"),
+  vocabWord("travel", "机场", "airport", "aeropuerto", "空港", "공항", "交通"),
+  vocabWord("travel", "火车", "train", "tren", "電車", "기차", "交通"),
+  vocabWord("travel", "飞机", "plane", "avión", "飛行機", "비행기", "交通"),
+  vocabWord("travel", "自行车", "bike", "bicicleta", "自転車", "자전거", "交通"),
+  vocabWord("travel", "地图", "map", "mapa", "地図", "지도", "出门"),
+  vocabWord("travel", "入口", "entrance", "entrada", "入口", "입구", "地点"),
+  vocabWord("travel", "出口", "exit", "salida", "出口", "출구", "地点"),
+  vocabWord("travel", "楼上", "upstairs", "arriba", "上の階", "위층", "地点"),
+  vocabWord("travel", "楼下", "downstairs", "abajo", "下の階", "아래층", "地点"),
+  vocabWord("travel", "附近", "nearby", "cerca", "近く", "근처", "地点"),
+  vocabWord("travel", "远的", "far", "lejos", "遠い", "먼", "距离"),
+  vocabWord("travel", "近的", "near", "cerca", "近い", "가까운", "距离"),
+  vocabWord("travel", "直走", "straight", "recto", "まっすぐ", "직진", "方向"),
+  vocabWord("travel", "转弯", "turn", "girar", "曲がる", "돌다", "方向"),
   vocabWord("shopping", "价格", "price", "precio", "値段", "가격", "购物"),
   vocabWord("shopping", "钱", "money", "dinero", "お金", "돈", "付款"),
   vocabWord("shopping", "银行卡", "card", "tarjeta", "カード", "카드", "付款"),
@@ -644,6 +795,38 @@ const VOCAB_LIBRARY = [
   vocabWord("shopping", "贵的", "expensive", "caro", "高い", "비싼", "价格"),
   vocabWord("shopping", "袋子", "bag", "bolsa", "袋", "봉투", "购物"),
   vocabWord("shopping", "收据", "receipt", "recibo", "レシート", "영수증", "付款"),
+  vocabWord("shopping", "商店", "store", "tienda", "店", "가게", "购物"),
+  vocabWord("shopping", "超市", "supermarket", "supermercado", "スーパー", "슈퍼마켓", "购物"),
+  vocabWord("shopping", "商品", "item", "artículo", "商品", "상품", "购物"),
+  vocabWord("shopping", "折扣", "discount", "descuento", "割引", "할인", "价格"),
+  vocabWord("shopping", "优惠券", "coupon", "cupón", "クーポン", "쿠폰", "价格"),
+  vocabWord("shopping", "试穿", "try on", "probarse", "試着する", "입어 보다", "购物"),
+  vocabWord("shopping", "退货", "return", "devolver", "返品", "반품", "购物"),
+  vocabWord("shopping", "换货", "exchange", "cambiar", "交換", "교환", "购物"),
+  vocabWord("shopping", "付款", "pay", "pagar", "払う", "결제하다", "付款"),
+  vocabWord("shopping", "订单", "order", "pedido", "注文", "주문", "购物"),
+  vocabWord("shopping", "快递", "delivery", "entrega", "配達", "배송", "购物"),
+  vocabWord("shopping", "包裹", "package", "paquete", "荷物", "소포", "购物"),
+  vocabWord("workstudy", "任务", "task", "tarea", "タスク", "업무", "工作"),
+  vocabWord("workstudy", "项目", "project", "proyecto", "プロジェクト", "프로젝트", "工作"),
+  vocabWord("workstudy", "会议", "meeting", "reunión", "会議", "회의", "工作"),
+  vocabWord("workstudy", "邮件", "email", "correo", "メール", "이메일", "工作"),
+  vocabWord("workstudy", "文件", "file", "archivo", "ファイル", "파일", "工作"),
+  vocabWord("workstudy", "计划", "plan", "plan", "計画", "계획", "工作"),
+  vocabWord("workstudy", "目标", "goal", "meta", "目標", "목표", "学习"),
+  vocabWord("workstudy", "练习", "practice", "práctica", "練習", "연습", "学习"),
+  vocabWord("workstudy", "考试", "test", "examen", "テスト", "시험", "学习"),
+  vocabWord("workstudy", "作业", "homework", "tarea", "宿題", "숙제", "学习"),
+  vocabWord("workstudy", "笔记", "notes", "notas", "メモ", "노트", "学习"),
+  vocabWord("workstudy", "老师", "teacher", "profesor", "先生", "선생님", "学习"),
+  vocabWord("workstudy", "学生", "student", "estudiante", "学生", "학생", "学习"),
+  vocabWord("workstudy", "问题", "problem", "problema", "問題", "문제", "学习"),
+  vocabWord("workstudy", "解决", "solve", "resolver", "解決する", "해결하다", "工作"),
+  vocabWord("workstudy", "准备", "prepare", "preparar", "準備する", "준비하다", "工作"),
+  vocabWord("workstudy", "解释", "explain", "explicar", "説明する", "설명하다", "学习"),
+  vocabWord("workstudy", "理解", "understand", "entender", "理解する", "이해하다", "学习"),
+  vocabWord("workstudy", "改进", "improve", "mejorar", "改善する", "개선하다", "学习"),
+  vocabWord("workstudy", "完成", "complete", "completar", "完了する", "완료하다", "工作"),
   vocabWord("feelings", "好的", "good", "bueno", "いい", "좋은", "状态"),
   vocabWord("feelings", "没事", "fine", "bien", "大丈夫", "괜찮은", "状态"),
   vocabWord("feelings", "累的", "tired", "cansado", "疲れた", "피곤한", "状态"),
@@ -655,6 +838,71 @@ const VOCAB_LIBRARY = [
   vocabWord("feelings", "谢谢", "thanks", "gracias", "ありがとう", "고마워", "礼貌"),
   vocabWord("feelings", "可以", "okay", "vale", "オーケー", "오케이", "回应"),
   vocabWord("feelings", "爱", "love", "amor", "愛", "사랑", "情感"),
+  vocabWord("feelings", "生气的", "angry", "enojado", "怒っている", "화난", "状态"),
+  vocabWord("feelings", "害怕的", "scared", "asustado", "怖い", "무서운", "状态"),
+  vocabWord("feelings", "担心的", "worried", "preocupado", "心配", "걱정되는", "状态"),
+  vocabWord("feelings", "兴奋的", "excited", "emocionado", "わくわくした", "신난", "状态"),
+  vocabWord("feelings", "无聊的", "bored", "aburrido", "退屈", "지루한", "状态"),
+  vocabWord("feelings", "放松的", "relaxed", "relajado", "リラックスした", "편안한", "状态"),
+  vocabWord("feelings", "压力", "stress", "estrés", "ストレス", "스트레스", "状态"),
+  vocabWord("feelings", "心情", "mood", "estado de ánimo", "気分", "기분", "状态"),
+  vocabWord("feelings", "希望", "hope", "esperanza", "希望", "희망", "情感"),
+  vocabWord("feelings", "重要的", "important", "importante", "大事な", "중요한", "形容"),
+  vocabWord("feelings", "容易的", "easy", "fácil", "簡単な", "쉬운", "形容"),
+  vocabWord("feelings", "困难的", "hard", "difícil", "難しい", "어려운", "形容"),
+  vocabWord("feelings", "奇怪的", "weird", "raro", "変な", "이상한", "形容"),
+  vocabWord("qualities", "新的", "new", "nuevo", "新しい", "새로운", "形容"),
+  vocabWord("qualities", "旧的", "old", "viejo", "古い", "오래된", "形容"),
+  vocabWord("qualities", "大的", "big", "grande", "大きい", "큰", "形容"),
+  vocabWord("qualities", "小的", "small", "pequeño", "小さい", "작은", "形容"),
+  vocabWord("qualities", "长的", "long", "largo", "長い", "긴", "形容"),
+  vocabWord("qualities", "短的", "short", "corto", "短い", "짧은", "形容"),
+  vocabWord("qualities", "快的", "fast", "rápido", "速い", "빠른", "形容"),
+  vocabWord("qualities", "慢的", "slow", "lento", "遅い", "느린", "形容"),
+  vocabWord("qualities", "强的", "strong", "fuerte", "強い", "강한", "形容"),
+  vocabWord("qualities", "弱的", "weak", "débil", "弱い", "약한", "形容"),
+  vocabWord("qualities", "干净的", "clean", "limpio", "きれい", "깨끗한", "形容"),
+  vocabWord("qualities", "脏的", "dirty", "sucio", "汚い", "더러운", "形容"),
+  vocabWord("qualities", "满的", "full", "lleno", "いっぱい", "가득한", "形容"),
+  vocabWord("qualities", "空的", "empty", "vacío", "空", "빈", "形容"),
+  vocabWord("qualities", "清楚的", "clear", "claro", "はっきりした", "분명한", "形容"),
+  vocabWord("qualities", "相同的", "same", "mismo", "同じ", "같은", "形容"),
+  vocabWord("qualities", "不同的", "different", "diferente", "違う", "다른", "形容"),
+  vocabWord("qualities", "真实的", "real", "real", "本当の", "진짜", "形容"),
+  vocabWord("qualities", "可能的", "possible", "posible", "可能な", "가능한", "形容"),
+  vocabWord("qualities", "完美的", "perfect", "perfecto", "完璧な", "완벽한", "形容"),
+  vocabWord("internet", "网络", "internet", "internet", "インターネット", "인터넷", "网络"),
+  vocabWord("internet", "密码", "password", "contraseña", "パスワード", "비밀번호", "网络"),
+  vocabWord("internet", "账号", "account", "cuenta", "アカウント", "계정", "网络"),
+  vocabWord("internet", "照片", "photo", "foto", "写真", "사진", "社交"),
+  vocabWord("internet", "视频", "video", "video", "動画", "영상", "社交"),
+  vocabWord("internet", "评论", "comment", "comentario", "コメント", "댓글", "社交"),
+  vocabWord("internet", "点赞", "like", "me gusta", "いいね", "좋아요", "社交"),
+  vocabWord("internet", "分享", "share", "compartir", "共有する", "공유하다", "社交"),
+  vocabWord("internet", "关注", "follow", "seguir", "フォローする", "팔로우하다", "社交"),
+  vocabWord("internet", "下载", "download", "descargar", "ダウンロード", "다운로드", "网络"),
+  vocabWord("internet", "上传", "upload", "subir", "アップロード", "업로드", "网络"),
+  vocabWord("internet", "搜索", "search", "buscar", "検索", "검색", "网络"),
+  vocabWord("internet", "通知", "notification", "notificación", "通知", "알림", "网络"),
+  vocabWord("internet", "应用", "app", "aplicación", "アプリ", "앱", "网络"),
+  vocabWord("internet", "屏幕", "screen", "pantalla", "画面", "화면", "设备"),
+  vocabWord("internet", "电池", "battery", "batería", "バッテリー", "배터리", "设备"),
+  vocabWord("numbers", "零", "zero", "cero", "ゼロ", "영", "数字"),
+  vocabWord("numbers", "一", "one", "uno", "一", "하나", "数字"),
+  vocabWord("numbers", "二", "two", "dos", "二", "둘", "数字"),
+  vocabWord("numbers", "三", "three", "tres", "三", "셋", "数字"),
+  vocabWord("numbers", "四", "four", "cuatro", "四", "넷", "数字"),
+  vocabWord("numbers", "五", "five", "cinco", "五", "다섯", "数字"),
+  vocabWord("numbers", "六", "six", "seis", "六", "여섯", "数字"),
+  vocabWord("numbers", "七", "seven", "siete", "七", "일곱", "数字"),
+  vocabWord("numbers", "八", "eight", "ocho", "八", "여덟", "数字"),
+  vocabWord("numbers", "九", "nine", "nueve", "九", "아홉", "数字"),
+  vocabWord("numbers", "十", "ten", "diez", "十", "열", "数字"),
+  vocabWord("numbers", "第一", "first", "primero", "一番目", "첫 번째", "顺序"),
+  vocabWord("numbers", "最后", "last", "último", "最後", "마지막", "顺序"),
+  vocabWord("numbers", "一半", "half", "mitad", "半分", "절반", "数量"),
+  vocabWord("numbers", "几个", "several", "varios", "いくつか", "몇몇", "数量"),
+  vocabWord("numbers", "每次", "each time", "cada vez", "毎回", "매번", "频率"),
 ];
 
 const SCENE_GROUPS = [
@@ -3148,11 +3396,11 @@ async function openSentenceAiAnswer(sentenceText, note = "") {
   const prompt = [
     `用户正在学习这句${language.label}: ${sentenceText}`,
     note ? `用户保存的中文句意: ${note}` : "",
-    "请像一个聪明、高情商、会聊天的语言导师来回答。中文为主，短段落，适合手机阅读。",
-    "先讲清这句话的意思、使用场景、一个最重要的词或口语点。",
-    `需要出现可跟读的${language.label}句子时，让句子单独成行，方便 App 添加朗读和收藏按钮。`,
-    "讲解结束后，直接顺着这句话自然延伸一个真实聊天话题，等用户回答后再继续聊。",
-    "不要写“继续话题：”“问题：”“追问：”这些标题，不要表格，不要 markdown 星号，不要像机器人。",
+    "请只做两件事：",
+    "1. 用中文讲这句话最重要的重点：意思、使用场景、一个关键词或口语点。控制在3-5句内。",
+    `2. 最后给一条自然聊天问句，问句要和原句有关，并同时给出一句${language.label}版本。`,
+    `让${language.label}句子单独成行，方便 App 添加朗读和收藏按钮。`,
+    "不要写“继续话题：”“问题：”“追问：”这些标题，不要表格，不要 markdown 星号，不要输出很多例句。",
   ]
     .filter(Boolean)
     .join("\n");
@@ -3191,7 +3439,7 @@ async function sendSentenceAiChatMessage() {
     `用户刚才说: ${text}`,
     "请不要重新完整讲解原句，除非用户问。",
     "像真实聊天一样接住用户的具体内容，语气自然、高情商，不要敷衍夸奖。",
-    `可以给一句对应的自然${language.label}说法，句子单独成行，方便 App 朗读和收藏。`,
+    `最多给一句对应的自然${language.label}说法，句子单独成行，方便 App 朗读和收藏。`,
     "最后自然地把话题递回给用户，但不要写“问题/追问/继续话题”这些标签。",
   ]
     .filter(Boolean)
@@ -5743,8 +5991,9 @@ function extractTargetSection(text) {
 
 function splitTargetLines(text) {
   return String(text || "")
-    .split(/\n+|(?<=[.!?。！？¿؟])\s+|\s*(?:\d+[.)、]|[-•])\s*/u)
+    .split(/\n+|(?<=[.!?。！？¿؟])\s+|(?=\s+\d+[.)、]\s*)/u)
     .map((item) => item.replace(/^["“”]+|["“”]+$/g, "").trim())
+    .map((item) => item.replace(/^(?:[-•]|\d+[.)、])\s*/u, "").trim())
     .map((item) => item.replace(/^(?:英文|目标语|西班牙语|日语|韩语)\s*[：:]\s*/u, "").trim())
     .filter((item) => item && !/^(?:中文意思|意思|翻译)\s*[：:]/u.test(item))
     .filter((item) => item.length <= 180)
@@ -6108,82 +6357,42 @@ function renderTeacherMessageContent(bubble, part, role) {
       meaning.className = "teacher-sentence-meaning";
       meaning.textContent = suggestion.note || "中文意思待补充。";
 
+      const row = document.createElement("div");
+      row.className = "teacher-english-row";
+
       const sentenceText = document.createElement("div");
       sentenceText.className = "teacher-english-sentence";
       sentenceText.setAttribute("aria-label", suggestion.sentence);
       renderSpeakableText(sentenceText, suggestion.sentence);
 
-      item.append(meaning, sentenceText);
+      const speakButton = document.createElement("button");
+      speakButton.className = "teacher-line-speak";
+      speakButton.type = "button";
+      speakButton.title = `朗读${language.label}`;
+      speakButton.setAttribute("aria-label", `朗读：${suggestion.sentence}`);
+      speakButton.textContent = "▶";
+      speakButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        speak(suggestion.sentence, "sentence");
+      });
+
+      const addButton = document.createElement("button");
+      addButton.className = "teacher-line-add";
+      addButton.type = "button";
+      addButton.title = "加入句子";
+      addButton.setAttribute("aria-label", `加入句子：${suggestion.sentence}`);
+      addButton.textContent = "+";
+      addButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        addTeacherSentence(suggestion, addButton);
+      });
+
+      row.append(sentenceText, speakButton, addButton);
+      item.append(meaning, row);
       englishBlock.appendChild(item);
     });
     bubble.appendChild(englishBlock);
   }
-
-  if (!display.suggestions.length) return;
-
-  const actions = document.createElement("div");
-  actions.className = "teacher-inline-actions";
-
-  const speakButton = document.createElement("button");
-  speakButton.className = "teacher-line-speak";
-  speakButton.type = "button";
-  speakButton.title = `朗读${language.label}`;
-  speakButton.setAttribute("aria-label", `朗读${language.label}`);
-  speakButton.textContent = "▶";
-
-  const addButton = document.createElement("button");
-  addButton.className = "teacher-line-add";
-  addButton.type = "button";
-  addButton.title = "选择要加入的句子";
-  addButton.setAttribute("aria-label", "选择要加入的句子");
-  addButton.textContent = "+";
-
-  const picker = document.createElement("div");
-  picker.className = "teacher-sentence-picker";
-  picker.hidden = true;
-
-  const pickerTitle = document.createElement("p");
-  pickerTitle.className = "teacher-picker-title";
-  pickerTitle.textContent = "选择要加入的句子";
-  picker.appendChild(pickerTitle);
-
-  display.suggestions.forEach((suggestion) => {
-    const option = document.createElement("button");
-    option.className = "teacher-picker-option";
-    option.type = "button";
-
-    if (suggestion.note) {
-      const note = document.createElement("small");
-      note.textContent = suggestion.note;
-      option.appendChild(note);
-    }
-
-    const english = document.createElement("span");
-    english.textContent = suggestion.sentence;
-    option.appendChild(english);
-
-    option.addEventListener("click", (event) => {
-      event.stopPropagation();
-      addTeacherSentence(suggestion, option);
-    });
-
-    picker.appendChild(option);
-  });
-
-  speakButton.addEventListener("click", (event) => {
-    event.stopPropagation();
-    speak(display.englishSentences.join(" "), "sentence");
-  });
-  addButton.addEventListener("click", (event) => {
-    event.stopPropagation();
-    picker.hidden = !picker.hidden;
-    addButton.classList.toggle("is-open", !picker.hidden);
-    if (!picker.hidden) revealTeacherPicker(picker);
-  });
-
-  actions.append(speakButton, addButton);
-  bubble.appendChild(actions);
-  bubble.appendChild(picker);
 }
 
 function renderUserMessageContent(bubble, part) {

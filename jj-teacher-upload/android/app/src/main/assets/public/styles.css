@@ -4673,6 +4673,33 @@ textarea::placeholder,
   color: #ffd43b;
 }
 
+/* free47: user messages stay transparent, and every target sentence gets its own controls. */
+.user-translation-card,
+.user-translation-card.is-open,
+.user-translation-card.is-open .user-chinese-toggle,
+.chat-bubble.is-user .user-translation-card,
+.chat-bubble.is-user .user-translation-card.is-open .user-chinese-toggle {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.chat-bubble.is-user .user-chinese-toggle {
+  color: #ffffff !important;
+}
+
+.teacher-english-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 30px 30px;
+  gap: 8px;
+  align-items: start;
+}
+
+.teacher-english-row .teacher-line-speak,
+.teacher-english-row .teacher-line-add {
+  margin-top: 1px;
+}
+
 /* free46: AI answer window uses the same full-width reading style. */
 .voice-pip {
   padding: max(14px, env(safe-area-inset-top)) 8px max(84px, env(safe-area-inset-bottom)) !important;

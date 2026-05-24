@@ -1,6 +1,6 @@
 {
-  "versionCode": 46,
-  "versionName": "free46",
-  "apkUrl": "https://files.catbox.moe/zjastt.apk",
-  "notes": "提升AI聊天提示词，让回复更自然高情商；AI解答窗口改成通栏阅读样式，句子支持播放、收藏和点词朗读。"
+  "versionCode": 47,
+  "versionName": "free47",
+  "apkUrl": "https://files.catbox.moe/fftgpi.apk",
+  "notes": "修复AI聊天用户消息白条；英文多句回复改为每句独立播放和收藏；AI解答只讲重点并接一条聊天问句；高频单词扩展到316个。"
 }
