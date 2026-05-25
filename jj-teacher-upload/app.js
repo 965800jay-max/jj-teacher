@@ -126,8 +126,8 @@ const LEARNING_LANGUAGES = {
   japanese: { label: "日语", targetLabel: "日语", speech: "ja-JP", tts: "ja", sample: "旅行时使用的日语句子" },
   korean: { label: "韩语", targetLabel: "韩语", speech: "ko-KR", tts: "ko", sample: "旅行时使用的韩语句子" },
 };
-const APP_BUILD_TAG = "free54";
-const APP_VERSION_CODE = 54;
+const APP_BUILD_TAG = "free55";
+const APP_VERSION_CODE = 55;
 const DAILY_CHAT_REPEAT_KEY = "sentence-reader-daily-chat-last";
 const AUTH_REQUIRED = true;
 const AI_RESPONSE_TIMEOUT_MS = 45000;

@@ -4893,3 +4893,689 @@ textarea::placeholder,
   background: rgba(255, 255, 255, 0.06) !important;
   color: #ffffff !important;
 }
+
+/* free55: v0 UI refresh adapted back to the existing vanilla app. */
+:root {
+  color-scheme: dark;
+  --page-rgb: 132, 116, 255;
+  --page-rgb-2: 81, 218, 196;
+  --page-accent: #8a7cff;
+  --page-secondary: #51dac4;
+  --page-bg: #050711;
+  --page-bg-deep: #030308;
+  --bg: #050711;
+  --bg-deep: #030308;
+  --surface: rgba(255, 255, 255, 0.09);
+  --surface-soft: rgba(255, 255, 255, 0.055);
+  --surface-lift: rgba(255, 255, 255, 0.12);
+  --ink: #fbfbff;
+  --ink-soft: rgba(251, 251, 255, 0.78);
+  --muted: rgba(251, 251, 255, 0.52);
+  --muted-soft: rgba(251, 251, 255, 0.34);
+  --line: rgba(255, 255, 255, 0.12);
+  --accent: #8a7cff;
+  --accent-strong: #f2efff;
+  --accent-soft: rgba(138, 124, 255, 0.16);
+  --accent-deep: rgba(138, 124, 255, 0.24);
+  --warm: #51dac4;
+  --warm-soft: rgba(81, 218, 196, 0.13);
+  --focus: #ffd861;
+  --glass: rgba(18, 20, 34, 0.66);
+  --glass-soft: rgba(255, 255, 255, 0.06);
+  --glass-line: rgba(255, 255, 255, 0.13);
+  --hairline: rgba(255, 255, 255, 0.075);
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+  --shadow-soft: 0 14px 32px rgba(0, 0, 0, 0.24);
+  --shadow-glow: 0 0 28px rgba(132, 116, 255, 0.12);
+}
+
+html,
+body {
+  background: #030308 !important;
+}
+
+body {
+  color: var(--ink) !important;
+  background:
+    linear-gradient(180deg, #070916 0%, #030308 54%, #050507 100%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.024) 0 1px, transparent 1px 24px) !important;
+  background-attachment: fixed !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  display: block !important;
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.055), transparent 24%, rgba(81, 218, 196, 0.035) 56%, transparent 78%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 32px);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+body::after,
+.ambient-backdrop {
+  display: none !important;
+}
+
+.app-shell {
+  width: min(100%, 540px);
+  padding: max(12px, env(safe-area-inset-top)) 16px 98px;
+}
+
+body[data-page="teacher"] .app-shell {
+  padding: max(10px, env(safe-area-inset-top)) 14px 76px;
+}
+
+.top-bar {
+  min-height: 58px !important;
+  margin: 0 0 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.13) !important;
+  border-radius: 22px !important;
+  padding: 10px 58px !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.045)),
+    rgba(8, 10, 20, 0.74) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 14px 36px rgba(0, 0, 0, 0.24) !important;
+  backdrop-filter: blur(34px) saturate(170%) !important;
+  -webkit-backdrop-filter: blur(34px) saturate(170%) !important;
+}
+
+body[data-page="teacher"] .top-bar {
+  position: relative;
+  margin-bottom: 10px !important;
+}
+
+.top-bar h1 {
+  color: #ffffff !important;
+  font-size: 19px !important;
+  font-weight: 860 !important;
+}
+
+.top-bar .eyebrow,
+.eyebrow,
+.sheet-label,
+.chat-label,
+.update-kicker,
+.auth-kicker {
+  color: rgba(81, 218, 196, 0.9) !important;
+  letter-spacing: 0.08em !important;
+}
+
+.top-bar > div {
+  padding: 0 !important;
+}
+
+.account-button,
+.top-friends-button,
+.top-bar .icon-button {
+  top: 50% !important;
+  width: 42px !important;
+  min-width: 42px !important;
+  height: 42px !important;
+  border: 1px solid rgba(255, 255, 255, 0.13) !important;
+  border-radius: 16px !important;
+  padding: 0 !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.045)),
+    rgba(255, 255, 255, 0.035) !important;
+  color: rgba(255, 255, 255, 0.82) !important;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2) !important;
+  transform: translateY(-50%) !important;
+}
+
+.account-button {
+  left: 8px !important;
+}
+
+.top-friends-button,
+.top-bar .icon-button {
+  right: 8px !important;
+}
+
+.top-friends-button.is-active,
+.account-button.is-active {
+  border-color: rgba(138, 124, 255, 0.46) !important;
+  background:
+    linear-gradient(135deg, rgba(138, 124, 255, 0.32), rgba(81, 218, 196, 0.13)),
+    rgba(255, 255, 255, 0.07) !important;
+  color: #ffffff !important;
+}
+
+.view-panel,
+.review-panel,
+.input-panel,
+.sentence-card,
+.word-sheet,
+.exam-hero,
+.exam-card,
+.scenes-panel,
+.scene-card,
+.scene-detail,
+.vocab-card,
+.friends-panel,
+.auth-card,
+.update-card,
+.voice-pip-card {
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 24px !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.04)),
+    rgba(12, 14, 24, 0.68) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 16px 40px rgba(0, 0, 0, 0.25) !important;
+  backdrop-filter: blur(34px) saturate(170%) !important;
+  -webkit-backdrop-filter: blur(34px) saturate(170%) !important;
+}
+
+.view-panel {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px !important;
+}
+
+.view-tabs,
+.scene-mode-tabs {
+  gap: 5px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 18px !important;
+  padding: 4px !important;
+  background: rgba(255, 255, 255, 0.045) !important;
+}
+
+.view-tab,
+.scene-mode-tab {
+  min-height: 42px !important;
+  border: 1px solid transparent !important;
+  border-radius: 14px !important;
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.58) !important;
+  font-weight: 840 !important;
+}
+
+.view-tab.is-active,
+.scene-mode-tab.is-active {
+  border-color: rgba(138, 124, 255, 0.34) !important;
+  border-radius: 14px !important;
+  background:
+    linear-gradient(135deg, rgba(138, 124, 255, 0.32), rgba(81, 218, 196, 0.14)),
+    rgba(255, 255, 255, 0.07) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 18px rgba(138, 124, 255, 0.12) !important;
+}
+
+.view-panel > p,
+.voice-picker {
+  color: rgba(255, 255, 255, 0.58) !important;
+}
+
+.input-panel textarea,
+.sentence-note,
+#examAnswer,
+.teacher-input,
+.auth-input,
+.voice-pip-composer textarea {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.045) !important;
+  color: #ffffff !important;
+}
+
+.input-panel textarea::placeholder,
+.sentence-note::placeholder,
+#examAnswer::placeholder,
+.teacher-input::placeholder,
+.auth-input::placeholder {
+  color: rgba(255, 255, 255, 0.34) !important;
+}
+
+.input-actions {
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+  background: transparent !important;
+}
+
+.primary-button,
+.ghost-button,
+.ai-button,
+.quick-prompts button,
+.bottom-nav-button,
+.teacher-line-speak,
+.teacher-line-add,
+.exam-answer-speak,
+.speak-button,
+.delete-button,
+.round-button,
+.scene-line-actions .round-button,
+.teacher-send-button {
+  border: 1px solid rgba(255, 255, 255, 0.13) !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.045)),
+    rgba(255, 255, 255, 0.04) !important;
+  color: rgba(255, 255, 255, 0.86) !important;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18) !important;
+  backdrop-filter: blur(18px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
+}
+
+.primary-button,
+#addButton,
+.scene-open-button,
+.teacher-send-button,
+.quick-prompts button.is-active,
+.bottom-nav-button.is-active,
+.view-tab.is-active {
+  border-color: rgba(138, 124, 255, 0.44) !important;
+  background:
+    linear-gradient(135deg, rgba(138, 124, 255, 0.36), rgba(81, 218, 196, 0.16)),
+    rgba(255, 255, 255, 0.075) !important;
+  color: #ffffff !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 10px 26px rgba(138, 124, 255, 0.18) !important;
+}
+
+#freeChatButton,
+#freeChatButton.is-active,
+#freeChatButton.is-free {
+  border-color: rgba(255, 190, 93, 0.5) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 190, 93, 0.42), rgba(255, 121, 68, 0.22)),
+    rgba(255, 255, 255, 0.06) !important;
+  color: #fff8ea !important;
+}
+
+.scene-open-button {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 18px !important;
+}
+
+.sentence-list,
+.scene-list,
+.friend-list,
+.admin-user-list {
+  gap: 14px !important;
+}
+
+.sentence-card {
+  grid-template-columns: minmax(0, 1fr) 44px !important;
+  gap: 14px !important;
+  padding: 18px !important;
+}
+
+.sentence-text {
+  color: #ffffff !important;
+  font-size: 18px !important;
+  font-weight: 760 !important;
+  line-height: 1.58 !important;
+}
+
+.sentence-note {
+  min-height: 48px !important;
+  padding: 12px 13px !important;
+  color: rgba(255, 255, 255, 0.62) !important;
+}
+
+.word-token {
+  border-radius: 8px !important;
+  color: inherit !important;
+}
+
+.word-token:active,
+.word-token.is-active,
+.chat-word-token:active {
+  background: rgba(138, 124, 255, 0.18) !important;
+  color: #ffffff !important;
+}
+
+.chat-panel {
+  gap: 10px !important;
+}
+
+.chat-messages {
+  gap: 14px !important;
+  padding: 12px 2px 8px !important;
+}
+
+.chat-bubble {
+  width: fit-content !important;
+  max-width: 92% !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 22px 22px 22px 8px !important;
+  padding: 12px 14px !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.045)),
+    rgba(12, 14, 24, 0.62) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2) !important;
+  backdrop-filter: blur(30px) saturate(170%) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(170%) !important;
+}
+
+.chat-bubble.is-teacher {
+  align-self: flex-start !important;
+  margin-right: 38px !important;
+}
+
+.chat-bubble.is-user {
+  align-self: flex-end !important;
+  max-width: 86% !important;
+  margin-left: 42px !important;
+  border-radius: 22px 22px 8px 22px !important;
+  border-color: rgba(138, 124, 255, 0.24) !important;
+  background:
+    linear-gradient(135deg, rgba(138, 124, 255, 0.2), rgba(81, 218, 196, 0.08)),
+    rgba(255, 255, 255, 0.05) !important;
+}
+
+.chat-bubble::after {
+  display: none !important;
+}
+
+.chat-label {
+  margin-bottom: 6px !important;
+  color: rgba(81, 218, 196, 0.9) !important;
+  font-size: 10px !important;
+}
+
+.chat-bubble.is-user .chat-label {
+  color: rgba(255, 255, 255, 0.48) !important;
+}
+
+.chat-text,
+.teacher-chinese-text,
+.user-chinese-toggle,
+.chat-bubble.is-user .user-message-text {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 15px !important;
+  line-height: 1.7 !important;
+}
+
+.chat-bubble.is-user .user-message-text,
+.chat-bubble.is-user .chat-text {
+  width: auto !important;
+  text-align: left !important;
+}
+
+.teacher-english-block {
+  gap: 10px !important;
+  margin-top: 12px !important;
+  padding-top: 0 !important;
+  border-top: 0 !important;
+  background: transparent !important;
+}
+
+.teacher-english-item,
+.user-translation-panel,
+.voice-pip-sentence-item {
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  border-radius: 18px !important;
+  padding: 12px !important;
+  background: rgba(255, 255, 255, 0.045) !important;
+}
+
+.teacher-english-row,
+.user-translation-panel,
+.voice-pip-sentence-row {
+  grid-template-columns: minmax(0, 1fr) 36px 36px !important;
+  gap: 9px !important;
+  align-items: center !important;
+}
+
+.teacher-english-sentence,
+.teacher-english-toggle,
+.user-translation-english,
+.voice-pip-sentence-text {
+  color: rgba(255, 255, 255, 0.88) !important;
+  font-size: 15px !important;
+  font-weight: 760 !important;
+}
+
+.teacher-sentence-meaning,
+.teacher-line-note,
+.voice-pip-sentence-note {
+  color: rgba(255, 255, 255, 0.66) !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+}
+
+.teacher-line-speak,
+.teacher-line-add,
+.scene-line-actions .round-button {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 14px !important;
+}
+
+.chat-composer {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 50px !important;
+  align-items: end !important;
+  gap: 10px !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 24px !important;
+  padding: 10px !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05)),
+    rgba(8, 10, 18, 0.78) !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.24) !important;
+  backdrop-filter: blur(34px) saturate(170%) !important;
+  -webkit-backdrop-filter: blur(34px) saturate(170%) !important;
+}
+
+.chat-composer .teacher-input {
+  min-height: 50px !important;
+  max-height: 120px !important;
+  padding: 13px 14px !important;
+  border: 0 !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+}
+
+.teacher-send-button {
+  display: inline-grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  padding: 0 !important;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 860;
+}
+
+.teacher-send-button:disabled {
+  opacity: 0.48;
+  cursor: wait;
+}
+
+.quick-prompts {
+  gap: 8px !important;
+  padding: 2px 0 4px !important;
+}
+
+.quick-prompts button {
+  min-height: 40px !important;
+  border-radius: 16px !important;
+  padding: 8px 14px !important;
+  white-space: nowrap;
+}
+
+.bottom-nav {
+  right: max(14px, calc((100vw - 540px) / 2 + 14px)) !important;
+  bottom: max(10px, env(safe-area-inset-bottom)) !important;
+  left: max(14px, calc((100vw - 540px) / 2 + 14px)) !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 24px !important;
+  padding: 6px !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.045)),
+    rgba(8, 10, 18, 0.82) !important;
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.34) !important;
+  backdrop-filter: blur(34px) saturate(170%) !important;
+  -webkit-backdrop-filter: blur(34px) saturate(170%) !important;
+}
+
+.bottom-nav-button {
+  min-height: 46px !important;
+  border-radius: 18px !important;
+  font-size: 14px !important;
+}
+
+.scenes-panel {
+  display: grid !important;
+  gap: 14px !important;
+  padding: 14px !important;
+}
+
+.scene-group-tabs {
+  gap: 9px !important;
+  padding-bottom: 4px !important;
+  scrollbar-width: none;
+}
+
+.scene-group-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.scene-group-tab {
+  min-height: 38px !important;
+  border: 1px solid rgba(255, 255, 255, 0.11) !important;
+  border-radius: 999px !important;
+  padding: 0 15px !important;
+  background: rgba(255, 255, 255, 0.045) !important;
+  color: rgba(255, 255, 255, 0.62) !important;
+  font-weight: 760 !important;
+}
+
+.scene-group-tab.is-active {
+  border-color: rgba(138, 124, 255, 0.4) !important;
+  border-radius: 999px !important;
+  background:
+    linear-gradient(135deg, rgba(138, 124, 255, 0.32), rgba(81, 218, 196, 0.14)),
+    rgba(255, 255, 255, 0.07) !important;
+  color: #ffffff !important;
+}
+
+.scene-card,
+.vocab-card {
+  padding: 16px !important;
+}
+
+.scene-card h3,
+.scene-detail h3,
+.review-panel h2,
+.scenes-header h2,
+.scene-detail-header h2,
+.vocab-content strong {
+  color: #ffffff !important;
+}
+
+.scene-card p,
+.scene-detail-header p,
+.vocab-content span,
+.scene-meta,
+.scene-card-header span {
+  color: rgba(255, 255, 255, 0.54) !important;
+}
+
+.scene-line {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.045) !important;
+}
+
+.scene-bubble {
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  border-radius: 20px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.scene-dialogue-line.is-ai .scene-bubble {
+  border-top-left-radius: 8px !important;
+}
+
+.scene-dialogue-line.is-user .scene-bubble {
+  border-top-right-radius: 8px !important;
+  background:
+    linear-gradient(135deg, rgba(138, 124, 255, 0.22), rgba(81, 218, 196, 0.08)) !important;
+}
+
+.scene-dialogue-line.is-user .scene-bubble strong,
+.scene-line strong,
+.scene-bubble strong {
+  color: #ffffff !important;
+}
+
+.scene-dialogue-line.is-user .scene-bubble span,
+.scene-line span,
+.scene-bubble span {
+  color: rgba(255, 255, 255, 0.56) !important;
+}
+
+.scene-chat-avatar,
+.scene-chat-avatar.is-ai,
+.scene-chat-avatar.is-user {
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 14px !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.045)),
+    rgba(255, 255, 255, 0.04) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.scene-chat-avatar.is-ai::before,
+.scene-chat-avatar.is-ai::after {
+  display: none !important;
+}
+
+.auth-sheet,
+.update-sheet,
+.voice-pip,
+.admin-message-sheet {
+  background: rgba(0, 0, 0, 0.68) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+.auth-card,
+.update-card,
+.voice-pip-card,
+.admin-message-card {
+  border-radius: 28px 28px 0 0 !important;
+}
+
+.voice-pip-question,
+.voice-pip-message p,
+.voice-pip-text {
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+@media (max-width: 380px) {
+  .app-shell {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .top-bar {
+    border-radius: 20px !important;
+  }
+
+  .quick-prompts button {
+    padding-inline: 12px !important;
+  }
+
+  .teacher-english-row,
+  .user-translation-panel,
+  .voice-pip-sentence-row {
+    grid-template-columns: minmax(0, 1fr) 34px 34px !important;
+  }
+}
