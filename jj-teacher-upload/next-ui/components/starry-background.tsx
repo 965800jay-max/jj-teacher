@@ -38,27 +38,27 @@ export function StarryBackground() {
     if (!ctx) return
 
     const resizeCanvas = () => {
-      const dpr = window.devicePixelRatio || 1
-      canvas.width = window.innerWidth * dpr
-      canvas.height = window.innerHeight * dpr
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      canvas.width = Math.ceil(window.innerWidth * dpr)
+      canvas.height = Math.ceil(window.innerHeight * dpr)
       canvas.style.width = `${window.innerWidth}px`
       canvas.style.height = `${window.innerHeight}px`
-      ctx.scale(dpr, dpr)
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       initStars()
     }
 
     const initStars = () => {
       const w = window.innerWidth
       const h = window.innerHeight
-      const starCount = Math.floor((w * h) / 2800)
+      const starCount = Math.floor((w * h) / 3600)
       const stars: Star[] = []
 
       for (let i = 0; i < starCount; i++) {
         stars.push({
           x: Math.random() * w,
           y: Math.random() * h,
-          size: Math.random() * 1.8 + 0.3,
-          opacity: Math.random() * 0.6 + 0.15,
+          size: Math.random() * 1.15 + 0.2,
+          opacity: Math.random() * 0.32 + 0.08,
           twinkleSpeed: Math.random() * 0.02 + 0.005,
           twinklePhase: Math.random() * Math.PI * 2,
           isTwinkling: Math.random() < 0.15,
@@ -91,7 +91,12 @@ export function StarryBackground() {
       const h = window.innerHeight
       time++
 
-      ctx.clearRect(0, 0, w, h)
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      ctx.setTransform(1, 0, 0, 1, 0, 0)
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      ctx.globalCompositeOperation = 'source-over'
+      ctx.globalAlpha = 1
 
       // Draw stars
       for (const star of starsRef.current) {
@@ -102,13 +107,13 @@ export function StarryBackground() {
         }
 
         // Draw glow for bigger stars
-        if (star.size > 1.2) {
-          const grd = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, star.size * 3)
-          grd.addColorStop(0, `rgba(200, 210, 255, ${alpha * 0.3})`)
+        if (star.size > 1) {
+          const grd = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, star.size * 2.5)
+          grd.addColorStop(0, `rgba(200, 210, 255, ${alpha * 0.18})`)
           grd.addColorStop(1, 'rgba(200, 210, 255, 0)')
           ctx.fillStyle = grd
           ctx.beginPath()
-          ctx.arc(star.x, star.y, star.size * 3, 0, Math.PI * 2)
+          ctx.arc(star.x, star.y, star.size * 2.5, 0, Math.PI * 2)
           ctx.fill()
         }
 
@@ -145,8 +150,8 @@ export function StarryBackground() {
 
         const gradient = ctx.createLinearGradient(tailX, tailY, s.x, s.y)
         gradient.addColorStop(0, `rgba(200, 210, 255, 0)`)
-        gradient.addColorStop(0.6, `rgba(210, 220, 255, ${s.opacity * 0.4})`)
-        gradient.addColorStop(1, `rgba(240, 245, 255, ${s.opacity * 0.9})`)
+        gradient.addColorStop(0.6, `rgba(210, 220, 255, ${s.opacity * 0.25})`)
+        gradient.addColorStop(1, `rgba(240, 245, 255, ${s.opacity * 0.55})`)
 
         ctx.strokeStyle = gradient
         ctx.lineWidth = 1.5
@@ -158,7 +163,7 @@ export function StarryBackground() {
 
         // Head glow
         const headGlow = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, 4)
-        headGlow.addColorStop(0, `rgba(240, 245, 255, ${s.opacity * 0.8})`)
+        headGlow.addColorStop(0, `rgba(240, 245, 255, ${s.opacity * 0.45})`)
         headGlow.addColorStop(1, 'rgba(240, 245, 255, 0)')
         ctx.fillStyle = headGlow
         ctx.beginPath()
@@ -186,7 +191,8 @@ export function StarryBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-0"
+      className="starry-canvas fixed inset-0 pointer-events-none z-0 opacity-70"
+      style={{ background: '#030308' }}
       aria-hidden="true"
     />
   )

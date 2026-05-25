@@ -1,6 +1,6 @@
 {
-  "versionCode": 56,
-  "versionName": "free56",
-  "apkUrl": "https://files.catbox.moe/nc45aq.apk",
-  "notes": "接入 v0 原始 Next.js / React / Tailwind 玻璃拟态 UI，保留原 App 学习、AI、账号和场景功能逻辑。"
+  "versionCode": 57,
+  "versionName": "free57",
+  "apkUrl": "https://files.catbox.moe/jsg0rg.apk",
+  "notes": "free57: 修复安卓进入单词/场景页后背景逐渐发白的问题。"
 }
