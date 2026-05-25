@@ -1,6 +1,6 @@
 {
-  "versionCode": 55,
-  "versionName": "free55",
-  "apkUrl": "https://files.catbox.moe/k75ojk.apk",
-  "notes": "安装新版玻璃质感 UI，并修复单词/场景页面选择场景时按钮变方的问题。"
+  "versionCode": 56,
+  "versionName": "free56",
+  "apkUrl": "https://files.catbox.moe/nc45aq.apk",
+  "notes": "接入 v0 原始 Next.js / React / Tailwind 玻璃拟态 UI，保留原 App 学习、AI、账号和场景功能逻辑。"
 }

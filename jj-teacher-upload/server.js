@@ -1334,8 +1334,17 @@ async function serveFile(request, response) {
 
   try {
     const file = await fs.readFile(filePath);
-    response.writeHead(200, {
+    const headers = {
       "Content-Type": mimeTypes[path.extname(filePath)] || "application/octet-stream",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    };
+    if (pathname === "/version.json") {
+      headers["Cache-Control"] = "no-store";
+    }
+    response.writeHead(200, {
+      ...headers,
     });
     response.end(file);
   } catch {
