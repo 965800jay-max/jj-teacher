@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { Play, Plus, RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { speakEnglish } from '@/lib/speech'
+import { SpeakableText } from '@/components/speakable-text'
 import type { TeacherMessage } from '@/lib/sample-data'
 
 interface ChatMessageProps {
@@ -18,11 +20,7 @@ export function ChatMessage({ message, onSpeak, onAddSentence }: ChatMessageProp
   const handleSpeak = (text: string, id: string) => {
     setPlayingId(id)
     setTimeout(() => setPlayingId(null), 300)
-    if (!('speechSynthesis' in window)) return
-    const utterance = new SpeechSynthesisUtterance(text)
-    utterance.lang = 'en-US'
-    utterance.rate = 0.9
-    speechSynthesis.speak(utterance)
+    speakEnglish(text, { mode: 'sentence', rate: 0.9 })
     onSpeak?.(text)
   }
 
@@ -117,7 +115,9 @@ export function ChatMessage({ message, onSpeak, onAddSentence }: ChatMessageProp
               <div className="inner-glow rounded-2xl" />
               <p className="relative text-xs text-white/45 mb-2 font-medium">{message.translation.note}</p>
               <div className="relative flex items-center gap-3">
-                <p className="flex-1 text-[15px] font-semibold text-white/95">{message.translation.sentence}</p>
+                <p className="flex-1 text-[15px] font-semibold text-white/95 leading-relaxed">
+                  <SpeakableText text={message.translation.sentence} rate={0.9} />
+                </p>
                 <button
                   onClick={() => handleSpeak(message.translation!.sentence, `user-${message.timestamp}`)}
                   className={cn(
@@ -156,7 +156,9 @@ export function ChatMessage({ message, onSpeak, onAddSentence }: ChatMessageProp
                 <div className="inner-glow rounded-2xl" />
                 <p className="relative text-sm text-white/50 mb-2">{pair.zh}</p>
                 <div className="relative flex items-center gap-3">
-                  <p className="flex-1 text-[15px] font-semibold text-white/95">{pair.en}</p>
+                  <p className="flex-1 text-[15px] font-semibold text-white/95 leading-relaxed">
+                    <SpeakableText text={pair.en} rate={0.9} />
+                  </p>
                   <button
                     onClick={() => handleSpeak(pair.en, `daily-${i}`)}
                     className={cn(
@@ -194,7 +196,9 @@ export function ChatMessage({ message, onSpeak, onAddSentence }: ChatMessageProp
                       <p className="text-xs text-white/45 mb-2">{item.zh}</p>
                     )}
                     <div className="flex items-center gap-3">
-                      <p className="flex-1 text-sm font-semibold text-white/95">{item.text}</p>
+                      <p className="flex-1 text-sm font-semibold text-white/95 leading-relaxed">
+                        <SpeakableText text={item.text} rate={0.9} />
+                      </p>
                       <button
                         onClick={() => handleSpeak(item.text, `chat-${i}`)}
                         className={cn(
@@ -261,7 +265,9 @@ export function MissingChineseMeaning({ englishText, onAdd }: { englishText: str
       <div className="inner-glow rounded-2xl" />
       <p className="relative text-xs text-[oklch(0.70_0.15_280_/_0.8)] font-medium mb-2">中文意思待补充</p>
       <div className="relative flex items-center gap-3">
-        <p className="flex-1 text-[15px] font-semibold text-white/95">{englishText}</p>
+        <p className="flex-1 text-[15px] font-semibold text-white/95 leading-relaxed">
+          <SpeakableText text={englishText} />
+        </p>
         <button
           onClick={onAdd}
           className="text-xs text-[oklch(0.80_0.15_280)] hover:text-[oklch(0.85_0.15_280)] font-semibold transition-colors"

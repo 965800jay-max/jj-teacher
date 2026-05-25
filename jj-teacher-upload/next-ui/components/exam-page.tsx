@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle, AlertCircle, ArrowRight, ChevronLeft } from 'lucide-react'
+import { CheckCircle, AlertCircle, ArrowRight, ChevronLeft, Play } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { speakEnglish } from '@/lib/speech'
+import { SpeakableText } from '@/components/speakable-text'
 import type { SavedSentence } from '@/lib/sample-data'
 
 interface ExamPageProps {
@@ -175,7 +177,19 @@ export function ExamPage({ sentences, onComplete, onBack }: ExamPageProps) {
                 {!isCorrect && (
                   <div id="examAnswerPanel" className="mt-4">
                     <p className="text-xs text-white/45 mb-2 font-medium">正确答案：</p>
-                    <p className="text-white/95 font-semibold leading-relaxed">{currentSentence.text}</p>
+                    <div className="flex items-center gap-3">
+                      <p className="flex-1 text-white/95 font-semibold leading-relaxed">
+                        <SpeakableText text={currentSentence.text} />
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => speakEnglish(currentSentence.text, { mode: 'sentence' })}
+                        className="flex-shrink-0 w-9 h-9 rounded-xl glass-button text-white/60 flex items-center justify-center hover:text-white transition-premium"
+                        aria-label="朗读答案"
+                      >
+                        <Play className="w-4 h-4 ml-0.5" />
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

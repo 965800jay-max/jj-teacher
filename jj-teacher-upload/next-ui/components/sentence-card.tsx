@@ -1,8 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { Play, Trash2, Sparkles, Check, BookOpen } from 'lucide-react'
+import { createPortal } from 'react-dom'
+import { Play, Trash2, Sparkles, Check, BookOpen, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { speakEnglish } from '@/lib/speech'
+import { SpeakableText } from '@/components/speakable-text'
 
 interface SentenceCardProps {
   text: string
@@ -33,27 +36,18 @@ export function SentenceCard({
   const [isAiClicked, setIsAiClicked] = useState(false)
   const [isPlayClicked, setIsPlayClicked] = useState(false)
 
-  const words = text.split(/(\s+|(?=[.,!?;:'"]))/).filter(Boolean)
-
-  const handleWordClick = (word: string) => {
-    if (word.trim() && !/^[.,!?;:'"]$/.test(word)) {
-      if (!('speechSynthesis' in window)) return
-      const utterance = new SpeechSynthesisUtterance(word)
-      utterance.lang = 'en-US'
-      utterance.rate = speechRate
-      speechSynthesis.speak(utterance)
-    }
-  }
-
   const handleSpeak = () => {
     setIsPlayClicked(true)
     setTimeout(() => setIsPlayClicked(false), 300)
-    if (!('speechSynthesis' in window)) return
-    const utterance = new SpeechSynthesisUtterance(text)
-    utterance.lang = 'en-US'
-    utterance.rate = speechRate
-    speechSynthesis.speak(utterance)
+    speakEnglish(text, { mode: 'sentence', rate: speechRate })
     onSpeak?.()
+  }
+
+  const handleAiClick = () => {
+    setIsAiClicked(true)
+    setTimeout(() => setIsAiClicked(false), 300)
+    setShowAiExplain(true)
+    if (!aiExplanation) onAiExplain?.()
   }
 
   return (
@@ -69,24 +63,8 @@ export function SentenceCard({
       
       <div className="relative p-6">
         {/* 英文句子 - 可点击单词 */}
-        <div className="flex flex-wrap gap-x-1.5 gap-y-1.5 text-lg text-white/95 leading-relaxed mb-4 font-medium">
-          {words.map((word, index) => {
-            const isPunctuation = /^[.,!?;:'"]$/.test(word)
-            const isSpace = /^\s+$/.test(word)
-            
-            if (isSpace) return <span key={index}> </span>
-            if (isPunctuation) return <span key={index} className="text-white/40 -ml-1">{word}</span>
-            
-            return (
-              <button
-                key={index}
-                onClick={() => handleWordClick(word)}
-                className="hover:text-[oklch(0.80_0.15_280)] hover:bg-[oklch(0.70_0.15_280_/_0.1)] rounded-lg px-1 -mx-1 transition-premium"
-              >
-                {word}
-              </button>
-            )
-          })}
+        <div className="text-lg text-white/95 leading-relaxed mb-4 font-medium">
+          <SpeakableText text={text} rate={speechRate} />
         </div>
 
         {/* 中文意思 */}
@@ -111,14 +89,9 @@ export function SentenceCard({
           </button>
 
           <button
-            onClick={() => {
-              setIsAiClicked(true)
-              setTimeout(() => setIsAiClicked(false), 300)
-              setShowAiExplain(!showAiExplain)
-              if (!aiExplanation) onAiExplain?.()
-            }}
+            onClick={handleAiClick}
             className={cn(
-              "flex items-center gap-2 h-11 px-5 rounded-2xl text-sm font-semibold tracking-wide transition-premium",
+              "flex shrink-0 items-center gap-2 h-11 px-4 rounded-2xl text-sm font-semibold tracking-wide whitespace-nowrap transition-premium",
               showAiExplain 
                 ? "glass-button-primary" 
                 : "glass-button text-white/60 hover:text-white/90",
@@ -129,7 +102,7 @@ export function SentenceCard({
               "w-4 h-4 transition-transform duration-300",
               isAiClicked && "rotate-180 scale-125"
             )} />
-            <span>AI 解答</span>
+            <span className="whitespace-nowrap">AI 解答</span>
           </button>
 
           <div className="flex-1" />
@@ -168,31 +141,52 @@ export function SentenceCard({
           </button>
         </div>
 
-        {/* AI 解答展开 */}
-        {showAiExplain && (
-          <div className="mt-6 pt-6 border-t border-white/[0.06] animate-slide-up">
+      </div>
+
+      {showAiExplain && typeof document !== 'undefined' ? createPortal((
+        <div className="fixed inset-0 z-[120] flex items-end justify-center bg-black/70 backdrop-blur-md px-4 pb-4 pt-20 animate-fade-in">
+          <button
+            className="absolute inset-0 cursor-default"
+            aria-label="关闭 AI 解答"
+            onClick={() => setShowAiExplain(false)}
+          />
+          <div className="relative w-full max-w-[520px] max-h-[82dvh] overflow-y-auto glass-sheet rounded-[2rem] p-6 animate-scale-in">
+            <div className="top-highlight" />
+            <div className="flex items-start justify-between gap-4 mb-5">
+              <div>
+                <p className="text-[10px] text-[oklch(0.70_0.15_280)] font-semibold tracking-[0.18em] uppercase mb-1">
+                  AI 解答
+                </p>
+                <h2 className="text-xl font-semibold text-white/95">句子重点</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAiExplain(false)}
+                className="w-10 h-10 rounded-2xl glass-button flex items-center justify-center text-white/55 hover:text-white transition-premium"
+                aria-label="关闭"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="rounded-2xl border border-white/[0.06] bg-white/[0.035] px-4 py-4 mb-5">
+              <p className="text-[15px] font-semibold text-white/95 leading-relaxed">{text}</p>
+              {note && <p className="text-sm text-white/45 leading-relaxed mt-2">{note}</p>}
+            </div>
+
             {aiExplanation ? (
-              <div className="space-y-3 text-sm">
-                {aiExplanation.split('\n').map((line, i) => (
-                  <p key={i} className={cn(
-                    "leading-relaxed",
-                    (line.startsWith('重点') || line.startsWith('例句')) 
-                      ? 'text-[oklch(0.80_0.15_280)] font-medium' 
-                      : 'text-white/60'
-                  )}>
-                    {line}
-                  </p>
-                ))}
+              <div className="space-y-3 text-[15px] text-white/72 leading-relaxed whitespace-pre-wrap">
+                {aiExplanation}
               </div>
             ) : (
-              <div className="flex items-center gap-3 text-sm text-white/45">
+              <div className="flex items-center gap-3 text-sm text-white/45 py-4">
                 <div className="w-5 h-5 border-2 border-white/20 border-t-[oklch(0.70_0.15_280)] rounded-full animate-spin" />
-                <span>正在生成解答...</span>
+                <span>正在生成句子重点...</span>
               </div>
             )}
           </div>
-        )}
-      </div>
+        </div>
+      ), document.body) : null}
     </div>
   )
 }

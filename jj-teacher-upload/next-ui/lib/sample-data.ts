@@ -50,7 +50,7 @@ export const savedSentences: SavedSentence[] = [
     "note": "我先快速看一下菜单。",
     "learned": false,
     "learnedAt": null,
-    "aiExplanation": "句意：我先快速看一下菜单。重点：Let me... 表示“让我先……”，听起来更自然。例句：Let me check that for you."
+    "aiExplanation": "句意是“我先快速看一下菜单”。重点在 Let me...，它表示“让我先……”，语气自然、柔和。take a quick look at 表示“快速看一下”，不是很正式地研究。"
   },
   {
     "id": "2",

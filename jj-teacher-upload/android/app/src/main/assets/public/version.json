@@ -1,6 +1,6 @@
 {
-  "versionCode": 57,
-  "versionName": "free57",
-  "apkUrl": "https://files.catbox.moe/jsg0rg.apk",
-  "notes": "free57: 修复安卓进入单词/场景页后背景逐渐发白的问题。"
+  "versionCode": 58,
+  "versionName": "free58",
+  "apkUrl": "https://files.catbox.moe/cwjp6d.apk",
+  "notes": "free58: 修复 AI 解答弹窗、安卓朗读、点击单词朗读和智语导师输入框显示。"
 }

@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { Plus, Play, ChevronLeft, BookA, Theater } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { speakEnglish } from '@/lib/speech'
+import { SpeakableText } from '@/components/speakable-text'
 import type { VocabItem, Scene } from '@/lib/sample-data'
 
 interface ScenesPageProps {
@@ -32,11 +34,7 @@ export function ScenesPage({
   const handleSpeak = (text: string, id: string) => {
     setPlayingId(id)
     setTimeout(() => setPlayingId(null), 300)
-    if (!('speechSynthesis' in window)) return
-    const utterance = new SpeechSynthesisUtterance(text)
-    utterance.lang = 'en-US'
-    utterance.rate = 0.9
-    speechSynthesis.speak(utterance)
+    speakEnglish(text, { mode: 'sentence', rate: 0.9 })
   }
 
   const handleModeChange = (newMode: 'vocab' | 'scenes') => {
@@ -89,7 +87,9 @@ export function ScenesPage({
                 <span className="text-xs text-white/45 font-medium">{line.zh}</span>
               </div>
               <div className="relative flex items-center gap-3">
-                <p className="flex-1 text-[15px] font-semibold text-white/95">{line.english}</p>
+                <p className="flex-1 text-[15px] font-semibold text-white/95 leading-relaxed">
+                  <SpeakableText text={line.english} rate={0.9} />
+                </p>
                 <button
                   onClick={() => handleSpeak(line.english, `scene-${i}`)}
                   className={cn(
@@ -181,7 +181,9 @@ export function ScenesPage({
               >
                 <div className="inner-glow rounded-2xl" />
                 <div className="relative flex items-center gap-4 mb-3">
-                  <span className="text-lg font-semibold text-white/95">{item.word}</span>
+                  <span className="text-lg font-semibold text-white/95">
+                    <SpeakableText text={item.word} rate={0.9} />
+                  </span>
                   <span className="text-sm text-white/45">{item.meaning}</span>
                   <button
                     onClick={() => handleSpeak(item.word, `vocab-${item.id}`)}
@@ -196,7 +198,9 @@ export function ScenesPage({
                     )} />
                   </button>
                 </div>
-                <p className="relative text-sm text-white/50 italic leading-relaxed">{item.example}</p>
+                <p className="relative text-sm text-white/50 italic leading-relaxed">
+                  <SpeakableText text={item.example} rate={0.9} />
+                </p>
               </div>
             ))
           ) : (

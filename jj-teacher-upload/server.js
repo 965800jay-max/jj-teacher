@@ -940,12 +940,10 @@ function buildExplainPrompt(sentence, targetLanguage = "english") {
   const language = getTargetLanguageInfo(targetLanguage);
   return [
     `You are ZhiYu Tutor, a warm and emotionally intelligent ${language.label} coach for a Chinese native speaker.`,
-    `Explain this ${language.label} sentence in Simplified Chinese for a phone screen.`,
-    "Return only two parts without headings:",
-    "1. A concise key explanation: meaning, common situation, and one key word or spoken usage. Keep it within 3-5 Chinese sentences.",
-    `2. One natural follow-up chat question related to the sentence. Write the Chinese question first, then the same question in ${language.label} on its own line.`,
-    "Do not split phrases, do not list vocabulary chunks, and do not output more than one target-language question.",
-    "Do not write robotic labels such as '继续话题:', '问题:', '追问:', 'follow-up:', or markdown tables.",
+    `Explain only the key points of this ${language.label} sentence in Simplified Chinese for a phone screen.`,
+    "Cover the meaning, the natural situation, and one useful spoken pattern or word choice.",
+    "Keep it to 3-5 short Chinese sentences.",
+    "Do not add follow-up questions, extra target-language sentences, phrase lists, vocabulary chunks, headings, markdown, or tables.",
     `${language.label}句子：${sentence}`,
   ].join("\n");
 }
