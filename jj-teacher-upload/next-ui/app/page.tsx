@@ -48,8 +48,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 62
-const CURRENT_VERSION_NAME = 'free62'
+const CURRENT_VERSION_CODE = 63
+const CURRENT_VERSION_NAME = 'free63'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -274,9 +274,19 @@ function cleanTopicReply(reply: string) {
   return lines.join('\n').trim()
 }
 
+function normalizeDisplayReply(reply: string) {
+  return reply
+    .replace(/\r\n/g, '\n')
+    .replace(/\s*(英文|English)\s*[:：]\s*/gi, '\n\n英文：\n')
+    .replace(/\s*(中文意思|中文|Chinese meaning|Meaning)\s*[:：]\s*/gi, '\n中文意思：\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
 function compactReply(reply: string, mode: string) {
   const clean = mode === 'topic' ? cleanTopicReply(reply) : reply
-  return clean
+  const displayClean = mode === 'topic' ? clean : normalizeDisplayReply(clean)
+  return displayClean
     .replace(/\n{3,}/g, '\n\n')
     .replace(/^\s*```[\s\S]*?```\s*$/g, '')
     .trim()

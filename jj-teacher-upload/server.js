@@ -1114,7 +1114,16 @@ function buildChatPrompt(message, history, mode = "chat", targetLanguage = "engl
           "1. 必须刚好给 3 句，不要只给 1 句。",
           "2. 句子要像真实朋友聊天，不要总是天气、吃什么、你在做什么。",
           "3. 主题可以包含作息、计划、手机、消费、心情、健身、音乐、房间、周末、短途旅行、社交边界。",
-          `4. 格式必须是：英文：1. ... 2. ... 3. ... 中文意思：1. ... 2. ... 3. ...`,
+          "4. 手机端显示必须分行，不要把英文和中文意思挤在同一行。",
+          "5. 格式必须是：",
+          "英文：",
+          "1. ...",
+          "2. ...",
+          "3. ...",
+          "中文意思：",
+          "1. ...",
+          "2. ...",
+          "3. ...",
         ].join("\n")
       : "",
     mode === "topic"
@@ -1136,6 +1145,20 @@ function buildChatPrompt(message, history, mode = "chat", targetLanguage = "engl
       ? `Topic mode display rule: do not use labels. Put at most one complete ${language.label} practice question on its own line, directly paired with the Chinese question above.`
       : `如果你给出${language.label}学习句子或翻译，请用“英文：”放${language.label}内容，并用“中文意思：”放中文意思。`,
     mode === "topic" ? "" : `“英文：”只是 App 的显示标记，后面的内容仍然应该是${language.label}。`,
+    mode === "topic"
+      ? ""
+      : [
+          "手机端排版规则：",
+          "1. 回复要短段落，适合手机阅读。",
+          "2. 不要写成“英文：Hey! 中文意思：嘿！”这种混排。",
+          "3. 每个例句必须分成两块：",
+          "英文：",
+          "Hey, what's up?",
+          "中文意思：",
+          "嘿，最近咋样？",
+          "4. 多个例句之间空一行。",
+          "5. 如果要说明用法，先写简短说明，再分块列例句。不要使用 Markdown 表格。",
+        ].join("\n"),
     formatMemoryForPrompt(memoryProfile),
     cleanHistory ? `最近对话：\n${cleanHistory}` : "",
     `用户：${message}`,
@@ -1156,7 +1179,7 @@ function compactTeacherReply(reply, mode) {
     return lines.join("\n").replace(/\n{3,}/g, "\n\n").trim();
   }
 
-  return lines.join(" ").replace(/\s+/g, " ").trim();
+  return normalizeTeacherDisplayReply(lines.join("\n"));
 }
 
 function removeTeacherMetaLines(reply, mode) {
@@ -1210,7 +1233,17 @@ function trimDirectTranslationReply(reply, message) {
   const meaning = reply.slice(meaningIndex + "中文意思：".length, meaningEnd).trim();
 
   if (!target || !meaning) return reply.slice(englishIndex).trim();
-  return `英文：${target} 中文意思：${meaning}`;
+  return `英文：\n${target}\n\n中文意思：\n${meaning}`;
+}
+
+function normalizeTeacherDisplayReply(reply) {
+  return String(reply || "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\s*(英文|English)\s*[:：]\s*/gi, "\n\n英文：\n")
+    .replace(/\s*(中文意思|中文|Chinese meaning|Meaning)\s*[:：]\s*/gi, "\n中文意思：\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
 }
 
 function extractJsonObject(text) {
@@ -1265,7 +1298,8 @@ async function handleWordLookup(request, response) {
 }
 
 function finalizeTeacherReply(reply, mode, rawMessage = "") {
-  return compactTeacherReply(reply, mode);
+  const compacted = compactTeacherReply(reply, mode);
+  return mode === "topic" ? compacted : trimDirectTranslationReply(compacted, rawMessage);
 }
 
 async function askAiTeacher(prompt, mode = "chat", targetLanguage = "english") {

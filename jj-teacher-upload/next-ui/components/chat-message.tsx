@@ -13,6 +13,90 @@ interface ChatMessageProps {
   onAddSentence?: (text: string, note: string) => void
 }
 
+type ChatContentItem = { type: 'text' | 'english'; text: string; zh?: string }
+type LabeledPair = { en: string; zh: string }
+type ParsedContent =
+  | { type: 'simple'; text: string }
+  | { type: 'daily-sentences'; pairs: LabeledPair[] }
+  | { type: 'chat'; content: ChatContentItem[] }
+  | { type: 'structured'; intro: string[]; pairs: LabeledPair[]; outro: string[] }
+
+function cleanFieldText(value: string) {
+  return value
+    .replace(/\s+/g, ' ')
+    .replace(/^\s*(?:[-•*]|\d+[.)、])\s*/, '')
+    .trim()
+}
+
+function splitNumberedValues(value: string) {
+  const withBreaks = value.replace(/\s+(?=\d+[.)、]\s*)/g, '\n')
+  const parts = withBreaks
+    .split(/\n+/)
+    .map(cleanFieldText)
+    .filter(Boolean)
+
+  return parts.length ? parts : [cleanFieldText(value)].filter(Boolean)
+}
+
+function splitParagraphs(value: string) {
+  return value
+    .split(/\n+/)
+    .map(cleanFieldText)
+    .filter(Boolean)
+}
+
+function pushLabeledPairs(pairs: LabeledPair[], englishValue: string, zhValue = '') {
+  const englishParts = splitNumberedValues(englishValue)
+  const zhParts = splitNumberedValues(zhValue)
+  const count = Math.max(englishParts.length, zhParts.length)
+
+  for (let index = 0; index < count; index += 1) {
+    const en = englishParts[index] || (count === 1 ? englishParts[0] : '')
+    if (!en) continue
+    pairs.push({
+      en,
+      zh: zhParts[index] || ''
+    })
+  }
+}
+
+function parseLabeledSections(text: string) {
+  const labelPattern = /(英文|英语|English|中文意思|中文|Chinese meaning|Meaning)\s*[:：]/gi
+  const matches = Array.from(text.matchAll(labelPattern))
+  if (!matches.length) return null
+
+  const intro = splitParagraphs(text.slice(0, matches[0].index || 0))
+  const outro: string[] = []
+  const pairs: LabeledPair[] = []
+  let currentEnglish = ''
+
+  matches.forEach((match, index) => {
+    const label = String(match[1] || '')
+    const start = (match.index || 0) + match[0].length
+    const end = matches[index + 1]?.index ?? text.length
+    const value = text.slice(start, end).trim()
+    const isEnglish = /^(英文|英语|English)$/i.test(label)
+
+    if (isEnglish) {
+      if (currentEnglish) pushLabeledPairs(pairs, currentEnglish)
+      currentEnglish = value
+      return
+    }
+
+    if (currentEnglish) {
+      pushLabeledPairs(pairs, currentEnglish, value)
+      currentEnglish = ''
+    } else {
+      outro.push(...splitParagraphs(value))
+    }
+  })
+
+  if (currentEnglish) pushLabeledPairs(pairs, currentEnglish)
+  if (!pairs.length) return null
+
+  return { intro, pairs, outro }
+}
+
 export function ChatMessage({ message, onSpeak, onAddSentence }: ChatMessageProps) {
   const isUser = message.role === 'user'
   const [playingId, setPlayingId] = useState<string | null>(null)
@@ -25,9 +109,14 @@ export function ChatMessage({ message, onSpeak, onAddSentence }: ChatMessageProp
   }
 
   // 解析消息内容
-  const parseContent = () => {
+  const parseContent = (): ParsedContent => {
     if (message.pending) {
       return { type: 'simple', text: message.text }
+    }
+
+    const structured = parseLabeledSections(message.text)
+    if (structured && message.mode !== 'daily-sentences') {
+      return { type: 'structured', ...structured }
     }
 
     if (message.mode === 'daily-sentences') {
@@ -68,7 +157,7 @@ export function ChatMessage({ message, onSpeak, onAddSentence }: ChatMessageProp
       return { type: 'daily-sentences', pairs }
     }
 
-    if (message.mode === 'chat' || message.mode === 'topic') {
+    if (message.mode === 'chat' || message.mode === 'topic' || message.mode === 'free-chat') {
       const lines = message.text.split('\n')
       const content: { type: 'text' | 'english'; text: string; zh?: string }[] = []
       
@@ -222,6 +311,66 @@ export function ChatMessage({ message, onSpeak, onAddSentence }: ChatMessageProp
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {parsed.type === 'structured' && (
+          <div className="relative glass-card rounded-3xl rounded-bl-lg px-5 py-4 overflow-hidden">
+            <div className="inner-glow rounded-3xl" />
+            <div className="relative space-y-4">
+              {parsed.intro.map((paragraph, i) => (
+                <p key={`intro-${i}`} className="text-[15px] text-white/72 leading-relaxed">
+                  {paragraph}
+                </p>
+              ))}
+
+              <div className="space-y-3">
+                {parsed.pairs.map((pair, i) => (
+                  <div key={i} className="rounded-2xl border border-[oklch(0.70_0.15_280_/_0.14)] bg-[oklch(0.70_0.15_280_/_0.055)] px-4 py-3">
+                    <p className="text-[10px] text-[oklch(0.70_0.15_280)] font-semibold tracking-[0.16em] uppercase mb-2">
+                      English
+                    </p>
+                    <div className="flex items-center gap-3 mb-3">
+                      <p className="flex-1 text-[15px] font-semibold text-white/95 leading-relaxed">
+                        <SpeakableText text={pair.en} rate={0.9} />
+                      </p>
+                      <button
+                        onClick={() => handleSpeak(pair.en, `structured-${i}`)}
+                        className={cn(
+                          "flex-shrink-0 w-8 h-8 rounded-xl glass-button text-white/60 flex items-center justify-center hover:text-white transition-premium",
+                          playingId === `structured-${i}` && "scale-90 brightness-125"
+                        )}
+                      >
+                        <Play className={cn(
+                          "w-3.5 h-3.5 ml-0.5 transition-transform duration-300",
+                          playingId === `structured-${i}` && "scale-125"
+                        )} />
+                      </button>
+                      <button
+                        onClick={() => onAddSentence?.(pair.en, pair.zh)}
+                        className="flex-shrink-0 w-8 h-8 rounded-xl glass-button text-white/60 flex items-center justify-center hover:text-[oklch(0.80_0.15_280)] transition-premium"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    {pair.zh && (
+                      <>
+                        <p className="text-[10px] text-white/35 font-semibold tracking-[0.16em] uppercase mb-1">
+                          中文意思
+                        </p>
+                        <p className="text-sm text-white/58 leading-relaxed">{pair.zh}</p>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {parsed.outro.map((paragraph, i) => (
+                <p key={`outro-${i}`} className="text-[15px] text-white/72 leading-relaxed">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
           </div>
         )}
 

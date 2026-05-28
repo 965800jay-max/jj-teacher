@@ -129,10 +129,39 @@ function foregroundSvg(size) {
 
 function splashSvg(width, height) {
   const min = Math.min(width, height)
-  const logoSize = Math.round(min * 0.28)
-  const logoX = Math.round((width - logoSize) / 2)
-  const logoY = Math.round((height - logoSize) / 2)
+  const isPortrait = height >= width
+  const centerX = Math.round(isPortrait ? width / 2 : width * 0.35)
+  const logoSize = Math.round(min * (isPortrait ? 0.34 : 0.28))
+  const logoX = Math.round(centerX - logoSize / 2)
+  const logoY = Math.round(height * (isPortrait ? 0.28 : 0.27))
   const tiny = Math.max(1, Math.round(min / 360))
+  const titleY = Math.round(height * (isPortrait ? 0.17 : 0.14))
+  const subtitleY = titleY + Math.round(min * 0.09)
+  const statusY = Math.round(logoY + logoSize + min * (isPortrait ? 0.12 : 0.10))
+  const cardWidth = Math.round(isPortrait ? Math.min(width * 0.74, min * 0.78) : Math.min(width * 0.40, min * 0.74))
+  const cardHeight = Math.round(min * 0.11)
+  const cardX = Math.round(isPortrait ? (width - cardWidth) / 2 : width * 0.56)
+  const cardGap = Math.round(min * 0.035)
+  const cardY = Math.round(isPortrait
+    ? Math.min(statusY + min * 0.08, height - cardHeight * 3 - cardGap * 2 - min * 0.11)
+    : height * 0.30)
+  const titleSize = Math.max(24, Math.round(min * 0.085))
+  const eyebrowSize = Math.max(10, Math.round(min * 0.032))
+  const bodySize = Math.max(12, Math.round(min * 0.042))
+  const cardTitleSize = Math.max(12, Math.round(min * 0.040))
+  const cardSubSize = Math.max(9, Math.round(min * 0.028))
+  const dotSize = Math.max(7, Math.round(min * 0.025))
+
+  const card = (index, title, subtitle) => {
+    const y = cardY + index * (cardHeight + cardGap)
+    return `
+  <g transform="translate(${cardX} ${y})">
+    <rect width="${cardWidth}" height="${cardHeight}" rx="${Math.round(cardHeight * 0.36)}" fill="${colors.accent}" fill-opacity="0.055" stroke="${colors.accent}" stroke-opacity="0.18" />
+    <circle cx="${Math.round(cardHeight * 0.48)}" cy="${Math.round(cardHeight / 2)}" r="${dotSize}" fill="${colors.accentBright}" fill-opacity="0.88" />
+    <text x="${Math.round(cardHeight * 0.88)}" y="${Math.round(cardHeight * 0.45)}" fill="${colors.white}" fill-opacity="0.88" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" font-size="${cardTitleSize}" font-weight="700">${title}</text>
+    <text x="${Math.round(cardHeight * 0.88)}" y="${Math.round(cardHeight * 0.73)}" fill="${colors.white}" fill-opacity="0.42" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" font-size="${cardSubSize}" font-weight="500">${subtitle}</text>
+  </g>`
+  }
 
   return `
 <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
@@ -163,12 +192,15 @@ function splashSvg(width, height) {
   </defs>
   <rect width="${width}" height="${height}" fill="url(#screenBg)" />
   <circle cx="${width / 2}" cy="${height / 2}" r="${Math.round(min * 0.58)}" fill="url(#centerGlow)" />
+  <circle cx="${centerX}" cy="${logoY + Math.round(logoSize / 2)}" r="${Math.round(logoSize * 0.92)}" fill="${colors.accent}" opacity="0.045" />
   <g opacity="0.32">
     <circle cx="${Math.round(width * 0.17)}" cy="${Math.round(height * 0.22)}" r="${tiny}" fill="${colors.accentBright}" />
     <circle cx="${Math.round(width * 0.78)}" cy="${Math.round(height * 0.28)}" r="${tiny}" fill="${colors.white}" />
     <circle cx="${Math.round(width * 0.24)}" cy="${Math.round(height * 0.72)}" r="${tiny}" fill="${colors.white}" />
     <circle cx="${Math.round(width * 0.70)}" cy="${Math.round(height * 0.78)}" r="${tiny}" fill="${colors.accent}" />
   </g>
+  <text x="${centerX}" y="${titleY}" text-anchor="middle" fill="${colors.accentBright}" fill-opacity="0.95" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" font-size="${eyebrowSize}" font-weight="800" letter-spacing="${Math.max(2, Math.round(min * 0.012))}">AI TUTOR</text>
+  <text x="${centerX}" y="${subtitleY}" text-anchor="middle" fill="${colors.white}" fill-opacity="0.96" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" font-size="${titleSize}" font-weight="760">智语导师</text>
   <g transform="translate(${logoX} ${logoY}) scale(${logoSize / 1024})" filter="url(#softGlow)">
     <rect width="1024" height="1024" rx="228" fill="${colors.bg}" fill-opacity="0.72" stroke="${colors.accent}" stroke-opacity="0.28" stroke-width="12" />
     <circle cx="512" cy="508" r="280" fill="${colors.accent}" opacity="0.08" />
@@ -179,6 +211,10 @@ function splashSvg(width, height) {
     <path d="M684 312L704 354L746 374L704 394L684 436L664 394L622 374L664 354L684 312Z"
       fill="${colors.accentBright}" opacity="0.9" />
   </g>
+  <text x="${centerX}" y="${statusY}" text-anchor="middle" fill="${colors.white}" fill-opacity="0.66" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" font-size="${bodySize}" font-weight="600">正在准备你的英语练习</text>
+  ${card(0, '自然表达', '像朋友聊天一样学英语')}
+  ${card(1, '长期记忆', '记住你的习惯和偏好')}
+  ${card(2, '场景复习', '句读、单词、场景同步准备')}
 </svg>`.trim()
 }
 
