@@ -1,6 +1,6 @@
 {
-  "versionCode": 64,
-  "versionName": "free64",
-  "apkUrl": "https://files.catbox.moe/0frlor.apk",
-  "notes": "free64: 丰富紫黑启动加载页内容，并优化智语导师回复排版；用户要多个自然例子时固定分块给 3 个。"
+  "versionCode": 65,
+  "versionName": "free65",
+  "apkUrl": "https://files.catbox.moe/3astom.apk",
+  "notes": "free65: 修复多例句请求被裁成一句的问题，保留英文和中文意思分块排版。"
 }

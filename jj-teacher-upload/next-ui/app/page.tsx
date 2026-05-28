@@ -48,8 +48,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 64
-const CURRENT_VERSION_NAME = 'free64'
+const CURRENT_VERSION_CODE = 65
+const CURRENT_VERSION_NAME = 'free65'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 

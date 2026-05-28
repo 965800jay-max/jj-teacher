@@ -1238,6 +1238,7 @@ function isDirectTranslationRequest(message) {
 
 function trimDirectTranslationReply(reply, message) {
   if (!isDirectTranslationRequest(message)) return reply;
+  if (isMultiExampleRequest(message)) return reply;
 
   const englishIndex = reply.indexOf("英文：");
   if (englishIndex === -1) return reply;
