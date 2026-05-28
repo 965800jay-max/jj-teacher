@@ -48,8 +48,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 60
-const CURRENT_VERSION_NAME = 'free60'
+const CURRENT_VERSION_CODE = 61
+const CURRENT_VERSION_NAME = 'free61'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -1015,7 +1015,7 @@ export default function ZhiyuApp() {
                 value={newSentence}
                 onChange={(event) => setNewSentence(event.target.value)}
                 placeholder="输入或粘贴要添加的英文句子..."
-                className="relative w-full min-h-[110px] bg-transparent border-0 outline-none p-5 text-[15px] text-white/90 placeholder:text-white/25 resize-none leading-relaxed"
+                className="relative w-full min-h-[110px] bg-transparent border-0 outline-none p-5 text-[15px] text-white/90 placeholder:text-[oklch(0.70_0.15_280_/_0.7)] resize-none leading-relaxed"
               />
               <div className="relative flex items-center justify-end border-t border-white/[0.06] p-4">
                 <button

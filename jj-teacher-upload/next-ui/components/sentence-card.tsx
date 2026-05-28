@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Play, Trash2, Sparkles, Check, BookOpen, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -37,8 +37,20 @@ export function SentenceCard({
   const [isDeleting, setIsDeleting] = useState(false)
   const [isAiClicked, setIsAiClicked] = useState(false)
   const [isPlayClicked, setIsPlayClicked] = useState(false)
+  const [isEditingNote, setIsEditingNote] = useState(false)
+  const [draftNote, setDraftNote] = useState(note)
   const lastNoteTapAtRef = useRef(0)
-  const notePromptedAtRef = useRef(0)
+  const noteInputRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    if (!isEditingNote) setDraftNote(note)
+  }, [isEditingNote, note])
+
+  useEffect(() => {
+    if (!isEditingNote) return
+    noteInputRef.current?.focus()
+    noteInputRef.current?.setSelectionRange(draftNote.length, draftNote.length)
+  }, [isEditingNote])
 
   const handleSpeak = () => {
     setIsPlayClicked(true)
@@ -55,13 +67,14 @@ export function SentenceCard({
   }
 
   const openNoteInput = () => {
-    if (!onUpdateNote || typeof window === 'undefined') return
-    const now = Date.now()
-    if (now - notePromptedAtRef.current < 600) return
-    notePromptedAtRef.current = now
-    const nextNote = window.prompt('请输入中文意思', note || '')
-    if (nextNote === null) return
-    onUpdateNote(nextNote.trim())
+    if (!onUpdateNote) return
+    setDraftNote(note)
+    setIsEditingNote(true)
+  }
+
+  const saveNoteInput = () => {
+    onUpdateNote?.(draftNote.trim())
+    setIsEditingNote(false)
   }
 
   const handleNotePointerUp = () => {
@@ -92,13 +105,36 @@ export function SentenceCard({
         </div>
 
         {/* 中文意思 */}
-        <p
-          className="text-sm text-white/50 mb-6 leading-relaxed"
-          onDoubleClick={openNoteInput}
-          onPointerUp={handleNotePointerUp}
-        >
-          {note || <span className="text-[oklch(0.70_0.15_280_/_0.7)] italic">点击添加中文意思</span>}
-        </p>
+        {isEditingNote ? (
+          <textarea
+            ref={noteInputRef}
+            value={draftNote}
+            onChange={(event) => setDraftNote(event.target.value)}
+            onBlur={saveNoteInput}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault()
+                saveNoteInput()
+              }
+              if (event.key === 'Escape') {
+                event.preventDefault()
+                setDraftNote(note)
+                setIsEditingNote(false)
+              }
+            }}
+            placeholder="点击添加中文意思"
+            rows={1}
+            className="mb-6 block w-full min-h-[1.5rem] resize-none bg-transparent border-0 p-0 text-sm text-[oklch(0.70_0.15_280_/_0.7)] placeholder:text-[oklch(0.70_0.15_280_/_0.7)] outline-none leading-relaxed"
+          />
+        ) : (
+          <p
+            className="text-sm text-[oklch(0.70_0.15_280_/_0.7)] mb-6 leading-relaxed"
+            onDoubleClick={openNoteInput}
+            onPointerUp={handleNotePointerUp}
+          >
+            {note || <span className="italic">点击添加中文意思</span>}
+          </p>
+        )}
 
         {/* 操作按钮 */}
         <div className="flex items-center gap-3">
