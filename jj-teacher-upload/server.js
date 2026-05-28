@@ -1090,6 +1090,12 @@ function isDailySentenceRequest(message) {
   return /(?:3|三).{0,8}句/u.test(clean) && /(?:日常|聊天|口语|朋友)/u.test(clean) && /句子/u.test(clean);
 }
 
+function isMultiExampleRequest(message) {
+  const clean = String(message || "");
+  return /(?:3|三|几个|一些).{0,12}(?:例子|说法|表达|句子)/u.test(clean)
+    && /(?:自然|日常|朋友|口语|美国|聊天|常见)/u.test(clean);
+}
+
 function buildChatPrompt(message, history, mode = "chat", targetLanguage = "english", memoryProfile = {}) {
   const language = getTargetLanguageInfo(targetLanguage);
   const cleanHistory = history
@@ -1124,6 +1130,19 @@ function buildChatPrompt(message, history, mode = "chat", targetLanguage = "engl
           "1. ...",
           "2. ...",
           "3. ...",
+        ].join("\n")
+      : "",
+    isMultiExampleRequest(message)
+      ? [
+          "多例句请求规则：",
+          "1. 用户要几个/三个例子时，必须给 3 个，不要只给 1 个。",
+          "2. 每个例子都要自然、口语、适合真实聊天。",
+          "3. 每个例子必须分块显示：",
+          "英文：",
+          "...",
+          "中文意思：",
+          "...",
+          "4. 多个例子之间空一行，不要混在同一段。",
         ].join("\n")
       : "",
     mode === "topic"
