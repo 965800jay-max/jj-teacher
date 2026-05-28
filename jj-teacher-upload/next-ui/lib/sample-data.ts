@@ -22,6 +22,20 @@ export interface TeacherMessage {
   timestamp: number
 }
 
+export interface TutorMemoryProfile {
+  enabled: boolean
+  summary: string
+  preferences: string[]
+  interests: string[]
+  habits: string[]
+  learningProfile: string[]
+  communicationStyle: string[]
+  correctionPatterns: string[]
+  personalFacts: string[]
+  avoid: string[]
+  updatedAt: number
+}
+
 export interface VocabItem {
   id: string
   group: string

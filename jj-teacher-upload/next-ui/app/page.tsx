@@ -18,7 +18,8 @@ import {
   sceneGroups,
   scenes,
   type SavedSentence,
-  type TeacherMessage
+  type TeacherMessage,
+  type TutorMemoryProfile
 } from '@/lib/sample-data'
 
 type ActiveTab = 'sentences' | 'scenes' | 'teacher'
@@ -47,8 +48,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 59
-const CURRENT_VERSION_NAME = 'free59'
+const CURRENT_VERSION_CODE = 60
+const CURRENT_VERSION_NAME = 'free60'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -63,6 +64,7 @@ const AUTH_USER_KEY = 'sentence-reader-auth-user'
 const AUTH_AVATAR_KEY = 'sentence-reader-auth-avatar'
 const UPDATE_DISMISS_KEY = 'sentence-reader-dismissed-update'
 const DAILY_CHAT_REPEAT_KEY = 'sentence-reader-daily-chat-last'
+const MEMORY_KEY = 'sentence-reader-memory-profile'
 
 const DAILY_LINES = [
   ['我最近一直想把生活节奏调回来。', "I've been trying to get back into a routine lately."],
@@ -168,6 +170,68 @@ function normalizeMessage(item: Partial<TeacherMessage> & Record<string, unknown
   }
 }
 
+function defaultMemoryProfile(enabled = true): TutorMemoryProfile {
+  return {
+    enabled,
+    summary: '',
+    preferences: [],
+    interests: [],
+    habits: [],
+    learningProfile: [],
+    communicationStyle: [],
+    correctionPatterns: [],
+    personalFacts: [],
+    avoid: [],
+    updatedAt: 0
+  }
+}
+
+function normalizeMemoryList(value: unknown, maxItems = 80) {
+  if (!Array.isArray(value)) return []
+  const seen = new Set<string>()
+  const items: string[] = []
+  for (const item of value) {
+    const clean = String(item || '').replace(/\s+/g, ' ').trim().slice(0, 220)
+    const key = clean.toLowerCase()
+    if (!clean || seen.has(key)) continue
+    seen.add(key)
+    items.push(clean)
+    if (items.length >= maxItems) break
+  }
+  return items
+}
+
+function normalizeMemoryProfile(value: unknown): TutorMemoryProfile {
+  const source = value && typeof value === 'object' ? value as Record<string, unknown> : {}
+  return {
+    enabled: source.enabled !== false,
+    summary: String(source.summary || '').trim().slice(0, 2400),
+    preferences: normalizeMemoryList(source.preferences),
+    interests: normalizeMemoryList(source.interests),
+    habits: normalizeMemoryList(source.habits),
+    learningProfile: normalizeMemoryList(source.learningProfile),
+    communicationStyle: normalizeMemoryList(source.communicationStyle),
+    correctionPatterns: normalizeMemoryList(source.correctionPatterns),
+    personalFacts: normalizeMemoryList(source.personalFacts),
+    avoid: normalizeMemoryList(source.avoid),
+    updatedAt: typeof source.updatedAt === 'number' ? source.updatedAt : 0
+  }
+}
+
+function memoryHasContent(memory: TutorMemoryProfile) {
+  return Boolean(
+    memory.summary ||
+      memory.preferences.length ||
+      memory.interests.length ||
+      memory.habits.length ||
+      memory.learningProfile.length ||
+      memory.communicationStyle.length ||
+      memory.correctionPatterns.length ||
+      memory.personalFacts.length ||
+      memory.avoid.length
+  )
+}
+
 function splitSentences(text: string) {
   return text
     .split(/\n+|(?<=[.!?。！？])\s+/)
@@ -247,6 +311,16 @@ async function requestAiTeacher(payload: Record<string, unknown>) {
   })
 }
 
+async function requestAiMemory(payload: Record<string, unknown>) {
+  return apiRequest('/api/ai-memory', {
+    method: 'POST',
+    body: JSON.stringify({
+      targetLanguage: TARGET_LANGUAGE,
+      ...payload
+    })
+  })
+}
+
 function serverModeFromQuickMode(mode?: TeacherQuickMode | null) {
   if (mode === 'topic') return 'topic'
   if (mode === 'free') return 'freestyle'
@@ -259,7 +333,7 @@ function messageModeFromServerMode(mode: string): TeacherMessage['mode'] {
   return 'chat'
 }
 
-function buildCloudPayload(sentences: SavedSentence[], messages: TeacherMessage[]) {
+function buildCloudPayload(sentences: SavedSentence[], messages: TeacherMessage[], memoryProfile: TutorMemoryProfile) {
   const cleanMessages = messages
     .filter((message) => !message.pending)
     .slice(-80)
@@ -272,6 +346,7 @@ function buildCloudPayload(sentences: SavedSentence[], messages: TeacherMessage[
       learningLanguage: TARGET_LANGUAGE,
       avatar: hasStorage() ? window.localStorage.getItem(AUTH_AVATAR_KEY) || '' : ''
     },
+    memoryProfile,
     learningLanguage: TARGET_LANGUAGE,
     sceneProgress: {},
     languages: {
@@ -298,6 +373,7 @@ export default function ZhiyuApp() {
 
   const [sentences, setSentences] = useState<SavedSentence[]>(initialSentences)
   const [messages, setMessages] = useState<TeacherMessage[]>([])
+  const [memoryProfile, setMemoryProfile] = useState<TutorMemoryProfile>(() => defaultMemoryProfile())
   const [newSentence, setNewSentence] = useState('')
   const [speechRate, setSpeechRate] = useState(1)
   const [teacherMode, setTeacherMode] = useState<TeacherQuickMode | null>(null)
@@ -309,11 +385,16 @@ export default function ZhiyuApp() {
   const [friends, setFriends] = useState<FriendItem[]>([])
 
   const messagesRef = useRef<TeacherMessage[]>(messages)
+  const memoryProfileRef = useRef<TutorMemoryProfile>(memoryProfile)
   const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     messagesRef.current = messages
   }, [messages])
+
+  useEffect(() => {
+    memoryProfileRef.current = memoryProfile
+  }, [memoryProfile])
 
   useEffect(() => {
     const storedSentences = readFirstJson<SavedSentence[]>([languageKey(SENTENCES_KEY), SENTENCES_KEY], [])
@@ -322,11 +403,13 @@ export default function ZhiyuApp() {
     const storedMessages = readFirstJson<TeacherMessage[]>([languageKey(TEACHER_CHAT_KEY), TEACHER_CHAT_KEY], [])
       .map((item, index) => normalizeMessage(item as Partial<TeacherMessage> & Record<string, unknown>, index))
       .filter(Boolean) as TeacherMessage[]
+    const storedMemory = normalizeMemoryProfile(readJson<unknown>(MEMORY_KEY, defaultMemoryProfile()))
     const storedUser = readJson<AppUser | null>(AUTH_USER_KEY, null)
     const storedToken = hasStorage() ? window.localStorage.getItem(AUTH_TOKEN_KEY) || '' : ''
 
     if (storedSentences.length) setSentences(storedSentences)
     if (storedMessages.length) setMessages(storedMessages)
+    setMemoryProfile(storedMemory)
     setNewSentence(hasStorage() ? window.localStorage.getItem(DRAFT_KEY) || '' : '')
     setSpeechRate(Number(hasStorage() ? window.localStorage.getItem(SPEED_KEY) || '1' : '1') || 1)
     setSentenceTab(hasStorage() && window.localStorage.getItem(VIEW_KEY) === 'learned' ? 'learned' : 'learning')
@@ -352,6 +435,11 @@ export default function ZhiyuApp() {
     writeJson(TEACHER_CHAT_KEY, cleanMessages)
     writeJson(languageKey(TEACHER_CHAT_KEY), cleanMessages)
   }, [hydrated, messages])
+
+  useEffect(() => {
+    if (!hydrated) return
+    writeJson(MEMORY_KEY, memoryProfile)
+  }, [hydrated, memoryProfile])
 
   useEffect(() => {
     if (!hydrated || !hasStorage()) return
@@ -398,6 +486,11 @@ export default function ZhiyuApp() {
       const remoteData = data.data || {}
       const remoteEnglish = remoteData.languages?.english || {}
       setSentences((current) => mergeSentences(current, remoteEnglish.sentences || remoteData.sentences))
+      const hasRemoteMemory = remoteData.memoryProfile && typeof remoteData.memoryProfile === 'object'
+      const remoteMemory = normalizeMemoryProfile(remoteData.memoryProfile)
+      if (hasRemoteMemory && remoteMemory.updatedAt >= memoryProfileRef.current.updatedAt) {
+        setMemoryProfile(remoteMemory)
+      }
       const remoteMessages = Array.isArray(remoteEnglish.teacherMessages)
         ? remoteEnglish.teacherMessages
         : Array.isArray(remoteData.teacherMessages)
@@ -420,13 +513,13 @@ export default function ZhiyuApp() {
     syncTimerRef.current = setTimeout(() => {
       apiRequest('/api/user-data', {
         method: 'POST',
-        body: JSON.stringify({ data: buildCloudPayload(sentences, messages) })
+        body: JSON.stringify({ data: buildCloudPayload(sentences, messages, memoryProfile) })
       }, authToken).catch(() => {})
     }, 900)
     return () => {
       if (syncTimerRef.current) clearTimeout(syncTimerRef.current)
     }
-  }, [hydrated, authToken, sentences, messages])
+  }, [hydrated, authToken, sentences, messages, memoryProfile])
 
   useEffect(() => {
     if (!hydrated) return
@@ -520,6 +613,43 @@ export default function ZhiyuApp() {
     }
   }, [sentences])
 
+  const updateMemoryFromExchange = useCallback(async (
+    userMessage: string,
+    assistantReply: string,
+    mode: TeacherMessage['mode']
+  ) => {
+    const currentMemory = memoryProfileRef.current
+    if (!currentMemory.enabled || !userMessage.trim()) return
+
+    try {
+      const data = await requestAiMemory({
+        memoryProfile: currentMemory,
+        userMessage,
+        assistantReply,
+        mode
+      })
+      const nextMemory = normalizeMemoryProfile(data.memoryProfile)
+      setMemoryProfile(nextMemory)
+    } catch {
+      // Memory is helpful, but chat should never depend on it.
+    }
+  }, [])
+
+  const handleToggleMemory = useCallback((enabled: boolean) => {
+    setMemoryProfile((current) => ({
+      ...current,
+      enabled,
+      updatedAt: Date.now()
+    }))
+  }, [])
+
+  const handleClearMemory = useCallback(() => {
+    setMemoryProfile({
+      ...defaultMemoryProfile(true),
+      updatedAt: Date.now()
+    })
+  }, [])
+
   const sendTeacherMessage = useCallback(async (text: string, quickMode?: TeacherQuickMode | null) => {
     const cleanText = text.trim()
     if (!cleanText || isSending) return
@@ -554,7 +684,8 @@ export default function ZhiyuApp() {
       const data = await requestAiTeacher({
         mode: serverMode,
         message: cleanText,
-        messages: history
+        messages: history,
+        memoryProfile: memoryProfileRef.current
       })
       const reply = compactReply(String(data.reply || ''), serverMode)
       setMessages((current) => current
@@ -566,6 +697,7 @@ export default function ZhiyuApp() {
           mode: displayMode,
           timestamp: Date.now()
         }))
+      updateMemoryFromExchange(cleanText, reply, displayMode)
     } catch (error) {
       setMessages((current) => current
         .filter((message) => message.id !== pendingMessage.id)
@@ -579,7 +711,7 @@ export default function ZhiyuApp() {
     } finally {
       setIsSending(false)
     }
-  }, [isSending])
+  }, [isSending, updateMemoryFromExchange])
 
   const startTopicPractice = useCallback(async () => {
     if (isSending) return
@@ -603,7 +735,8 @@ export default function ZhiyuApp() {
       const data = await requestAiTeacher({
         mode: 'topic',
         message: '直接开启一个轻松自然的英语日常聊天。只发一个生活化问题：先中文问句，再给同一个问题的英文版本，不要解释为什么选这个话题。',
-        messages: messagesRef.current.filter((message) => !message.pending).slice(-6).map(({ role, text }) => ({ role, text }))
+        messages: messagesRef.current.filter((message) => !message.pending).slice(-6).map(({ role, text }) => ({ role, text })),
+        memoryProfile: memoryProfileRef.current
       })
       const reply = cleanTopicReply(String(data.reply || '')) || '你最近反复听或看的一个东西是什么？\nWhat’s something you’ve been listening to or watching a lot recently?'
       setMessages((current) => current
@@ -951,9 +1084,12 @@ export default function ZhiyuApp() {
             messages={messages}
             activeMode={teacherMode}
             isSending={isSending}
+            memoryProfile={memoryProfile}
             onSendMessage={sendTeacherMessage}
             onQuickAction={handleQuickAction}
             onAddSentence={handleAddSentence}
+            onToggleMemory={handleToggleMemory}
+            onClearMemory={handleClearMemory}
           />
         )}
       </main>

@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Send, MessageCircle, Sparkles, Coffee } from 'lucide-react'
+import { createPortal } from 'react-dom'
+import { Send, MessageCircle, Sparkles, Coffee, Brain, X, Trash2, Power } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ChatMessage } from '@/components/chat-message'
-import type { TeacherMessage } from '@/lib/sample-data'
+import type { TeacherMessage, TutorMemoryProfile } from '@/lib/sample-data'
 
 export type TeacherQuickMode = 'topic' | 'daily' | 'free'
 
@@ -12,22 +13,61 @@ interface TeacherPageProps {
   messages: TeacherMessage[]
   activeMode?: TeacherQuickMode | null
   isSending?: boolean
+  memoryProfile?: TutorMemoryProfile
   onSendMessage?: (text: string, mode?: TeacherQuickMode | null) => void
   onQuickAction?: (action: TeacherQuickMode) => void
   onAddSentence?: (text: string, note: string) => void
+  onToggleMemory?: (enabled: boolean) => void
+  onClearMemory?: () => void
 }
+
+const memorySectionLabels: Array<[keyof TutorMemoryProfile, string]> = [
+  ['preferences', '偏好'],
+  ['interests', '爱好'],
+  ['habits', '习惯'],
+  ['learningProfile', '学习'],
+  ['communicationStyle', '风格'],
+  ['correctionPatterns', '常错'],
+  ['personalFacts', '信息'],
+  ['avoid', '避开']
+]
 
 export function TeacherPage({
   messages,
   activeMode = null,
   isSending = false,
+  memoryProfile,
   onSendMessage,
   onQuickAction,
-  onAddSentence
+  onAddSentence,
+  onToggleMemory,
+  onClearMemory
 }: TeacherPageProps) {
   const [inputValue, setInputValue] = useState('')
+  const [showMemory, setShowMemory] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const memory = memoryProfile || {
+    enabled: true,
+    summary: '',
+    preferences: [],
+    interests: [],
+    habits: [],
+    learningProfile: [],
+    communicationStyle: [],
+    correctionPatterns: [],
+    personalFacts: [],
+    avoid: [],
+    updatedAt: 0
+  }
+  const memorySections = memorySectionLabels
+    .map(([key, label]) => ({
+      key,
+      label,
+      items: Array.isArray(memory[key]) ? memory[key] as string[] : []
+    }))
+    .filter((section) => section.items.length > 0)
+  const hasMemory = Boolean(memory.summary || memorySections.length)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -136,6 +176,15 @@ export function TeacherPage({
             <Coffee className="w-[18px] h-[18px]" />
             闲聊模式
           </button>
+          <button
+            id="memoryButton"
+            type="button"
+            onClick={() => setShowMemory(true)}
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-semibold tracking-wide whitespace-nowrap transition-premium glass-button text-white/55 hover:text-white/85"
+          >
+            <Brain className="w-[18px] h-[18px]" />
+            记忆
+          </button>
         </div>
       </div>
 
@@ -173,6 +222,87 @@ export function TeacherPage({
           </button>
         </div>
       </form>
+
+      {showMemory && typeof document !== 'undefined' ? createPortal((
+        <div className="fixed inset-0 z-[120] flex items-end justify-center bg-black/70 backdrop-blur-md px-4 pb-4 pt-20 animate-fade-in">
+          <button
+            className="absolute inset-0 cursor-default"
+            aria-label="关闭记忆"
+            onClick={() => setShowMemory(false)}
+          />
+          <div className="relative w-full max-w-[520px] max-h-[82dvh] overflow-y-auto glass-sheet rounded-[2rem] p-6 animate-scale-in">
+            <div className="top-highlight" />
+            <div className="flex items-start justify-between gap-4 mb-5">
+              <div>
+                <p className="text-[10px] text-[oklch(0.70_0.15_280)] font-semibold tracking-[0.18em] uppercase mb-1">
+                  Memory
+                </p>
+                <h2 className="text-xl font-semibold text-white/95">长期记忆</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowMemory(false)}
+                className="w-10 h-10 rounded-2xl glass-button flex items-center justify-center text-white/55 hover:text-white transition-premium"
+                aria-label="关闭"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3 mb-5">
+              <button
+                type="button"
+                onClick={() => onToggleMemory?.(!memory.enabled)}
+                className={cn(
+                  "flex items-center gap-2 h-11 px-4 rounded-2xl text-sm font-semibold transition-premium",
+                  memory.enabled ? "glass-button-primary" : "glass-button text-white/55"
+                )}
+              >
+                <Power className="w-4 h-4" />
+                {memory.enabled ? '已开启' : '已关闭'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.confirm('清空全部长期记忆？')) onClearMemory?.()
+                }}
+                className="flex items-center gap-2 h-11 px-4 rounded-2xl text-sm font-semibold transition-premium glass-button text-white/55 hover:text-[oklch(0.70_0.22_25)]"
+              >
+                <Trash2 className="w-4 h-4" />
+                清空
+              </button>
+            </div>
+
+            {hasMemory ? (
+              <div className="space-y-4">
+                {memory.summary && (
+                  <div className="rounded-2xl border border-white/[0.06] bg-white/[0.035] px-4 py-4">
+                    <p className="text-sm text-white/72 leading-relaxed whitespace-pre-wrap">{memory.summary}</p>
+                  </div>
+                )}
+                {memorySections.map((section) => (
+                  <div key={section.key as string} className="rounded-2xl border border-white/[0.06] bg-white/[0.025] px-4 py-4">
+                    <p className="text-[11px] text-[oklch(0.70_0.15_280)] font-semibold tracking-[0.12em] uppercase mb-3">
+                      {section.label}
+                    </p>
+                    <div className="space-y-2">
+                      {section.items.map((item, index) => (
+                        <p key={`${section.key as string}-${index}`} className="text-sm text-white/70 leading-relaxed">
+                          {item}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.035] px-4 py-8 text-center">
+                <p className="text-sm text-white/45">还没有记忆</p>
+              </div>
+            )}
+          </div>
+        </div>
+      ), document.body) : null}
     </section>
   )
 }
