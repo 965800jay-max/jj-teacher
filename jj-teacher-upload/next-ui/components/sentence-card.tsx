@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Play, Trash2, Sparkles, Check, BookOpen, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -15,6 +15,7 @@ interface SentenceCardProps {
   speechRate?: number
   onSpeak?: () => void
   onAdd?: () => void
+  onUpdateNote?: (note: string) => void
   onDelete?: () => void
   onToggleLearned?: () => void
   onAiExplain?: () => void
@@ -27,6 +28,7 @@ export function SentenceCard({
   aiExplanation,
   speechRate = 0.9,
   onSpeak,
+  onUpdateNote,
   onDelete,
   onToggleLearned,
   onAiExplain
@@ -35,6 +37,8 @@ export function SentenceCard({
   const [isDeleting, setIsDeleting] = useState(false)
   const [isAiClicked, setIsAiClicked] = useState(false)
   const [isPlayClicked, setIsPlayClicked] = useState(false)
+  const lastNoteTapAtRef = useRef(0)
+  const notePromptedAtRef = useRef(0)
 
   const handleSpeak = () => {
     setIsPlayClicked(true)
@@ -48,6 +52,26 @@ export function SentenceCard({
     setTimeout(() => setIsAiClicked(false), 300)
     setShowAiExplain(true)
     if (!aiExplanation) onAiExplain?.()
+  }
+
+  const openNoteInput = () => {
+    if (!onUpdateNote || typeof window === 'undefined') return
+    const now = Date.now()
+    if (now - notePromptedAtRef.current < 600) return
+    notePromptedAtRef.current = now
+    const nextNote = window.prompt('请输入中文意思', note || '')
+    if (nextNote === null) return
+    onUpdateNote(nextNote.trim())
+  }
+
+  const handleNotePointerUp = () => {
+    const now = Date.now()
+    if (now - lastNoteTapAtRef.current < 450) {
+      lastNoteTapAtRef.current = 0
+      openNoteInput()
+      return
+    }
+    lastNoteTapAtRef.current = now
   }
 
   return (
@@ -68,7 +92,11 @@ export function SentenceCard({
         </div>
 
         {/* 中文意思 */}
-        <p className="text-sm text-white/50 mb-6 leading-relaxed">
+        <p
+          className="text-sm text-white/50 mb-6 leading-relaxed"
+          onDoubleClick={openNoteInput}
+          onPointerUp={handleNotePointerUp}
+        >
           {note || <span className="text-[oklch(0.70_0.15_280_/_0.7)] italic">点击添加中文意思</span>}
         </p>
 
