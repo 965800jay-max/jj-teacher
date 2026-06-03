@@ -22,7 +22,7 @@ import {
   type TeacherMessage,
   type TutorMemoryProfile
 } from '@/lib/sample-data'
-import { getVocabBook, removeVocabBookItem, VOCAB_BOOK_EVENT, type VocabBookItem } from '@/lib/vocab-book'
+import { ADD_WORD_EXAMPLE_EVENT, getVocabBook, removeVocabBookItem, VOCAB_BOOK_EVENT, type VocabBookItem } from '@/lib/vocab-book'
 
 type ActiveTab = 'sentences' | 'scenes' | 'teacher'
 type HomeView = 'learning' | 'learned' | 'vocab'
@@ -51,8 +51,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 67
-const CURRENT_VERSION_NAME = 'free67'
+const CURRENT_VERSION_CODE = 68
+const CURRENT_VERSION_NAME = 'free68'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -639,7 +639,7 @@ export default function ZhiyuApp() {
   const filteredVocabBook = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
     if (!query) return vocabBook
-    return vocabBook.filter((item) => [item.word, item.phonetic, item.meaning, item.example].join(' ').toLowerCase().includes(query))
+    return vocabBook.filter((item) => [item.word, item.phonetic, item.meaning, item.example, item.exampleZh].join(' ').toLowerCase().includes(query))
   }, [vocabBook, searchQuery])
 
   const handleAddSentence = useCallback((text?: string, note?: string, category?: string) => {
@@ -659,6 +659,18 @@ export default function ZhiyuApp() {
     setSentences((current) => [...newItems, ...current])
     setHomeView('learning')
   }, [])
+
+  useEffect(() => {
+    const handleAddWordExample = (event: Event) => {
+      const detail = (event as CustomEvent<{ english?: unknown; chinese?: unknown }>).detail || {}
+      const english = String(detail.english || '').trim()
+      const chinese = String(detail.chinese || '').trim()
+      if (!english) return
+      handleAddSentence(english, chinese)
+    }
+    window.addEventListener(ADD_WORD_EXAMPLE_EVENT, handleAddWordExample)
+    return () => window.removeEventListener(ADD_WORD_EXAMPLE_EVENT, handleAddWordExample)
+  }, [handleAddSentence])
 
   const resetAddSheet = useCallback(() => {
     setManualEnglish('')
@@ -1210,6 +1222,7 @@ export default function ZhiyuApp() {
                         {item.example && (
                           <div className="rounded-2xl border border-white/[0.06] bg-white/[0.035] px-4 py-3">
                             <p className="text-sm text-white/72 leading-relaxed">{item.example}</p>
+                            {item.exampleZh && <p className="mt-2 text-xs text-white/42 leading-relaxed">{item.exampleZh}</p>}
                           </div>
                         )}
                       </div>
@@ -1423,7 +1436,7 @@ export default function ZhiyuApp() {
                   )}
                 >
                   <WandSparkles className="w-4 h-4" />
-                  {isGeneratingSentence ? '正在生成...' : generatedSentence ? '重新生成' : '生成自然英文'}
+                  {isGeneratingSentence ? '正在生成...' : generatedSentence ? '重新生成' : '生成英语'}
                 </button>
 
                 {generationError && (

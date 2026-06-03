@@ -1,6 +1,6 @@
 {
-  "versionCode": 67,
-  "versionName": "free67",
-  "apkUrl": "https://files.catbox.moe/j04n7v.apk",
-  "notes": "free67: 句读分类只显示当前列表里真实存在的分类，避免空分类。"
+  "versionCode": 68,
+  "versionName": "free68",
+  "apkUrl": "https://files.catbox.moe/6xbifx.apk",
+  "notes": "free68: 中文生成英文按钮改为生成英语；单词例句增加中文意思、朗读和加到句读小按钮。"
 }

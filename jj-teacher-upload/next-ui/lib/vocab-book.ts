@@ -3,6 +3,7 @@ export interface WordLookup {
   phonetic: string
   meaning: string
   example: string
+  exampleZh: string
 }
 
 export interface VocabBookItem extends WordLookup {
@@ -12,6 +13,7 @@ export interface VocabBookItem extends WordLookup {
 export const WORD_CACHE_KEY = 'sentence-reader-word-cache'
 export const VOCAB_BOOK_KEY = 'sentence-reader-vocab-book'
 export const VOCAB_BOOK_EVENT = 'sentence-reader-vocab-book-updated'
+export const ADD_WORD_EXAMPLE_EVENT = 'sentence-reader-add-word-example'
 
 function hasStorage() {
   return typeof window !== 'undefined' && Boolean(window.localStorage)
@@ -47,7 +49,8 @@ function normalizeLookup(value: Partial<WordLookup> & Record<string, unknown>): 
     word,
     phonetic: String(value.phonetic || '').trim(),
     meaning: String(value.meaning || '').trim(),
-    example: String(value.example || '').trim()
+    example: String(value.example || '').trim(),
+    exampleZh: String(value.exampleZh || '').trim()
   }
 }
 

@@ -1362,10 +1362,11 @@ async function handleWordLookup(request, response) {
   const prompt = [
     "Look up this English word for a Chinese language learner.",
     "Return only compact JSON, no Markdown.",
-    'Required shape: {"phonetic":"","meaning":"","example":""}',
+    'Required shape: {"phonetic":"","meaning":"","example":"","exampleZh":""}',
     "phonetic: IPA without slashes if you know it, otherwise empty string.",
     "meaning: concise Simplified Chinese meanings, 1 line, include common spoken usage if helpful.",
     "example: one short natural English sentence using the word.",
+    "exampleZh: concise Simplified Chinese meaning of the example sentence.",
     `word: ${word}`,
   ].join("\n");
 
@@ -1374,13 +1375,14 @@ async function handleWordLookup(request, response) {
   const phonetic = String(data.phonetic || "").replace(/^\/|\/$/g, "").trim().slice(0, 80);
   const meaning = String(data.meaning || "").trim().slice(0, 160);
   const example = String(data.example || "").trim().slice(0, 180);
+  const exampleZh = String(data.exampleZh || "").trim().slice(0, 180);
 
   if (!meaning) {
     sendJson(response, 502, { error: "No meaning returned" });
     return;
   }
 
-  sendJson(response, 200, { word, phonetic, meaning, example });
+  sendJson(response, 200, { word, phonetic, meaning, example, exampleZh });
 }
 
 function finalizeTeacherReply(reply, mode, rawMessage = "") {
@@ -1505,7 +1507,7 @@ function buildAiInstructions(mode = "chat", targetLanguage = "english") {
     return "You convert app learning data between languages. Return valid JSON only, with no Markdown or explanation.";
   }
   if (mode === "word-lookup") {
-    return "You are a compact English-to-Simplified-Chinese dictionary. Return JSON only with phonetic, Chinese meaning, and one short natural example.";
+    return "You are a compact English-to-Simplified-Chinese dictionary. Return JSON only with phonetic, Chinese meaning, one short natural example, and the example's Simplified Chinese meaning.";
   }
   if (mode === "generate-sentence") {
     return `Return compact JSON only. Generate one natural spoken ${language.label} sentence from the Chinese meaning, with a short Chinese category. No Markdown, no extra text.`;

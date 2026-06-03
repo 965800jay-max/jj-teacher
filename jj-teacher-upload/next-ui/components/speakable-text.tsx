@@ -6,6 +6,7 @@ import { Plus, Volume2, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { speakEnglish } from '@/lib/speech'
 import {
+  ADD_WORD_EXAMPLE_EVENT,
   addVocabBookItem,
   cacheWord,
   getCachedWord,
@@ -44,15 +45,17 @@ export function SpeakableText({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [isSaved, setIsSaved] = useState(false)
+  const [isExampleAdded, setIsExampleAdded] = useState(false)
 
   useEffect(() => {
     if (!activeWord) return
     const cached = getCachedWord(activeWord)
     setLookup(cached)
     setIsSaved(hasVocabBookItem(activeWord))
+    setIsExampleAdded(false)
     setError('')
 
-    if (cached) return
+    if (cached?.exampleZh) return
 
     let cancelled = false
     setIsLoading(true)
@@ -69,7 +72,8 @@ export function SpeakableText({
           word: String(data.word || activeWord).trim().toLowerCase(),
           phonetic: String(data.phonetic || '').trim(),
           meaning: String(data.meaning || '').trim(),
-          example: String(data.example || '').trim()
+          example: String(data.example || '').trim(),
+          exampleZh: String(data.exampleZh || '').trim()
         }
         cacheWord(nextLookup)
         setLookup(nextLookup)
@@ -91,6 +95,19 @@ export function SpeakableText({
     setLookup(null)
     setError('')
     setIsLoading(false)
+  }
+
+  const getExampleText = (item: WordLookup) => item.example || `I want to practice the word ${item.word}.`
+  const getExampleZh = (item: WordLookup) => item.exampleZh || `我想练习 ${item.word} 这个词。`
+
+  const addExampleToSentences = (item: WordLookup) => {
+    const english = getExampleText(item)
+    const chinese = getExampleZh(item)
+    if (typeof window === 'undefined') return
+    window.dispatchEvent(new CustomEvent(ADD_WORD_EXAMPLE_EVENT, {
+      detail: { english, chinese }
+    }))
+    setIsExampleAdded(true)
   }
 
   return (
@@ -162,8 +179,32 @@ export function SpeakableText({
                   <p className="text-[15px] text-white/80 leading-relaxed">{lookup.meaning || '暂无释义'}</p>
                 </div>
                 <div className="rounded-2xl border border-white/[0.06] bg-white/[0.035] px-4 py-3">
-                  <p className="text-[11px] text-white/35 font-semibold tracking-[0.14em] uppercase mb-2">Example</p>
-                  <p className="text-[15px] text-white/82 leading-relaxed">{lookup.example || `I want to practice the word ${lookup.word}.`}</p>
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <p className="text-[11px] text-white/35 font-semibold tracking-[0.14em] uppercase">Example</p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => speakEnglish(getExampleText(lookup), { mode: 'sentence', rate })}
+                        className="w-8 h-8 rounded-xl glass-button flex items-center justify-center text-white/60 hover:text-white transition-premium"
+                        aria-label="朗读例句"
+                      >
+                        <Volume2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => addExampleToSentences(lookup)}
+                        className={cn(
+                          "w-8 h-8 rounded-xl flex items-center justify-center transition-premium",
+                          isExampleAdded ? "glass-button text-white/40" : "glass-button-primary"
+                        )}
+                        aria-label="添加例句到句读"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-[15px] text-white/82 leading-relaxed">{getExampleText(lookup)}</p>
+                  <p className="mt-2 text-sm text-white/45 leading-relaxed">{getExampleZh(lookup)}</p>
                 </div>
                 <div className="grid grid-cols-2 gap-3 pt-1">
                   <button
