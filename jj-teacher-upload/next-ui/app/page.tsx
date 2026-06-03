@@ -51,8 +51,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 68
-const CURRENT_VERSION_NAME = 'free68'
+const CURRENT_VERSION_CODE = 69
+const CURRENT_VERSION_NAME = 'free69'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -737,6 +737,21 @@ export default function ZhiyuApp() {
     ))
   }, [])
 
+  const handleUpdateSentenceText = useCallback((id: string, text: string) => {
+    const cleanText = text.replace(/\s+/g, ' ').trim()
+    if (!cleanText) return
+    setSentences((current) => current.map((sentence) =>
+      sentence.id === id
+        ? {
+            ...sentence,
+            text: cleanText,
+            category: normalizeCategoryName(inferSentenceCategory(cleanText, sentence.note)),
+            aiExplanation: cleanText === sentence.text ? sentence.aiExplanation : ''
+          }
+        : sentence
+    ))
+  }, [])
+
   const handleUpdateSentenceNote = useCallback((id: string, note: string) => {
     setSentences((current) => current.map((sentence) =>
       sentence.id === id
@@ -1256,6 +1271,7 @@ export default function ZhiyuApp() {
                         aiExplanation={sentence.aiExplanation}
                         speechRate={speechRate}
                         onDelete={() => handleDeleteSentence(sentence.id)}
+                        onUpdateText={(text) => handleUpdateSentenceText(sentence.id, text)}
                         onUpdateNote={(note) => handleUpdateSentenceNote(sentence.id, note)}
                         onToggleLearned={() => handleToggleLearned(sentence.id)}
                         onAiExplain={() => handleAiExplain(sentence.id)}

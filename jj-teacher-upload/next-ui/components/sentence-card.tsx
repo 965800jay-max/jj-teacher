@@ -15,6 +15,7 @@ interface SentenceCardProps {
   speechRate?: number
   onSpeak?: () => void
   onAdd?: () => void
+  onUpdateText?: (text: string) => void
   onUpdateNote?: (note: string) => void
   onDelete?: () => void
   onToggleLearned?: () => void
@@ -28,6 +29,7 @@ export function SentenceCard({
   aiExplanation,
   speechRate = 0.9,
   onSpeak,
+  onUpdateText,
   onUpdateNote,
   onDelete,
   onToggleLearned,
@@ -37,14 +39,27 @@ export function SentenceCard({
   const [isDeleting, setIsDeleting] = useState(false)
   const [isAiClicked, setIsAiClicked] = useState(false)
   const [isPlayClicked, setIsPlayClicked] = useState(false)
+  const [isEditingText, setIsEditingText] = useState(false)
+  const [draftText, setDraftText] = useState(text)
   const [isEditingNote, setIsEditingNote] = useState(false)
   const [draftNote, setDraftNote] = useState(note)
   const lastNoteTapAtRef = useRef(0)
+  const textInputRef = useRef<HTMLTextAreaElement>(null)
   const noteInputRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    if (!isEditingText) setDraftText(text)
+  }, [isEditingText, text])
 
   useEffect(() => {
     if (!isEditingNote) setDraftNote(note)
   }, [isEditingNote, note])
+
+  useEffect(() => {
+    if (!isEditingText) return
+    textInputRef.current?.focus()
+    textInputRef.current?.setSelectionRange(draftText.length, draftText.length)
+  }, [isEditingText])
 
   useEffect(() => {
     if (!isEditingNote) return
@@ -64,6 +79,19 @@ export function SentenceCard({
     setTimeout(() => setIsAiClicked(false), 300)
     setShowAiExplain(true)
     if (!aiExplanation) onAiExplain?.()
+  }
+
+  const openTextInput = () => {
+    if (!onUpdateText) return
+    setDraftText(text)
+    setIsEditingText(true)
+  }
+
+  const saveTextInput = () => {
+    const cleanText = draftText.replace(/\s+/g, ' ').trim()
+    if (cleanText) onUpdateText?.(cleanText)
+    setDraftText(cleanText || text)
+    setIsEditingText(false)
   }
 
   const openNoteInput = () => {
@@ -99,10 +127,35 @@ export function SentenceCard({
       <div className="top-highlight" />
       
       <div className="relative p-6">
-        {/* 英文句子 - 可点击单词 */}
-        <div className="text-lg text-white/95 leading-relaxed mb-4 font-medium">
-          <SpeakableText text={text} rate={speechRate} />
-        </div>
+        {/* 英文句子 - 可点击单词，双击可修改 */}
+        {isEditingText ? (
+          <textarea
+            ref={textInputRef}
+            value={draftText}
+            onChange={(event) => setDraftText(event.target.value)}
+            onBlur={saveTextInput}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault()
+                saveTextInput()
+              }
+              if (event.key === 'Escape') {
+                event.preventDefault()
+                setDraftText(text)
+                setIsEditingText(false)
+              }
+            }}
+            rows={2}
+            className="mb-4 block w-full min-h-[3.25rem] resize-none bg-transparent border-0 p-0 text-lg text-white/95 placeholder:text-white/35 outline-none leading-relaxed font-medium"
+          />
+        ) : (
+          <div
+            className="text-lg text-white/95 leading-relaxed mb-4 font-medium"
+            onDoubleClick={openTextInput}
+          >
+            <SpeakableText text={text} rate={speechRate} onDoubleTap={openTextInput} />
+          </div>
+        )}
 
         {/* 中文意思 */}
         {isEditingNote ? (

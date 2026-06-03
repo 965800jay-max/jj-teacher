@@ -1,6 +1,6 @@
 {
-  "versionCode": 68,
-  "versionName": "free68",
-  "apkUrl": "https://files.catbox.moe/6xbifx.apk",
-  "notes": "free68: 中文生成英文按钮改为生成英语；单词例句增加中文意思、朗读和加到句读小按钮。"
+  "versionCode": 69,
+  "versionName": "free69",
+  "apkUrl": "https://files.catbox.moe/7tb2wy.apk",
+  "notes": "free69: 英文句子支持双击原地修改；修改后自动重新分类并清空旧 AI 解答。"
 }

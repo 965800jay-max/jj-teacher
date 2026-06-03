@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Plus, Volume2, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -20,6 +20,7 @@ interface SpeakableTextProps {
   className?: string
   wordClassName?: string
   punctuationClassName?: string
+  onDoubleTap?: () => void
 }
 
 const TOKEN_PATTERN = /[A-Za-z]+(?:['’][A-Za-z]+)?|\d+(?:[.,]\d+)?|[^\w\s]+|\s+/g
@@ -38,7 +39,8 @@ export function SpeakableText({
   rate = 1,
   className,
   wordClassName,
-  punctuationClassName
+  punctuationClassName,
+  onDoubleTap
 }: SpeakableTextProps) {
   const [activeWord, setActiveWord] = useState('')
   const [lookup, setLookup] = useState<WordLookup | null>(null)
@@ -46,6 +48,14 @@ export function SpeakableText({
   const [error, setError] = useState('')
   const [isSaved, setIsSaved] = useState(false)
   const [isExampleAdded, setIsExampleAdded] = useState(false)
+  const singleTapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const lastTapAtRef = useRef(0)
+
+  useEffect(() => {
+    return () => {
+      if (singleTapTimerRef.current) clearTimeout(singleTapTimerRef.current)
+    }
+  }, [])
 
   useEffect(() => {
     if (!activeWord) return
@@ -110,6 +120,33 @@ export function SpeakableText({
     setIsExampleAdded(true)
   }
 
+  const handleWordTap = (word: string) => {
+    if (!onDoubleTap) {
+      speakEnglish(word, { mode: 'word', rate })
+      setActiveWord(word.toLowerCase())
+      return
+    }
+
+    const now = Date.now()
+    if (now - lastTapAtRef.current < 360) {
+      lastTapAtRef.current = 0
+      if (singleTapTimerRef.current) {
+        clearTimeout(singleTapTimerRef.current)
+        singleTapTimerRef.current = null
+      }
+      onDoubleTap()
+      return
+    }
+
+    lastTapAtRef.current = now
+    if (singleTapTimerRef.current) clearTimeout(singleTapTimerRef.current)
+    singleTapTimerRef.current = setTimeout(() => {
+      speakEnglish(word, { mode: 'word', rate })
+      setActiveWord(word.toLowerCase())
+      singleTapTimerRef.current = null
+    }, 230)
+  }
+
   return (
     <>
       <span className={cn('inline', className)}>
@@ -133,8 +170,7 @@ export function SpeakableText({
               onClick={(event) => {
                 event.stopPropagation()
                 const word = clean.replace(/’/g, "'")
-                speakEnglish(word, { mode: 'word', rate })
-                setActiveWord(word.toLowerCase())
+                handleWordTap(word)
               }}
               className={cn(
                 'inline rounded-lg px-1 -mx-1 text-left transition-premium hover:bg-[oklch(0.70_0.15_280_/_0.1)] hover:text-[oklch(0.80_0.15_280)]',
