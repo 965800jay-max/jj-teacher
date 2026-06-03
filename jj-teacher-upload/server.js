@@ -369,6 +369,7 @@ function sanitizeSentence(item) {
   return {
     text,
     note: limitText(item.note, 500),
+    category: normalizeGeneratedCategory(limitText(item.category, 40), text, limitText(item.note, 500)),
     learned: Boolean(item.learned),
     learnedAt: typeof item.learnedAt === "number" ? item.learnedAt : null,
     aiExplanation: limitText(item.aiExplanation, 1200),
@@ -783,6 +784,9 @@ async function handleSpeech(request, response) {
       "Content-Type": "audio/mpeg",
       "Cache-Control": "private, max-age=3600",
       "X-Voice-Source": "online",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     });
     response.end(speechCache.get(cacheKey));
     return;
@@ -794,6 +798,9 @@ async function handleSpeech(request, response) {
     "Content-Type": "audio/mpeg",
     "Cache-Control": "private, max-age=3600",
     "X-Voice-Source": "online",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   });
   response.end(audio);
 }
@@ -906,6 +913,32 @@ async function handleAiTeacher(request, response) {
     const sourceLanguage = normalizeTargetLanguage(payload.sourceLanguage);
     const reply = await askAiTeacher(buildConvertLanguagePrompt(payload, sourceLanguage, targetLanguage), mode, targetLanguage);
     sendJson(response, 200, { reply });
+    return;
+  }
+
+  if (mode === "generate-sentence") {
+    const chinese = String(payload.chinese || payload.message || "").trim();
+    if (!chinese) {
+      sendJson(response, 400, { error: "Chinese meaning is required" });
+      return;
+    }
+
+    const raw = await askAiTeacher(buildGenerateSentencePrompt(chinese, targetLanguage), mode, targetLanguage);
+    const data = extractJsonObject(raw) || {};
+    const english = String(data.english || "").replace(/\s+/g, " ").trim();
+    const finalChinese = String(data.chinese || chinese).trim() || chinese;
+    const category = normalizeGeneratedCategory(String(data.category || ""), english, finalChinese);
+
+    if (!english) {
+      sendJson(response, 502, { error: "No sentence returned", message: "生成失败，请重试。" });
+      return;
+    }
+
+    sendJson(response, 200, {
+      english: english.slice(0, 240),
+      chinese: finalChinese.slice(0, 240),
+      category,
+    });
     return;
   }
 
@@ -1044,9 +1077,40 @@ function buildConvertLanguagePrompt(payload, sourceLanguage = "english", targetL
     "6. 不要新增无关内容，不要删除用户消息，不要改 role。",
     "7. 只返回 JSON，不要 Markdown，不要解释。",
     "JSON 格式必须是：",
-    '{"sentences":[{"text":"","note":"","learned":false,"learnedAt":null,"aiExplanation":""}],"teacherMessages":[{"role":"assistant","text":""}]}',
+    '{"sentences":[{"text":"","note":"","category":"","learned":false,"learnedAt":null,"aiExplanation":""}],"teacherMessages":[{"role":"assistant","text":""}]}',
     `旧数据：${JSON.stringify({ sentences, teacherMessages })}`,
   ].join("\n");
+}
+
+function buildGenerateSentencePrompt(chinese, targetLanguage = "english") {
+  const language = getTargetLanguageInfo(targetLanguage);
+  return [
+    `Generate one natural ${language.label} sentence for a Chinese language learner.`,
+    "Return compact JSON only. No Markdown. No explanation.",
+    'Required shape: {"english":"","chinese":"","category":""}',
+    "The English must sound natural, spoken, local, and useful in real life.",
+    "Avoid textbook wording, stiff translation tone, and overly formal English.",
+    "Good contexts: daily communication, hair stylist and client chats, Instagram message replies, gym, dating, casual plans.",
+    "Category must be short Simplified Chinese. Prefer one of: 理发, 客户沟通, 日常, 健身, 约会, 其他.",
+    "Only create a new category if it is clearly useful and no preferred category fits. Keep it under 6 Chinese characters.",
+    `Chinese meaning: ${chinese}`,
+  ].join("\n");
+}
+
+function normalizeGeneratedCategory(category, english = "", chinese = "") {
+  const raw = String(category || "").replace(/\s+/g, "").trim();
+  const text = `${raw} ${english} ${chinese}`.toLowerCase();
+
+  if (/(理发|发型|剪发|染发|烫发|hair|salon|barber|bang|fade|trim|layer|perm)/iu.test(text)) return "理发";
+  if (/(客户|预约|沟通|客人|client|customer|appointment|consultation|book|schedule|deposit|reschedule)/iu.test(text)) return "客户沟通";
+  if (/(健身|训练|肌肉|有氧|workout|gym|fitness|protein|muscle|cardio|sore|rep|set)/iu.test(text)) return "健身";
+  if (/(约会|情侣|喜欢|暧昧|dating|date|crush|flirt|relationship|cute|miss you)/iu.test(text)) return "约会";
+  if (/(日常|聊天|朋友|生活|吃饭|周末|daily|casual|friend|food|coffee|weekend|plan|hang out)/iu.test(text)) return "日常";
+
+  const allowed = new Set(["理发", "客户沟通", "日常", "健身", "约会", "其他"]);
+  if (allowed.has(raw)) return raw;
+  if (/^[\u4e00-\u9fff]{2,6}$/u.test(raw)) return raw;
+  return "其他";
 }
 
 function formatMemoryForPrompt(memoryProfile) {
@@ -1298,9 +1362,10 @@ async function handleWordLookup(request, response) {
   const prompt = [
     "Look up this English word for a Chinese language learner.",
     "Return only compact JSON, no Markdown.",
-    'Required shape: {"phonetic":"","meaning":""}',
+    'Required shape: {"phonetic":"","meaning":"","example":""}',
     "phonetic: IPA without slashes if you know it, otherwise empty string.",
     "meaning: concise Simplified Chinese meanings, 1 line, include common spoken usage if helpful.",
+    "example: one short natural English sentence using the word.",
     `word: ${word}`,
   ].join("\n");
 
@@ -1308,13 +1373,14 @@ async function handleWordLookup(request, response) {
   const data = extractJsonObject(raw) || {};
   const phonetic = String(data.phonetic || "").replace(/^\/|\/$/g, "").trim().slice(0, 80);
   const meaning = String(data.meaning || "").trim().slice(0, 160);
+  const example = String(data.example || "").trim().slice(0, 180);
 
   if (!meaning) {
     sendJson(response, 502, { error: "No meaning returned" });
     return;
   }
 
-  sendJson(response, 200, { word, phonetic, meaning });
+  sendJson(response, 200, { word, phonetic, meaning, example });
 }
 
 function finalizeTeacherReply(reply, mode, rawMessage = "") {
@@ -1439,7 +1505,10 @@ function buildAiInstructions(mode = "chat", targetLanguage = "english") {
     return "You convert app learning data between languages. Return valid JSON only, with no Markdown or explanation.";
   }
   if (mode === "word-lookup") {
-    return "You are a compact English-to-Simplified-Chinese dictionary. Return JSON only.";
+    return "You are a compact English-to-Simplified-Chinese dictionary. Return JSON only with phonetic, Chinese meaning, and one short natural example.";
+  }
+  if (mode === "generate-sentence") {
+    return `Return compact JSON only. Generate one natural spoken ${language.label} sentence from the Chinese meaning, with a short Chinese category. No Markdown, no extra text.`;
   }
   if (mode === "memory") {
     return "You update long-term user memory for a language learning app. Return valid compact JSON only.";

@@ -1,8 +1,9 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Plus, User, Users, BookOpen, Sparkles, BookText, Layers, MessageCircle } from 'lucide-react'
+import { Plus, User, Users, BookOpen, Sparkles, BookText, Layers, MessageCircle, Search, X, WandSparkles, Volume2, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { speakEnglish } from '@/lib/speech'
 import { StarryBackground } from '@/components/starry-background'
 import { BottomNav } from '@/components/bottom-nav'
 import { SentenceCard } from '@/components/sentence-card'
@@ -21,9 +22,11 @@ import {
   type TeacherMessage,
   type TutorMemoryProfile
 } from '@/lib/sample-data'
+import { getVocabBook, removeVocabBookItem, VOCAB_BOOK_EVENT, type VocabBookItem } from '@/lib/vocab-book'
 
 type ActiveTab = 'sentences' | 'scenes' | 'teacher'
-type SentenceTab = 'learning' | 'learned'
+type HomeView = 'learning' | 'learned' | 'vocab'
+type AddMode = 'manual' | 'ai'
 
 interface AppUser {
   id?: string
@@ -48,8 +51,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 65
-const CURRENT_VERSION_NAME = 'free65'
+const CURRENT_VERSION_CODE = 66
+const CURRENT_VERSION_NAME = 'free66'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -58,7 +61,6 @@ const TEACHER_CHAT_KEY = 'sentence-reader-ai-chat'
 const SPEED_KEY = 'sentence-reader-speed'
 const VIEW_KEY = 'sentence-reader-view'
 const APP_PAGE_KEY = 'sentence-reader-page'
-const DRAFT_KEY = 'sentence-reader-draft'
 const AUTH_TOKEN_KEY = 'sentence-reader-auth-token'
 const AUTH_USER_KEY = 'sentence-reader-auth-user'
 const AUTH_AVATAR_KEY = 'sentence-reader-auth-avatar'
@@ -98,6 +100,32 @@ const DAILY_LINES = [
   ['我需要一个不用一直盯着屏幕的爱好。', "I need a hobby that doesn't involve staring at a screen."],
   ['我在努力少买网上那些莫名其妙的小东西。', "I'm trying to stop buying random stuff online."]
 ] as const
+
+const CATEGORY_ALL = '全部'
+const BASE_CATEGORIES = ['理发', '客户沟通', '日常', '健身', '约会', '其他'] as const
+
+function normalizeCategoryName(category?: string) {
+  const clean = String(category || '').replace(/\s+/g, '').trim()
+  if (!clean) return '其他'
+  const lower = clean.toLowerCase()
+  if (/理发|发型|剪发|染发|烫发|hair|salon|barber/.test(lower)) return '理发'
+  if (/客户|客人|预约|沟通|client|customer|appointment|consultation/.test(lower)) return '客户沟通'
+  if (/健身|训练|肌肉|有氧|gym|workout|fitness/.test(lower)) return '健身'
+  if (/约会|情侣|暧昧|dating|date|crush|flirt|relationship/.test(lower)) return '约会'
+  if (/日常|聊天|朋友|生活|daily|casual|friend/.test(lower)) return '日常'
+  if (BASE_CATEGORIES.includes(clean as typeof BASE_CATEGORIES[number])) return clean
+  return /^[\u4e00-\u9fff]{2,6}$/.test(clean) ? clean : '其他'
+}
+
+function inferSentenceCategory(text = '', note = '') {
+  const value = `${text} ${note}`.toLowerCase()
+  if (/(hair|salon|barber|trim|fade|taper|bangs|layer|perm|color|理发|发型|剪发|染发|烫发)/.test(value)) return '理发'
+  if (/(client|customer|appointment|consultation|book|schedule|reschedule|deposit|客户|客人|预约|咨询|沟通)/.test(value)) return '客户沟通'
+  if (/(gym|workout|fitness|protein|muscle|cardio|sore|rep|set|健身|训练|肌肉|有氧)/.test(value)) return '健身'
+  if (/(date|dating|crush|flirt|relationship|cute|miss you|约会|情侣|暧昧|喜欢你|想你)/.test(value)) return '约会'
+  if (/(coffee|food|weekend|friend|hang out|plan|daily|casual|吃饭|周末|朋友|日常|聊天|生活)/.test(value)) return '日常'
+  return '其他'
+}
 
 function hasStorage() {
   return typeof window !== 'undefined' && Boolean(window.localStorage)
@@ -141,6 +169,7 @@ function normalizeSentence(item: Partial<SavedSentence> & Record<string, unknown
     id: String(item.id || makeId(`sentence-${index}`)),
     text,
     note: String(item.note || ''),
+    category: normalizeCategoryName(String(item.category || '') || inferSentenceCategory(text, String(item.note || ''))),
     learned: Boolean(item.learned),
     learnedAt: typeof item.learnedAt === 'number' ? item.learnedAt : null,
     aiExplanation: String(item.aiExplanation || '')
@@ -230,13 +259,6 @@ function memoryHasContent(memory: TutorMemoryProfile) {
       memory.personalFacts.length ||
       memory.avoid.length
   )
-}
-
-function splitSentences(text: string) {
-  return text
-    .split(/\n+|(?<=[.!?。！？])\s+/)
-    .map((sentence) => sentence.replace(/\s+/g, ' ').trim())
-    .filter(Boolean)
 }
 
 function mergeSentences(local: SavedSentence[], remote: unknown) {
@@ -373,7 +395,17 @@ function buildCloudPayload(sentences: SavedSentence[], messages: TeacherMessage[
 
 export default function ZhiyuApp() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('sentences')
-  const [sentenceTab, setSentenceTab] = useState<SentenceTab>('learning')
+  const [homeView, setHomeView] = useState<HomeView>('learning')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState(CATEGORY_ALL)
+  const [showAddSheet, setShowAddSheet] = useState(false)
+  const [addMode, setAddMode] = useState<AddMode>('manual')
+  const [manualEnglish, setManualEnglish] = useState('')
+  const [manualChinese, setManualChinese] = useState('')
+  const [aiChinese, setAiChinese] = useState('')
+  const [generatedSentence, setGeneratedSentence] = useState<{ english: string; chinese: string; category: string } | null>(null)
+  const [isGeneratingSentence, setIsGeneratingSentence] = useState(false)
+  const [generationError, setGenerationError] = useState('')
   const [showExam, setShowExam] = useState(false)
   const [showFriends, setShowFriends] = useState(false)
   const [showAuth, setShowAuth] = useState(false)
@@ -382,9 +414,9 @@ export default function ZhiyuApp() {
   const [hydrated, setHydrated] = useState(false)
 
   const [sentences, setSentences] = useState<SavedSentence[]>(initialSentences)
+  const [vocabBook, setVocabBook] = useState<VocabBookItem[]>([])
   const [messages, setMessages] = useState<TeacherMessage[]>([])
   const [memoryProfile, setMemoryProfile] = useState<TutorMemoryProfile>(() => defaultMemoryProfile())
-  const [newSentence, setNewSentence] = useState('')
   const [speechRate, setSpeechRate] = useState(1)
   const [teacherMode, setTeacherMode] = useState<TeacherQuickMode | null>(null)
   const [isSending, setIsSending] = useState(false)
@@ -419,10 +451,11 @@ export default function ZhiyuApp() {
 
     if (storedSentences.length) setSentences(storedSentences)
     if (storedMessages.length) setMessages(storedMessages)
+    setVocabBook(getVocabBook())
     setMemoryProfile(storedMemory)
-    setNewSentence(hasStorage() ? window.localStorage.getItem(DRAFT_KEY) || '' : '')
     setSpeechRate(Number(hasStorage() ? window.localStorage.getItem(SPEED_KEY) || '1' : '1') || 1)
-    setSentenceTab(hasStorage() && window.localStorage.getItem(VIEW_KEY) === 'learned' ? 'learned' : 'learning')
+    const storedView = hasStorage() ? window.localStorage.getItem(VIEW_KEY) : ''
+    setHomeView(storedView === 'learned' || storedView === 'vocab' ? storedView : 'learning')
     const storedPage = hasStorage() ? window.localStorage.getItem(APP_PAGE_KEY) : ''
     if (storedPage === 'teacher' || storedPage === 'scenes' || storedPage === 'sentences') setActiveTab(storedPage)
     if (storedToken && storedUser) {
@@ -432,6 +465,13 @@ export default function ZhiyuApp() {
     }
     setHydrated(true)
   }, [])
+
+  useEffect(() => {
+    if (!hydrated) return
+    const handleVocabBookChange = () => setVocabBook(getVocabBook())
+    window.addEventListener(VOCAB_BOOK_EVENT, handleVocabBookChange)
+    return () => window.removeEventListener(VOCAB_BOOK_EVENT, handleVocabBookChange)
+  }, [hydrated])
 
   useEffect(() => {
     if (!hydrated) return
@@ -453,18 +493,13 @@ export default function ZhiyuApp() {
 
   useEffect(() => {
     if (!hydrated || !hasStorage()) return
-    window.localStorage.setItem(DRAFT_KEY, newSentence)
-  }, [hydrated, newSentence])
-
-  useEffect(() => {
-    if (!hydrated || !hasStorage()) return
     window.localStorage.setItem(SPEED_KEY, String(speechRate))
   }, [hydrated, speechRate])
 
   useEffect(() => {
     if (!hydrated || !hasStorage()) return
-    window.localStorage.setItem(VIEW_KEY, sentenceTab)
-  }, [hydrated, sentenceTab])
+    window.localStorage.setItem(VIEW_KEY, homeView)
+  }, [hydrated, homeView])
 
   useEffect(() => {
     if (!hydrated || !hasStorage()) return
@@ -561,26 +596,116 @@ export default function ZhiyuApp() {
     return () => controller.abort()
   }, [hydrated])
 
-  const filteredSentences = useMemo(() => {
-    return sentences.filter((sentence) => sentenceTab === 'learning' ? !sentence.learned : sentence.learned)
-  }, [sentences, sentenceTab])
+  const learningCount = useMemo(() => sentences.filter((sentence) => !sentence.learned).length, [sentences])
+  const learnedCount = useMemo(() => sentences.filter((sentence) => sentence.learned).length, [sentences])
 
-  const handleAddSentence = useCallback((text?: string, note?: string) => {
-    const additions = text ? [text.trim()] : splitSentences(newSentence)
+  const categories = useMemo(() => {
+    const seen = new Set<string>()
+    const list = [CATEGORY_ALL, ...BASE_CATEGORIES]
+    for (const category of list) seen.add(category)
+    for (const sentence of sentences) {
+      const category = normalizeCategoryName(sentence.category || inferSentenceCategory(sentence.text, sentence.note))
+      if (!seen.has(category)) {
+        seen.add(category)
+        list.push(category)
+      }
+    }
+    return list
+  }, [sentences])
+
+  const filteredSentences = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+    return sentences.filter((sentence) => {
+      if (homeView === 'learning' && sentence.learned) return false
+      if (homeView === 'learned' && !sentence.learned) return false
+
+      const category = normalizeCategoryName(sentence.category || inferSentenceCategory(sentence.text, sentence.note))
+      if (categoryFilter !== CATEGORY_ALL && category !== categoryFilter) return false
+      if (!query) return true
+
+      return [sentence.text, sentence.note, category]
+        .join(' ')
+        .toLowerCase()
+        .includes(query)
+    })
+  }, [sentences, homeView, categoryFilter, searchQuery])
+
+  const filteredVocabBook = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+    if (!query) return vocabBook
+    return vocabBook.filter((item) => [item.word, item.phonetic, item.meaning, item.example].join(' ').toLowerCase().includes(query))
+  }, [vocabBook, searchQuery])
+
+  const handleAddSentence = useCallback((text?: string, note?: string, category?: string) => {
+    const additions = text ? [text.trim()] : []
     if (!additions.length) return
 
     const newItems = additions.map((sentenceText) => ({
       id: makeId('sentence'),
       text: sentenceText,
       note: note || '',
+      category: normalizeCategoryName(category || inferSentenceCategory(sentenceText, note || '')),
       learned: false,
       learnedAt: null,
       aiExplanation: ''
     }))
 
     setSentences((current) => [...newItems, ...current])
-    setNewSentence('')
-  }, [newSentence])
+    setHomeView('learning')
+  }, [])
+
+  const resetAddSheet = useCallback(() => {
+    setManualEnglish('')
+    setManualChinese('')
+    setAiChinese('')
+    setGeneratedSentence(null)
+    setGenerationError('')
+    setIsGeneratingSentence(false)
+  }, [])
+
+  const closeAddSheet = useCallback(() => {
+    setShowAddSheet(false)
+    resetAddSheet()
+  }, [resetAddSheet])
+
+  const handleManualAdd = useCallback(() => {
+    const english = manualEnglish.trim()
+    const chinese = manualChinese.trim()
+    if (!english || !chinese) return
+    handleAddSentence(english, chinese)
+    closeAddSheet()
+  }, [closeAddSheet, handleAddSentence, manualChinese, manualEnglish])
+
+  const handleGenerateSentence = useCallback(async () => {
+    const chinese = aiChinese.trim()
+    if (!chinese || isGeneratingSentence) return
+
+    setIsGeneratingSentence(true)
+    setGenerationError('')
+    setGeneratedSentence(null)
+    try {
+      const data = await requestAiTeacher({
+        mode: 'generate-sentence',
+        chinese,
+        message: chinese
+      })
+      const english = String(data.english || '').trim()
+      const finalChinese = String(data.chinese || chinese).trim()
+      const category = normalizeCategoryName(String(data.category || '') || inferSentenceCategory(english, finalChinese))
+      if (!english) throw new Error('empty')
+      setGeneratedSentence({ english, chinese: finalChinese, category })
+    } catch {
+      setGenerationError('生成失败，请重试。')
+    } finally {
+      setIsGeneratingSentence(false)
+    }
+  }, [aiChinese, isGeneratingSentence])
+
+  const handleAddGeneratedSentence = useCallback(() => {
+    if (!generatedSentence) return
+    handleAddSentence(generatedSentence.english, generatedSentence.chinese, generatedSentence.category)
+    closeAddSheet()
+  }, [closeAddSheet, generatedSentence, handleAddSentence])
 
   const handleDeleteSentence = useCallback((id: string) => {
     setSentences((current) => current.filter((sentence) => sentence.id !== id))
@@ -939,147 +1064,219 @@ export default function ZhiyuApp() {
         ) : showFriends ? (
           <FriendsPage friends={friends} onRefresh={() => loadFriends()} />
         ) : activeTab === 'sentences' ? (
-          <section id="sentencesPage" className="px-5 py-5 flex-1 animate-fade-in">
-            <div className="relative glass-card rounded-3xl p-5 mb-5 overflow-hidden">
-              <div className="inner-glow rounded-3xl" />
-              <div className="top-highlight" />
-
-              <div className="relative glass-tabs flex gap-1 mb-5">
+          <section id="sentencesPage" className="px-4 py-3 flex-1 animate-fade-in">
+            <div className="space-y-3 mb-4">
+              <div className="relative glass-tabs flex gap-1 h-10 p-1">
                 {[
-                  { id: 'learning' as const, label: '学习中' },
-                  { id: 'learned' as const, label: '已学会' }
+                  { id: 'learning' as const, label: '学习中', count: learningCount },
+                  { id: 'learned' as const, label: '已学会', count: learnedCount },
+                  { id: 'vocab' as const, label: '生词本', count: vocabBook.length }
                 ].map((tab) => (
                   <button
                     key={tab.id}
                     id={`${tab.id}Tab`}
-                    onClick={() => setSentenceTab(tab.id)}
+                    onClick={() => setHomeView(tab.id)}
                     role="tab"
-                    aria-selected={sentenceTab === tab.id}
+                    aria-selected={homeView === tab.id}
                     className={cn(
-                      "flex-1 glass-tab relative overflow-hidden",
-                      sentenceTab === tab.id && "glass-tab-active"
+                      "flex-1 h-8 rounded-2xl text-xs font-semibold whitespace-nowrap transition-premium",
+                      homeView === tab.id
+                        ? "glass-tab-active text-white"
+                        : "text-white/45 hover:text-white/80"
                     )}
                   >
-                    {tab.label}
+                    {tab.label} <span className="text-[11px] opacity-70">{tab.count}</span>
                   </button>
                 ))}
               </div>
 
-              <div className="relative flex items-center justify-between">
-                <p id="sentenceCount" className="text-sm text-white/45 font-medium">
-                  {filteredSentences.length} 句
-                </p>
+              <label className="relative block">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35" />
+                <input
+                  id="sentenceSearch"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder={homeView === 'vocab' ? '搜索单词、释义、例句...' : '搜索英文、中文意思或单词...'}
+                  className="w-full h-10 rounded-2xl glass-card bg-transparent border-0 outline-none pl-10 pr-4 text-sm text-white/90 placeholder:text-white/32"
+                />
+              </label>
+
+              {homeView !== 'vocab' && (
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-white/35 font-medium">语速</span>
-                  <input
-                    id="speedSlider"
-                    type="range"
-                    min="0.5"
-                    max="1.5"
-                    step="0.05"
-                    value={speechRate}
-                    onChange={(event) => setSpeechRate(parseFloat(event.target.value))}
-                    className="w-20 h-1.5 rounded-full appearance-none bg-white/10 cursor-pointer
-                      [&::-webkit-slider-thumb]:appearance-none
-                      [&::-webkit-slider-thumb]:w-4
-                      [&::-webkit-slider-thumb]:h-4
-                      [&::-webkit-slider-thumb]:rounded-full
-                      [&::-webkit-slider-thumb]:bg-[oklch(0.70_0.15_280)]
-                      [&::-webkit-slider-thumb]:shadow-[0_0_10px_oklch(0.70_0.15_280_/_0.5)]
-                      [&::-webkit-slider-thumb]:border-2
-                      [&::-webkit-slider-thumb]:border-white/20"
-                  />
-                  <span id="speedValue" className="text-xs font-semibold text-white/60 w-10 tabular-nums">
-                    {speechRate.toFixed(2)}x
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {sentenceTab === 'learning' && filteredSentences.length > 0 && (
-              <button
-                id="reviewButton"
-                onClick={() => setShowExam(true)}
-                className="w-full glass-card-accent flex items-center justify-between p-5 mb-5 rounded-3xl group transition-premium overflow-hidden"
-              >
-                <div className="inner-glow rounded-3xl" />
-                <div className="relative flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-[oklch(0.70_0.15_280_/_0.2)] border border-[oklch(0.70_0.15_280_/_0.3)] flex items-center justify-center group-hover:scale-110 transition-premium">
-                    <BookOpen className="w-5 h-5 text-[oklch(0.80_0.15_280)]" />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-[10px] text-[oklch(0.70_0.15_280)] font-semibold uppercase tracking-[0.15em] mb-0.5">Review</p>
-                    <p className="text-[15px] font-semibold text-white/95">开始默写复习</p>
-                  </div>
-                </div>
-                <span className="relative text-xs text-white/45 font-medium">
-                  {filteredSentences.filter((sentence) => sentence.note).length} 句可复习
-                </span>
-              </button>
-            )}
-
-            <div className="relative glass-card rounded-3xl mb-5 overflow-hidden">
-              <div className="inner-glow rounded-3xl" />
-              <textarea
-                id="sentenceInput"
-                value={newSentence}
-                onChange={(event) => setNewSentence(event.target.value)}
-                placeholder="输入或粘贴要添加的英文句子..."
-                className="relative w-full min-h-[110px] bg-transparent border-0 outline-none p-5 text-[15px] text-white/90 placeholder:text-[oklch(0.70_0.15_280_/_0.7)] resize-none leading-relaxed"
-              />
-              <div className="relative flex items-center justify-end border-t border-white/[0.06] p-4">
-                <button
-                  id="addButton"
-                  onClick={() => handleAddSentence()}
-                  disabled={!newSentence.trim()}
-                  className={cn(
-                    "flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-semibold transition-premium",
-                    newSentence.trim() ? "glass-button-primary" : "glass-button text-white/35"
-                  )}
-                >
-                  <Plus className="w-4 h-4" />
-                  添加
-                </button>
-              </div>
-            </div>
-
-            <div id="sentenceList" className="space-y-4">
-              {filteredSentences.length > 0 ? (
-                filteredSentences.map((sentence, index) => (
-                  <div
-                    key={sentence.id}
-                    className="animate-slide-up"
-                    style={{ animationDelay: `${index * 50}ms` }}
+                  <button
+                    id="reviewButton"
+                    onClick={() => setShowExam(true)}
+                    disabled={learningCount === 0}
+                    className={cn(
+                      "h-10 px-4 rounded-2xl text-sm font-semibold transition-premium flex items-center gap-2",
+                      learningCount > 0 ? "glass-button-primary" : "glass-button text-white/30"
+                    )}
                   >
-                    <SentenceCard
-                      text={sentence.text}
-                      note={sentence.note}
-                      learned={sentence.learned}
-                      aiExplanation={sentence.aiExplanation}
-                      speechRate={speechRate}
-                      onDelete={() => handleDeleteSentence(sentence.id)}
-                      onUpdateNote={(note) => handleUpdateSentenceNote(sentence.id, note)}
-                      onToggleLearned={() => handleToggleLearned(sentence.id)}
-                      onAiExplain={() => handleAiExplain(sentence.id)}
+                    ✍️ 默写复习
+                  </button>
+                  <div className="min-w-0 flex-1 flex items-center justify-end gap-2">
+                    <span className="text-[11px] text-white/35 font-medium">语速</span>
+                    <input
+                      id="speedSlider"
+                      type="range"
+                      min="0.5"
+                      max="1.5"
+                      step="0.05"
+                      value={speechRate}
+                      onChange={(event) => setSpeechRate(parseFloat(event.target.value))}
+                      className="w-20 h-1.5 rounded-full appearance-none bg-white/10 cursor-pointer
+                        [&::-webkit-slider-thumb]:appearance-none
+                        [&::-webkit-slider-thumb]:w-4
+                        [&::-webkit-slider-thumb]:h-4
+                        [&::-webkit-slider-thumb]:rounded-full
+                        [&::-webkit-slider-thumb]:bg-[oklch(0.70_0.15_280)]
+                        [&::-webkit-slider-thumb]:shadow-[0_0_10px_oklch(0.70_0.15_280_/_0.5)]
+                        [&::-webkit-slider-thumb]:border-2
+                        [&::-webkit-slider-thumb]:border-white/20"
                     />
+                    <span id="speedValue" className="text-[11px] font-semibold text-white/55 w-9 tabular-nums">
+                      {speechRate.toFixed(2)}x
+                    </span>
                   </div>
-                ))
-              ) : (
-                <div id="emptyState" className="text-center py-20 animate-fade-in">
-                  <div className="w-20 h-20 rounded-3xl glass-card mx-auto mb-6 flex items-center justify-center">
-                    <BookOpen className="w-8 h-8 text-white/30" />
+                </div>
+              )}
+
+              {homeView !== 'vocab' && (
+                <div className="-mx-4 overflow-x-auto px-4 pb-1 scrollbar-hide">
+                  <div className="flex gap-2 min-w-max">
+                    {categories.map((category) => (
+                      <button
+                        key={category}
+                        type="button"
+                        onClick={() => setCategoryFilter(category)}
+                        className={cn(
+                          "h-9 px-4 rounded-full text-xs font-semibold whitespace-nowrap transition-premium border",
+                          categoryFilter === category
+                            ? "bg-[oklch(0.70_0.15_280_/_0.22)] border-[oklch(0.70_0.15_280_/_0.45)] text-white shadow-[0_0_18px_oklch(0.70_0.15_280_/_0.18)]"
+                            : "bg-white/[0.04] border-white/[0.07] text-white/45 hover:text-white/75"
+                        )}
+                      >
+                        {category}
+                      </button>
+                    ))}
                   </div>
-                  <h2 className="text-xl font-semibold text-white/90 mb-2">
-                    {sentenceTab === 'learning' ? '添加句子后就能直接听' : '还没有学会的句子'}
-                  </h2>
-                  <p className="text-sm text-white/40 leading-relaxed max-w-[260px] mx-auto">
-                    {sentenceTab === 'learning'
-                      ? '整句点右侧按钮，单词直接点英文。'
-                      : '学会的句子会显示在这里。'}
-                  </p>
                 </div>
               )}
             </div>
+
+            {homeView === 'vocab' ? (
+              <div id="vocabBookList" className="space-y-3">
+                {filteredVocabBook.length > 0 ? (
+                  filteredVocabBook.map((item, index) => (
+                    <div
+                      key={item.word}
+                      className="relative glass-card rounded-3xl p-5 overflow-hidden animate-slide-up"
+                      style={{ animationDelay: `${index * 40}ms` }}
+                    >
+                      <div className="inner-glow rounded-3xl" />
+                      <div className="top-highlight" />
+                      <div className="relative flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <h2 className="text-xl font-semibold text-white/95">{item.word}</h2>
+                          {item.phonetic && <p className="mt-1 text-sm text-white/40">/{item.phonetic}/</p>}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => speakEnglish(item.word, { mode: 'word', rate: speechRate })}
+                            className="w-10 h-10 rounded-2xl glass-button flex items-center justify-center text-white/60 hover:text-white transition-premium"
+                            aria-label="朗读单词"
+                          >
+                            <Volume2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeVocabBookItem(item.word)}
+                            className="w-10 h-10 rounded-2xl glass-button flex items-center justify-center text-white/45 hover:text-[oklch(0.70_0.22_25)] transition-premium"
+                            aria-label="移出生词本"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="relative mt-4 space-y-3">
+                        <p className="text-[15px] text-white/76 leading-relaxed">{item.meaning}</p>
+                        {item.example && (
+                          <div className="rounded-2xl border border-white/[0.06] bg-white/[0.035] px-4 py-3">
+                            <p className="text-sm text-white/72 leading-relaxed">{item.example}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div id="emptyVocabState" className="text-center py-20 animate-fade-in">
+                    <div className="w-20 h-20 rounded-3xl glass-card mx-auto mb-6 flex items-center justify-center">
+                      <BookOpen className="w-8 h-8 text-white/30" />
+                    </div>
+                    <h2 className="text-xl font-semibold text-white/90 mb-2">生词本还是空的</h2>
+                    <p className="text-sm text-white/40 leading-relaxed max-w-[260px] mx-auto">
+                      点击任意英文单词后，可以把它加入这里。
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div id="sentenceList" className="space-y-4">
+                {filteredSentences.length > 0 ? (
+                  filteredSentences.map((sentence, index) => (
+                    <div
+                      key={sentence.id}
+                      className="animate-slide-up"
+                      style={{ animationDelay: `${index * 40}ms` }}
+                    >
+                      <SentenceCard
+                        text={sentence.text}
+                        note={sentence.note}
+                        learned={sentence.learned}
+                        aiExplanation={sentence.aiExplanation}
+                        speechRate={speechRate}
+                        onDelete={() => handleDeleteSentence(sentence.id)}
+                        onUpdateNote={(note) => handleUpdateSentenceNote(sentence.id, note)}
+                        onToggleLearned={() => handleToggleLearned(sentence.id)}
+                        onAiExplain={() => handleAiExplain(sentence.id)}
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <div id="emptyState" className="text-center py-20 animate-fade-in">
+                    <div className="w-20 h-20 rounded-3xl glass-card mx-auto mb-6 flex items-center justify-center">
+                      <BookOpen className="w-8 h-8 text-white/30" />
+                    </div>
+                    <h2 className="text-xl font-semibold text-white/90 mb-2">
+                      {homeView === 'learning' ? '添加句子后就能直接听' : '还没有学会的句子'}
+                    </h2>
+                    <p className="text-sm text-white/40 leading-relaxed max-w-[260px] mx-auto">
+                      {searchQuery || categoryFilter !== CATEGORY_ALL
+                        ? '当前筛选下没有内容。'
+                        : homeView === 'learning'
+                          ? '整句点右侧按钮，单词直接点英文。'
+                          : '学会的句子会显示在这里。'}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {homeView !== 'vocab' && (
+              <button
+                id="floatingAddButton"
+                type="button"
+                onClick={() => {
+                  resetAddSheet()
+                  setShowAddSheet(true)
+                }}
+                className="fixed right-5 bottom-[calc(5.6rem+env(safe-area-inset-bottom))] z-50 w-14 h-14 rounded-3xl glass-button-primary flex items-center justify-center shadow-[0_0_28px_oklch(0.70_0.15_280_/_0.35)] transition-premium active:scale-95"
+                aria-label="添加句子"
+              >
+                <Plus className="w-6 h-6" />
+              </button>
+            )}
           </section>
         ) : activeTab === 'scenes' ? (
           <ScenesPage
@@ -1113,6 +1310,152 @@ export default function ZhiyuApp() {
             setShowFriends(false)
           }}
         />
+      )}
+
+      {showAddSheet && (
+        <div className="fixed inset-0 z-[130] flex items-end justify-center bg-black/65 backdrop-blur-md px-4 pb-4 pt-16 animate-fade-in">
+          <button className="absolute inset-0 cursor-default" aria-label="关闭添加句子" onClick={closeAddSheet} />
+          <div className="relative w-full max-w-[520px] max-h-[86dvh] overflow-y-auto glass-sheet rounded-[2rem] p-5 animate-scale-in">
+            <div className="top-highlight" />
+            <div className="flex items-start justify-between gap-4 mb-5">
+              <div>
+                <p className="text-[10px] text-[oklch(0.70_0.15_280)] font-semibold tracking-[0.18em] uppercase mb-1">
+                  Add Sentence
+                </p>
+                <h2 className="text-xl font-semibold text-white/95">添加句子</h2>
+              </div>
+              <button
+                type="button"
+                onClick={closeAddSheet}
+                className="w-10 h-10 rounded-2xl glass-button flex items-center justify-center text-white/55 hover:text-white transition-premium"
+                aria-label="关闭"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="glass-tabs flex gap-1 h-10 p-1 mb-5">
+              {[
+                { id: 'manual' as const, label: '手动添加' },
+                { id: 'ai' as const, label: '中文生成英文' }
+              ].map((mode) => (
+                <button
+                  key={mode.id}
+                  type="button"
+                  onClick={() => {
+                    setAddMode(mode.id)
+                    setGenerationError('')
+                  }}
+                  className={cn(
+                    "flex-1 h-8 rounded-2xl text-sm font-semibold transition-premium",
+                    addMode === mode.id ? "glass-tab-active text-white" : "text-white/45 hover:text-white/80"
+                  )}
+                >
+                  {mode.label}
+                </button>
+              ))}
+            </div>
+
+            {addMode === 'manual' ? (
+              <div className="space-y-4">
+                <label className="block">
+                  <span className="mb-2 block text-[11px] text-[oklch(0.70_0.15_280)] font-semibold tracking-[0.14em] uppercase">英文句子</span>
+                  <textarea
+                    value={manualEnglish}
+                    onChange={(event) => setManualEnglish(event.target.value)}
+                    placeholder="输入自然英文句子..."
+                    rows={3}
+                    className="w-full rounded-2xl border border-white/[0.07] bg-white/[0.035] px-4 py-3 text-[15px] text-white/90 placeholder:text-[oklch(0.70_0.15_280_/_0.55)] outline-none resize-none leading-relaxed"
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-[11px] text-[oklch(0.70_0.15_280)] font-semibold tracking-[0.14em] uppercase">中文意思</span>
+                  <textarea
+                    value={manualChinese}
+                    onChange={(event) => setManualChinese(event.target.value)}
+                    placeholder="输入中文意思..."
+                    rows={2}
+                    className="w-full rounded-2xl border border-white/[0.07] bg-white/[0.035] px-4 py-3 text-[15px] text-white/90 placeholder:text-[oklch(0.70_0.15_280_/_0.55)] outline-none resize-none leading-relaxed"
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={handleManualAdd}
+                  disabled={!manualEnglish.trim() || !manualChinese.trim()}
+                  className={cn(
+                    "w-full h-12 rounded-2xl text-sm font-semibold transition-premium",
+                    manualEnglish.trim() && manualChinese.trim() ? "glass-button-primary" : "glass-button text-white/35"
+                  )}
+                >
+                  添加到学习中
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <label className="block">
+                  <span className="mb-2 block text-[11px] text-[oklch(0.70_0.15_280)] font-semibold tracking-[0.14em] uppercase">中文意思</span>
+                  <textarea
+                    value={aiChinese}
+                    onChange={(event) => {
+                      setAiChinese(event.target.value)
+                      setGeneratedSentence(null)
+                      setGenerationError('')
+                    }}
+                    placeholder="例如：我先帮你看一下发型适合怎么修..."
+                    rows={3}
+                    className="w-full rounded-2xl border border-white/[0.07] bg-white/[0.035] px-4 py-3 text-[15px] text-white/90 placeholder:text-[oklch(0.70_0.15_280_/_0.55)] outline-none resize-none leading-relaxed"
+                  />
+                </label>
+
+                <button
+                  type="button"
+                  onClick={handleGenerateSentence}
+                  disabled={!aiChinese.trim() || isGeneratingSentence}
+                  className={cn(
+                    "w-full h-12 rounded-2xl text-sm font-semibold transition-premium flex items-center justify-center gap-2",
+                    aiChinese.trim() && !isGeneratingSentence ? "glass-button-primary" : "glass-button text-white/35"
+                  )}
+                >
+                  <WandSparkles className="w-4 h-4" />
+                  {isGeneratingSentence ? '正在生成...' : generatedSentence ? '重新生成' : '生成自然英文'}
+                </button>
+
+                {generationError && (
+                  <p className="rounded-2xl border border-[oklch(0.62_0.22_25_/_0.25)] bg-[oklch(0.62_0.22_25_/_0.08)] px-4 py-3 text-sm text-[oklch(0.72_0.20_25)]">
+                    {generationError}
+                  </p>
+                )}
+
+                {generatedSentence && (
+                  <div className="rounded-3xl border border-white/[0.07] bg-white/[0.04] p-4">
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <span className="rounded-full border border-[oklch(0.70_0.15_280_/_0.35)] bg-[oklch(0.70_0.15_280_/_0.12)] px-3 py-1 text-xs font-semibold text-[oklch(0.82_0.15_280)]">
+                        {generatedSentence.category}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => speakEnglish(generatedSentence.english, { mode: 'sentence', rate: speechRate })}
+                        className="w-9 h-9 rounded-2xl glass-button flex items-center justify-center text-white/60"
+                        aria-label="朗读生成句子"
+                      >
+                        <Volume2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <p className="text-[16px] font-semibold text-white/92 leading-relaxed">{generatedSentence.english}</p>
+                    <p className="mt-3 text-sm text-white/50 leading-relaxed">{generatedSentence.chinese}</p>
+                    <button
+                      type="button"
+                      onClick={handleAddGeneratedSentence}
+                      className="mt-4 w-full h-12 rounded-2xl glass-button-primary text-sm font-semibold transition-premium"
+                    >
+                      添加到学习中
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       <AuthSheet

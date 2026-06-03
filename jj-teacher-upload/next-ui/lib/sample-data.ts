@@ -4,6 +4,7 @@ export interface SavedSentence {
   id: string
   text: string
   note: string
+  category?: string
   learned: boolean
   learnedAt: number | null
   aiExplanation: string

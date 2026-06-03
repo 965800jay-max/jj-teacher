@@ -1,6 +1,6 @@
 {
-  "versionCode": 65,
-  "versionName": "free65",
-  "apkUrl": "https://files.catbox.moe/3astom.apk",
-  "notes": "free65: 修复多例句请求被裁成一句的问题，保留英文和中文意思分块排版。"
+  "versionCode": 66,
+  "versionName": "free66",
+  "apkUrl": "https://files.catbox.moe/50ofov.apk",
+  "notes": "free66: 主页改为紧凑搜索分类布局，新增 AI 中文生成英文、单词释义弹窗和生词本。"
 }
