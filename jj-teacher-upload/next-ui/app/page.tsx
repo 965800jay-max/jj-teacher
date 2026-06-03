@@ -51,8 +51,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 66
-const CURRENT_VERSION_NAME = 'free66'
+const CURRENT_VERSION_CODE = 67
+const CURRENT_VERSION_NAME = 'free67'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -601,9 +601,11 @@ export default function ZhiyuApp() {
 
   const categories = useMemo(() => {
     const seen = new Set<string>()
-    const list = [CATEGORY_ALL, ...BASE_CATEGORIES]
-    for (const category of list) seen.add(category)
+    const list = [CATEGORY_ALL]
+    seen.add(CATEGORY_ALL)
     for (const sentence of sentences) {
+      if (homeView === 'learning' && sentence.learned) continue
+      if (homeView === 'learned' && !sentence.learned) continue
       const category = normalizeCategoryName(sentence.category || inferSentenceCategory(sentence.text, sentence.note))
       if (!seen.has(category)) {
         seen.add(category)
@@ -611,7 +613,11 @@ export default function ZhiyuApp() {
       }
     }
     return list
-  }, [sentences])
+  }, [sentences, homeView])
+
+  useEffect(() => {
+    if (!categories.includes(categoryFilter)) setCategoryFilter(CATEGORY_ALL)
+  }, [categories, categoryFilter])
 
   const filteredSentences = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()

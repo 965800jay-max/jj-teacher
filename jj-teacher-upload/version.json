@@ -1,6 +1,6 @@
 {
-  "versionCode": 66,
-  "versionName": "free66",
-  "apkUrl": "https://files.catbox.moe/50ofov.apk",
-  "notes": "free66: 主页改为紧凑搜索分类布局，新增 AI 中文生成英文、单词释义弹窗和生词本。"
+  "versionCode": 67,
+  "versionName": "free67",
+  "apkUrl": "https://files.catbox.moe/j04n7v.apk",
+  "notes": "free67: 句读分类只显示当前列表里真实存在的分类，避免空分类。"
 }
