@@ -1,6 +1,6 @@
 {
-  "versionCode": 75,
-  "versionName": "free75",
-  "apkUrl": "https://files.catbox.moe/zr3xqq.apk",
-  "notes": "free75: 新增语言助手页面，支持翻译、本地化、发型师沟通、AI回复、解释和发音。"
+  "versionCode": 76,
+  "versionName": "free76",
+  "apkUrl": "https://files.catbox.moe/dui1sr.apk",
+  "notes": "free76: 修复语言助手输入框点击后页面被键盘顶上去的问题。"
 }
