@@ -966,18 +966,22 @@ async function handleAiTeacher(request, response) {
   if (mode === "select-dialogue") {
     const message = String(payload.message || "").trim();
     const history = Array.isArray(payload.messages) ? payload.messages.slice(-10) : [];
+    const selectScene = normalizeSelectDialogueScenario(payload.selectScene || payload.scene || payload.scenario);
+    const selectDifficulty = normalizeSelectDialogueDifficulty(payload.selectDifficulty || payload.difficulty);
+    const selectStage = normalizeSelectDialogueStage(payload.selectStage || payload.stage, selectScene);
     if (!message) {
       sendJson(response, 400, { error: "Message is required" });
       return;
     }
 
     const raw = await askAiTeacher(
-      buildSelectDialoguePrompt(message, history, targetLanguage, memoryProfile),
+      buildSelectDialoguePrompt(message, history, targetLanguage, memoryProfile, selectScene, selectDifficulty, selectStage),
       mode,
       targetLanguage
     );
     const data = extractJsonObject(raw) || {};
     const aiMessage = String(data.aiMessage || data.reply || "").replace(/\s+/g, " ").trim();
+    const stage = normalizeSelectDialogueStage(data.stage || data.currentStage || data.nextStage || selectStage, selectScene);
     const rawOptions = Array.isArray(data.replyOptions) ? data.replyOptions : [];
     const rawMeanings = Array.isArray(data.replyOptionMeanings) ? data.replyOptionMeanings : [];
     const seen = new Set();
@@ -1001,6 +1005,7 @@ async function handleAiTeacher(request, response) {
     sendJson(response, 200, {
       aiMessage: aiMessage.slice(0, 500),
       reply: aiMessage.slice(0, 500),
+      stage,
       replyOptions: replyOptions.slice(0, 3),
       replyOptionMeanings: replyOptionMeanings.slice(0, 3),
     });
@@ -1162,9 +1167,110 @@ function buildGenerateSentencePrompt(chinese, targetLanguage = "english") {
   ].join("\n");
 }
 
-function buildSelectDialoguePrompt(message, history, targetLanguage = "english", memoryProfile = {}) {
+const selectDialogueScenarios = {
+  "hair-client": {
+    label: "hair salon client",
+    aiRole: "a real salon client",
+    stages: ["sides", "back", "top", "bangs", "overall style", "perm", "casual chat", "styling lesson", "product recommendation", "next appointment"],
+    details: "The client may ask about low taper, mid taper, skin fade, two block, wolf cut, mullet, Korean perm, soft perm, down perm, middle part, 7:3 part, hair texture, head shape, products, blow-drying, maintenance, price, and how long it lasts."
+  },
+  "daily-life": {
+    label: "daily life",
+    aiRole: "a real friend",
+    stages: ["opening", "recent life", "plans", "small problem", "preference", "follow-up plan"],
+    details: "Talk like a friend about food, routines, weather, errands, weekend plans, money, sleep, phone use, or small daily moments."
+  },
+  restaurant: {
+    label: "restaurant ordering",
+    aiRole: "a server or restaurant customer",
+    stages: ["arrival", "menu", "recommendation", "ordering", "modifications", "payment", "to-go"],
+    details: "Move through entering, looking at the menu, asking for recommendations, ordering, changing requirements, paying, and asking for takeout."
+  },
+  "coffee-shop": {
+    label: "coffee shop",
+    aiRole: "a barista or customer",
+    stages: ["greeting", "drink choice", "milk and sweetness", "food add-on", "name and payment", "pickup", "small talk"],
+    details: "Practice coffee orders, customizations, pickup, payment, and casual short conversation."
+  },
+  shopping: {
+    label: "shopping",
+    aiRole: "a store associate or shopper",
+    stages: ["finding item", "size", "try-on", "color", "price", "return policy", "checkout"],
+    details: "Practice finding items, asking about size, fit, color, price, availability, returns, and checkout."
+  },
+  gym: {
+    label: "gym",
+    aiRole: "a workout partner or trainer",
+    stages: ["training plan", "machine", "weight", "sets and reps", "form", "diet", "recovery"],
+    details: "Talk about workout plans, equipment, weight, sets, reps, form, diet, soreness, and recovery."
+  },
+  appointment: {
+    label: "appointment scheduling",
+    aiRole: "a client or receptionist",
+    stages: ["request time", "availability", "service details", "reschedule", "confirmation", "arrival instructions"],
+    details: "Practice booking, rescheduling, confirming time, asking service details, and giving arrival instructions."
+  },
+  "social-chat": {
+    label: "social chat",
+    aiRole: "a person the learner just met",
+    stages: ["opening", "shared topic", "personal interest", "light joke", "plans", "follow-up"],
+    details: "Practice meeting people, keeping a conversation alive, asking natural questions, and responding casually."
+  },
+  travel: {
+    label: "travel",
+    aiRole: "an airport staff member, hotel staff member, local person, or traveler",
+    stages: ["airport", "security", "hotel", "directions", "attraction", "transportation"],
+    details: "Move through airport, security, hotel, directions, attractions, transport, delays, and travel problems."
+  },
+  work: {
+    label: "work communication",
+    aiRole: "a coworker, client, or manager",
+    stages: ["greeting", "task", "timeline", "blocker", "meeting", "follow-up"],
+    details: "Practice work updates, deadlines, questions, blockers, meetings, and polite follow-up."
+  },
+  renting: {
+    label: "renting and housing",
+    aiRole: "a landlord, agent, roommate, or tenant",
+    stages: ["viewing", "rent", "utilities", "maintenance", "lease", "move-in"],
+    details: "Practice asking about apartments, rent, utilities, repairs, lease terms, and move-in details."
+  },
+  medical: {
+    label: "medical visit",
+    aiRole: "a receptionist, nurse, doctor, or patient",
+    stages: ["appointment", "symptoms", "duration", "pain level", "medicine", "follow-up"],
+    details: "Practice describing symptoms, duration, pain level, medicine, instructions, and follow-up."
+  }
+};
+
+const selectDialogueDifficultyRules = {
+  easy: "Difficulty: easy. Use short, simple sentences and common words. Keep aiMessage very easy to understand.",
+  medium: "Difficulty: intermediate. Make the conversation close to real life with useful details, but still clear for a learner.",
+  advanced: "Difficulty: advanced. Sound closer to a native speaker with richer details, natural phrasing, and deeper follow-up."
+};
+
+function normalizeSelectDialogueScenario(value) {
+  const key = String(value || "").trim();
+  return selectDialogueScenarios[key] ? key : "daily-life";
+}
+
+function normalizeSelectDialogueDifficulty(value) {
+  const key = String(value || "").trim();
+  return selectDialogueDifficultyRules[key] ? key : "medium";
+}
+
+function normalizeSelectDialogueStage(value, scenarioKey) {
+  const scenario = selectDialogueScenarios[normalizeSelectDialogueScenario(scenarioKey)] || selectDialogueScenarios["daily-life"];
+  const clean = String(value || "").replace(/\s+/g, " ").trim();
+  return scenario.stages.includes(clean) ? clean : "";
+}
+
+function buildSelectDialoguePrompt(message, history, targetLanguage = "english", memoryProfile = {}, scenarioKey = "daily-life", difficultyKey = "medium", currentStage = "") {
   const language = getTargetLanguageInfo(targetLanguage);
   const isStart = message === "START_SELECT_DIALOGUE";
+  const scenarioId = normalizeSelectDialogueScenario(scenarioKey);
+  const difficultyId = normalizeSelectDialogueDifficulty(difficultyKey);
+  const scenario = selectDialogueScenarios[scenarioId];
+  const safeStage = normalizeSelectDialogueStage(currentStage, scenarioId);
   const cleanHistory = Array.isArray(history)
     ? history
         .filter((item) => item && typeof item.text === "string" && (item.role === "user" || item.role === "assistant"))
@@ -1173,26 +1279,36 @@ function buildSelectDialoguePrompt(message, history, targetLanguage = "english",
     : "";
 
   return [
-    `The learner is practicing spoken ${language.label} through a point-and-click chat mode.`,
+    `The learner is practicing spoken ${language.label} through a point-and-click real-world scenario mode.`,
     "Return compact JSON only. No Markdown. No extra text.",
-    'Required shape: {"aiMessage":"","replyOptions":["","",""],"replyOptionMeanings":["","",""]}',
+    'Required shape: {"aiMessage":"","replyOptions":["","",""],"replyOptionMeanings":["","",""],"stage":""}',
+    `Scenario: ${scenario.label}.`,
+    `AI role: ${scenario.aiRole}. Act as this real person, not as a teacher, grammar explainer, exam app, or chatbot.`,
+    `Stage flow: ${scenario.stages.join(" -> ")}.`,
+    safeStage ? `Current stage: ${safeStage}. Continue naturally from here and move forward only when it feels realistic.` : "Current stage: start at the first stage.",
+    `Scenario details: ${scenario.details}`,
+    selectDialogueDifficultyRules[difficultyId],
     "aiMessage rules:",
-    "1. Write one short natural English chat message as the AI.",
-    "2. Sound like a real friendly person, not a textbook or grammar teacher.",
-    "3. Do not explain grammar unless the user directly asks.",
-    "4. Ask or imply one easy next direction so the learner can continue.",
+    "1. Write one natural English message as the role character.",
+    "2. Stay inside the selected scenario and move through the real-world flow. Do not randomly change topics.",
+    "3. Do not explain grammar, translate, grade, or mention that this is practice.",
+    "4. Ask or imply one realistic next direction so the learner can continue.",
     "replyOptions rules:",
-    "1. Provide 2 or 3 natural English replies the learner can tap.",
-    "2. Each option must be short, casual, and directly sendable.",
-    "3. Options must have different tones or directions.",
-    "4. Do not include Chinese in replyOptions.",
+    "1. Provide exactly 3 natural English replies the learner can tap.",
+    "2. Option 1 is easy: short, simple, beginner-friendly.",
+    "3. Option 2 is natural: what a normal person would say in real life.",
+    "4. Option 3 is advanced: more fluent, detailed, or native-like.",
+    "5. Do not include Chinese in replyOptions.",
     "replyOptionMeanings rules:",
     "1. Provide Simplified Chinese meanings matching replyOptions by index.",
     "2. Keep each meaning concise.",
+    "stage rules:",
+    "1. Return the current or next stage as exactly one value from the stage flow.",
+    "2. Do not invent stage names.",
     formatMemoryForPrompt(memoryProfile),
     cleanHistory ? `Recent conversation:\n${cleanHistory}` : "",
     isStart
-      ? "Start a simple everyday conversation topic. Do not mention that this is a mode or that options will appear."
+      ? "Start the scenario as the real role character. Do not mention that this is a mode or that options will appear."
       : `The learner selected or typed this reply: ${message}`,
   ]
     .filter(Boolean)

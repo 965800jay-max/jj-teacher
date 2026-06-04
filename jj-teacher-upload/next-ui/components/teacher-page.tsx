@@ -2,11 +2,19 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { Send, MessageCircle, Sparkles, Coffee, Brain, X, Trash2, Power, MousePointerClick, RefreshCw, Plus, Volume2, VolumeX } from 'lucide-react'
+import { Send, Sparkles, Coffee, Brain, X, Trash2, Power, MousePointerClick, RefreshCw, Plus, Volume2, VolumeX, Gauge, RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ChatMessage } from '@/components/chat-message'
 import { speakEnglish } from '@/lib/speech'
 import type { TeacherMessage, TutorMemoryProfile } from '@/lib/sample-data'
+import {
+  getTeacherDifficultyLabel,
+  getTeacherScenarioLabel,
+  teacherDifficultyOptions,
+  teacherScenarioOptions,
+  type TeacherDifficulty,
+  type TeacherScenarioId
+} from '@/lib/teacher-scenarios'
 
 export type TeacherQuickMode = 'topic' | 'daily' | 'free' | 'select' | 'hair' | 'client'
 
@@ -19,8 +27,13 @@ interface TeacherPageProps {
   replyOptionMeanings?: string[]
   isReplyOptionsLoading?: boolean
   replyOptionsError?: string
+  selectSceneId?: TeacherScenarioId
+  selectDifficulty?: TeacherDifficulty
+  selectStage?: string
   onSendMessage?: (text: string, mode?: TeacherQuickMode | null) => void
   onQuickAction?: (action: TeacherQuickMode) => void
+  onStartSelectDialogue?: (sceneId: TeacherScenarioId, options?: { reset?: boolean }) => void
+  onDifficultyChange?: (difficulty: TeacherDifficulty) => void
   onSelectReplyOption?: (option: string) => void
   onRetryReplyOptions?: () => void
   onAddSentence?: (text: string, note: string) => void
@@ -68,8 +81,13 @@ export function TeacherPage({
   replyOptionMeanings = [],
   isReplyOptionsLoading = false,
   replyOptionsError = '',
+  selectSceneId = 'daily-life',
+  selectDifficulty = 'medium',
+  selectStage = '',
   onSendMessage,
   onQuickAction,
+  onStartSelectDialogue,
+  onDifficultyChange,
   onSelectReplyOption,
   onRetryReplyOptions,
   onAddSentence,
@@ -79,6 +97,9 @@ export function TeacherPage({
 }: TeacherPageProps) {
   const [inputValue, setInputValue] = useState('')
   const [showMemory, setShowMemory] = useState(false)
+  const [showScenePicker, setShowScenePicker] = useState(false)
+  const [scenePickerMode, setScenePickerMode] = useState<'start' | 'new'>('start')
+  const [showDifficultyPicker, setShowDifficultyPicker] = useState(false)
   const [optionPreview, setOptionPreview] = useState<{ text: string; note: string } | null>(null)
   const [selectDialogueMuted, setSelectDialogueMuted] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -165,6 +186,22 @@ export function TeacherPage({
     onQuickAction?.(action)
   }
 
+  const openScenePicker = (mode: 'start' | 'new') => {
+    if (isSending) return
+    setScenePickerMode(mode)
+    setShowScenePicker(true)
+  }
+
+  const handleSceneSelect = (sceneId: TeacherScenarioId) => {
+    setShowScenePicker(false)
+    onStartSelectDialogue?.(sceneId, { reset: true })
+  }
+
+  const handleDifficultySelect = (difficulty: TeacherDifficulty) => {
+    setShowDifficultyPicker(false)
+    onDifficultyChange?.(difficulty)
+  }
+
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputValue(e.target.value)
     const target = e.target
@@ -205,33 +242,21 @@ export function TeacherPage({
       {/* 小型模式 chips */}
       <div className="flex-shrink-0 px-4 pb-0.5">
         <div className="flex gap-2 overflow-x-auto py-1 -mx-4 px-4 scrollbar-hide">
-          {[
-            { id: 'topic' as const, label: '话题', icon: MessageCircle },
-            { id: 'daily' as const, label: '日常', icon: Sparkles },
-            { id: 'free' as const, label: '闲聊', icon: Coffee },
-            { id: 'hair' as const, label: '理发', icon: Sparkles },
-            { id: 'client' as const, label: '客户沟通', icon: MessageCircle },
-            { id: 'select' as const, label: '点选对话', icon: MousePointerClick }
-          ].map((item) => {
-            const Icon = item.icon
-            return (
-              <button
-                key={item.id}
-                id={item.id === 'topic' ? 'topicButton' : item.id === 'free' ? 'freeChatButton' : item.id === 'select' ? 'selectDialogueButton' : undefined}
-                onClick={() => handleQuickAction(item.id)}
-                disabled={isSending}
-                className={cn(
-                  "flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-semibold tracking-wide whitespace-nowrap transition-premium",
-                  activeMode === item.id
-                    ? "border border-[oklch(0.70_0.15_280_/_0.45)] bg-[oklch(0.70_0.15_280_/_0.16)] text-white shadow-[0_0_18px_oklch(0.70_0.15_280_/_0.18)]"
-                    : "border border-white/[0.08] bg-white/[0.035] text-white/55 hover:text-white/85"
-                )}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                {item.label}
-              </button>
-            )
-          })}
+          <button
+            id="selectDialogueButton"
+            type="button"
+            onClick={() => openScenePicker('start')}
+            disabled={isSending}
+            className={cn(
+              "flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-semibold tracking-wide whitespace-nowrap transition-premium border",
+              activeMode === 'select'
+                ? "border-[oklch(0.70_0.15_280_/_0.45)] bg-[oklch(0.70_0.15_280_/_0.16)] text-white shadow-[0_0_18px_oklch(0.70_0.15_280_/_0.18)]"
+                : "border-white/[0.08] bg-white/[0.035] text-white/55 hover:text-white/85"
+            )}
+          >
+            <MousePointerClick className="w-3.5 h-3.5" />
+            点选对话
+          </button>
           <button
             id="selectDialogueMuteButton"
             type="button"
@@ -255,7 +280,47 @@ export function TeacherPage({
             <Brain className="w-3.5 h-3.5" />
             记忆
           </button>
+          <button
+            id="difficultyButton"
+            type="button"
+            onClick={() => setShowDifficultyPicker(true)}
+            className="flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.035] px-3 text-xs font-semibold tracking-wide text-white/55 transition-premium hover:text-white/85"
+          >
+            <Gauge className="w-3.5 h-3.5" />
+            {getTeacherDifficultyLabel(selectDifficulty)}
+          </button>
+          <button
+            id="freeChatButton"
+            type="button"
+            onClick={() => handleQuickAction('free')}
+            disabled={isSending}
+            className={cn(
+              "flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-semibold tracking-wide whitespace-nowrap transition-premium border",
+              activeMode === 'free'
+                ? "border-[oklch(0.70_0.15_280_/_0.45)] bg-[oklch(0.70_0.15_280_/_0.16)] text-white shadow-[0_0_18px_oklch(0.70_0.15_280_/_0.18)]"
+                : "border-white/[0.08] bg-white/[0.035] text-white/55 hover:text-white/85"
+            )}
+          >
+            <Coffee className="w-3.5 h-3.5" />
+            闲聊
+          </button>
+          <button
+            id="newSelectDialogueButton"
+            type="button"
+            onClick={() => openScenePicker('new')}
+            disabled={isSending}
+            className="flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.035] px-3 text-xs font-semibold tracking-wide text-white/55 transition-premium hover:text-white/85"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            新对话
+          </button>
         </div>
+        {activeMode === 'select' && (
+          <div className="mt-1 flex items-center gap-2 overflow-hidden text-[10px] font-medium text-white/30">
+            <span className="truncate">{getTeacherScenarioLabel(selectSceneId)}</span>
+            {selectStage && <span className="truncate">/ {selectStage}</span>}
+          </div>
+        )}
       </div>
 
       {/* 聊天消息区 */}
@@ -273,9 +338,13 @@ export function TeacherPage({
                 <Sparkles className="w-8 h-8 text-[oklch(0.80_0.15_280)]" />
               </div>
             </div>
-            <h2 className="text-xl font-semibold text-white/95 mb-2 tracking-wide">开始和智语导师聊天</h2>
+            <h2 className="text-xl font-semibold text-white/95 mb-2 tracking-wide">
+              {activeMode === 'select' ? '选择场景开始练习' : '开始和智语导师聊天'}
+            </h2>
             <p className="text-sm text-white/45 leading-relaxed max-w-[280px]">
-              用中文告诉我你想表达什么，我会教你自然的英文说法。
+              {activeMode === 'select'
+                ? '点击顶部“点选对话”，选择真实场景后直接开始。'
+                : '用中文告诉我你想表达什么，我会教你自然的英文说法。'}
             </p>
           </div>
         ) : (
@@ -301,6 +370,7 @@ export function TeacherPage({
               <div className="relative flex gap-2 overflow-x-auto pb-1 pr-2 scrollbar-hide scroll-smooth">
                 {visibleReplyOptions.map((option, index) => {
                   const note = replyOptionMeanings[index] || '中文意思待补充'
+                  const levelLabel = index === 0 ? '简单版' : index === 1 ? '自然版' : '进阶版'
                   return (
                     <button
                       key={`${option}-${index}`}
@@ -322,6 +392,9 @@ export function TeacherPage({
                         (isSending || isReplyOptionsLoading) && "opacity-50"
                       )}
                     >
+                      <span className="mb-1 w-fit rounded-full border border-[oklch(0.70_0.15_280_/_0.22)] bg-black/20 px-2 py-0.5 text-[10px] font-semibold leading-none text-[oklch(0.78_0.15_280_/_0.72)]">
+                        {levelLabel}
+                      </span>
                       <span className="w-full overflow-hidden text-[13px] font-semibold leading-tight text-white/88 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">{option}</span>
                       <span className="mt-1 w-full truncate text-[11px] font-medium leading-tight text-[oklch(0.70_0.15_280_/_0.56)]">{note}</span>
                     </button>
@@ -390,6 +463,106 @@ export function TeacherPage({
           </button>
         </div>
       </form>
+
+      {showScenePicker && typeof document !== 'undefined' ? createPortal((
+        <div className="fixed inset-0 z-[130] flex items-end justify-center bg-black/70 backdrop-blur-md px-4 pb-4 pt-20 animate-fade-in">
+          <button
+            className="absolute inset-0 cursor-default"
+            aria-label="关闭场景选择"
+            onClick={() => setShowScenePicker(false)}
+          />
+          <div className="relative w-full max-w-[520px] max-h-[82dvh] overflow-y-auto glass-sheet rounded-[2rem] p-5 animate-scale-in">
+            <div className="top-highlight" />
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <div>
+                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[oklch(0.70_0.15_280)]">
+                  Scenario
+                </p>
+                <h2 className="text-xl font-semibold text-white/95">
+                  {scenePickerMode === 'new' ? '选择新对话场景' : '选择练习场景'}
+                </h2>
+                <p className="mt-1 text-xs leading-relaxed text-white/38">
+                  AI 会扮演真实人物，按场景流程推进。
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowScenePicker(false)}
+                className="flex h-10 w-10 items-center justify-center rounded-2xl glass-button text-white/55 transition-premium hover:text-white"
+                aria-label="关闭"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2.5">
+              {teacherScenarioOptions.map((scenario) => (
+                <button
+                  key={scenario.id}
+                  type="button"
+                  onClick={() => handleSceneSelect(scenario.id)}
+                  className={cn(
+                    "min-h-[82px] rounded-2xl border px-3 py-3 text-left transition-premium active:scale-[0.98]",
+                    selectSceneId === scenario.id
+                      ? "border-[oklch(0.70_0.15_280_/_0.42)] bg-[oklch(0.70_0.15_280_/_0.13)] shadow-[0_0_22px_oklch(0.70_0.15_280_/_0.13)]"
+                      : "border-white/[0.07] bg-white/[0.035] hover:border-[oklch(0.70_0.15_280_/_0.24)] hover:bg-white/[0.055]"
+                  )}
+                >
+                  <span className="block text-sm font-semibold text-white/90">{scenario.label}</span>
+                  <span className="mt-1.5 block text-[11px] leading-relaxed text-white/38">{scenario.detail}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      ), document.body) : null}
+
+      {showDifficultyPicker && typeof document !== 'undefined' ? createPortal((
+        <div className="fixed inset-0 z-[130] flex items-end justify-center bg-black/70 backdrop-blur-md px-4 pb-4 pt-20 animate-fade-in">
+          <button
+            className="absolute inset-0 cursor-default"
+            aria-label="关闭难度选择"
+            onClick={() => setShowDifficultyPicker(false)}
+          />
+          <div className="relative w-full max-w-[520px] glass-sheet rounded-[2rem] p-5 animate-scale-in">
+            <div className="top-highlight" />
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <div>
+                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[oklch(0.70_0.15_280)]">
+                  Difficulty
+                </p>
+                <h2 className="text-xl font-semibold text-white/95">选择难度</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowDifficultyPicker(false)}
+                className="flex h-10 w-10 items-center justify-center rounded-2xl glass-button text-white/55 transition-premium hover:text-white"
+                aria-label="关闭"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="space-y-2.5">
+              {teacherDifficultyOptions.map((difficulty) => (
+                <button
+                  key={difficulty.id}
+                  type="button"
+                  onClick={() => handleDifficultySelect(difficulty.id)}
+                  className={cn(
+                    "w-full rounded-2xl border px-4 py-3 text-left transition-premium active:scale-[0.99]",
+                    selectDifficulty === difficulty.id
+                      ? "border-[oklch(0.70_0.15_280_/_0.42)] bg-[oklch(0.70_0.15_280_/_0.13)] text-white shadow-[0_0_20px_oklch(0.70_0.15_280_/_0.12)]"
+                      : "border-white/[0.07] bg-white/[0.035] text-white/68 hover:bg-white/[0.055]"
+                  )}
+                >
+                  <span className="block text-sm font-semibold">{difficulty.label}</span>
+                  <span className="mt-1 block text-xs leading-relaxed text-white/42">{difficulty.detail}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      ), document.body) : null}
 
       {optionPreview && typeof document !== 'undefined' ? createPortal((
         <div className="fixed inset-0 z-[130] flex items-end justify-center bg-black/70 backdrop-blur-md px-4 pb-4 pt-20 animate-fade-in">

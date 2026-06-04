@@ -14,6 +14,12 @@ import { ExamPage } from '@/components/exam-page'
 import { FriendsPage } from '@/components/friends-page'
 import { AuthSheet, UpdateSheet } from '@/components/auth-sheet'
 import {
+  normalizeTeacherDifficulty,
+  normalizeTeacherScenarioId,
+  type TeacherDifficulty,
+  type TeacherScenarioId
+} from '@/lib/teacher-scenarios'
+import {
   savedSentences as initialSentences,
   vocabGroups,
   vocabItems,
@@ -33,6 +39,14 @@ interface LanguageAssistantState {
   mode: AssistantMode
   inputValue: string
   results: LanguageAssistantResult[]
+}
+
+interface SelectDialogueState {
+  sceneId: TeacherScenarioId
+  difficulty: TeacherDifficulty
+  stage: string
+  replyOptions: string[]
+  replyOptionMeanings: string[]
 }
 
 interface AppUser {
@@ -58,8 +72,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 82
-const CURRENT_VERSION_NAME = 'free82'
+const CURRENT_VERSION_CODE = 83
+const CURRENT_VERSION_NAME = 'free83'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -75,6 +89,7 @@ const UPDATE_DISMISS_KEY = 'sentence-reader-dismissed-update'
 const DAILY_CHAT_REPEAT_KEY = 'sentence-reader-daily-chat-last'
 const MEMORY_KEY = 'sentence-reader-memory-profile'
 const LANGUAGE_ASSISTANT_STATE_KEY = 'sentence-reader-language-assistant-state'
+const SELECT_DIALOGUE_STATE_KEY = 'sentence-reader-select-dialogue-state'
 const SELECT_DIALOGUE_START = 'START_SELECT_DIALOGUE'
 const TEACHER_TRANSLATION_CACHE_KEY = 'sentence-reader-teacher-translation-cache'
 const ASSISTANT_MODE_IDS: AssistantMode[] = ['translate', 'localize', 'hair', 'reply', 'explain', 'pronunciation']
@@ -82,6 +97,13 @@ const DEFAULT_LANGUAGE_ASSISTANT_STATE: LanguageAssistantState = {
   mode: 'translate',
   inputValue: '',
   results: []
+}
+const DEFAULT_SELECT_DIALOGUE_STATE: SelectDialogueState = {
+  sceneId: 'daily-life',
+  difficulty: 'medium',
+  stage: '',
+  replyOptions: [],
+  replyOptionMeanings: []
 }
 
 const DAILY_LINES = [
@@ -385,6 +407,7 @@ function messageModeFromServerMode(mode: string): TeacherMessage['mode'] {
 
 function normalizeSelectDialogueTurn(data: Record<string, unknown>) {
   const aiMessage = String(data.aiMessage || data.reply || '').trim()
+  const stage = String(data.stage || data.currentStage || data.nextStage || '').replace(/\s+/g, ' ').trim().slice(0, 80)
   const rawOptions = Array.isArray(data.replyOptions) ? data.replyOptions : []
   const rawMeanings = Array.isArray(data.replyOptionMeanings) ? data.replyOptionMeanings : []
   const seen = new Set<string>()
@@ -406,6 +429,7 @@ function normalizeSelectDialogueTurn(data: Record<string, unknown>) {
 
   return {
     aiMessage: aiMessage.slice(0, 500),
+    stage,
     replyOptions: replyOptions.slice(0, 3),
     replyOptionMeanings: replyOptionMeanings.slice(0, 3)
   }
@@ -458,6 +482,29 @@ function normalizeLanguageAssistantState(value: unknown): LanguageAssistantState
     mode: normalizeAssistantModeValue(source.mode),
     inputValue: String(source.inputValue || '').slice(0, 4000),
     results: normalizeLanguageAssistantResults({ results: rawResults })
+  }
+}
+
+function normalizeSelectDialogueState(value: unknown): SelectDialogueState {
+  const source = value && typeof value === 'object' ? value as Record<string, unknown> : {}
+  const replyOptions = Array.isArray(source.replyOptions)
+    ? source.replyOptions
+        .map((item) => String(item || '').replace(/\s+/g, ' ').trim())
+        .filter(Boolean)
+        .slice(0, 3)
+    : []
+  const replyOptionMeanings = Array.isArray(source.replyOptionMeanings)
+    ? source.replyOptionMeanings
+        .map((item) => String(item || '').replace(/\s+/g, ' ').trim())
+        .slice(0, 3)
+    : []
+
+  return {
+    sceneId: normalizeTeacherScenarioId(source.sceneId),
+    difficulty: normalizeTeacherDifficulty(source.difficulty),
+    stage: String(source.stage || '').replace(/\s+/g, ' ').trim().slice(0, 80),
+    replyOptions,
+    replyOptionMeanings
   }
 }
 
@@ -521,6 +568,9 @@ export default function ZhiyuApp() {
   const [selectReplyMeanings, setSelectReplyMeanings] = useState<string[]>([])
   const [selectReplyError, setSelectReplyError] = useState('')
   const [isSelectReplyLoading, setIsSelectReplyLoading] = useState(false)
+  const [selectSceneId, setSelectSceneId] = useState<TeacherScenarioId>(DEFAULT_SELECT_DIALOGUE_STATE.sceneId)
+  const [selectDifficulty, setSelectDifficulty] = useState<TeacherDifficulty>(DEFAULT_SELECT_DIALOGUE_STATE.difficulty)
+  const [selectDialogueStage, setSelectDialogueStage] = useState(DEFAULT_SELECT_DIALOGUE_STATE.stage)
 
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [authToken, setAuthToken] = useState('')
@@ -529,7 +579,13 @@ export default function ZhiyuApp() {
 
   const messagesRef = useRef<TeacherMessage[]>(messages)
   const memoryProfileRef = useRef<TutorMemoryProfile>(memoryProfile)
-  const selectRetryRef = useRef<{ message: string; appendUser: boolean } | null>(null)
+  const selectRetryRef = useRef<{
+    message: string
+    appendUser: boolean
+    sceneId: TeacherScenarioId
+    difficulty: TeacherDifficulty
+    stage: string
+  } | null>(null)
   const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -549,6 +605,7 @@ export default function ZhiyuApp() {
       .filter(Boolean) as TeacherMessage[]
     const storedMemory = normalizeMemoryProfile(readJson<unknown>(MEMORY_KEY, defaultMemoryProfile()))
     const storedAssistantState = normalizeLanguageAssistantState(readJson<unknown>(LANGUAGE_ASSISTANT_STATE_KEY, DEFAULT_LANGUAGE_ASSISTANT_STATE))
+    const storedSelectState = normalizeSelectDialogueState(readJson<unknown>(SELECT_DIALOGUE_STATE_KEY, DEFAULT_SELECT_DIALOGUE_STATE))
     const storedUser = readJson<AppUser | null>(AUTH_USER_KEY, null)
     const storedToken = hasStorage() ? window.localStorage.getItem(AUTH_TOKEN_KEY) || '' : ''
 
@@ -557,6 +614,14 @@ export default function ZhiyuApp() {
     setVocabBook(getVocabBook())
     setMemoryProfile(storedMemory)
     setLanguageAssistantState(storedAssistantState)
+    setSelectSceneId(storedSelectState.sceneId)
+    setSelectDifficulty(storedSelectState.difficulty)
+    setSelectDialogueStage(storedSelectState.stage)
+    setSelectReplyOptions(storedSelectState.replyOptions)
+    setSelectReplyMeanings(storedSelectState.replyOptionMeanings)
+    if (storedSelectState.replyOptions.length || storedMessages.some((message) => message.mode === 'select-dialogue')) {
+      setTeacherMode('select')
+    }
     setSpeechRate(Number(hasStorage() ? window.localStorage.getItem(SPEED_KEY) || '1' : '1') || 1)
     const storedView = hasStorage() ? window.localStorage.getItem(VIEW_KEY) : ''
     setHomeView(storedView === 'learned' || storedView === 'vocab' ? storedView : 'learning')
@@ -599,6 +664,17 @@ export default function ZhiyuApp() {
     if (!hydrated) return
     writeJson(LANGUAGE_ASSISTANT_STATE_KEY, languageAssistantState)
   }, [hydrated, languageAssistantState])
+
+  useEffect(() => {
+    if (!hydrated) return
+    writeJson(SELECT_DIALOGUE_STATE_KEY, {
+      sceneId: selectSceneId,
+      difficulty: selectDifficulty,
+      stage: selectDialogueStage,
+      replyOptions: selectReplyOptions,
+      replyOptionMeanings: selectReplyMeanings
+    })
+  }, [hydrated, selectSceneId, selectDifficulty, selectDialogueStage, selectReplyOptions, selectReplyMeanings])
 
   useEffect(() => {
     if (!hydrated || !hasStorage()) return
@@ -985,12 +1061,19 @@ export default function ZhiyuApp() {
     setSelectReplyMeanings([])
     setSelectReplyError('')
     setIsSelectReplyLoading(false)
+    setSelectDialogueStage('')
     selectRetryRef.current = null
   }, [])
 
-  const startSelectDialogue = useCallback(async () => {
+  const startSelectDialogue = useCallback(async (
+    sceneId: TeacherScenarioId = selectSceneId,
+    options: { reset?: boolean } = {}
+  ) => {
     if (isSending || isSelectReplyLoading) return
+    const nextSceneId = normalizeTeacherScenarioId(sceneId)
+    const shouldReset = options.reset !== false
 
+    setSelectSceneId(nextSceneId)
     setTeacherMode('select')
     setActiveTab('teacher')
     setShowExam(false)
@@ -998,9 +1081,16 @@ export default function ZhiyuApp() {
     setSelectReplyError('')
     setSelectReplyOptions([])
     setSelectReplyMeanings([])
+    setSelectDialogueStage('')
     setIsSelectReplyLoading(true)
     setIsSending(true)
-    selectRetryRef.current = { message: SELECT_DIALOGUE_START, appendUser: false }
+    selectRetryRef.current = {
+      message: SELECT_DIALOGUE_START,
+      appendUser: false,
+      sceneId: nextSceneId,
+      difficulty: selectDifficulty,
+      stage: ''
+    }
 
     const pendingMessage: TeacherMessage = {
       id: makeId('select-pending'),
@@ -1011,18 +1101,21 @@ export default function ZhiyuApp() {
       timestamp: Date.now()
     }
 
-    const history = messagesRef.current
+    const history = shouldReset ? [] : messagesRef.current
       .filter((message) => !message.pending)
       .slice(-10)
       .map(({ role, text }) => ({ role, text }))
 
-    setMessages((current) => [...current, pendingMessage])
+    setMessages((current) => shouldReset ? [pendingMessage] : [...current, pendingMessage])
 
     try {
       const data = await requestAiTeacher({
         mode: 'select-dialogue',
         message: SELECT_DIALOGUE_START,
         messages: history,
+        selectScene: nextSceneId,
+        selectDifficulty,
+        selectStage: '',
         memoryProfile: memoryProfileRef.current
       })
       const turn = normalizeSelectDialogueTurn(data as Record<string, unknown>)
@@ -1035,6 +1128,7 @@ export default function ZhiyuApp() {
           mode: 'select-dialogue',
           timestamp: Date.now()
         }))
+      setSelectDialogueStage(turn.stage)
       setSelectReplyOptions(turn.replyOptions)
       setSelectReplyMeanings(turn.replyOptionMeanings)
       setSelectReplyError('')
@@ -1045,13 +1139,21 @@ export default function ZhiyuApp() {
       setIsSending(false)
       setIsSelectReplyLoading(false)
     }
-  }, [isSending, isSelectReplyLoading])
+  }, [isSending, isSelectReplyLoading, selectDifficulty, selectSceneId])
 
-  const sendSelectDialogueReply = useCallback(async (text: string, options: { appendUser?: boolean } = {}) => {
+  const sendSelectDialogueReply = useCallback(async (text: string, options: {
+    appendUser?: boolean
+    sceneId?: TeacherScenarioId
+    difficulty?: TeacherDifficulty
+    stage?: string
+  } = {}) => {
     const cleanText = text.trim()
     if (!cleanText || isSending || isSelectReplyLoading) return
 
     const appendUser = options.appendUser !== false
+    const requestSceneId = normalizeTeacherScenarioId(options.sceneId || selectSceneId)
+    const requestDifficulty = normalizeTeacherDifficulty(options.difficulty || selectDifficulty)
+    const currentStage = typeof options.stage === 'string' ? options.stage : selectDialogueStage
     const now = Date.now()
     const userMessage: TeacherMessage = {
       id: makeId('select-user-message'),
@@ -1072,7 +1174,8 @@ export default function ZhiyuApp() {
       .filter((message) => !message.pending)
       .slice(-10)
       .map(({ role, text }) => ({ role, text }))
-
+    setSelectSceneId(requestSceneId)
+    setSelectDifficulty(requestDifficulty)
     setTeacherMode('select')
     setActiveTab('teacher')
     setShowExam(false)
@@ -1082,7 +1185,13 @@ export default function ZhiyuApp() {
     setIsSending(true)
     setSelectReplyOptions([])
     setSelectReplyMeanings([])
-    selectRetryRef.current = { message: cleanText, appendUser: false }
+    selectRetryRef.current = {
+      message: cleanText,
+      appendUser: false,
+      sceneId: requestSceneId,
+      difficulty: requestDifficulty,
+      stage: currentStage
+    }
     setMessages((current) => appendUser
       ? [...current, userMessage, pendingMessage]
       : [...current, pendingMessage])
@@ -1092,6 +1201,9 @@ export default function ZhiyuApp() {
         mode: 'select-dialogue',
         message: cleanText,
         messages: history,
+        selectScene: requestSceneId,
+        selectDifficulty: requestDifficulty,
+        selectStage: currentStage,
         memoryProfile: memoryProfileRef.current
       })
       const turn = normalizeSelectDialogueTurn(data as Record<string, unknown>)
@@ -1104,6 +1216,7 @@ export default function ZhiyuApp() {
           mode: 'select-dialogue',
           timestamp: Date.now()
         }))
+      setSelectDialogueStage(turn.stage || currentStage)
       setSelectReplyOptions(turn.replyOptions)
       setSelectReplyMeanings(turn.replyOptionMeanings)
       setSelectReplyError('')
@@ -1115,16 +1228,21 @@ export default function ZhiyuApp() {
       setIsSending(false)
       setIsSelectReplyLoading(false)
     }
-  }, [isSending, isSelectReplyLoading, updateMemoryFromExchange])
+  }, [isSending, isSelectReplyLoading, selectDialogueStage, selectDifficulty, selectSceneId, updateMemoryFromExchange])
 
   const retrySelectDialogue = useCallback(() => {
     const retry = selectRetryRef.current
     if (!retry || retry.message === SELECT_DIALOGUE_START) {
-      startSelectDialogue()
+      startSelectDialogue(retry?.sceneId || selectSceneId, { reset: false })
       return
     }
-    sendSelectDialogueReply(retry.message, { appendUser: retry.appendUser })
-  }, [sendSelectDialogueReply, startSelectDialogue])
+    sendSelectDialogueReply(retry.message, {
+      appendUser: retry.appendUser,
+      sceneId: retry.sceneId,
+      difficulty: retry.difficulty,
+      stage: retry.stage
+    })
+  }, [selectSceneId, sendSelectDialogueReply, startSelectDialogue])
 
   const sendTeacherMessage = useCallback(async (text: string, quickMode?: TeacherQuickMode | null) => {
     const cleanText = text.trim()
@@ -1693,8 +1811,13 @@ export default function ZhiyuApp() {
             replyOptionMeanings={selectReplyMeanings}
             isReplyOptionsLoading={isSelectReplyLoading}
             replyOptionsError={selectReplyError}
+            selectSceneId={selectSceneId}
+            selectDifficulty={selectDifficulty}
+            selectStage={selectDialogueStage}
             onSendMessage={sendTeacherMessage}
             onQuickAction={handleQuickAction}
+            onStartSelectDialogue={startSelectDialogue}
+            onDifficultyChange={setSelectDifficulty}
             onSelectReplyOption={sendSelectDialogueReply}
             onRetryReplyOptions={retrySelectDialogue}
             onAddSentence={handleAddSentence}
