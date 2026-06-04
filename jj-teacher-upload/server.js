@@ -1222,6 +1222,7 @@ function buildLanguageAssistantPrompt(mode, input, targetLanguage = "english") {
     "3. Keep each result short enough for a phone screen.",
     "4. Use Simplified Chinese for chinese, scene, and keyPoints.",
     "5. If a result has an English sentence, always provide its concise Chinese meaning.",
+    "6. Only fill phonetic in pronunciation mode. In all other modes, set phonetic to an empty string.",
   ];
 
   const modeRules = {
@@ -1314,10 +1315,12 @@ function normalizeLanguageAssistantResults(rawResults, mode, input = "") {
       .replace(/\s+/g, " ")
       .trim()
       .slice(0, 320);
-    const phonetic = String(source.phonetic || source.ipa || "")
-      .replace(/^\/|\/$/g, "")
-      .trim()
-      .slice(0, 120);
+    const phonetic = mode === "pronunciation"
+      ? String(source.phonetic || source.ipa || "")
+          .replace(/^\/|\/$/g, "")
+          .trim()
+          .slice(0, 120)
+      : "";
     const keyPoints = Array.isArray(source.keyPoints || source.points)
       ? (source.keyPoints || source.points)
           .map((point) => String(point || "").replace(/\s+/g, " ").trim().slice(0, 120))
