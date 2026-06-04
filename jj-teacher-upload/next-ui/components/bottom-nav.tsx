@@ -1,6 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import { BookText, Layers, MessageCircle } from 'lucide-react'
 
 interface BottomNavProps {
   activeTab: 'sentences' | 'scenes' | 'teacher'
@@ -9,9 +10,9 @@ interface BottomNavProps {
 
 export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   const tabs = [
-    { id: 'sentences' as const, label: '句读', english: 'Sentences' },
-    { id: 'scenes' as const, label: '单词/场景', english: 'Words' },
-    { id: 'teacher' as const, label: '智语导师', english: 'Tutor' }
+    { id: 'sentences' as const, label: '句读', icon: BookText },
+    { id: 'scenes' as const, label: '单词', icon: Layers },
+    { id: 'teacher' as const, label: '导师', icon: MessageCircle }
   ]
 
   return (
@@ -26,13 +27,15 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       
       <div className="relative max-w-[520px] mx-auto flex">
-        {tabs.map((tab) => (
+        {tabs.map((tab) => {
+          const Icon = tab.icon
+          return (
           <button
             key={tab.id}
             id={`${tab.id}Nav`}
             onClick={() => onTabChange(tab.id)}
             className={cn(
-              "flex-1 flex flex-col items-center justify-center py-4 transition-premium relative group"
+              "flex-1 flex items-center justify-center gap-1.5 py-3 transition-premium relative group"
             )}
             aria-current={activeTab === tab.id ? 'page' : undefined}
           >
@@ -46,30 +49,29 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
             
             {/* 背景高亮 - 渐变紫光 */}
             <div className={cn(
-              "absolute inset-x-2 inset-y-1 rounded-2xl transition-all duration-400 overflow-hidden",
+              "absolute inset-x-3 inset-y-1.5 rounded-2xl transition-all duration-400 overflow-hidden",
               activeTab === tab.id 
                 ? "bg-gradient-to-b from-[oklch(0.70_0.15_280_/_0.15)] via-[oklch(0.55_0.18_300_/_0.08)] to-transparent shadow-[0_0_20px_oklch(0.65_0.18_290_/_0.08)]" 
                 : "bg-transparent group-hover:bg-white/[0.03]"
             )} />
+
+            <Icon className={cn(
+              "relative w-4 h-4 transition-all duration-300",
+              activeTab === tab.id
+                ? "text-[oklch(0.80_0.15_280)]"
+                : "text-white/36 group-hover:text-white/58"
+            )} />
             
             <span className={cn(
-              "relative text-[15px] tracking-wide transition-all duration-300",
+              "relative text-[14px] tracking-wide transition-all duration-300",
               activeTab === tab.id 
                 ? "font-semibold text-white" 
                 : "font-medium text-white/40 group-hover:text-white/60"
             )}>
               {tab.label}
             </span>
-            <span className={cn(
-              "relative text-[10px] mt-0.5 tracking-[0.1em] uppercase transition-all duration-300",
-              activeTab === tab.id 
-                ? "text-[oklch(0.70_0.15_280_/_0.8)]" 
-                : "text-white/25 group-hover:text-white/35"
-            )}>
-              {tab.english}
-            </span>
           </button>
-        ))}
+        )})}
       </div>
     </nav>
   )

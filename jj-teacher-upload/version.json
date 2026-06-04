@@ -1,6 +1,6 @@
 {
-  "versionCode": 71,
-  "versionName": "free71",
-  "apkUrl": "https://files.catbox.moe/hw581i.apk",
-  "notes": "free71: 优化智语导师布局，压缩顶部 chips、聊天气泡、Pick a reply 和输入框，让聊天区更大。"
+  "versionCode": 72,
+  "versionName": "free72",
+  "apkUrl": "https://files.catbox.moe/kayeyk.apk",
+  "notes": "free72: 优化智语导师点选对话 UI，去掉消息外层大框，加入单条中文展开、双语回复 chips 和更紧凑底部导航。"
 }

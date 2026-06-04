@@ -23,6 +23,7 @@ interface TeacherPageProps {
   onSelectReplyOption?: (option: string) => void
   onRetryReplyOptions?: () => void
   onAddSentence?: (text: string, note: string) => void
+  onTranslateText?: (text: string) => Promise<string>
   onToggleMemory?: (enabled: boolean) => void
   onClearMemory?: () => void
 }
@@ -52,6 +53,7 @@ export function TeacherPage({
   onSelectReplyOption,
   onRetryReplyOptions,
   onAddSentence,
+  onTranslateText,
   onToggleMemory,
   onClearMemory
 }: TeacherPageProps) {
@@ -148,7 +150,7 @@ export function TeacherPage({
   return (
     <section id="teacherPage" className="flex flex-1 min-h-0 flex-col overflow-hidden animate-fade-in">
       {/* 小型模式 chips */}
-      <div className="flex-shrink-0 px-4 pb-1">
+      <div className="flex-shrink-0 px-4 pb-0.5">
         <div className="flex gap-2 overflow-x-auto py-1 -mx-4 px-4 scrollbar-hide">
           {[
             { id: 'topic' as const, label: '话题', icon: MessageCircle },
@@ -192,7 +194,7 @@ export function TeacherPage({
       {/* 聊天消息区 */}
       <div
         id="chatMessages"
-        className="min-h-0 flex-1 overflow-y-auto px-4 py-3"
+        className="min-h-0 flex-1 overflow-y-auto px-4 py-2"
       >
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-6">
@@ -216,6 +218,7 @@ export function TeacherPage({
                 key={msg.id} 
                 message={msg}
                 onAddSentence={onAddSentence}
+                onTranslateText={onTranslateText}
               />
             ))}
             <div ref={messagesEndRef} />
@@ -225,20 +228,11 @@ export function TeacherPage({
 
       {(activeMode === 'select' || visibleReplyOptions.length > 0 || replyOptionsError) && (
         <div className="flex-shrink-0 px-4 pb-2">
-          <div className="relative max-h-[100px] overflow-hidden rounded-2xl border border-[oklch(0.70_0.15_280_/_0.14)] bg-black/25 px-3 py-2 backdrop-blur-xl">
-            <div className="relative mb-2 flex items-center justify-between gap-3">
-              <p className="text-[9px] text-[oklch(0.70_0.15_280)] font-semibold tracking-[0.16em] uppercase">
-                PICK A REPLY
-              </p>
-              {isReplyOptionsLoading && (
-                <span className="text-[10px] text-white/35">正在生成...</span>
-              )}
-            </div>
-
+          <div className="relative min-h-[76px] max-h-[90px] overflow-hidden rounded-2xl border border-[oklch(0.70_0.15_280_/_0.12)] bg-black/20 px-2.5 py-2 backdrop-blur-xl">
             {visibleReplyOptions.length > 0 ? (
-              <div className="relative flex gap-2 overflow-x-auto pb-1 pr-1 scrollbar-hide scroll-smooth">
+              <div className="relative flex gap-2 overflow-x-auto pb-1 pr-2 scrollbar-hide scroll-smooth">
                 {visibleReplyOptions.map((option, index) => {
-                  const note = replyOptionMeanings[index] || ''
+                  const note = replyOptionMeanings[index] || '中文意思待补充'
                   return (
                     <button
                       key={`${option}-${index}`}
@@ -255,15 +249,21 @@ export function TeacherPage({
                       }}
                       onClick={() => handleOptionClick(option)}
                       className={cn(
-                        "flex h-11 min-w-[140px] max-w-[80vw] shrink-0 items-center rounded-2xl border border-[oklch(0.70_0.15_280_/_0.26)] bg-[oklch(0.70_0.15_280_/_0.075)] px-3 text-left text-[13px] font-semibold leading-tight text-white/86 shadow-[0_0_18px_oklch(0.70_0.15_280_/_0.08)] transition-premium",
+                        "flex min-h-[56px] max-h-16 min-w-[150px] max-w-[80vw] shrink-0 flex-col justify-center rounded-2xl border border-[oklch(0.70_0.15_280_/_0.26)] bg-[oklch(0.70_0.15_280_/_0.075)] px-3 py-2 text-left shadow-[0_0_18px_oklch(0.70_0.15_280_/_0.08)] transition-premium",
                         "hover:bg-[oklch(0.70_0.15_280_/_0.14)] active:scale-[0.98]",
                         (isSending || isReplyOptionsLoading) && "opacity-50"
                       )}
                     >
-                      <span className="overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">{option}</span>
+                      <span className="w-full overflow-hidden text-[13px] font-semibold leading-tight text-white/88 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">{option}</span>
+                      <span className="mt-1 w-full truncate text-[11px] font-medium leading-tight text-[oklch(0.70_0.15_280_/_0.56)]">{note}</span>
                     </button>
                   )
                 })}
+                {isReplyOptionsLoading && (
+                  <span className="flex h-9 shrink-0 items-center rounded-full border border-white/[0.07] bg-white/[0.035] px-3 text-[11px] text-white/38">
+                    正在生成...
+                  </span>
+                )}
               </div>
             ) : (
               <p className="relative text-xs text-white/42 leading-relaxed">
@@ -290,13 +290,13 @@ export function TeacherPage({
       )}
 
       {/* 输入框 - 高级玻璃效果 */}
-      <form onSubmit={handleSubmit} className="flex-shrink-0 px-4 pb-[calc(86px+env(safe-area-inset-bottom))]">
-        <div className="relative flex min-h-[54px] items-end gap-2 overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.045] px-4 py-2 backdrop-blur-xl">
+      <form onSubmit={handleSubmit} className="flex-shrink-0 px-4 pb-[calc(72px+env(safe-area-inset-bottom))]">
+        <div className="relative flex min-h-[52px] items-end gap-2 overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.045] px-4 py-2 backdrop-blur-xl">
           <textarea
             ref={inputRef}
             id="teacherInput"
             className="relative flex-1 bg-transparent border-0 outline-none resize-none text-[15px] text-white/95 placeholder:text-white/30 min-h-[28px] max-h-[78px] py-1.5 leading-relaxed"
-            placeholder="用中文告诉我你想表达什么..."
+            placeholder="用中文告诉我你想表达什么…"
             value={inputValue}
             onChange={handleInputChange}
             disabled={isSending}

@@ -51,8 +51,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 71
-const CURRENT_VERSION_NAME = 'free71'
+const CURRENT_VERSION_CODE = 72
+const CURRENT_VERSION_NAME = 'free72'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -68,6 +68,7 @@ const UPDATE_DISMISS_KEY = 'sentence-reader-dismissed-update'
 const DAILY_CHAT_REPEAT_KEY = 'sentence-reader-daily-chat-last'
 const MEMORY_KEY = 'sentence-reader-memory-profile'
 const SELECT_DIALOGUE_START = 'START_SELECT_DIALOGUE'
+const TEACHER_TRANSLATION_CACHE_KEY = 'sentence-reader-teacher-translation-cache'
 
 const DAILY_LINES = [
   ['我最近一直想把生活节奏调回来。', "I've been trying to get back into a routine lately."],
@@ -761,6 +762,32 @@ export default function ZhiyuApp() {
     closeAddSheet()
   }, [closeAddSheet, generatedSentence, handleAddSentence])
 
+  const translateTeacherText = useCallback(async (text: string) => {
+    const cleanText = text.replace(/\s+/g, ' ').trim()
+    if (!cleanText) return ''
+
+    const cache = readJson<Record<string, string>>(TEACHER_TRANSLATION_CACHE_KEY, {})
+    if (cache[cleanText]) return cache[cleanText]
+
+    const data = await requestAiTeacher({
+      mode: 'chat',
+      message: `请把下面英文翻译成简洁自然的中文意思。只输出中文，不要解释，不要加标签：${cleanText}`,
+      messages: []
+    })
+    const translated = String(data.reply || data.chinese || '')
+      .replace(/^\s*(中文意思|中文|Meaning|Chinese)\s*[:：]\s*/i, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 180)
+    const meaning = translated || '中文意思待补充'
+
+    writeJson(TEACHER_TRANSLATION_CACHE_KEY, {
+      ...cache,
+      [cleanText]: meaning
+    })
+    return meaning
+  }, [])
+
   const handleDeleteSentence = useCallback((id: string) => {
     setSentences((current) => current.filter((sentence) => sentence.id !== id))
   }, [])
@@ -954,6 +981,8 @@ export default function ZhiyuApp() {
     setSelectReplyError('')
     setIsSelectReplyLoading(true)
     setIsSending(true)
+    setSelectReplyOptions([])
+    setSelectReplyMeanings([])
     selectRetryRef.current = { message: cleanText, appendUser: false }
     setMessages((current) => appendUser
       ? [...current, userMessage, pendingMessage]
@@ -1557,6 +1586,7 @@ export default function ZhiyuApp() {
             onSelectReplyOption={sendSelectDialogueReply}
             onRetryReplyOptions={retrySelectDialogue}
             onAddSentence={handleAddSentence}
+            onTranslateText={translateTeacherText}
             onToggleMemory={handleToggleMemory}
             onClearMemory={handleClearMemory}
           />

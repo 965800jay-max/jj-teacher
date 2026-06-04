@@ -11,6 +11,7 @@ interface ChatMessageProps {
   message: TeacherMessage
   onSpeak?: (text: string) => void
   onAddSentence?: (text: string, note: string) => void
+  onTranslateText?: (text: string) => Promise<string>
 }
 
 type ChatContentItem = { type: 'text' | 'english'; text: string; zh?: string }
@@ -97,15 +98,131 @@ function parseLabeledSections(text: string) {
   return { intro, pairs, outro }
 }
 
-export function ChatMessage({ message, onSpeak, onAddSentence }: ChatMessageProps) {
+function hasChinese(text: string) {
+  return /[\u4e00-\u9fff]/.test(text)
+}
+
+function isEnglishLike(text: string) {
+  return /[A-Za-z]/.test(text) && !hasChinese(text)
+}
+
+function extractEnglishLines(text: string) {
+  const lines = text
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+  const englishLines = lines.filter((line) => isEnglishLike(line))
+  return englishLines.length ? englishLines.join('\n') : text.trim()
+}
+
+function extractChineseLines(text: string) {
+  return text
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => hasChinese(line))
+    .join('\n')
+}
+
+export function ChatMessage({ message, onSpeak, onAddSentence, onTranslateText }: ChatMessageProps) {
   const isUser = message.role === 'user'
   const [playingId, setPlayingId] = useState<string | null>(null)
+  const [expandedMeaningKey, setExpandedMeaningKey] = useState<string | null>(null)
+  const [meaningCache, setMeaningCache] = useState<Record<string, string>>({})
+  const [loadingMeaningKey, setLoadingMeaningKey] = useState<string | null>(null)
 
   const handleSpeak = (text: string, id: string) => {
     setPlayingId(id)
     setTimeout(() => setPlayingId(null), 300)
     speakEnglish(text, { mode: 'sentence', rate: 0.9 })
     onSpeak?.(text)
+  }
+
+  const handleToggleMeaning = async (key: string, text: string, knownMeaning = '') => {
+    if (expandedMeaningKey === key) {
+      setExpandedMeaningKey(null)
+      return
+    }
+
+    setExpandedMeaningKey(key)
+    if (knownMeaning || meaningCache[key] || !onTranslateText) return
+
+    setLoadingMeaningKey(key)
+    try {
+      const translated = await onTranslateText(text)
+      setMeaningCache((current) => ({
+        ...current,
+        [key]: translated || '中文意思待补充'
+      }))
+    } catch {
+      setMeaningCache((current) => ({
+        ...current,
+        [key]: '中文意思待补充'
+      }))
+    } finally {
+      setLoadingMeaningKey(null)
+    }
+  }
+
+  const renderBubbleActions = (text: string, note: string, key: string) => {
+    const isMeaningOpen = expandedMeaningKey === key
+    const meaning = note || meaningCache[key] || ''
+    return (
+      <div className="flex shrink-0 items-center gap-1 pt-0.5">
+        <button
+          onClick={() => handleSpeak(text, key)}
+          className={cn(
+            "w-8 h-8 rounded-full glass-button text-white/58 flex items-center justify-center hover:text-white transition-premium",
+            playingId === key && "scale-90 brightness-125"
+          )}
+          aria-label="播放英文"
+        >
+          <Play className={cn(
+            "w-3.5 h-3.5 ml-0.5 transition-transform duration-300",
+            playingId === key && "scale-125"
+          )} />
+        </button>
+        <button
+          onClick={() => onAddSentence?.(text, note || meaning)}
+          className="w-8 h-8 rounded-full glass-button text-white/58 flex items-center justify-center hover:text-[oklch(0.80_0.15_280)] transition-premium"
+          aria-label="加入句库"
+        >
+          <Plus className="w-3.5 h-3.5" />
+        </button>
+        <button
+          type="button"
+          onClick={() => handleToggleMeaning(key, text, note)}
+          className={cn(
+            "w-8 h-8 rounded-full border text-[12px] font-semibold transition-premium",
+            isMeaningOpen
+              ? "border-[oklch(0.70_0.15_280_/_0.45)] bg-[oklch(0.70_0.15_280_/_0.16)] text-white"
+              : "border-white/[0.08] bg-white/[0.035] text-white/50 hover:text-white/80"
+          )}
+          aria-label={isMeaningOpen ? '收起中文意思' : '显示中文意思'}
+        >
+          {loadingMeaningKey === key ? '...' : '中'}
+        </button>
+      </div>
+    )
+  }
+
+  const renderEnglishBubble = (text: string, note: string, key: string, extraClass = '') => {
+    const isMeaningOpen = expandedMeaningKey === key
+    const meaning = note || meaningCache[key] || ''
+    return (
+      <div className={cn("relative rounded-2xl rounded-bl-md border border-[oklch(0.70_0.15_280_/_0.16)] bg-white/[0.055] px-4 py-3 backdrop-blur-xl shadow-[0_0_18px_oklch(0.70_0.15_280_/_0.06)]", extraClass)}>
+        <div className="flex items-start gap-2.5">
+          <p className="min-w-0 flex-1 whitespace-pre-wrap text-[14px] font-semibold text-white/94 leading-relaxed">
+            <SpeakableText text={text} rate={0.9} />
+          </p>
+          {renderBubbleActions(text, note, key)}
+        </div>
+        {isMeaningOpen && (
+          <p className="mt-2.5 border-t border-white/[0.06] pt-2 text-xs leading-relaxed text-[oklch(0.70_0.15_280_/_0.62)] whitespace-pre-wrap">
+            {loadingMeaningKey === key ? '正在生成中文意思...' : meaning || '中文意思待补充'}
+          </p>
+        )}
+      </div>
+    )
   }
 
   // 解析消息内容
@@ -192,14 +309,13 @@ export function ChatMessage({ message, onSpeak, onAddSentence }: ChatMessageProp
   if (isUser) {
     return (
       <div className="flex justify-end mb-3 animate-slide-up">
-        <div className="max-w-[84%]">
-          {/* 用户消息气泡 - 带紫色光晕 */}
-          <div className="relative rounded-2xl rounded-br-md overflow-hidden bg-[oklch(0.70_0.15_280_/_0.16)] backdrop-blur-xl border border-[oklch(0.70_0.15_280_/_0.24)] px-4 py-3 shadow-[0_0_22px_oklch(0.70_0.15_280_/_0.1)]">
+        <div className="max-w-[86%] space-y-2">
+          <div className="relative rounded-2xl rounded-br-md bg-[oklch(0.70_0.15_280_/_0.16)] backdrop-blur-xl border border-[oklch(0.70_0.15_280_/_0.24)] px-4 py-3 shadow-[0_0_22px_oklch(0.70_0.15_280_/_0.1)]">
             <p className="relative text-[14px] text-white/95 leading-relaxed">{message.text}</p>
           </div>
           
           {message.translation && (
-            <div className="mt-2 relative rounded-2xl border border-white/[0.06] bg-white/[0.035] px-3 py-2 overflow-hidden">
+            <div className="relative rounded-2xl rounded-br-md border border-white/[0.06] bg-white/[0.035] px-3 py-2">
               <p className="relative text-xs text-white/45 mb-2 font-medium">{message.translation.note}</p>
               <div className="relative flex items-center gap-3">
                 <p className="flex-1 text-[14px] font-semibold text-white/95 leading-relaxed">
@@ -233,76 +349,28 @@ export function ChatMessage({ message, onSpeak, onAddSentence }: ChatMessageProp
 
   return (
     <div className="flex mb-3 animate-slide-up">
-      <div className="max-w-[84%]">
+      <div className="max-w-[86%] space-y-2">
         
         {parsed.type === 'daily-sentences' && (
           <div className="space-y-2">
             {parsed.pairs.map((pair, i) => (
-              <div key={i} className="relative rounded-2xl rounded-bl-md border border-white/[0.07] bg-white/[0.055] px-4 py-3 backdrop-blur-xl">
-                <p className="relative text-xs text-white/48 mb-2">{pair.zh}</p>
-                <div className="relative flex items-center gap-3">
-                  <p className="flex-1 text-[14px] font-semibold text-white/95 leading-relaxed">
-                    <SpeakableText text={pair.en} rate={0.9} />
-                  </p>
-                  <button
-                    onClick={() => handleSpeak(pair.en, `daily-${i}`)}
-                    className={cn(
-                      "flex-shrink-0 w-7 h-7 rounded-lg glass-button text-white/60 flex items-center justify-center hover:text-white transition-premium",
-                      playingId === `daily-${i}` && "scale-90 brightness-125"
-                    )}
-                  >
-                    <Play className={cn(
-                      "w-3.5 h-3.5 ml-0.5 transition-transform duration-300",
-                      playingId === `daily-${i}` && "scale-125"
-                    )} />
-                  </button>
-                  <button
-                    onClick={() => onAddSentence?.(pair.en, pair.zh)}
-                    className="flex-shrink-0 w-7 h-7 rounded-lg glass-button text-white/60 flex items-center justify-center hover:text-[oklch(0.80_0.15_280)] transition-premium"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+              <div key={i}>
+                {renderEnglishBubble(pair.en, pair.zh, `daily-${message.id}-${i}`)}
               </div>
             ))}
           </div>
         )}
 
         {parsed.type === 'chat' && (
-          <div className="relative rounded-2xl rounded-bl-md border border-white/[0.07] bg-white/[0.055] px-4 py-3 space-y-2.5 backdrop-blur-xl">
+          <div className="space-y-2">
             {parsed.content.map((item, i) => (
               <div key={i} className="relative">
                 {item.type === 'text' ? (
-                  <p className="text-[14px] text-white/74 leading-relaxed">{item.text}</p>
-                ) : (
-                  <div className="bg-white/[0.04] rounded-xl px-3 py-2 mt-2 border border-white/[0.06]">
-                    {item.zh && (
-                      <p className="text-xs text-white/45 mb-2">{item.zh}</p>
-                    )}
-                    <div className="flex items-center gap-2">
-                      <p className="flex-1 text-[14px] font-semibold text-white/95 leading-relaxed">
-                        <SpeakableText text={item.text} rate={0.9} />
-                      </p>
-                      <button
-                        onClick={() => handleSpeak(item.text, `chat-${i}`)}
-                        className={cn(
-                          "flex-shrink-0 w-7 h-7 rounded-lg glass-button text-white/60 flex items-center justify-center hover:text-white transition-premium",
-                          playingId === `chat-${i}` && "scale-90 brightness-125"
-                        )}
-                      >
-                        <Play className={cn(
-                          "w-3 h-3 ml-0.5 transition-transform duration-300",
-                          playingId === `chat-${i}` && "scale-125"
-                        )} />
-                      </button>
-                      <button
-                        onClick={() => onAddSentence?.(item.text, item.zh || '')}
-                        className="flex-shrink-0 w-7 h-7 rounded-lg glass-button text-white/60 flex items-center justify-center hover:text-[oklch(0.80_0.15_280)] transition-premium"
-                      >
-                        <Plus className="w-3 h-3" />
-                      </button>
-                    </div>
+                  <div className="rounded-2xl rounded-bl-md border border-white/[0.06] bg-white/[0.045] px-4 py-3 backdrop-blur-xl">
+                    <p className="text-[14px] text-white/74 leading-relaxed">{item.text}</p>
                   </div>
+                ) : (
+                  renderEnglishBubble(item.text, item.zh || '', `chat-${message.id}-${i}`)
                 )}
               </div>
             ))}
@@ -310,68 +378,41 @@ export function ChatMessage({ message, onSpeak, onAddSentence }: ChatMessageProp
         )}
 
         {parsed.type === 'structured' && (
-          <div className="relative rounded-2xl rounded-bl-md border border-white/[0.07] bg-white/[0.055] px-4 py-3 backdrop-blur-xl">
-            <div className="relative space-y-3">
+          <div className="space-y-2">
               {parsed.intro.map((paragraph, i) => (
-                <p key={`intro-${i}`} className="text-[14px] text-white/72 leading-relaxed">
+                <div key={`intro-${i}`} className="rounded-2xl rounded-bl-md border border-white/[0.06] bg-white/[0.045] px-4 py-3 backdrop-blur-xl">
+                  <p className="text-[14px] text-white/72 leading-relaxed">
                   {paragraph}
-                </p>
+                  </p>
+                </div>
               ))}
 
               <div className="space-y-2">
                 {parsed.pairs.map((pair, i) => (
-                  <div key={i} className="rounded-xl border border-[oklch(0.70_0.15_280_/_0.14)] bg-[oklch(0.70_0.15_280_/_0.055)] px-3 py-2">
-                    <p className="text-[10px] text-[oklch(0.70_0.15_280)] font-semibold tracking-[0.16em] uppercase mb-2">
-                      English
-                    </p>
-                    <div className="flex items-center gap-2 mb-2">
-                      <p className="flex-1 text-[14px] font-semibold text-white/95 leading-relaxed">
-                        <SpeakableText text={pair.en} rate={0.9} />
-                      </p>
-                      <button
-                        onClick={() => handleSpeak(pair.en, `structured-${i}`)}
-                        className={cn(
-                          "flex-shrink-0 w-7 h-7 rounded-lg glass-button text-white/60 flex items-center justify-center hover:text-white transition-premium",
-                          playingId === `structured-${i}` && "scale-90 brightness-125"
-                        )}
-                      >
-                        <Play className={cn(
-                          "w-3 h-3 ml-0.5 transition-transform duration-300",
-                          playingId === `structured-${i}` && "scale-125"
-                        )} />
-                      </button>
-                      <button
-                        onClick={() => onAddSentence?.(pair.en, pair.zh)}
-                        className="flex-shrink-0 w-7 h-7 rounded-lg glass-button text-white/60 flex items-center justify-center hover:text-[oklch(0.80_0.15_280)] transition-premium"
-                      >
-                        <Plus className="w-3 h-3" />
-                      </button>
-                    </div>
-                    {pair.zh && (
-                      <>
-                        <p className="text-[10px] text-white/35 font-semibold tracking-[0.16em] uppercase mb-1">
-                          中文意思
-                        </p>
-                        <p className="text-xs text-white/58 leading-relaxed">{pair.zh}</p>
-                      </>
-                    )}
+                  <div key={i}>
+                    {renderEnglishBubble(pair.en, pair.zh, `structured-${message.id}-${i}`)}
                   </div>
                 ))}
               </div>
 
               {parsed.outro.map((paragraph, i) => (
-                <p key={`outro-${i}`} className="text-[14px] text-white/72 leading-relaxed">
-                  {paragraph}
-                </p>
+                <div key={`outro-${i}`} className="rounded-2xl rounded-bl-md border border-white/[0.06] bg-white/[0.045] px-4 py-3 backdrop-blur-xl">
+                  <p className="text-[14px] text-white/72 leading-relaxed">
+                    {paragraph}
+                  </p>
+                </div>
               ))}
-            </div>
           </div>
         )}
 
         {parsed.type === 'simple' && (
-          <div className="relative rounded-2xl rounded-bl-md border border-white/[0.07] bg-white/[0.055] px-4 py-3 backdrop-blur-xl">
-            <p className="relative text-[14px] text-white/74 leading-relaxed whitespace-pre-wrap">{parsed.text}</p>
-          </div>
+          isEnglishLike(extractEnglishLines(parsed.text))
+            ? renderEnglishBubble(extractEnglishLines(parsed.text), extractChineseLines(parsed.text), `simple-${message.id}`)
+            : (
+              <div className="relative rounded-2xl rounded-bl-md border border-white/[0.06] bg-white/[0.045] px-4 py-3 backdrop-blur-xl">
+                <p className="relative text-[14px] text-white/74 leading-relaxed whitespace-pre-wrap">{parsed.text}</p>
+              </div>
+            )
         )}
       </div>
     </div>
