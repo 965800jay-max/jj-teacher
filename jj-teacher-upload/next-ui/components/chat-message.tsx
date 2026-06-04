@@ -157,7 +157,7 @@ export function ChatMessage({ message, onSpeak, onAddSentence }: ChatMessageProp
       return { type: 'daily-sentences', pairs }
     }
 
-    if (message.mode === 'chat' || message.mode === 'topic' || message.mode === 'free-chat') {
+    if (message.mode === 'chat' || message.mode === 'topic' || message.mode === 'free-chat' || message.mode === 'select-dialogue') {
       const lines = message.text.split('\n')
       const content: { type: 'text' | 'english'; text: string; zh?: string }[] = []
       

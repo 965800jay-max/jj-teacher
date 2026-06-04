@@ -51,8 +51,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 69
-const CURRENT_VERSION_NAME = 'free69'
+const CURRENT_VERSION_CODE = 70
+const CURRENT_VERSION_NAME = 'free70'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -67,6 +67,7 @@ const AUTH_AVATAR_KEY = 'sentence-reader-auth-avatar'
 const UPDATE_DISMISS_KEY = 'sentence-reader-dismissed-update'
 const DAILY_CHAT_REPEAT_KEY = 'sentence-reader-daily-chat-last'
 const MEMORY_KEY = 'sentence-reader-memory-profile'
+const SELECT_DIALOGUE_START = 'START_SELECT_DIALOGUE'
 
 const DAILY_LINES = [
   ['我最近一直想把生活节奏调回来。', "I've been trying to get back into a routine lately."],
@@ -180,7 +181,7 @@ function normalizeMessage(item: Partial<TeacherMessage> & Record<string, unknown
   const role = item.role === 'assistant' ? 'assistant' : item.role === 'user' ? 'user' : null
   const text = String(item.text || '').trim()
   if (!role || !text) return null
-  const mode = item.mode === 'topic' || item.mode === 'daily-sentences' || item.mode === 'free-chat' || item.mode === 'chat'
+  const mode = item.mode === 'topic' || item.mode === 'daily-sentences' || item.mode === 'free-chat' || item.mode === 'chat' || item.mode === 'select-dialogue'
     ? item.mode
     : undefined
   const translation = item.translation && typeof item.translation === 'object'
@@ -356,13 +357,43 @@ async function requestAiMemory(payload: Record<string, unknown>) {
 function serverModeFromQuickMode(mode?: TeacherQuickMode | null) {
   if (mode === 'topic') return 'topic'
   if (mode === 'free') return 'freestyle'
+  if (mode === 'select') return 'select-dialogue'
   return 'chat'
 }
 
 function messageModeFromServerMode(mode: string): TeacherMessage['mode'] {
   if (mode === 'topic') return 'topic'
   if (mode === 'freestyle') return 'free-chat'
+  if (mode === 'select-dialogue') return 'select-dialogue'
   return 'chat'
+}
+
+function normalizeSelectDialogueTurn(data: Record<string, unknown>) {
+  const aiMessage = String(data.aiMessage || data.reply || '').trim()
+  const rawOptions = Array.isArray(data.replyOptions) ? data.replyOptions : []
+  const rawMeanings = Array.isArray(data.replyOptionMeanings) ? data.replyOptionMeanings : []
+  const seen = new Set<string>()
+  const replyOptions: string[] = []
+  const replyOptionMeanings: string[] = []
+
+  rawOptions.forEach((item, index) => {
+    const option = String(item || '').replace(/\s+/g, ' ').trim()
+    const key = option.toLowerCase()
+    if (!option || seen.has(key) || /[\u4e00-\u9fff]/.test(option)) return
+    seen.add(key)
+    replyOptions.push(option.slice(0, 150))
+    replyOptionMeanings.push(String(rawMeanings[index] || '').trim().slice(0, 180))
+  })
+
+  if (!aiMessage || replyOptions.length < 2) {
+    throw new Error('生成失败，请重试')
+  }
+
+  return {
+    aiMessage: aiMessage.slice(0, 500),
+    replyOptions: replyOptions.slice(0, 3),
+    replyOptionMeanings: replyOptionMeanings.slice(0, 3)
+  }
 }
 
 function buildCloudPayload(sentences: SavedSentence[], messages: TeacherMessage[], memoryProfile: TutorMemoryProfile) {
@@ -420,6 +451,10 @@ export default function ZhiyuApp() {
   const [speechRate, setSpeechRate] = useState(1)
   const [teacherMode, setTeacherMode] = useState<TeacherQuickMode | null>(null)
   const [isSending, setIsSending] = useState(false)
+  const [selectReplyOptions, setSelectReplyOptions] = useState<string[]>([])
+  const [selectReplyMeanings, setSelectReplyMeanings] = useState<string[]>([])
+  const [selectReplyError, setSelectReplyError] = useState('')
+  const [isSelectReplyLoading, setIsSelectReplyLoading] = useState(false)
 
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [authToken, setAuthToken] = useState('')
@@ -428,6 +463,7 @@ export default function ZhiyuApp() {
 
   const messagesRef = useRef<TeacherMessage[]>(messages)
   const memoryProfileRef = useRef<TutorMemoryProfile>(memoryProfile)
+  const selectRetryRef = useRef<{ message: string; appendUser: boolean } | null>(null)
   const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -818,9 +854,156 @@ export default function ZhiyuApp() {
     })
   }, [])
 
+  const clearSelectDialogueState = useCallback(() => {
+    setSelectReplyOptions([])
+    setSelectReplyMeanings([])
+    setSelectReplyError('')
+    setIsSelectReplyLoading(false)
+    selectRetryRef.current = null
+  }, [])
+
+  const startSelectDialogue = useCallback(async () => {
+    if (isSending || isSelectReplyLoading) return
+
+    setTeacherMode('select')
+    setActiveTab('teacher')
+    setShowExam(false)
+    setShowFriends(false)
+    setSelectReplyError('')
+    setIsSelectReplyLoading(true)
+    setIsSending(true)
+    selectRetryRef.current = { message: SELECT_DIALOGUE_START, appendUser: false }
+
+    const pendingMessage: TeacherMessage = {
+      id: makeId('select-pending'),
+      role: 'assistant',
+      text: '点选对话正在开始...',
+      mode: 'select-dialogue',
+      pending: true,
+      timestamp: Date.now()
+    }
+
+    const history = messagesRef.current
+      .filter((message) => !message.pending)
+      .slice(-10)
+      .map(({ role, text }) => ({ role, text }))
+
+    setMessages((current) => [...current, pendingMessage])
+
+    try {
+      const data = await requestAiTeacher({
+        mode: 'select-dialogue',
+        message: SELECT_DIALOGUE_START,
+        messages: history,
+        memoryProfile: memoryProfileRef.current
+      })
+      const turn = normalizeSelectDialogueTurn(data as Record<string, unknown>)
+      setMessages((current) => current
+        .filter((message) => message.id !== pendingMessage.id)
+        .concat({
+          id: makeId('select-message'),
+          role: 'assistant',
+          text: turn.aiMessage,
+          mode: 'select-dialogue',
+          timestamp: Date.now()
+        }))
+      setSelectReplyOptions(turn.replyOptions)
+      setSelectReplyMeanings(turn.replyOptionMeanings)
+      setSelectReplyError('')
+    } catch {
+      setMessages((current) => current.filter((message) => message.id !== pendingMessage.id))
+      setSelectReplyError('生成失败，请重试')
+    } finally {
+      setIsSending(false)
+      setIsSelectReplyLoading(false)
+    }
+  }, [isSending, isSelectReplyLoading])
+
+  const sendSelectDialogueReply = useCallback(async (text: string, options: { appendUser?: boolean } = {}) => {
+    const cleanText = text.trim()
+    if (!cleanText || isSending || isSelectReplyLoading) return
+
+    const appendUser = options.appendUser !== false
+    const now = Date.now()
+    const userMessage: TeacherMessage = {
+      id: makeId('select-user-message'),
+      role: 'user',
+      text: cleanText,
+      mode: 'select-dialogue',
+      timestamp: now
+    }
+    const pendingMessage: TeacherMessage = {
+      id: makeId('select-assistant-pending'),
+      role: 'assistant',
+      text: 'AI 正在继续对话...',
+      mode: 'select-dialogue',
+      pending: true,
+      timestamp: now + 1
+    }
+    const history = messagesRef.current
+      .filter((message) => !message.pending)
+      .slice(-10)
+      .map(({ role, text }) => ({ role, text }))
+
+    setTeacherMode('select')
+    setActiveTab('teacher')
+    setShowExam(false)
+    setShowFriends(false)
+    setSelectReplyError('')
+    setIsSelectReplyLoading(true)
+    setIsSending(true)
+    selectRetryRef.current = { message: cleanText, appendUser: false }
+    setMessages((current) => appendUser
+      ? [...current, userMessage, pendingMessage]
+      : [...current, pendingMessage])
+
+    try {
+      const data = await requestAiTeacher({
+        mode: 'select-dialogue',
+        message: cleanText,
+        messages: history,
+        memoryProfile: memoryProfileRef.current
+      })
+      const turn = normalizeSelectDialogueTurn(data as Record<string, unknown>)
+      setMessages((current) => current
+        .filter((message) => message.id !== pendingMessage.id)
+        .concat({
+          id: makeId('select-assistant-message'),
+          role: 'assistant',
+          text: turn.aiMessage,
+          mode: 'select-dialogue',
+          timestamp: Date.now()
+        }))
+      setSelectReplyOptions(turn.replyOptions)
+      setSelectReplyMeanings(turn.replyOptionMeanings)
+      setSelectReplyError('')
+      updateMemoryFromExchange(cleanText, turn.aiMessage, 'select-dialogue')
+    } catch {
+      setMessages((current) => current.filter((message) => message.id !== pendingMessage.id))
+      setSelectReplyError('生成失败，请重试')
+    } finally {
+      setIsSending(false)
+      setIsSelectReplyLoading(false)
+    }
+  }, [isSending, isSelectReplyLoading, updateMemoryFromExchange])
+
+  const retrySelectDialogue = useCallback(() => {
+    const retry = selectRetryRef.current
+    if (!retry || retry.message === SELECT_DIALOGUE_START) {
+      startSelectDialogue()
+      return
+    }
+    sendSelectDialogueReply(retry.message, { appendUser: retry.appendUser })
+  }, [sendSelectDialogueReply, startSelectDialogue])
+
   const sendTeacherMessage = useCallback(async (text: string, quickMode?: TeacherQuickMode | null) => {
     const cleanText = text.trim()
     if (!cleanText || isSending) return
+
+    if (quickMode === 'select') {
+      sendSelectDialogueReply(cleanText)
+      return
+    }
 
     const serverMode = serverModeFromQuickMode(quickMode)
     const displayMode = messageModeFromServerMode(serverMode)
@@ -879,7 +1062,7 @@ export default function ZhiyuApp() {
     } finally {
       setIsSending(false)
     }
-  }, [isSending, updateMemoryFromExchange])
+  }, [isSending, sendSelectDialogueReply, updateMemoryFromExchange])
 
   const startTopicPractice = useCallback(async () => {
     if (isSending) return
@@ -933,9 +1116,15 @@ export default function ZhiyuApp() {
 
   const handleQuickAction = useCallback((action: TeacherQuickMode) => {
     if (action === 'topic') {
+      clearSelectDialogueState()
       startTopicPractice()
       return
     }
+    if (action === 'select') {
+      startSelectDialogue()
+      return
+    }
+    clearSelectDialogueState()
     setTeacherMode(action)
     setActiveTab('teacher')
     setShowExam(false)
@@ -959,7 +1148,7 @@ export default function ZhiyuApp() {
       mode: 'free-chat',
       timestamp: Date.now()
     }])
-  }, [startTopicPractice])
+  }, [clearSelectDialogueState, startSelectDialogue, startTopicPractice])
 
   const handleLogin = useCallback(async (email: string, password: string) => {
     if (!email.trim() || !password.trim()) throw new Error('账号和密码都要填。')
@@ -1327,8 +1516,14 @@ export default function ZhiyuApp() {
             activeMode={teacherMode}
             isSending={isSending}
             memoryProfile={memoryProfile}
+            replyOptions={selectReplyOptions}
+            replyOptionMeanings={selectReplyMeanings}
+            isReplyOptionsLoading={isSelectReplyLoading}
+            replyOptionsError={selectReplyError}
             onSendMessage={sendTeacherMessage}
             onQuickAction={handleQuickAction}
+            onSelectReplyOption={sendSelectDialogueReply}
+            onRetryReplyOptions={retrySelectDialogue}
             onAddSentence={handleAddSentence}
             onToggleMemory={handleToggleMemory}
             onClearMemory={handleClearMemory}

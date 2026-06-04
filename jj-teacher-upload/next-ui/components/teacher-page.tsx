@@ -2,20 +2,26 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { Send, MessageCircle, Sparkles, Coffee, Brain, X, Trash2, Power } from 'lucide-react'
+import { Send, MessageCircle, Sparkles, Coffee, Brain, X, Trash2, Power, MousePointerClick, RefreshCw, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ChatMessage } from '@/components/chat-message'
 import type { TeacherMessage, TutorMemoryProfile } from '@/lib/sample-data'
 
-export type TeacherQuickMode = 'topic' | 'daily' | 'free'
+export type TeacherQuickMode = 'topic' | 'daily' | 'free' | 'select'
 
 interface TeacherPageProps {
   messages: TeacherMessage[]
   activeMode?: TeacherQuickMode | null
   isSending?: boolean
   memoryProfile?: TutorMemoryProfile
+  replyOptions?: string[]
+  replyOptionMeanings?: string[]
+  isReplyOptionsLoading?: boolean
+  replyOptionsError?: string
   onSendMessage?: (text: string, mode?: TeacherQuickMode | null) => void
   onQuickAction?: (action: TeacherQuickMode) => void
+  onSelectReplyOption?: (option: string) => void
+  onRetryReplyOptions?: () => void
   onAddSentence?: (text: string, note: string) => void
   onToggleMemory?: (enabled: boolean) => void
   onClearMemory?: () => void
@@ -37,16 +43,25 @@ export function TeacherPage({
   activeMode = null,
   isSending = false,
   memoryProfile,
+  replyOptions = [],
+  replyOptionMeanings = [],
+  isReplyOptionsLoading = false,
+  replyOptionsError = '',
   onSendMessage,
   onQuickAction,
+  onSelectReplyOption,
+  onRetryReplyOptions,
   onAddSentence,
   onToggleMemory,
   onClearMemory
 }: TeacherPageProps) {
   const [inputValue, setInputValue] = useState('')
   const [showMemory, setShowMemory] = useState(false)
+  const [optionPreview, setOptionPreview] = useState<{ text: string; note: string } | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const longPressFiredRef = useRef(false)
   const memory = memoryProfile || {
     enabled: true,
     summary: '',
@@ -77,6 +92,12 @@ export function TeacherPage({
     scrollToBottom()
   }, [messages])
 
+  useEffect(() => {
+    return () => {
+      if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current)
+    }
+  }, [])
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!inputValue.trim() || isSending) return
@@ -95,6 +116,34 @@ export function TeacherPage({
     target.style.height = 'auto'
     target.style.height = Math.min(target.scrollHeight, 120) + 'px'
   }
+
+  const clearOptionLongPress = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current)
+      longPressTimerRef.current = null
+    }
+  }
+
+  const startOptionLongPress = (option: string, note: string) => {
+    clearOptionLongPress()
+    longPressFiredRef.current = false
+    longPressTimerRef.current = setTimeout(() => {
+      longPressFiredRef.current = true
+      setOptionPreview({ text: option, note: note || '中文意思待补充' })
+    }, 520)
+  }
+
+  const handleOptionClick = (option: string) => {
+    if (longPressFiredRef.current) {
+      setTimeout(() => {
+        longPressFiredRef.current = false
+      }, 0)
+      return
+    }
+    onSelectReplyOption?.(option)
+  }
+
+  const visibleReplyOptions = replyOptions.slice(0, 3)
 
   return (
     <section id="teacherPage" className="flex flex-1 min-h-0 flex-col animate-fade-in">
@@ -177,6 +226,20 @@ export function TeacherPage({
             闲聊模式
           </button>
           <button
+            id="selectDialogueButton"
+            onClick={() => handleQuickAction('select')}
+            disabled={isSending}
+            className={cn(
+              "flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-semibold tracking-wide whitespace-nowrap transition-premium",
+              activeMode === 'select'
+                ? "glass-button-primary"
+                : "glass-button text-white/55 hover:text-white/85"
+            )}
+          >
+            <MousePointerClick className="w-[18px] h-[18px]" />
+            点选对话
+          </button>
+          <button
             id="memoryButton"
             type="button"
             onClick={() => setShowMemory(true)}
@@ -187,6 +250,73 @@ export function TeacherPage({
           </button>
         </div>
       </div>
+
+      {(activeMode === 'select' || visibleReplyOptions.length > 0 || replyOptionsError) && (
+        <div className="flex-shrink-0 px-5 pb-3">
+          <div className="relative glass-card rounded-3xl px-4 py-3 overflow-hidden">
+            <div className="inner-glow rounded-3xl" />
+            <div className="relative mb-2 flex items-center justify-between gap-3">
+              <p className="text-[10px] text-[oklch(0.70_0.15_280)] font-semibold tracking-[0.16em] uppercase">
+                Pick a Reply
+              </p>
+              {isReplyOptionsLoading && (
+                <span className="text-[11px] text-white/35">正在生成...</span>
+              )}
+            </div>
+
+            {visibleReplyOptions.length > 0 ? (
+              <div className="relative flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                {visibleReplyOptions.map((option, index) => {
+                  const note = replyOptionMeanings[index] || ''
+                  return (
+                    <button
+                      key={`${option}-${index}`}
+                      type="button"
+                      disabled={isSending || isReplyOptionsLoading}
+                      onPointerDown={() => startOptionLongPress(option, note)}
+                      onPointerUp={clearOptionLongPress}
+                      onPointerCancel={clearOptionLongPress}
+                      onPointerLeave={clearOptionLongPress}
+                      onContextMenu={(event) => {
+                        event.preventDefault()
+                        clearOptionLongPress()
+                        setOptionPreview({ text: option, note: note || '中文意思待补充' })
+                      }}
+                      onClick={() => handleOptionClick(option)}
+                      className={cn(
+                        "min-w-[78%] rounded-2xl border border-[oklch(0.70_0.15_280_/_0.26)] bg-[oklch(0.70_0.15_280_/_0.075)] px-4 py-3 text-left text-sm font-semibold leading-relaxed text-white/86 shadow-[0_0_24px_oklch(0.70_0.15_280_/_0.08)] transition-premium",
+                        "hover:bg-[oklch(0.70_0.15_280_/_0.14)] active:scale-[0.98]",
+                        (isSending || isReplyOptionsLoading) && "opacity-50"
+                      )}
+                    >
+                      {option}
+                    </button>
+                  )
+                })}
+              </div>
+            ) : (
+              <p className="relative text-sm text-white/42 leading-relaxed">
+                {isReplyOptionsLoading ? 'AI 正在准备可以直接点击的英文回复...' : '点击“点选对话”开始。'}
+              </p>
+            )}
+
+            {replyOptionsError && (
+              <div className="relative mt-3 flex items-center justify-between gap-3 rounded-2xl border border-[oklch(0.62_0.22_25_/_0.22)] bg-[oklch(0.62_0.22_25_/_0.08)] px-3 py-2">
+                <p className="text-xs text-[oklch(0.72_0.20_25)]">{replyOptionsError}</p>
+                <button
+                  type="button"
+                  onClick={onRetryReplyOptions}
+                  disabled={isSending || isReplyOptionsLoading}
+                  className="flex shrink-0 items-center gap-1.5 rounded-xl px-2 py-1.5 text-xs font-semibold text-white/75 transition-premium hover:text-white"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  重新生成
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* 输入框 - 高级玻璃效果 */}
       <form onSubmit={handleSubmit} className="flex-shrink-0 px-5 pb-[calc(96px+env(safe-area-inset-bottom))]">
@@ -222,6 +352,52 @@ export function TeacherPage({
           </button>
         </div>
       </form>
+
+      {optionPreview && typeof document !== 'undefined' ? createPortal((
+        <div className="fixed inset-0 z-[130] flex items-end justify-center bg-black/70 backdrop-blur-md px-4 pb-4 pt-20 animate-fade-in">
+          <button
+            className="absolute inset-0 cursor-default"
+            aria-label="关闭回复意思"
+            onClick={() => setOptionPreview(null)}
+          />
+          <div className="relative w-full max-w-[520px] glass-sheet rounded-[2rem] p-5 animate-scale-in">
+            <div className="top-highlight" />
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <p className="text-[10px] text-[oklch(0.70_0.15_280)] font-semibold tracking-[0.18em] uppercase mb-1">
+                  Reply
+                </p>
+                <h2 className="text-lg font-semibold text-white/95 leading-relaxed">{optionPreview.text}</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setOptionPreview(null)}
+                className="w-10 h-10 rounded-2xl glass-button flex items-center justify-center text-white/55 hover:text-white transition-premium"
+                aria-label="关闭"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="rounded-2xl border border-white/[0.06] bg-white/[0.035] px-4 py-4 mb-4">
+              <p className="text-[11px] text-[oklch(0.70_0.15_280)] font-semibold tracking-[0.14em] uppercase mb-2">
+                中文意思
+              </p>
+              <p className="text-sm text-white/72 leading-relaxed">{optionPreview.note}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                onAddSentence?.(optionPreview.text, optionPreview.note)
+                setOptionPreview(null)
+              }}
+              className="w-full h-12 rounded-2xl glass-button-primary flex items-center justify-center gap-2 text-sm font-semibold transition-premium"
+            >
+              <Plus className="w-4 h-4" />
+              加入句读
+            </button>
+          </div>
+        </div>
+      ), document.body) : null}
 
       {showMemory && typeof document !== 'undefined' ? createPortal((
         <div className="fixed inset-0 z-[120] flex items-end justify-center bg-black/70 backdrop-blur-md px-4 pb-4 pt-20 animate-fade-in">

@@ -942,6 +942,50 @@ async function handleAiTeacher(request, response) {
     return;
   }
 
+  if (mode === "select-dialogue") {
+    const message = String(payload.message || "").trim();
+    const history = Array.isArray(payload.messages) ? payload.messages.slice(-10) : [];
+    if (!message) {
+      sendJson(response, 400, { error: "Message is required" });
+      return;
+    }
+
+    const raw = await askAiTeacher(
+      buildSelectDialoguePrompt(message, history, targetLanguage, memoryProfile),
+      mode,
+      targetLanguage
+    );
+    const data = extractJsonObject(raw) || {};
+    const aiMessage = String(data.aiMessage || data.reply || "").replace(/\s+/g, " ").trim();
+    const rawOptions = Array.isArray(data.replyOptions) ? data.replyOptions : [];
+    const rawMeanings = Array.isArray(data.replyOptionMeanings) ? data.replyOptionMeanings : [];
+    const seen = new Set();
+    const replyOptions = [];
+    const replyOptionMeanings = [];
+
+    rawOptions.forEach((item, index) => {
+      const option = String(item || "").replace(/\s+/g, " ").trim();
+      const key = option.toLowerCase();
+      if (!option || seen.has(key) || /[\u4e00-\u9fff]/u.test(option)) return;
+      seen.add(key);
+      replyOptions.push(option.slice(0, 150));
+      replyOptionMeanings.push(String(rawMeanings[index] || "").trim().slice(0, 180));
+    });
+
+    if (!aiMessage || replyOptions.length < 2) {
+      sendJson(response, 502, { error: "No selectable dialogue returned", message: "生成失败，请重试" });
+      return;
+    }
+
+    sendJson(response, 200, {
+      aiMessage: aiMessage.slice(0, 500),
+      reply: aiMessage.slice(0, 500),
+      replyOptions: replyOptions.slice(0, 3),
+      replyOptionMeanings: replyOptionMeanings.slice(0, 3),
+    });
+    return;
+  }
+
   if (mode === "explain") {
     const sentence = String(payload.sentence || "").trim();
     if (!sentence) {
@@ -1095,6 +1139,43 @@ function buildGenerateSentencePrompt(chinese, targetLanguage = "english") {
     "Only create a new category if it is clearly useful and no preferred category fits. Keep it under 6 Chinese characters.",
     `Chinese meaning: ${chinese}`,
   ].join("\n");
+}
+
+function buildSelectDialoguePrompt(message, history, targetLanguage = "english", memoryProfile = {}) {
+  const language = getTargetLanguageInfo(targetLanguage);
+  const isStart = message === "START_SELECT_DIALOGUE";
+  const cleanHistory = Array.isArray(history)
+    ? history
+        .filter((item) => item && typeof item.text === "string" && (item.role === "user" || item.role === "assistant"))
+        .map((item) => `${item.role === "user" ? "User" : "AI"}: ${limitText(item.text, 500)}`)
+        .join("\n")
+    : "";
+
+  return [
+    `The learner is practicing spoken ${language.label} through a point-and-click chat mode.`,
+    "Return compact JSON only. No Markdown. No extra text.",
+    'Required shape: {"aiMessage":"","replyOptions":["","",""],"replyOptionMeanings":["","",""]}',
+    "aiMessage rules:",
+    "1. Write one short natural English chat message as the AI.",
+    "2. Sound like a real friendly person, not a textbook or grammar teacher.",
+    "3. Do not explain grammar unless the user directly asks.",
+    "4. Ask or imply one easy next direction so the learner can continue.",
+    "replyOptions rules:",
+    "1. Provide 2 or 3 natural English replies the learner can tap.",
+    "2. Each option must be short, casual, and directly sendable.",
+    "3. Options must have different tones or directions.",
+    "4. Do not include Chinese in replyOptions.",
+    "replyOptionMeanings rules:",
+    "1. Provide Simplified Chinese meanings matching replyOptions by index.",
+    "2. Keep each meaning concise.",
+    formatMemoryForPrompt(memoryProfile),
+    cleanHistory ? `Recent conversation:\n${cleanHistory}` : "",
+    isStart
+      ? "Start a simple everyday conversation topic. Do not mention that this is a mode or that options will appear."
+      : `The learner selected or typed this reply: ${message}`,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 }
 
 function normalizeGeneratedCategory(category, english = "", chinese = "") {
@@ -1511,6 +1592,9 @@ function buildAiInstructions(mode = "chat", targetLanguage = "english") {
   }
   if (mode === "generate-sentence") {
     return `Return compact JSON only. Generate one natural spoken ${language.label} sentence from the Chinese meaning, with a short Chinese category. No Markdown, no extra text.`;
+  }
+  if (mode === "select-dialogue") {
+    return `You run a point-and-click spoken ${language.label} chat practice mode. Return valid compact JSON only with aiMessage, replyOptions, and replyOptionMeanings. No Markdown, no labels outside JSON.`;
   }
   if (mode === "memory") {
     return "You update long-term user memory for a language learning app. Return valid compact JSON only.";
