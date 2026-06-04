@@ -1,6 +1,6 @@
 {
-  "versionCode": 80,
-  "versionName": "free80",
-  "apkUrl": "https://files.catbox.moe/q5f2dp.apk",
-  "notes": "free80: 语言助手翻译结果切换页面后保留，并新增一键重置按钮。"
+  "versionCode": 81,
+  "versionName": "free81",
+  "apkUrl": "https://files.catbox.moe/lf62q9.apk",
+  "notes": "free81: 点选对话新增双方新句子自动朗读、静音按钮，并给我方消息增加翻译和朗读。"
 }

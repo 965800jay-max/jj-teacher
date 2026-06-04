@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { RefreshCw } from 'lucide-react'
+import { Languages, RefreshCw, Volume2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { speakEnglish } from '@/lib/speech'
 import { SpeakableText } from '@/components/speakable-text'
@@ -124,6 +124,33 @@ function extractChineseLines(text: string) {
     .join('\n')
 }
 
+function extractSpeakableEnglish(text: string) {
+  const clean = String(text || '').replace(/\s+/g, ' ').trim()
+  if (!clean) return ''
+  const chunks = clean
+    .replace(/[\u4e00-\u9fff]+/g, '\n')
+    .split(/\n+/)
+    .map((line) => line.replace(/^\s*(英文|English|中文意思|中文|Meaning)\s*[:：]\s*/i, '').trim())
+    .filter((line) => /[A-Za-z]/.test(line))
+  const result = chunks.join(' ').replace(/\s+/g, ' ').trim()
+  if (result) return result
+  return /[A-Za-z]/.test(clean) && !hasChinese(clean) ? clean : ''
+}
+
+function translationFallback(text: string) {
+  return hasChinese(text) ? '英文表达待补充' : '中文意思待补充'
+}
+
+function translationLoadingText(text: string) {
+  return hasChinese(text) ? '正在生成英文表达...' : '正在生成中文意思...'
+}
+
+function translationButtonLabel(text: string, isOpen: boolean, isLoading: boolean) {
+  if (isOpen) return hasChinese(text) ? '隐藏英文' : '隐藏中文'
+  if (isLoading) return hasChinese(text) ? '生成英文' : '生成中文'
+  return hasChinese(text) ? '译英' : '译中'
+}
+
 function isExplanationStyleText(text: string) {
   const clean = String(text || '').trim()
   if (!hasChinese(clean) || !/[A-Za-z]/.test(clean)) return false
@@ -143,10 +170,12 @@ export function ChatMessage({ message, compactAfter = false, onSpeak, onAddSente
   const messageLayerClass = openMenuKey ? 'relative z-[120]' : 'relative z-0'
 
   const handleSpeak = (text: string, id: string) => {
+    const speakText = extractSpeakableEnglish(text)
+    if (!speakText) return
     setPlayingId(id)
     setTimeout(() => setPlayingId(null), 300)
-    speakEnglish(text, { mode: 'sentence', rate: 0.9 })
-    onSpeak?.(text)
+    speakEnglish(speakText, { mode: 'sentence', rate: 0.9 })
+    onSpeak?.(speakText)
   }
 
   const handleToggleMeaning = async (key: string, text: string, knownMeaning = '') => {
@@ -164,12 +193,12 @@ export function ChatMessage({ message, compactAfter = false, onSpeak, onAddSente
       const translated = await onTranslateText(text)
       setMeaningCache((current) => ({
         ...current,
-        [key]: translated || '中文意思待补充'
+        [key]: translated || translationFallback(text)
       }))
     } catch {
       setMeaningCache((current) => ({
         ...current,
-        [key]: '中文意思待补充'
+        [key]: translationFallback(text)
       }))
     } finally {
       setLoadingMeaningKey(null)
@@ -248,7 +277,7 @@ export function ChatMessage({ message, compactAfter = false, onSpeak, onAddSente
         {renderBubbleMenu(text, note, key)}
         {isMeaningOpen && (
           <p className="mt-2.5 border-t border-white/[0.06] pt-2 text-xs leading-relaxed text-[oklch(0.70_0.15_280_/_0.62)] whitespace-pre-wrap">
-            {loadingMeaningKey === key ? '正在生成中文意思...' : meaning || '中文意思待补充'}
+            {loadingMeaningKey === key ? translationLoadingText(text) : meaning || translationFallback(text)}
           </p>
         )}
       </div>
@@ -341,11 +370,42 @@ export function ChatMessage({ message, compactAfter = false, onSpeak, onAddSente
   const parsed = parseContent()
 
   if (isUser) {
+    const userTranslationKey = `user-message-${message.id}`
+    const isUserTranslationOpen = expandedMeaningKey === userTranslationKey
+    const userTranslation = meaningCache[userTranslationKey] || ''
+    const canSpeakUserText = Boolean(extractSpeakableEnglish(message.text))
+
     return (
       <div className={cn("flex justify-end animate-slide-up", messageGapClass, messageLayerClass)}>
         <div className="max-w-[86%] space-y-2">
           <div className="relative rounded-2xl rounded-br-md bg-[oklch(0.70_0.15_280_/_0.16)] backdrop-blur-xl border border-[oklch(0.70_0.15_280_/_0.24)] px-4 py-3 shadow-[0_0_22px_oklch(0.70_0.15_280_/_0.1)]">
             <p className="relative text-[14px] text-white/95 leading-relaxed">{message.text}</p>
+            <div className="mt-2 flex justify-end gap-1.5">
+              <button
+                type="button"
+                onClick={() => handleSpeak(message.text, `user-speak-${message.id}`)}
+                disabled={!canSpeakUserText}
+                className="flex h-7 items-center gap-1 rounded-xl border border-white/[0.07] bg-black/10 px-2 text-[11px] font-semibold text-white/58 transition-premium hover:text-white disabled:opacity-30"
+                aria-label="朗读我的消息"
+              >
+                <Volume2 className="h-3.5 w-3.5" />
+                朗读
+              </button>
+              <button
+                type="button"
+                onClick={() => handleToggleMeaning(userTranslationKey, message.text)}
+                className="flex h-7 items-center gap-1 rounded-xl border border-white/[0.07] bg-black/10 px-2 text-[11px] font-semibold text-white/58 transition-premium hover:text-white"
+                aria-label="翻译我的消息"
+              >
+                <Languages className="h-3.5 w-3.5" />
+                {translationButtonLabel(message.text, isUserTranslationOpen, loadingMeaningKey === userTranslationKey)}
+              </button>
+            </div>
+            {isUserTranslationOpen && (
+              <p className="mt-2.5 border-t border-white/[0.08] pt-2 text-xs leading-relaxed text-[oklch(0.83_0.13_280_/_0.76)] whitespace-pre-wrap">
+                {loadingMeaningKey === userTranslationKey ? translationLoadingText(message.text) : userTranslation || translationFallback(message.text)}
+              </p>
+            )}
           </div>
           
           {message.translation && (

@@ -2,9 +2,10 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { Send, MessageCircle, Sparkles, Coffee, Brain, X, Trash2, Power, MousePointerClick, RefreshCw, Plus } from 'lucide-react'
+import { Send, MessageCircle, Sparkles, Coffee, Brain, X, Trash2, Power, MousePointerClick, RefreshCw, Plus, Volume2, VolumeX } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ChatMessage } from '@/components/chat-message'
+import { speakEnglish } from '@/lib/speech'
 import type { TeacherMessage, TutorMemoryProfile } from '@/lib/sample-data'
 
 export type TeacherQuickMode = 'topic' | 'daily' | 'free' | 'select' | 'hair' | 'client'
@@ -39,6 +40,25 @@ const memorySectionLabels: Array<[keyof TutorMemoryProfile, string]> = [
   ['avoid', '避开']
 ]
 
+const SELECT_DIALOGUE_MUTE_KEY = 'sentence-reader-select-dialogue-muted'
+
+function hasChinese(text: string) {
+  return /[\u4e00-\u9fff]/.test(text)
+}
+
+function extractSpeakableEnglish(text: string) {
+  const clean = String(text || '').replace(/\s+/g, ' ').trim()
+  if (!clean) return ''
+  const chunks = clean
+    .replace(/[\u4e00-\u9fff]+/g, '\n')
+    .split(/\n+/)
+    .map((line) => line.replace(/^\s*(英文|English|中文意思|中文|Meaning)\s*[:：]\s*/i, '').trim())
+    .filter((line) => /[A-Za-z]/.test(line))
+  const result = chunks.join(' ').replace(/\s+/g, ' ').trim()
+  if (result) return result
+  return /[A-Za-z]/.test(clean) && !hasChinese(clean) ? clean : ''
+}
+
 export function TeacherPage({
   messages,
   activeMode = null,
@@ -60,10 +80,13 @@ export function TeacherPage({
   const [inputValue, setInputValue] = useState('')
   const [showMemory, setShowMemory] = useState(false)
   const [optionPreview, setOptionPreview] = useState<{ text: string; note: string } | null>(null)
+  const [selectDialogueMuted, setSelectDialogueMuted] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const longPressFiredRef = useRef(false)
+  const spokenMessageIdsRef = useRef<Set<string>>(new Set())
+  const mountedAtRef = useRef(Date.now())
   const memory = memoryProfile || {
     enabled: true,
     summary: '',
@@ -93,6 +116,36 @@ export function TeacherPage({
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    setSelectDialogueMuted(window.localStorage.getItem(SELECT_DIALOGUE_MUTE_KEY) === '1')
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    window.localStorage.setItem(SELECT_DIALOGUE_MUTE_KEY, selectDialogueMuted ? '1' : '0')
+  }, [selectDialogueMuted])
+
+  useEffect(() => {
+    const newMessages = messages.filter((message) => !spokenMessageIdsRef.current.has(message.id))
+    newMessages.forEach((message) => spokenMessageIdsRef.current.add(message.id))
+    if (selectDialogueMuted || !newMessages.length) return
+
+    newMessages
+      .filter((message) =>
+        message.mode === 'select-dialogue' &&
+        !message.pending &&
+        (!message.timestamp || message.timestamp >= mountedAtRef.current - 1000)
+      )
+      .forEach((message, index) => {
+        const speakText = extractSpeakableEnglish(message.text)
+        if (!speakText) return
+        window.setTimeout(() => {
+          speakEnglish(speakText, { mode: 'sentence', rate: 0.9 }).catch(() => {})
+        }, index * 520)
+      })
+  }, [messages, selectDialogueMuted])
 
   useEffect(() => {
     return () => {
@@ -179,6 +232,20 @@ export function TeacherPage({
               </button>
             )
           })}
+          <button
+            id="selectDialogueMuteButton"
+            type="button"
+            onClick={() => setSelectDialogueMuted((current) => !current)}
+            className={cn(
+              "flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-semibold tracking-wide whitespace-nowrap transition-premium border",
+              selectDialogueMuted
+                ? "border-[oklch(0.70_0.15_280_/_0.45)] bg-[oklch(0.70_0.15_280_/_0.16)] text-white shadow-[0_0_18px_oklch(0.70_0.15_280_/_0.18)]"
+                : "border-white/[0.08] bg-white/[0.035] text-white/55 hover:text-white/85"
+            )}
+          >
+            {selectDialogueMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+            {selectDialogueMuted ? '已静音' : '静音'}
+          </button>
           <button
             id="memoryButton"
             type="button"

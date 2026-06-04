@@ -58,8 +58,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 80
-const CURRENT_VERSION_NAME = 'free80'
+const CURRENT_VERSION_CODE = 81
+const CURRENT_VERSION_NAME = 'free81'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -841,17 +841,20 @@ export default function ZhiyuApp() {
     const cache = readJson<Record<string, string>>(TEACHER_TRANSLATION_CACHE_KEY, {})
     if (cache[cleanText]) return cache[cleanText]
 
+    const shouldTranslateToEnglish = /[\u4e00-\u9fff]/.test(cleanText)
     const data = await requestAiTeacher({
       mode: 'chat',
-      message: `请把下面英文翻译成简洁自然的中文意思。只输出中文，不要解释，不要加标签：${cleanText}`,
+      message: shouldTranslateToEnglish
+        ? `请把下面中文转换成自然、口语化、美国本地人常用的英文表达。只输出英文句子，不要解释，不要加标签：${cleanText}`
+        : `请把下面英文翻译成简洁自然的中文意思。只输出中文，不要解释，不要加标签：${cleanText}`,
       messages: []
     })
-    const translated = String(data.reply || data.chinese || '')
-      .replace(/^\s*(中文意思|中文|Meaning|Chinese)\s*[:：]\s*/i, '')
+    const translated = String(data.reply || data.english || data.chinese || '')
+      .replace(/^\s*(英文|英语|English|中文意思|中文|Meaning|Chinese)\s*[:：]\s*/i, '')
       .replace(/\s+/g, ' ')
       .trim()
       .slice(0, 180)
-    const meaning = translated || '中文意思待补充'
+    const meaning = translated || (shouldTranslateToEnglish ? '英文表达待补充' : '中文意思待补充')
 
     writeJson(TEACHER_TRANSLATION_CACHE_KEY, {
       ...cache,
