@@ -1,6 +1,6 @@
 {
-  "versionCode": 81,
-  "versionName": "free81",
-  "apkUrl": "https://files.catbox.moe/lf62q9.apk",
-  "notes": "free81: 点选对话新增双方新句子自动朗读、静音按钮，并给我方消息增加翻译和朗读。"
+  "versionCode": 82,
+  "versionName": "free82",
+  "apkUrl": "https://files.catbox.moe/3jplgo.apk",
+  "notes": "free82: 我方消息朗读和翻译收进三点菜单，和 AI 消息操作保持一致。"
 }

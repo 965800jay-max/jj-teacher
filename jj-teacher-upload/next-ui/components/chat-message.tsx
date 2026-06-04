@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Languages, RefreshCw, Volume2 } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { speakEnglish } from '@/lib/speech'
 import { SpeakableText } from '@/components/speakable-text'
@@ -148,7 +148,7 @@ function translationLoadingText(text: string) {
 function translationButtonLabel(text: string, isOpen: boolean, isLoading: boolean) {
   if (isOpen) return hasChinese(text) ? '隐藏英文' : '隐藏中文'
   if (isLoading) return hasChinese(text) ? '生成英文' : '生成中文'
-  return hasChinese(text) ? '译英' : '译中'
+  return hasChinese(text) ? '查看英文' : '查看中文'
 }
 
 function isExplanationStyleText(text: string) {
@@ -205,9 +205,10 @@ export function ChatMessage({ message, compactAfter = false, onSpeak, onAddSente
     }
   }
 
-  const renderBubbleMenu = (text: string, note: string, key: string) => {
+  const renderBubbleMenu = (text: string, note: string, key: string, options: { showAddSentence?: boolean } = {}) => {
     const isMeaningOpen = expandedMeaningKey === key
     const meaning = note || meaningCache[key] || ''
+    const showAddSentence = options.showAddSentence !== false
     return (
       <div className="absolute bottom-2 right-2 z-[140]">
         <button
@@ -241,19 +242,21 @@ export function ChatMessage({ message, compactAfter = false, onSpeak, onAddSente
               className="flex h-9 w-full items-center gap-2 rounded-xl px-2.5 text-left text-[12px] font-semibold text-white/72 transition-premium hover:bg-white/[0.06] hover:text-white"
             >
               <span className="text-[13px]">🌐</span>
-              {isMeaningOpen ? '隐藏中文' : loadingMeaningKey === key ? '生成中文' : '查看中文'}
+              {translationButtonLabel(text, isMeaningOpen, loadingMeaningKey === key)}
             </button>
-            <button
-              type="button"
-              onClick={() => {
-                onAddSentence?.(text, note || meaning)
-                setOpenMenuKey(null)
-              }}
-              className="flex h-9 w-full items-center gap-2 rounded-xl px-2.5 text-left text-[12px] font-semibold text-white/72 transition-premium hover:bg-white/[0.06] hover:text-white"
-            >
-              <span className="text-[13px]">⭐</span>
-              加入句库
-            </button>
+            {showAddSentence && (
+              <button
+                type="button"
+                onClick={() => {
+                  onAddSentence?.(text, note || meaning)
+                  setOpenMenuKey(null)
+                }}
+                className="flex h-9 w-full items-center gap-2 rounded-xl px-2.5 text-left text-[12px] font-semibold text-white/72 transition-premium hover:bg-white/[0.06] hover:text-white"
+              >
+                <span className="text-[13px]">⭐</span>
+                加入句库
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -373,34 +376,13 @@ export function ChatMessage({ message, compactAfter = false, onSpeak, onAddSente
     const userTranslationKey = `user-message-${message.id}`
     const isUserTranslationOpen = expandedMeaningKey === userTranslationKey
     const userTranslation = meaningCache[userTranslationKey] || ''
-    const canSpeakUserText = Boolean(extractSpeakableEnglish(message.text))
 
     return (
       <div className={cn("flex justify-end animate-slide-up", messageGapClass, messageLayerClass)}>
         <div className="max-w-[86%] space-y-2">
-          <div className="relative rounded-2xl rounded-br-md bg-[oklch(0.70_0.15_280_/_0.16)] backdrop-blur-xl border border-[oklch(0.70_0.15_280_/_0.24)] px-4 py-3 shadow-[0_0_22px_oklch(0.70_0.15_280_/_0.1)]">
+          <div className="relative rounded-2xl rounded-br-md bg-[oklch(0.70_0.15_280_/_0.16)] backdrop-blur-xl border border-[oklch(0.70_0.15_280_/_0.24)] px-4 py-3 pr-10 shadow-[0_0_22px_oklch(0.70_0.15_280_/_0.1)]">
             <p className="relative text-[14px] text-white/95 leading-relaxed">{message.text}</p>
-            <div className="mt-2 flex justify-end gap-1.5">
-              <button
-                type="button"
-                onClick={() => handleSpeak(message.text, `user-speak-${message.id}`)}
-                disabled={!canSpeakUserText}
-                className="flex h-7 items-center gap-1 rounded-xl border border-white/[0.07] bg-black/10 px-2 text-[11px] font-semibold text-white/58 transition-premium hover:text-white disabled:opacity-30"
-                aria-label="朗读我的消息"
-              >
-                <Volume2 className="h-3.5 w-3.5" />
-                朗读
-              </button>
-              <button
-                type="button"
-                onClick={() => handleToggleMeaning(userTranslationKey, message.text)}
-                className="flex h-7 items-center gap-1 rounded-xl border border-white/[0.07] bg-black/10 px-2 text-[11px] font-semibold text-white/58 transition-premium hover:text-white"
-                aria-label="翻译我的消息"
-              >
-                <Languages className="h-3.5 w-3.5" />
-                {translationButtonLabel(message.text, isUserTranslationOpen, loadingMeaningKey === userTranslationKey)}
-              </button>
-            </div>
+            {renderBubbleMenu(message.text, '', userTranslationKey, { showAddSentence: false })}
             {isUserTranslationOpen && (
               <p className="mt-2.5 border-t border-white/[0.08] pt-2 text-xs leading-relaxed text-[oklch(0.83_0.13_280_/_0.76)] whitespace-pre-wrap">
                 {loadingMeaningKey === userTranslationKey ? translationLoadingText(message.text) : userTranslation || translationFallback(message.text)}
