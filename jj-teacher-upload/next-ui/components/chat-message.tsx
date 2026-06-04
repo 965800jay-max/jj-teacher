@@ -132,6 +132,7 @@ export function ChatMessage({ message, compactAfter = false, onSpeak, onAddSente
   const [loadingMeaningKey, setLoadingMeaningKey] = useState<string | null>(null)
   const [openMenuKey, setOpenMenuKey] = useState<string | null>(null)
   const messageGapClass = compactAfter ? 'mb-1.5' : 'mb-3'
+  const messageLayerClass = openMenuKey ? 'relative z-[120]' : 'relative z-0'
 
   const handleSpeak = (text: string, id: string) => {
     setPlayingId(id)
@@ -171,7 +172,7 @@ export function ChatMessage({ message, compactAfter = false, onSpeak, onAddSente
     const isMeaningOpen = expandedMeaningKey === key
     const meaning = note || meaningCache[key] || ''
     return (
-      <div className="absolute bottom-2 right-2 z-20">
+      <div className="absolute bottom-2 right-2 z-[140]">
         <button
           type="button"
           onClick={() => setOpenMenuKey((current) => current === key ? null : key)}
@@ -185,7 +186,7 @@ export function ChatMessage({ message, compactAfter = false, onSpeak, onAddSente
         </button>
 
         {openMenuKey === key && (
-          <div className="absolute right-0 top-8 z-30 w-[148px] rounded-2xl border border-white/[0.08] bg-black/90 p-1.5 shadow-[0_12px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl animate-scale-in">
+          <div className="absolute right-0 top-8 z-[999] w-[148px] rounded-2xl border border-white/[0.08] bg-black/90 p-1.5 shadow-[0_12px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl animate-scale-in">
             <button
               type="button"
               onClick={() => {
@@ -226,7 +227,11 @@ export function ChatMessage({ message, compactAfter = false, onSpeak, onAddSente
     const isMeaningOpen = expandedMeaningKey === key
     const meaning = note || meaningCache[key] || ''
     return (
-      <div className={cn("relative rounded-2xl rounded-bl-md border border-[oklch(0.70_0.15_280_/_0.16)] bg-white/[0.055] px-4 py-3 pr-10 backdrop-blur-xl shadow-[0_0_18px_oklch(0.70_0.15_280_/_0.06)]", extraClass)}>
+      <div className={cn(
+        "relative overflow-visible rounded-2xl rounded-bl-md border border-[oklch(0.70_0.15_280_/_0.16)] bg-white/[0.055] px-4 py-3 pr-10 backdrop-blur-xl shadow-[0_0_18px_oklch(0.70_0.15_280_/_0.06)]",
+        openMenuKey === key ? "z-[130]" : "z-0",
+        extraClass
+      )}>
         <div>
           <p className="whitespace-pre-wrap text-[14px] font-semibold text-white/94 leading-relaxed">
             <SpeakableText text={text} rate={0.9} />
@@ -325,7 +330,7 @@ export function ChatMessage({ message, compactAfter = false, onSpeak, onAddSente
 
   if (isUser) {
     return (
-      <div className={cn("flex justify-end animate-slide-up", messageGapClass)}>
+      <div className={cn("flex justify-end animate-slide-up", messageGapClass, messageLayerClass)}>
         <div className="max-w-[86%] space-y-2">
           <div className="relative rounded-2xl rounded-br-md bg-[oklch(0.70_0.15_280_/_0.16)] backdrop-blur-xl border border-[oklch(0.70_0.15_280_/_0.24)] px-4 py-3 shadow-[0_0_22px_oklch(0.70_0.15_280_/_0.1)]">
             <p className="relative text-[14px] text-white/95 leading-relaxed">{message.text}</p>
@@ -345,7 +350,7 @@ export function ChatMessage({ message, compactAfter = false, onSpeak, onAddSente
   }
 
   return (
-    <div className={cn("flex animate-slide-up", messageGapClass)}>
+    <div className={cn("flex animate-slide-up", messageGapClass, messageLayerClass)}>
       <div className="max-w-[86%] space-y-2">
         
         {parsed.type === 'daily-sentences' && (

@@ -1,6 +1,6 @@
 {
-  "versionCode": 73,
-  "versionName": "free73",
-  "apkUrl": "https://files.catbox.moe/xz2u0c.apk",
-  "notes": "free73: 将智语导师气泡操作收进单个菜单按钮，并压缩同一发送者连续消息间距。"
+  "versionCode": 74,
+  "versionName": "free74",
+  "apkUrl": "https://files.catbox.moe/gxqpf6.apk",
+  "notes": "free74: 修复智语导师气泡菜单被下方消息遮挡的问题。"
 }
