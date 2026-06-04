@@ -213,10 +213,11 @@ export function TeacherPage({
           </div>
         ) : (
           <>
-            {messages.map((msg) => (
+            {messages.map((msg, index) => (
               <ChatMessage 
                 key={msg.id} 
                 message={msg}
+                compactAfter={messages[index + 1]?.role === msg.role}
                 onAddSentence={onAddSentence}
                 onTranslateText={onTranslateText}
               />

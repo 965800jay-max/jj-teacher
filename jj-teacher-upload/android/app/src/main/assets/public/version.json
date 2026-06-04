@@ -1,6 +1,6 @@
 {
-  "versionCode": 72,
-  "versionName": "free72",
-  "apkUrl": "https://files.catbox.moe/kayeyk.apk",
-  "notes": "free72: 优化智语导师点选对话 UI，去掉消息外层大框，加入单条中文展开、双语回复 chips 和更紧凑底部导航。"
+  "versionCode": 73,
+  "versionName": "free73",
+  "apkUrl": "https://files.catbox.moe/xz2u0c.apk",
+  "notes": "free73: 将智语导师气泡操作收进单个菜单按钮，并压缩同一发送者连续消息间距。"
 }

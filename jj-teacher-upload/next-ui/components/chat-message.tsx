@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Play, Plus, RefreshCw } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { speakEnglish } from '@/lib/speech'
 import { SpeakableText } from '@/components/speakable-text'
@@ -9,6 +9,7 @@ import type { TeacherMessage } from '@/lib/sample-data'
 
 interface ChatMessageProps {
   message: TeacherMessage
+  compactAfter?: boolean
   onSpeak?: (text: string) => void
   onAddSentence?: (text: string, note: string) => void
   onTranslateText?: (text: string) => Promise<string>
@@ -123,12 +124,14 @@ function extractChineseLines(text: string) {
     .join('\n')
 }
 
-export function ChatMessage({ message, onSpeak, onAddSentence, onTranslateText }: ChatMessageProps) {
+export function ChatMessage({ message, compactAfter = false, onSpeak, onAddSentence, onTranslateText }: ChatMessageProps) {
   const isUser = message.role === 'user'
   const [playingId, setPlayingId] = useState<string | null>(null)
   const [expandedMeaningKey, setExpandedMeaningKey] = useState<string | null>(null)
   const [meaningCache, setMeaningCache] = useState<Record<string, string>>({})
   const [loadingMeaningKey, setLoadingMeaningKey] = useState<string | null>(null)
+  const [openMenuKey, setOpenMenuKey] = useState<string | null>(null)
+  const messageGapClass = compactAfter ? 'mb-1.5' : 'mb-3'
 
   const handleSpeak = (text: string, id: string) => {
     setPlayingId(id)
@@ -138,6 +141,7 @@ export function ChatMessage({ message, onSpeak, onAddSentence, onTranslateText }
   }
 
   const handleToggleMeaning = async (key: string, text: string, knownMeaning = '') => {
+    setOpenMenuKey(null)
     if (expandedMeaningKey === key) {
       setExpandedMeaningKey(null)
       return
@@ -163,44 +167,57 @@ export function ChatMessage({ message, onSpeak, onAddSentence, onTranslateText }
     }
   }
 
-  const renderBubbleActions = (text: string, note: string, key: string) => {
+  const renderBubbleMenu = (text: string, note: string, key: string) => {
     const isMeaningOpen = expandedMeaningKey === key
     const meaning = note || meaningCache[key] || ''
     return (
-      <div className="flex shrink-0 items-center gap-1 pt-0.5">
-        <button
-          onClick={() => handleSpeak(text, key)}
-          className={cn(
-            "w-8 h-8 rounded-full glass-button text-white/58 flex items-center justify-center hover:text-white transition-premium",
-            playingId === key && "scale-90 brightness-125"
-          )}
-          aria-label="播放英文"
-        >
-          <Play className={cn(
-            "w-3.5 h-3.5 ml-0.5 transition-transform duration-300",
-            playingId === key && "scale-125"
-          )} />
-        </button>
-        <button
-          onClick={() => onAddSentence?.(text, note || meaning)}
-          className="w-8 h-8 rounded-full glass-button text-white/58 flex items-center justify-center hover:text-[oklch(0.80_0.15_280)] transition-premium"
-          aria-label="加入句库"
-        >
-          <Plus className="w-3.5 h-3.5" />
-        </button>
+      <div className="absolute bottom-2 right-2 z-20">
         <button
           type="button"
-          onClick={() => handleToggleMeaning(key, text, note)}
+          onClick={() => setOpenMenuKey((current) => current === key ? null : key)}
           className={cn(
-            "w-8 h-8 rounded-full border text-[12px] font-semibold transition-premium",
-            isMeaningOpen
-              ? "border-[oklch(0.70_0.15_280_/_0.45)] bg-[oklch(0.70_0.15_280_/_0.16)] text-white"
-              : "border-white/[0.08] bg-white/[0.035] text-white/50 hover:text-white/80"
+            "flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.055] bg-white/[0.025] text-[18px] leading-none text-white/35 transition-premium hover:border-[oklch(0.70_0.15_280_/_0.22)] hover:text-white/70",
+            openMenuKey === key && "border-[oklch(0.70_0.15_280_/_0.34)] bg-[oklch(0.70_0.15_280_/_0.09)] text-white/80"
           )}
-          aria-label={isMeaningOpen ? '收起中文意思' : '显示中文意思'}
+          aria-label="消息操作"
         >
-          {loadingMeaningKey === key ? '...' : '中'}
+          ⋯
         </button>
+
+        {openMenuKey === key && (
+          <div className="absolute right-0 top-8 z-30 w-[148px] rounded-2xl border border-white/[0.08] bg-black/90 p-1.5 shadow-[0_12px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl animate-scale-in">
+            <button
+              type="button"
+              onClick={() => {
+                handleSpeak(text, key)
+                setOpenMenuKey(null)
+              }}
+              className="flex h-9 w-full items-center gap-2 rounded-xl px-2.5 text-left text-[12px] font-semibold text-white/72 transition-premium hover:bg-white/[0.06] hover:text-white"
+            >
+              <span className="text-[13px]">▶</span>
+              播放句子
+            </button>
+            <button
+              type="button"
+              onClick={() => handleToggleMeaning(key, text, note)}
+              className="flex h-9 w-full items-center gap-2 rounded-xl px-2.5 text-left text-[12px] font-semibold text-white/72 transition-premium hover:bg-white/[0.06] hover:text-white"
+            >
+              <span className="text-[13px]">🌐</span>
+              {isMeaningOpen ? '隐藏中文' : loadingMeaningKey === key ? '生成中文' : '查看中文'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onAddSentence?.(text, note || meaning)
+                setOpenMenuKey(null)
+              }}
+              className="flex h-9 w-full items-center gap-2 rounded-xl px-2.5 text-left text-[12px] font-semibold text-white/72 transition-premium hover:bg-white/[0.06] hover:text-white"
+            >
+              <span className="text-[13px]">⭐</span>
+              加入句库
+            </button>
+          </div>
+        )}
       </div>
     )
   }
@@ -209,13 +226,13 @@ export function ChatMessage({ message, onSpeak, onAddSentence, onTranslateText }
     const isMeaningOpen = expandedMeaningKey === key
     const meaning = note || meaningCache[key] || ''
     return (
-      <div className={cn("relative rounded-2xl rounded-bl-md border border-[oklch(0.70_0.15_280_/_0.16)] bg-white/[0.055] px-4 py-3 backdrop-blur-xl shadow-[0_0_18px_oklch(0.70_0.15_280_/_0.06)]", extraClass)}>
-        <div className="flex items-start gap-2.5">
-          <p className="min-w-0 flex-1 whitespace-pre-wrap text-[14px] font-semibold text-white/94 leading-relaxed">
+      <div className={cn("relative rounded-2xl rounded-bl-md border border-[oklch(0.70_0.15_280_/_0.16)] bg-white/[0.055] px-4 py-3 pr-10 backdrop-blur-xl shadow-[0_0_18px_oklch(0.70_0.15_280_/_0.06)]", extraClass)}>
+        <div>
+          <p className="whitespace-pre-wrap text-[14px] font-semibold text-white/94 leading-relaxed">
             <SpeakableText text={text} rate={0.9} />
           </p>
-          {renderBubbleActions(text, note, key)}
         </div>
+        {renderBubbleMenu(text, note, key)}
         {isMeaningOpen && (
           <p className="mt-2.5 border-t border-white/[0.06] pt-2 text-xs leading-relaxed text-[oklch(0.70_0.15_280_/_0.62)] whitespace-pre-wrap">
             {loadingMeaningKey === key ? '正在生成中文意思...' : meaning || '中文意思待补充'}
@@ -308,39 +325,19 @@ export function ChatMessage({ message, onSpeak, onAddSentence, onTranslateText }
 
   if (isUser) {
     return (
-      <div className="flex justify-end mb-3 animate-slide-up">
+      <div className={cn("flex justify-end animate-slide-up", messageGapClass)}>
         <div className="max-w-[86%] space-y-2">
           <div className="relative rounded-2xl rounded-br-md bg-[oklch(0.70_0.15_280_/_0.16)] backdrop-blur-xl border border-[oklch(0.70_0.15_280_/_0.24)] px-4 py-3 shadow-[0_0_22px_oklch(0.70_0.15_280_/_0.1)]">
             <p className="relative text-[14px] text-white/95 leading-relaxed">{message.text}</p>
           </div>
           
           {message.translation && (
-            <div className="relative rounded-2xl rounded-br-md border border-white/[0.06] bg-white/[0.035] px-3 py-2">
-              <p className="relative text-xs text-white/45 mb-2 font-medium">{message.translation.note}</p>
-              <div className="relative flex items-center gap-3">
-                <p className="flex-1 text-[14px] font-semibold text-white/95 leading-relaxed">
-                  <SpeakableText text={message.translation.sentence} rate={0.9} />
-                </p>
-                <button
-                  onClick={() => handleSpeak(message.translation!.sentence, `user-${message.timestamp}`)}
-                  className={cn(
-                    "flex-shrink-0 w-7 h-7 rounded-lg glass-button text-white/60 flex items-center justify-center hover:text-white transition-premium",
-                    playingId === `user-${message.timestamp}` && "scale-90 brightness-125"
-                  )}
-                >
-                  <Play className={cn(
-                    "w-3.5 h-3.5 ml-0.5 transition-transform duration-300",
-                    playingId === `user-${message.timestamp}` && "scale-125"
-                  )} />
-                </button>
-                <button
-                  onClick={() => onAddSentence?.(message.translation!.sentence, message.translation!.note)}
-                  className="flex-shrink-0 w-7 h-7 rounded-lg glass-button text-white/60 flex items-center justify-center hover:text-[oklch(0.80_0.15_280)] transition-premium"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
+            renderEnglishBubble(
+              message.translation.sentence,
+              message.translation.note,
+              `user-translation-${message.id}`,
+              'rounded-br-md border-white/[0.06] bg-white/[0.035]'
+            )
           )}
         </div>
       </div>
@@ -348,7 +345,7 @@ export function ChatMessage({ message, onSpeak, onAddSentence, onTranslateText }
   }
 
   return (
-    <div className="flex mb-3 animate-slide-up">
+    <div className={cn("flex animate-slide-up", messageGapClass)}>
       <div className="max-w-[86%] space-y-2">
         
         {parsed.type === 'daily-sentences' && (
