@@ -1,6 +1,6 @@
 {
-  "versionCode": 70,
-  "versionName": "free70",
-  "apkUrl": "https://files.catbox.moe/3j3tg5.apk",
-  "notes": "free70: 智语导师新增点选式情景对话模式，可点击英文回复循环聊天，长按选项查看中文并加入句读。"
+  "versionCode": 71,
+  "versionName": "free71",
+  "apkUrl": "https://files.catbox.moe/hw581i.apk",
+  "notes": "free71: 优化智语导师布局，压缩顶部 chips、聊天气泡、Pick a reply 和输入框，让聊天区更大。"
 }

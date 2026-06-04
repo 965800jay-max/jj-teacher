@@ -51,8 +51,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 70
-const CURRENT_VERSION_NAME = 'free70'
+const CURRENT_VERSION_CODE = 71
+const CURRENT_VERSION_NAME = 'free71'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -355,7 +355,7 @@ async function requestAiMemory(payload: Record<string, unknown>) {
 }
 
 function serverModeFromQuickMode(mode?: TeacherQuickMode | null) {
-  if (mode === 'topic') return 'topic'
+  if (mode === 'topic' || mode === 'hair' || mode === 'client') return 'topic'
   if (mode === 'free') return 'freestyle'
   if (mode === 'select') return 'select-dialogue'
   return 'chat'
@@ -870,6 +870,8 @@ export default function ZhiyuApp() {
     setShowExam(false)
     setShowFriends(false)
     setSelectReplyError('')
+    setSelectReplyOptions([])
+    setSelectReplyMeanings([])
     setIsSelectReplyLoading(true)
     setIsSending(true)
     selectRetryRef.current = { message: SELECT_DIALOGUE_START, appendUser: false }
@@ -1064,9 +1066,13 @@ export default function ZhiyuApp() {
     }
   }, [isSending, sendSelectDialogueReply, updateMemoryFromExchange])
 
-  const startTopicPractice = useCallback(async () => {
+  const startTopicPractice = useCallback(async (
+    topicPrompt = '直接开启一个轻松自然的英语日常聊天。只发一个生活化问题：先中文问句，再给同一个问题的英文版本，不要解释为什么选这个话题。',
+    fallback = '你最近反复听或看的一个东西是什么？\nWhat’s something you’ve been listening to or watching a lot recently?',
+    nextMode: TeacherQuickMode = 'topic'
+  ) => {
     if (isSending) return
-    setTeacherMode('topic')
+    setTeacherMode(nextMode)
     setActiveTab('teacher')
     setShowExam(false)
     setShowFriends(false)
@@ -1085,11 +1091,11 @@ export default function ZhiyuApp() {
     try {
       const data = await requestAiTeacher({
         mode: 'topic',
-        message: '直接开启一个轻松自然的英语日常聊天。只发一个生活化问题：先中文问句，再给同一个问题的英文版本，不要解释为什么选这个话题。',
+        message: topicPrompt,
         messages: messagesRef.current.filter((message) => !message.pending).slice(-6).map(({ role, text }) => ({ role, text })),
         memoryProfile: memoryProfileRef.current
       })
-      const reply = cleanTopicReply(String(data.reply || '')) || '你最近反复听或看的一个东西是什么？\nWhat’s something you’ve been listening to or watching a lot recently?'
+      const reply = cleanTopicReply(String(data.reply || '')) || fallback
       setMessages((current) => current
         .filter((message) => message.id !== pendingMessage.id)
         .concat({
@@ -1105,7 +1111,7 @@ export default function ZhiyuApp() {
         .concat({
           id: makeId('topic-fallback'),
           role: 'assistant',
-          text: '你最近反复听或看的一个东西是什么？\nWhat’s something you’ve been listening to or watching a lot recently?',
+          text: fallback,
           mode: 'topic',
           timestamp: Date.now()
         }))
@@ -1118,6 +1124,24 @@ export default function ZhiyuApp() {
     if (action === 'topic') {
       clearSelectDialogueState()
       startTopicPractice()
+      return
+    }
+    if (action === 'hair') {
+      clearSelectDialogueState()
+      startTopicPractice(
+        '开启一个理发师和客人之间的轻松英文聊天话题。只发一个自然问题：先中文问句，再给同一个问题的英文版本，不要解释。',
+        '你平时剪头发更喜欢固定风格，还是会偶尔换一下？\nDo you usually stick with the same haircut, or do you like changing it up sometimes?',
+        'hair'
+      )
+      return
+    }
+    if (action === 'client') {
+      clearSelectDialogueState()
+      startTopicPractice(
+        '开启一个理发师和客人沟通相关的轻松英文聊天话题。只发一个自然问题：先中文问句，再给同一个问题的英文版本，不要解释。',
+        '你和客人沟通发型时，最常需要确认哪一点？\nWhat do you usually need to confirm first when talking to a client about their haircut?',
+        'client'
+      )
       return
     }
     if (action === 'select') {
@@ -1227,14 +1251,19 @@ export default function ZhiyuApp() {
           : "min-h-dvh pb-24"
       )}>
         <header className={cn(
-          "sticky top-0 z-40 px-5 py-4 safe-area-pt",
-          activeTab === 'teacher' && !showExam && !showFriends && "relative flex-shrink-0"
+          "sticky top-0 z-40 safe-area-pt",
+          activeTab === 'teacher' && !showExam && !showFriends
+            ? "relative flex-shrink-0 px-4 py-3"
+            : "px-5 py-4"
         )}>
           <div className="absolute inset-0 glass-nav" />
 
           <div className="relative flex items-center justify-between">
             <div className="flex items-center gap-3.5">
-              <div className="relative w-11 h-11 rounded-2xl glass-button flex items-center justify-center overflow-hidden group">
+              <div className={cn(
+                "relative rounded-2xl glass-button flex items-center justify-center overflow-hidden group",
+                activeTab === 'teacher' && !showExam && !showFriends ? "w-10 h-10" : "w-11 h-11"
+              )}>
                 <div className="absolute inset-0 bg-gradient-to-br from-[oklch(0.70_0.15_280_/_0.15)] to-transparent" />
                 <PageIcon className="w-5 h-5 text-[oklch(0.80_0.15_280)] relative z-10 group-hover:scale-110 transition-transform duration-300" />
               </div>
@@ -1242,7 +1271,10 @@ export default function ZhiyuApp() {
                 <p className="text-[10px] text-[oklch(0.70_0.15_280)] font-semibold tracking-[0.2em] uppercase mb-0.5">
                   {pageInfo.eyebrow}
                 </p>
-                <h1 id="pageTitle" className="text-xl font-semibold text-white/95 tracking-wide">
+                <h1 id="pageTitle" className={cn(
+                  "font-semibold text-white/95 tracking-wide",
+                  activeTab === 'teacher' && !showExam && !showFriends ? "text-lg" : "text-xl"
+                )}>
                   {pageInfo.title}
                 </h1>
               </div>

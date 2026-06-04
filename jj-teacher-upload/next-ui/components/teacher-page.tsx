@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 import { ChatMessage } from '@/components/chat-message'
 import type { TeacherMessage, TutorMemoryProfile } from '@/lib/sample-data'
 
-export type TeacherQuickMode = 'topic' | 'daily' | 'free' | 'select'
+export type TeacherQuickMode = 'topic' | 'daily' | 'free' | 'select' | 'hair' | 'client'
 
 interface TeacherPageProps {
   messages: TeacherMessage[]
@@ -146,23 +146,65 @@ export function TeacherPage({
   const visibleReplyOptions = replyOptions.slice(0, 3)
 
   return (
-    <section id="teacherPage" className="flex flex-1 min-h-0 flex-col animate-fade-in">
+    <section id="teacherPage" className="flex flex-1 min-h-0 flex-col overflow-hidden animate-fade-in">
+      {/* 小型模式 chips */}
+      <div className="flex-shrink-0 px-4 pb-1">
+        <div className="flex gap-2 overflow-x-auto py-1 -mx-4 px-4 scrollbar-hide">
+          {[
+            { id: 'topic' as const, label: '话题', icon: MessageCircle },
+            { id: 'daily' as const, label: '日常', icon: Sparkles },
+            { id: 'free' as const, label: '闲聊', icon: Coffee },
+            { id: 'hair' as const, label: '理发', icon: Sparkles },
+            { id: 'client' as const, label: '客户沟通', icon: MessageCircle },
+            { id: 'select' as const, label: '点选对话', icon: MousePointerClick }
+          ].map((item) => {
+            const Icon = item.icon
+            return (
+              <button
+                key={item.id}
+                id={item.id === 'topic' ? 'topicButton' : item.id === 'free' ? 'freeChatButton' : item.id === 'select' ? 'selectDialogueButton' : undefined}
+                onClick={() => handleQuickAction(item.id)}
+                disabled={isSending}
+                className={cn(
+                  "flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-semibold tracking-wide whitespace-nowrap transition-premium",
+                  activeMode === item.id
+                    ? "border border-[oklch(0.70_0.15_280_/_0.45)] bg-[oklch(0.70_0.15_280_/_0.16)] text-white shadow-[0_0_18px_oklch(0.70_0.15_280_/_0.18)]"
+                    : "border border-white/[0.08] bg-white/[0.035] text-white/55 hover:text-white/85"
+                )}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {item.label}
+              </button>
+            )
+          })}
+          <button
+            id="memoryButton"
+            type="button"
+            onClick={() => setShowMemory(true)}
+            className="flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.035] px-3 text-xs font-semibold tracking-wide text-white/55 transition-premium hover:text-white/85"
+          >
+            <Brain className="w-3.5 h-3.5" />
+            记忆
+          </button>
+        </div>
+      </div>
+
       {/* 聊天消息区 */}
-      <div 
-        id="chatMessages" 
-        className="min-h-0 flex-1 overflow-y-auto px-5 py-5"
+      <div
+        id="chatMessages"
+        className="min-h-0 flex-1 overflow-y-auto px-4 py-3"
       >
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-6">
             {/* 图标 - 带光晕 */}
-            <div className="relative mb-8">
-              <div className="absolute inset-0 w-24 h-24 rounded-full bg-[oklch(0.70_0.15_280_/_0.15)] blur-xl animate-glow" />
-              <div className="relative w-24 h-24 rounded-3xl glass-card flex items-center justify-center">
+            <div className="relative mb-5">
+              <div className="absolute inset-0 w-[4.5rem] h-[4.5rem] rounded-full bg-[oklch(0.70_0.15_280_/_0.15)] blur-xl animate-glow" />
+              <div className="relative w-[4.5rem] h-[4.5rem] rounded-3xl glass-card flex items-center justify-center">
                 <div className="inner-glow rounded-3xl" />
-                <Sparkles className="w-10 h-10 text-[oklch(0.80_0.15_280)]" />
+                <Sparkles className="w-8 h-8 text-[oklch(0.80_0.15_280)]" />
               </div>
             </div>
-            <h2 className="text-2xl font-semibold text-white/95 mb-3 tracking-wide">开始和智语导师聊天</h2>
+            <h2 className="text-xl font-semibold text-white/95 mb-2 tracking-wide">开始和智语导师聊天</h2>
             <p className="text-sm text-white/45 leading-relaxed max-w-[280px]">
               用中文告诉我你想表达什么，我会教你自然的英文说法。
             </p>
@@ -181,91 +223,20 @@ export function TeacherPage({
         )}
       </div>
 
-      {/* 快捷操作 */}
-      <div className="flex-shrink-0 px-5 pb-3">
-        <div className="flex gap-3 overflow-x-auto py-2 -mx-5 px-5 scrollbar-hide">
-          <button
-            id="topicButton"
-            onClick={() => handleQuickAction('topic')}
-            disabled={isSending}
-            className={cn(
-              "flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-semibold tracking-wide whitespace-nowrap transition-premium",
-              activeMode === 'topic'
-                ? "glass-button-primary"
-                : "glass-button text-white/55 hover:text-white/85"
-            )}
-          >
-            <MessageCircle className="w-[18px] h-[18px]" />
-            话题
-          </button>
-          <button
-            onClick={() => handleQuickAction('daily')}
-            disabled={isSending}
-            className={cn(
-              "flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-semibold tracking-wide whitespace-nowrap transition-premium",
-              activeMode === 'daily'
-                ? "glass-button-primary"
-                : "glass-button text-white/55 hover:text-white/85"
-            )}
-          >
-            <Sparkles className="w-[18px] h-[18px]" />
-            英语日常句子
-          </button>
-          <button
-            id="freeChatButton"
-            onClick={() => handleQuickAction('free')}
-            disabled={isSending}
-            className={cn(
-              "flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-semibold tracking-wide whitespace-nowrap transition-premium",
-              activeMode === 'free'
-                ? "glass-button-primary"
-                : "glass-button text-white/55 hover:text-white/85"
-            )}
-          >
-            <Coffee className="w-[18px] h-[18px]" />
-            闲聊模式
-          </button>
-          <button
-            id="selectDialogueButton"
-            onClick={() => handleQuickAction('select')}
-            disabled={isSending}
-            className={cn(
-              "flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-semibold tracking-wide whitespace-nowrap transition-premium",
-              activeMode === 'select'
-                ? "glass-button-primary"
-                : "glass-button text-white/55 hover:text-white/85"
-            )}
-          >
-            <MousePointerClick className="w-[18px] h-[18px]" />
-            点选对话
-          </button>
-          <button
-            id="memoryButton"
-            type="button"
-            onClick={() => setShowMemory(true)}
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-semibold tracking-wide whitespace-nowrap transition-premium glass-button text-white/55 hover:text-white/85"
-          >
-            <Brain className="w-[18px] h-[18px]" />
-            记忆
-          </button>
-        </div>
-      </div>
-
       {(activeMode === 'select' || visibleReplyOptions.length > 0 || replyOptionsError) && (
-        <div className="flex-shrink-0 px-5 pb-3">
-          <div className="relative glass-card rounded-3xl px-4 py-3 overflow-hidden">
-            <div className="inner-glow rounded-3xl" />
+        <div className="flex-shrink-0 px-4 pb-2">
+          <div className="relative max-h-[100px] overflow-hidden rounded-2xl border border-[oklch(0.70_0.15_280_/_0.14)] bg-black/25 px-3 py-2 backdrop-blur-xl">
             <div className="relative mb-2 flex items-center justify-between gap-3">
-              <p className="text-[10px] text-[oklch(0.70_0.15_280)] font-semibold tracking-[0.16em] uppercase">
-                Pick a Reply
+              <p className="text-[9px] text-[oklch(0.70_0.15_280)] font-semibold tracking-[0.16em] uppercase">
+                PICK A REPLY
               </p>
               {isReplyOptionsLoading && (
-                <span className="text-[11px] text-white/35">正在生成...</span>
+                <span className="text-[10px] text-white/35">正在生成...</span>
               )}
             </div>
 
             {visibleReplyOptions.length > 0 ? (
-              <div className="relative flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+              <div className="relative flex gap-2 overflow-x-auto pb-1 pr-1 scrollbar-hide scroll-smooth">
                 {visibleReplyOptions.map((option, index) => {
                   const note = replyOptionMeanings[index] || ''
                   return (
@@ -284,18 +255,18 @@ export function TeacherPage({
                       }}
                       onClick={() => handleOptionClick(option)}
                       className={cn(
-                        "min-w-[78%] rounded-2xl border border-[oklch(0.70_0.15_280_/_0.26)] bg-[oklch(0.70_0.15_280_/_0.075)] px-4 py-3 text-left text-sm font-semibold leading-relaxed text-white/86 shadow-[0_0_24px_oklch(0.70_0.15_280_/_0.08)] transition-premium",
+                        "flex h-11 min-w-[140px] max-w-[80vw] shrink-0 items-center rounded-2xl border border-[oklch(0.70_0.15_280_/_0.26)] bg-[oklch(0.70_0.15_280_/_0.075)] px-3 text-left text-[13px] font-semibold leading-tight text-white/86 shadow-[0_0_18px_oklch(0.70_0.15_280_/_0.08)] transition-premium",
                         "hover:bg-[oklch(0.70_0.15_280_/_0.14)] active:scale-[0.98]",
                         (isSending || isReplyOptionsLoading) && "opacity-50"
                       )}
                     >
-                      {option}
+                      <span className="overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">{option}</span>
                     </button>
                   )
                 })}
               </div>
             ) : (
-              <p className="relative text-sm text-white/42 leading-relaxed">
+              <p className="relative text-xs text-white/42 leading-relaxed">
                 {isReplyOptionsLoading ? 'AI 正在准备可以直接点击的英文回复...' : '点击“点选对话”开始。'}
               </p>
             )}
@@ -319,13 +290,12 @@ export function TeacherPage({
       )}
 
       {/* 输入框 - 高级玻璃效果 */}
-      <form onSubmit={handleSubmit} className="flex-shrink-0 px-5 pb-[calc(96px+env(safe-area-inset-bottom))]">
-        <div className="relative glass-card flex items-end gap-3 rounded-3xl px-5 py-3 overflow-hidden">
-          <div className="inner-glow rounded-3xl" />
+      <form onSubmit={handleSubmit} className="flex-shrink-0 px-4 pb-[calc(86px+env(safe-area-inset-bottom))]">
+        <div className="relative flex min-h-[54px] items-end gap-2 overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.045] px-4 py-2 backdrop-blur-xl">
           <textarea
             ref={inputRef}
             id="teacherInput"
-            className="relative flex-1 bg-transparent border-0 outline-none resize-none text-[15px] text-white/95 placeholder:text-white/30 min-h-[28px] max-h-[120px] py-1.5 leading-relaxed"
+            className="relative flex-1 bg-transparent border-0 outline-none resize-none text-[15px] text-white/95 placeholder:text-white/30 min-h-[28px] max-h-[78px] py-1.5 leading-relaxed"
             placeholder="用中文告诉我你想表达什么..."
             value={inputValue}
             onChange={handleInputChange}
@@ -342,7 +312,7 @@ export function TeacherPage({
             type="submit"
             disabled={!inputValue.trim() || isSending}
             className={cn(
-              "relative flex-shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center transition-premium",
+              "relative flex-shrink-0 w-10 h-10 rounded-2xl flex items-center justify-center transition-premium",
               inputValue.trim() && !isSending
                 ? "glass-button-primary"
                 : "glass-button text-white/30"

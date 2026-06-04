@@ -191,39 +191,37 @@ export function ChatMessage({ message, onSpeak, onAddSentence }: ChatMessageProp
 
   if (isUser) {
     return (
-      <div className="flex justify-end mb-5 animate-slide-up">
-        <div className="max-w-[85%]">
+      <div className="flex justify-end mb-3 animate-slide-up">
+        <div className="max-w-[84%]">
           {/* 用户消息气泡 - 带紫色光晕 */}
-          <div className="relative rounded-3xl rounded-br-lg overflow-hidden bg-[oklch(0.70_0.15_280_/_0.15)] backdrop-blur-xl border border-[oklch(0.70_0.15_280_/_0.25)] px-5 py-4 shadow-[0_0_30px_oklch(0.70_0.15_280_/_0.1)]">
-            <div className="inner-glow rounded-3xl" />
-            <p className="relative text-[15px] text-white/95 leading-relaxed">{message.text}</p>
+          <div className="relative rounded-2xl rounded-br-md overflow-hidden bg-[oklch(0.70_0.15_280_/_0.16)] backdrop-blur-xl border border-[oklch(0.70_0.15_280_/_0.24)] px-4 py-3 shadow-[0_0_22px_oklch(0.70_0.15_280_/_0.1)]">
+            <p className="relative text-[14px] text-white/95 leading-relaxed">{message.text}</p>
           </div>
           
           {message.translation && (
-            <div className="mt-3 relative glass-card rounded-2xl px-5 py-4 overflow-hidden">
-              <div className="inner-glow rounded-2xl" />
+            <div className="mt-2 relative rounded-2xl border border-white/[0.06] bg-white/[0.035] px-3 py-2 overflow-hidden">
               <p className="relative text-xs text-white/45 mb-2 font-medium">{message.translation.note}</p>
               <div className="relative flex items-center gap-3">
-                <p className="flex-1 text-[15px] font-semibold text-white/95 leading-relaxed">
+                <p className="flex-1 text-[14px] font-semibold text-white/95 leading-relaxed">
                   <SpeakableText text={message.translation.sentence} rate={0.9} />
                 </p>
                 <button
                   onClick={() => handleSpeak(message.translation!.sentence, `user-${message.timestamp}`)}
                   className={cn(
-                    "flex-shrink-0 w-9 h-9 rounded-xl glass-button text-white/60 flex items-center justify-center hover:text-white transition-premium",
+                    "flex-shrink-0 w-7 h-7 rounded-lg glass-button text-white/60 flex items-center justify-center hover:text-white transition-premium",
                     playingId === `user-${message.timestamp}` && "scale-90 brightness-125"
                   )}
                 >
                   <Play className={cn(
-                    "w-4 h-4 ml-0.5 transition-transform duration-300",
+                    "w-3.5 h-3.5 ml-0.5 transition-transform duration-300",
                     playingId === `user-${message.timestamp}` && "scale-125"
                   )} />
                 </button>
                 <button
                   onClick={() => onAddSentence?.(message.translation!.sentence, message.translation!.note)}
-                  className="flex-shrink-0 w-9 h-9 rounded-xl glass-button text-white/60 flex items-center justify-center hover:text-[oklch(0.80_0.15_280)] transition-premium"
+                  className="flex-shrink-0 w-7 h-7 rounded-lg glass-button text-white/60 flex items-center justify-center hover:text-[oklch(0.80_0.15_280)] transition-premium"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
@@ -234,37 +232,35 @@ export function ChatMessage({ message, onSpeak, onAddSentence }: ChatMessageProp
   }
 
   return (
-    <div className="flex mb-5 animate-slide-up">
-      <div className="max-w-[90%]">
-        <p className="text-[10px] text-[oklch(0.70_0.15_280)] font-semibold mb-2.5 ml-1 tracking-[0.15em] uppercase">智语导师</p>
+    <div className="flex mb-3 animate-slide-up">
+      <div className="max-w-[84%]">
         
         {parsed.type === 'daily-sentences' && (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {parsed.pairs.map((pair, i) => (
-              <div key={i} className="relative glass-card rounded-2xl px-5 py-4 overflow-hidden">
-                <div className="inner-glow rounded-2xl" />
-                <p className="relative text-sm text-white/50 mb-2">{pair.zh}</p>
+              <div key={i} className="relative rounded-2xl rounded-bl-md border border-white/[0.07] bg-white/[0.055] px-4 py-3 backdrop-blur-xl">
+                <p className="relative text-xs text-white/48 mb-2">{pair.zh}</p>
                 <div className="relative flex items-center gap-3">
-                  <p className="flex-1 text-[15px] font-semibold text-white/95 leading-relaxed">
+                  <p className="flex-1 text-[14px] font-semibold text-white/95 leading-relaxed">
                     <SpeakableText text={pair.en} rate={0.9} />
                   </p>
                   <button
                     onClick={() => handleSpeak(pair.en, `daily-${i}`)}
                     className={cn(
-                      "flex-shrink-0 w-9 h-9 rounded-xl glass-button text-white/60 flex items-center justify-center hover:text-white transition-premium",
+                      "flex-shrink-0 w-7 h-7 rounded-lg glass-button text-white/60 flex items-center justify-center hover:text-white transition-premium",
                       playingId === `daily-${i}` && "scale-90 brightness-125"
                     )}
                   >
                     <Play className={cn(
-                      "w-4 h-4 ml-0.5 transition-transform duration-300",
+                      "w-3.5 h-3.5 ml-0.5 transition-transform duration-300",
                       playingId === `daily-${i}` && "scale-125"
                     )} />
                   </button>
                   <button
                     onClick={() => onAddSentence?.(pair.en, pair.zh)}
-                    className="flex-shrink-0 w-9 h-9 rounded-xl glass-button text-white/60 flex items-center justify-center hover:text-[oklch(0.80_0.15_280)] transition-premium"
+                    className="flex-shrink-0 w-7 h-7 rounded-lg glass-button text-white/60 flex items-center justify-center hover:text-[oklch(0.80_0.15_280)] transition-premium"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
@@ -273,38 +269,37 @@ export function ChatMessage({ message, onSpeak, onAddSentence }: ChatMessageProp
         )}
 
         {parsed.type === 'chat' && (
-          <div className="relative glass-card rounded-3xl rounded-bl-lg px-5 py-4 space-y-4 overflow-hidden">
-            <div className="inner-glow rounded-3xl" />
+          <div className="relative rounded-2xl rounded-bl-md border border-white/[0.07] bg-white/[0.055] px-4 py-3 space-y-2.5 backdrop-blur-xl">
             {parsed.content.map((item, i) => (
               <div key={i} className="relative">
                 {item.type === 'text' ? (
-                  <p className="text-[15px] text-white/70 leading-relaxed">{item.text}</p>
+                  <p className="text-[14px] text-white/74 leading-relaxed">{item.text}</p>
                 ) : (
-                  <div className="bg-white/[0.04] rounded-xl px-4 py-3 mt-3 border border-white/[0.06]">
+                  <div className="bg-white/[0.04] rounded-xl px-3 py-2 mt-2 border border-white/[0.06]">
                     {item.zh && (
                       <p className="text-xs text-white/45 mb-2">{item.zh}</p>
                     )}
-                    <div className="flex items-center gap-3">
-                      <p className="flex-1 text-sm font-semibold text-white/95 leading-relaxed">
+                    <div className="flex items-center gap-2">
+                      <p className="flex-1 text-[14px] font-semibold text-white/95 leading-relaxed">
                         <SpeakableText text={item.text} rate={0.9} />
                       </p>
                       <button
                         onClick={() => handleSpeak(item.text, `chat-${i}`)}
                         className={cn(
-                          "flex-shrink-0 w-8 h-8 rounded-lg glass-button text-white/60 flex items-center justify-center hover:text-white transition-premium",
+                          "flex-shrink-0 w-7 h-7 rounded-lg glass-button text-white/60 flex items-center justify-center hover:text-white transition-premium",
                           playingId === `chat-${i}` && "scale-90 brightness-125"
                         )}
                       >
                         <Play className={cn(
-                          "w-3.5 h-3.5 ml-0.5 transition-transform duration-300",
+                          "w-3 h-3 ml-0.5 transition-transform duration-300",
                           playingId === `chat-${i}` && "scale-125"
                         )} />
                       </button>
                       <button
                         onClick={() => onAddSentence?.(item.text, item.zh || '')}
-                        className="flex-shrink-0 w-8 h-8 rounded-lg glass-button text-white/60 flex items-center justify-center hover:text-[oklch(0.80_0.15_280)] transition-premium"
+                        className="flex-shrink-0 w-7 h-7 rounded-lg glass-button text-white/60 flex items-center justify-center hover:text-[oklch(0.80_0.15_280)] transition-premium"
                       >
-                        <Plus className="w-3.5 h-3.5" />
+                        <Plus className="w-3 h-3" />
                       </button>
                     </div>
                   </div>
@@ -315,42 +310,41 @@ export function ChatMessage({ message, onSpeak, onAddSentence }: ChatMessageProp
         )}
 
         {parsed.type === 'structured' && (
-          <div className="relative glass-card rounded-3xl rounded-bl-lg px-5 py-4 overflow-hidden">
-            <div className="inner-glow rounded-3xl" />
-            <div className="relative space-y-4">
+          <div className="relative rounded-2xl rounded-bl-md border border-white/[0.07] bg-white/[0.055] px-4 py-3 backdrop-blur-xl">
+            <div className="relative space-y-3">
               {parsed.intro.map((paragraph, i) => (
-                <p key={`intro-${i}`} className="text-[15px] text-white/72 leading-relaxed">
+                <p key={`intro-${i}`} className="text-[14px] text-white/72 leading-relaxed">
                   {paragraph}
                 </p>
               ))}
 
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {parsed.pairs.map((pair, i) => (
-                  <div key={i} className="rounded-2xl border border-[oklch(0.70_0.15_280_/_0.14)] bg-[oklch(0.70_0.15_280_/_0.055)] px-4 py-3">
+                  <div key={i} className="rounded-xl border border-[oklch(0.70_0.15_280_/_0.14)] bg-[oklch(0.70_0.15_280_/_0.055)] px-3 py-2">
                     <p className="text-[10px] text-[oklch(0.70_0.15_280)] font-semibold tracking-[0.16em] uppercase mb-2">
                       English
                     </p>
-                    <div className="flex items-center gap-3 mb-3">
-                      <p className="flex-1 text-[15px] font-semibold text-white/95 leading-relaxed">
+                    <div className="flex items-center gap-2 mb-2">
+                      <p className="flex-1 text-[14px] font-semibold text-white/95 leading-relaxed">
                         <SpeakableText text={pair.en} rate={0.9} />
                       </p>
                       <button
                         onClick={() => handleSpeak(pair.en, `structured-${i}`)}
                         className={cn(
-                          "flex-shrink-0 w-8 h-8 rounded-xl glass-button text-white/60 flex items-center justify-center hover:text-white transition-premium",
+                          "flex-shrink-0 w-7 h-7 rounded-lg glass-button text-white/60 flex items-center justify-center hover:text-white transition-premium",
                           playingId === `structured-${i}` && "scale-90 brightness-125"
                         )}
                       >
                         <Play className={cn(
-                          "w-3.5 h-3.5 ml-0.5 transition-transform duration-300",
+                          "w-3 h-3 ml-0.5 transition-transform duration-300",
                           playingId === `structured-${i}` && "scale-125"
                         )} />
                       </button>
                       <button
                         onClick={() => onAddSentence?.(pair.en, pair.zh)}
-                        className="flex-shrink-0 w-8 h-8 rounded-xl glass-button text-white/60 flex items-center justify-center hover:text-[oklch(0.80_0.15_280)] transition-premium"
+                        className="flex-shrink-0 w-7 h-7 rounded-lg glass-button text-white/60 flex items-center justify-center hover:text-[oklch(0.80_0.15_280)] transition-premium"
                       >
-                        <Plus className="w-3.5 h-3.5" />
+                        <Plus className="w-3 h-3" />
                       </button>
                     </div>
                     {pair.zh && (
@@ -358,7 +352,7 @@ export function ChatMessage({ message, onSpeak, onAddSentence }: ChatMessageProp
                         <p className="text-[10px] text-white/35 font-semibold tracking-[0.16em] uppercase mb-1">
                           中文意思
                         </p>
-                        <p className="text-sm text-white/58 leading-relaxed">{pair.zh}</p>
+                        <p className="text-xs text-white/58 leading-relaxed">{pair.zh}</p>
                       </>
                     )}
                   </div>
@@ -366,7 +360,7 @@ export function ChatMessage({ message, onSpeak, onAddSentence }: ChatMessageProp
               </div>
 
               {parsed.outro.map((paragraph, i) => (
-                <p key={`outro-${i}`} className="text-[15px] text-white/72 leading-relaxed">
+                <p key={`outro-${i}`} className="text-[14px] text-white/72 leading-relaxed">
                   {paragraph}
                 </p>
               ))}
@@ -375,9 +369,8 @@ export function ChatMessage({ message, onSpeak, onAddSentence }: ChatMessageProp
         )}
 
         {parsed.type === 'simple' && (
-          <div className="relative glass-card rounded-3xl rounded-bl-lg px-5 py-4 overflow-hidden">
-            <div className="inner-glow rounded-3xl" />
-            <p className="relative text-[15px] text-white/70 leading-relaxed whitespace-pre-wrap">{parsed.text}</p>
+          <div className="relative rounded-2xl rounded-bl-md border border-white/[0.07] bg-white/[0.055] px-4 py-3 backdrop-blur-xl">
+            <p className="relative text-[14px] text-white/74 leading-relaxed whitespace-pre-wrap">{parsed.text}</p>
           </div>
         )}
       </div>
