@@ -5,6 +5,7 @@
 
 /* 智语导师 - Vision Pro / iOS 26 风格透明玻璃主题 */
 :root {
+  --zhiyu-app-height: 100vh;
   /* 深邃背景 - 近乎纯黑但带微妙蓝调 */
   --background: oklch(0.06 0.008 280);
   --foreground: oklch(0.98 0.005 90);
@@ -141,6 +142,16 @@
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+.zhiyu-app-min {
+  min-height: var(--zhiyu-app-height, 100vh);
+}
+
+.zhiyu-app-shell {
+  height: var(--zhiyu-app-height, 100vh);
+  min-height: var(--zhiyu-app-height, 100vh);
+  max-height: var(--zhiyu-app-height, 100vh);
 }
 
 .starry-canvas {

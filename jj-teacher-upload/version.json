@@ -1,6 +1,6 @@
 {
-  "versionCode": 77,
-  "versionName": "free77",
-  "apkUrl": "https://files.catbox.moe/rcnkce.apk",
-  "notes": "free77: 本地化模式只保留更口语和更随意两种表达，去掉重复的普通翻译。"
+  "versionCode": 78,
+  "versionName": "free78",
+  "apkUrl": "https://files.catbox.moe/lcf3gp.apk",
+  "notes": "free78: 修复安卓键盘弹出时输入模块被顶上去的问题。"
 }

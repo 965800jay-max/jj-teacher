@@ -30,7 +30,36 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  interactiveWidget: 'overlays-content',
 }
+
+const stableViewportScript = `
+(function () {
+  var root = document.documentElement;
+  var lastWidth = window.innerWidth;
+  function hasTextFocus() {
+    var el = document.activeElement;
+    if (!el) return false;
+    var tag = String(el.tagName || '').toLowerCase();
+    return tag === 'input' || tag === 'textarea' || tag === 'select' || el.isContentEditable;
+  }
+  function setStableHeight(force) {
+    if (!force && hasTextFocus()) return;
+    var height = window.innerHeight || document.documentElement.clientHeight;
+    if (height > 0) root.style.setProperty('--zhiyu-app-height', height + 'px');
+  }
+  setStableHeight(true);
+  window.addEventListener('resize', function () {
+    if (window.innerWidth !== lastWidth) {
+      lastWidth = window.innerWidth;
+      window.setTimeout(function () { setStableHeight(true); }, 80);
+    }
+  }, { passive: true });
+  window.addEventListener('orientationchange', function () {
+    window.setTimeout(function () { setStableHeight(true); }, 300);
+  }, { passive: true });
+})();
+`
 
 export default function RootLayout({
   children,
@@ -40,6 +69,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" className="bg-background">
       <body className="font-sans antialiased min-h-screen">
+        <script dangerouslySetInnerHTML={{ __html: stableViewportScript }} />
         {children}
       </body>
     </html>

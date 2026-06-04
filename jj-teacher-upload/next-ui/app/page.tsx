@@ -52,8 +52,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 77
-const CURRENT_VERSION_NAME = 'free77'
+const CURRENT_VERSION_CODE = 78
+const CURRENT_VERSION_NAME = 'free78'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -1319,15 +1319,15 @@ export default function ZhiyuApp() {
   const PageIcon = pageInfo.icon
 
   return (
-    <div className="min-h-screen bg-[#030308] relative overflow-hidden isolate">
+    <div className="zhiyu-app-min bg-[#030308] relative overflow-hidden isolate">
       <StarryBackground />
       <div className="fixed inset-0 z-[1] pointer-events-none bg-[#030308]/45" aria-hidden="true" />
 
       <main className={cn(
         "relative z-10 w-full max-w-[520px] mx-auto",
         (activeTab === 'teacher' || activeTab === 'assistant') && !showExam && !showFriends
-          ? "h-dvh flex flex-col"
-          : "min-h-dvh pb-24"
+          ? "zhiyu-app-shell flex flex-col"
+          : "zhiyu-app-min pb-24"
       )}>
         <header className={cn(
           "sticky top-0 z-40 safe-area-pt",
