@@ -29,6 +29,12 @@ type ActiveTab = 'sentences' | 'scenes' | 'assistant' | 'teacher'
 type HomeView = 'learning' | 'learned' | 'vocab'
 type AddMode = 'manual' | 'ai'
 
+interface LanguageAssistantState {
+  mode: AssistantMode
+  inputValue: string
+  results: LanguageAssistantResult[]
+}
+
 interface AppUser {
   id?: string
   name: string
@@ -52,8 +58,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 79
-const CURRENT_VERSION_NAME = 'free79'
+const CURRENT_VERSION_CODE = 80
+const CURRENT_VERSION_NAME = 'free80'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -68,8 +74,15 @@ const AUTH_AVATAR_KEY = 'sentence-reader-auth-avatar'
 const UPDATE_DISMISS_KEY = 'sentence-reader-dismissed-update'
 const DAILY_CHAT_REPEAT_KEY = 'sentence-reader-daily-chat-last'
 const MEMORY_KEY = 'sentence-reader-memory-profile'
+const LANGUAGE_ASSISTANT_STATE_KEY = 'sentence-reader-language-assistant-state'
 const SELECT_DIALOGUE_START = 'START_SELECT_DIALOGUE'
 const TEACHER_TRANSLATION_CACHE_KEY = 'sentence-reader-teacher-translation-cache'
+const ASSISTANT_MODE_IDS: AssistantMode[] = ['translate', 'localize', 'hair', 'reply', 'explain', 'pronunciation']
+const DEFAULT_LANGUAGE_ASSISTANT_STATE: LanguageAssistantState = {
+  mode: 'translate',
+  inputValue: '',
+  results: []
+}
 
 const DAILY_LINES = [
   ['我最近一直想把生活节奏调回来。', "I've been trying to get back into a routine lately."],
@@ -434,6 +447,20 @@ function normalizeLanguageAssistantResults(data: Record<string, unknown>): Langu
   return results.slice(0, 5)
 }
 
+function normalizeAssistantModeValue(value: unknown): AssistantMode {
+  return ASSISTANT_MODE_IDS.includes(value as AssistantMode) ? value as AssistantMode : 'translate'
+}
+
+function normalizeLanguageAssistantState(value: unknown): LanguageAssistantState {
+  const source = value && typeof value === 'object' ? value as Record<string, unknown> : {}
+  const rawResults = Array.isArray(source.results) ? source.results : []
+  return {
+    mode: normalizeAssistantModeValue(source.mode),
+    inputValue: String(source.inputValue || '').slice(0, 4000),
+    results: normalizeLanguageAssistantResults({ results: rawResults })
+  }
+}
+
 function buildCloudPayload(sentences: SavedSentence[], messages: TeacherMessage[], memoryProfile: TutorMemoryProfile) {
   const cleanMessages = messages
     .filter((message) => !message.pending)
@@ -488,6 +515,7 @@ export default function ZhiyuApp() {
   const [memoryProfile, setMemoryProfile] = useState<TutorMemoryProfile>(() => defaultMemoryProfile())
   const [speechRate, setSpeechRate] = useState(1)
   const [teacherMode, setTeacherMode] = useState<TeacherQuickMode | null>(null)
+  const [languageAssistantState, setLanguageAssistantState] = useState<LanguageAssistantState>(DEFAULT_LANGUAGE_ASSISTANT_STATE)
   const [isSending, setIsSending] = useState(false)
   const [selectReplyOptions, setSelectReplyOptions] = useState<string[]>([])
   const [selectReplyMeanings, setSelectReplyMeanings] = useState<string[]>([])
@@ -520,6 +548,7 @@ export default function ZhiyuApp() {
       .map((item, index) => normalizeMessage(item as Partial<TeacherMessage> & Record<string, unknown>, index))
       .filter(Boolean) as TeacherMessage[]
     const storedMemory = normalizeMemoryProfile(readJson<unknown>(MEMORY_KEY, defaultMemoryProfile()))
+    const storedAssistantState = normalizeLanguageAssistantState(readJson<unknown>(LANGUAGE_ASSISTANT_STATE_KEY, DEFAULT_LANGUAGE_ASSISTANT_STATE))
     const storedUser = readJson<AppUser | null>(AUTH_USER_KEY, null)
     const storedToken = hasStorage() ? window.localStorage.getItem(AUTH_TOKEN_KEY) || '' : ''
 
@@ -527,6 +556,7 @@ export default function ZhiyuApp() {
     if (storedMessages.length) setMessages(storedMessages)
     setVocabBook(getVocabBook())
     setMemoryProfile(storedMemory)
+    setLanguageAssistantState(storedAssistantState)
     setSpeechRate(Number(hasStorage() ? window.localStorage.getItem(SPEED_KEY) || '1' : '1') || 1)
     const storedView = hasStorage() ? window.localStorage.getItem(VIEW_KEY) : ''
     setHomeView(storedView === 'learned' || storedView === 'vocab' ? storedView : 'learning')
@@ -564,6 +594,11 @@ export default function ZhiyuApp() {
     if (!hydrated) return
     writeJson(MEMORY_KEY, memoryProfile)
   }, [hydrated, memoryProfile])
+
+  useEffect(() => {
+    if (!hydrated) return
+    writeJson(LANGUAGE_ASSISTANT_STATE_KEY, languageAssistantState)
+  }, [hydrated, languageAssistantState])
 
   useEffect(() => {
     if (!hydrated || !hasStorage()) return
@@ -835,6 +870,18 @@ export default function ZhiyuApp() {
       message: cleanText
     })
     return normalizeLanguageAssistantResults(data as Record<string, unknown>)
+  }, [])
+
+  const updateLanguageAssistantState = useCallback((patch: Partial<LanguageAssistantState>) => {
+    setLanguageAssistantState((current) => ({ ...current, ...patch }))
+  }, [])
+
+  const resetLanguageAssistantState = useCallback(() => {
+    setLanguageAssistantState((current) => ({
+      ...current,
+      inputValue: '',
+      results: []
+    }))
   }, [])
 
   const handleDeleteSentence = useCallback((id: string) => {
@@ -1623,6 +1670,13 @@ export default function ZhiyuApp() {
           />
         ) : activeTab === 'assistant' ? (
           <LanguageAssistantPage
+            mode={languageAssistantState.mode}
+            inputValue={languageAssistantState.inputValue}
+            results={languageAssistantState.results}
+            onModeChange={(mode) => updateLanguageAssistantState({ mode })}
+            onInputChange={(inputValue) => updateLanguageAssistantState({ inputValue })}
+            onResultsChange={(results) => updateLanguageAssistantState({ results })}
+            onReset={resetLanguageAssistantState}
             onRunAssistant={runLanguageAssistant}
             onAddSentence={(english, chinese) => handleAddSentence(english, chinese)}
           />

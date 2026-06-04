@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { Clipboard, Copy, Languages, Loader2, MessageCircle, Plus, Scissors, Sparkles, Trash2, Volume2, WandSparkles } from 'lucide-react'
+import { Clipboard, Copy, Languages, Loader2, MessageCircle, Plus, RotateCcw, Scissors, Sparkles, Trash2, Volume2, WandSparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { speakEnglish } from '@/lib/speech'
 
@@ -24,6 +24,13 @@ export interface LanguageAssistantResult {
 }
 
 interface LanguageAssistantPageProps {
+  mode: AssistantMode
+  inputValue: string
+  results: LanguageAssistantResult[]
+  onModeChange: (mode: AssistantMode) => void
+  onInputChange: (value: string) => void
+  onResultsChange: (results: LanguageAssistantResult[]) => void
+  onReset: () => void
   onRunAssistant: (mode: AssistantMode, text: string) => Promise<LanguageAssistantResult[]>
   onAddSentence: (english: string, chinese: string) => void
 }
@@ -83,10 +90,17 @@ function cleanText(value?: string) {
   return String(value || '').replace(/\s+/g, ' ').trim()
 }
 
-export function LanguageAssistantPage({ onRunAssistant, onAddSentence }: LanguageAssistantPageProps) {
-  const [mode, setMode] = useState<AssistantMode>('translate')
-  const [inputValue, setInputValue] = useState('')
-  const [results, setResults] = useState<LanguageAssistantResult[]>([])
+export function LanguageAssistantPage({
+  mode,
+  inputValue,
+  results,
+  onModeChange,
+  onInputChange,
+  onResultsChange,
+  onReset,
+  onRunAssistant,
+  onAddSentence
+}: LanguageAssistantPageProps) {
   const [error, setError] = useState('')
   const [toast, setToast] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -116,7 +130,7 @@ export function LanguageAssistantPage({ onRunAssistant, onAddSentence }: Languag
     try {
       const nextResults = await onRunAssistant(mode, text)
       if (!nextResults.length) throw new Error('empty')
-      setResults(nextResults)
+      onResultsChange(nextResults)
     } catch {
       setError('生成失败，请重试')
     } finally {
@@ -128,7 +142,7 @@ export function LanguageAssistantPage({ onRunAssistant, onAddSentence }: Languag
     try {
       const text = await navigator.clipboard?.readText?.()
       if (!text) return
-      setInputValue(text)
+      onInputChange(text)
       setError('')
     } catch {
       setError('粘贴失败，请手动输入')
@@ -203,7 +217,7 @@ export function LanguageAssistantPage({ onRunAssistant, onAddSentence }: Languag
                 key={item.id}
                 type="button"
                 onClick={() => {
-                  setMode(item.id)
+                  onModeChange(item.id)
                   setError('')
                 }}
                 className={cn(
@@ -226,7 +240,7 @@ export function LanguageAssistantPage({ onRunAssistant, onAddSentence }: Languag
           id="languageAssistantInput"
           value={inputValue}
           onChange={(event) => {
-            setInputValue(event.target.value)
+            onInputChange(event.target.value)
             if (error) setError('')
           }}
           placeholder={activeMode.placeholder}
@@ -237,8 +251,8 @@ export function LanguageAssistantPage({ onRunAssistant, onAddSentence }: Languag
           <button
             type="button"
             onClick={() => {
-              setInputValue('')
-              setResults([])
+              onInputChange('')
+              onResultsChange([])
               setError('')
             }}
             className="flex h-8 items-center gap-1 rounded-xl glass-button px-2.5 text-[11px] font-semibold text-white/45 transition-premium hover:text-white"
@@ -257,18 +271,34 @@ export function LanguageAssistantPage({ onRunAssistant, onAddSentence }: Languag
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={handleRun}
-        disabled={isLoading}
-        className={cn(
-          "mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-sm font-semibold transition-premium",
-          isLoading ? "glass-button text-white/42" : "glass-button-primary"
-        )}
-      >
-        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <WandSparkles className="w-4 h-4" />}
-        {isLoading ? '正在生成...' : activeMode.button}
-      </button>
+      <div className="mt-3 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={handleRun}
+          disabled={isLoading}
+          className={cn(
+            "flex h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl text-sm font-semibold transition-premium",
+            isLoading ? "glass-button text-white/42" : "glass-button-primary"
+          )}
+        >
+          {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <WandSparkles className="w-4 h-4" />}
+          <span className="truncate">{isLoading ? '正在生成...' : activeMode.button}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            onReset()
+            setError('')
+            showToast('已重置')
+          }}
+          disabled={isLoading}
+          className="flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-2xl glass-button px-3 text-xs font-semibold text-white/55 transition-premium hover:text-white disabled:opacity-45"
+          aria-label="一键重置"
+        >
+          <RotateCcw className="w-3.5 h-3.5" />
+          重置
+        </button>
+      </div>
 
       {error && (
         <p className="mt-3 rounded-2xl border border-[oklch(0.62_0.22_25_/_0.25)] bg-[oklch(0.62_0.22_25_/_0.08)] px-4 py-3 text-sm text-[oklch(0.72_0.20_25)]">

@@ -1,6 +1,6 @@
 {
-  "versionCode": 79,
-  "versionName": "free79",
-  "apkUrl": "https://files.catbox.moe/p1dsdz.apk",
-  "notes": "free79: 优化智语导师解释类问题回复，避免一个问题拆成过多句子气泡。"
+  "versionCode": 80,
+  "versionName": "free80",
+  "apkUrl": "https://files.catbox.moe/q5f2dp.apk",
+  "notes": "free80: 语言助手翻译结果切换页面后保留，并新增一键重置按钮。"
 }
