@@ -942,6 +942,27 @@ async function handleAiTeacher(request, response) {
     return;
   }
 
+  if (mode === "language-assistant") {
+    const assistantMode = normalizeAssistantMode(payload.assistantMode || payload.toolMode);
+    const message = limitText(payload.message || payload.text, 2000);
+    if (!message) {
+      sendJson(response, 400, { error: "Message is required", message: "请输入内容" });
+      return;
+    }
+
+    const raw = await askAiTeacher(buildLanguageAssistantPrompt(assistantMode, message, targetLanguage), mode, targetLanguage);
+    const data = extractJsonObject(raw) || {};
+    const results = normalizeLanguageAssistantResults(data.results || data, assistantMode, message);
+
+    if (!results.length) {
+      sendJson(response, 502, { error: "No assistant results", message: "生成失败，请重试" });
+      return;
+    }
+
+    sendJson(response, 200, { results });
+    return;
+  }
+
   if (mode === "select-dialogue") {
     const message = String(payload.message || "").trim();
     const history = Array.isArray(payload.messages) ? payload.messages.slice(-10) : [];
@@ -1176,6 +1197,152 @@ function buildSelectDialoguePrompt(message, history, targetLanguage = "english",
   ]
     .filter(Boolean)
     .join("\n\n");
+}
+
+function normalizeAssistantMode(mode) {
+  const value = String(mode || "translate").trim().toLowerCase();
+  if (value === "translate" || value === "translation") return "translate";
+  if (value === "localize" || value === "localization") return "localize";
+  if (value === "hair" || value === "hairstylist" || value === "barber") return "hair";
+  if (value === "reply" || value === "ai-reply") return "reply";
+  if (value === "explain" || value === "explanation") return "explain";
+  if (value === "pronunciation" || value === "pronounce") return "pronunciation";
+  return "translate";
+}
+
+function buildLanguageAssistantPrompt(mode, input, targetLanguage = "english") {
+  const language = getTargetLanguageInfo(targetLanguage);
+  const common = [
+    `You are a compact mobile language assistant for a Chinese learner of ${language.label}.`,
+    "Return valid compact JSON only. No Markdown. No prose outside JSON.",
+    'Required shape: {"results":[{"title":"","english":"","chinese":"","phonetic":"","scene":"","keyPoints":[""],"alternatives":[{"english":"","chinese":""}]}]}',
+    "General style rules:",
+    "1. English must be natural, spoken, local, and directly usable.",
+    "2. Avoid textbook English, stiff translation tone, corporate support tone, and overly formal wording.",
+    "3. Keep each result short enough for a phone screen.",
+    "4. Use Simplified Chinese for chinese, scene, and keyPoints.",
+    "5. If a result has an English sentence, always provide its concise Chinese meaning.",
+  ];
+
+  const modeRules = {
+    translate: [
+      "Mode: translate.",
+      "Detect whether the input is Chinese or English.",
+      "If Chinese, translate it into one natural spoken English sentence or message.",
+      "If English, translate it into accurate natural Simplified Chinese and keep the original English in english.",
+      "Return exactly 1 result.",
+    ],
+    localize: [
+      "Mode: localize stiff English.",
+      "Rewrite the input into 3 native-sounding casual English options.",
+      "Each option should have a different level of casualness or phrasing.",
+      "Return exactly 3 results.",
+    ],
+    hair: [
+      "Mode: hair stylist communication.",
+      "Generate 3 natural English expressions for a hair stylist speaking to a client or replying on Instagram.",
+      "Sound like a US local stylist: friendly, clear, not too formal.",
+      "Return exactly 3 results.",
+    ],
+    reply: [
+      "Mode: AI reply.",
+      "The input is a client or friend message. Generate 3 directly sendable replies.",
+      "Titles must be: 简短自然版, 友好详细版, 更 local 口语版.",
+      "If the context is booking, hair, or Instagram, keep it natural and polite without sounding like customer service.",
+      "Return exactly 3 results.",
+    ],
+    explain: [
+      "Mode: explain.",
+      "Explain the English sentence in Chinese.",
+      "Return exactly 1 result.",
+      "Use chinese for the sentence meaning.",
+      "Use scene for where this sentence fits.",
+      "Use keyPoints for important words or phrases with short Chinese notes.",
+      "Use alternatives for 2 or 3 more natural replacement expressions if helpful.",
+    ],
+    pronunciation: [
+      "Mode: pronunciation.",
+      "Analyze pronunciation for the word or sentence.",
+      "Return exactly 1 result.",
+      "Use english for the input or a cleaned version.",
+      "Use phonetic for IPA when possible.",
+      "Use chinese for the meaning.",
+      "Use keyPoints for short pronunciation tips in Simplified Chinese.",
+    ],
+  };
+
+  return common
+    .concat(modeRules[mode] || modeRules.translate)
+    .concat([`User input: ${input}`])
+    .join("\n");
+}
+
+function defaultAssistantTitle(mode, index) {
+  if (mode === "reply") return ["简短自然版", "友好详细版", "更 local 口语版"][index] || `回复 ${index + 1}`;
+  if (mode === "localize") return `推荐表达 ${index + 1}`;
+  if (mode === "hair") return `理发表达 ${index + 1}`;
+  if (mode === "translate") return "翻译结果";
+  if (mode === "explain") return "句子解释";
+  if (mode === "pronunciation") return "发音分析";
+  return `结果 ${index + 1}`;
+}
+
+function normalizeAssistantAlternative(item) {
+  const source = item && typeof item === "object" ? item : {};
+  const english = String(source.english || source.text || "").replace(/\s+/g, " ").trim().slice(0, 260);
+  const chinese = String(source.chinese || source.meaning || "").replace(/\s+/g, " ").trim().slice(0, 260);
+  if (!english) return null;
+  return { english, chinese };
+}
+
+function normalizeLanguageAssistantResults(rawResults, mode, input = "") {
+  const sourceList = Array.isArray(rawResults) ? rawResults : [rawResults];
+  const results = [];
+  const seen = new Set();
+
+  sourceList.forEach((item, index) => {
+    const source = item && typeof item === "object" ? item : {};
+    const english = String(source.english || source.text || source.reply || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 520);
+    const chinese = String(source.chinese || source.meaning || source.translation || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 520);
+    const scene = String(source.scene || source.usage || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 320);
+    const phonetic = String(source.phonetic || source.ipa || "")
+      .replace(/^\/|\/$/g, "")
+      .trim()
+      .slice(0, 120);
+    const keyPoints = Array.isArray(source.keyPoints || source.points)
+      ? (source.keyPoints || source.points)
+          .map((point) => String(point || "").replace(/\s+/g, " ").trim().slice(0, 120))
+          .filter(Boolean)
+          .slice(0, 8)
+      : [];
+    const alternatives = Array.isArray(source.alternatives)
+      ? source.alternatives.map(normalizeAssistantAlternative).filter(Boolean).slice(0, 4)
+      : [];
+    const key = `${english}|${chinese}|${scene}`.toLowerCase();
+    if ((!english && !chinese && !scene && !keyPoints.length && !alternatives.length) || seen.has(key)) return;
+    seen.add(key);
+
+    results.push({
+      title: String(source.title || defaultAssistantTitle(mode, index)).replace(/\s+/g, " ").trim().slice(0, 80),
+      english,
+      chinese: chinese || (mode === "translate" && /[\u4e00-\u9fff]/u.test(input) ? input.slice(0, 260) : ""),
+      phonetic,
+      scene,
+      keyPoints,
+      alternatives,
+    });
+  });
+
+  return results.slice(0, 5);
 }
 
 function normalizeGeneratedCategory(category, english = "", chinese = "") {
@@ -1579,6 +1746,7 @@ function getAiReasoningEffort(mode) {
 
 function getAiMaxOutputTokens(mode) {
   if (mode === "memory") return Math.max(aiMaxOutputTokens, 1400);
+  if (mode === "language-assistant") return Math.max(aiMaxOutputTokens, 1200);
   return mode === "convert-language" ? aiConvertMaxOutputTokens : aiMaxOutputTokens;
 }
 
@@ -1592,6 +1760,9 @@ function buildAiInstructions(mode = "chat", targetLanguage = "english") {
   }
   if (mode === "generate-sentence") {
     return `Return compact JSON only. Generate one natural spoken ${language.label} sentence from the Chinese meaning, with a short Chinese category. No Markdown, no extra text.`;
+  }
+  if (mode === "language-assistant") {
+    return `You are a compact mobile ${language.label} language assistant. Return valid compact JSON only with a results array. English must be natural, spoken, local, and directly usable. No Markdown, no prose outside JSON.`;
   }
   if (mode === "select-dialogue") {
     return `You run a point-and-click spoken ${language.label} chat practice mode. Return valid compact JSON only with aiMessage, replyOptions, and replyOptionMeanings. No Markdown, no labels outside JSON.`;

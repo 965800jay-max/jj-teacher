@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Plus, User, Users, BookOpen, Sparkles, BookText, Layers, MessageCircle, Search, X, WandSparkles, Volume2, Trash2 } from 'lucide-react'
+import { Plus, User, Users, BookOpen, Sparkles, BookText, Layers, MessageCircle, Search, X, WandSparkles, Volume2, Trash2, Languages } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { speakEnglish } from '@/lib/speech'
 import { StarryBackground } from '@/components/starry-background'
@@ -9,6 +9,7 @@ import { BottomNav } from '@/components/bottom-nav'
 import { SentenceCard } from '@/components/sentence-card'
 import { ScenesPage } from '@/components/scenes-page'
 import { TeacherPage, type TeacherQuickMode } from '@/components/teacher-page'
+import { LanguageAssistantPage, type AssistantMode, type LanguageAssistantResult } from '@/components/language-assistant-page'
 import { ExamPage } from '@/components/exam-page'
 import { FriendsPage } from '@/components/friends-page'
 import { AuthSheet, UpdateSheet } from '@/components/auth-sheet'
@@ -24,7 +25,7 @@ import {
 } from '@/lib/sample-data'
 import { ADD_WORD_EXAMPLE_EVENT, getVocabBook, removeVocabBookItem, VOCAB_BOOK_EVENT, type VocabBookItem } from '@/lib/vocab-book'
 
-type ActiveTab = 'sentences' | 'scenes' | 'teacher'
+type ActiveTab = 'sentences' | 'scenes' | 'assistant' | 'teacher'
 type HomeView = 'learning' | 'learned' | 'vocab'
 type AddMode = 'manual' | 'ai'
 
@@ -51,8 +52,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 74
-const CURRENT_VERSION_NAME = 'free74'
+const CURRENT_VERSION_CODE = 75
+const CURRENT_VERSION_NAME = 'free75'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -397,6 +398,42 @@ function normalizeSelectDialogueTurn(data: Record<string, unknown>) {
   }
 }
 
+function normalizeLanguageAssistantResults(data: Record<string, unknown>): LanguageAssistantResult[] {
+  const rawResults = Array.isArray(data.results) ? data.results : []
+  const results = rawResults
+    .map((item, index) => {
+      const source = item && typeof item === 'object' ? item as Record<string, unknown> : {}
+      const alternatives = Array.isArray(source.alternatives)
+        ? source.alternatives
+            .map((alternative) => {
+              const alt = alternative && typeof alternative === 'object' ? alternative as Record<string, unknown> : {}
+              return {
+                english: String(alt.english || '').replace(/\s+/g, ' ').trim().slice(0, 240),
+                chinese: String(alt.chinese || '').replace(/\s+/g, ' ').trim().slice(0, 240)
+              }
+            })
+            .filter((alternative) => alternative.english)
+            .slice(0, 4)
+        : []
+
+      return {
+        id: String(source.id || makeId(`assistant-result-${index}`)),
+        title: String(source.title || '').replace(/\s+/g, ' ').trim().slice(0, 80),
+        english: String(source.english || '').replace(/\s+/g, ' ').trim().slice(0, 500),
+        chinese: String(source.chinese || '').replace(/\s+/g, ' ').trim().slice(0, 500),
+        phonetic: String(source.phonetic || '').replace(/^\/|\/$/g, '').trim().slice(0, 100),
+        scene: String(source.scene || '').replace(/\s+/g, ' ').trim().slice(0, 300),
+        keyPoints: Array.isArray(source.keyPoints)
+          ? source.keyPoints.map((point) => String(point || '').replace(/\s+/g, ' ').trim()).filter(Boolean).slice(0, 8)
+          : [],
+        alternatives
+      }
+    })
+    .filter((item) => item.english || item.chinese || item.scene || item.keyPoints?.length || item.alternatives?.length)
+
+  return results.slice(0, 5)
+}
+
 function buildCloudPayload(sentences: SavedSentence[], messages: TeacherMessage[], memoryProfile: TutorMemoryProfile) {
   const cleanMessages = messages
     .filter((message) => !message.pending)
@@ -494,7 +531,7 @@ export default function ZhiyuApp() {
     const storedView = hasStorage() ? window.localStorage.getItem(VIEW_KEY) : ''
     setHomeView(storedView === 'learned' || storedView === 'vocab' ? storedView : 'learning')
     const storedPage = hasStorage() ? window.localStorage.getItem(APP_PAGE_KEY) : ''
-    if (storedPage === 'teacher' || storedPage === 'scenes' || storedPage === 'sentences') setActiveTab(storedPage)
+    if (storedPage === 'teacher' || storedPage === 'assistant' || storedPage === 'scenes' || storedPage === 'sentences') setActiveTab(storedPage)
     if (storedToken && storedUser) {
       setAuthToken(storedToken)
       setUser(storedUser)
@@ -786,6 +823,18 @@ export default function ZhiyuApp() {
       [cleanText]: meaning
     })
     return meaning
+  }, [])
+
+  const runLanguageAssistant = useCallback(async (mode: AssistantMode, text: string) => {
+    const cleanText = text.trim()
+    if (!cleanText) return []
+
+    const data = await requestAiTeacher({
+      mode: 'language-assistant',
+      assistantMode: mode,
+      message: cleanText
+    })
+    return normalizeLanguageAssistantResults(data as Record<string, unknown>)
   }, [])
 
   const handleDeleteSentence = useCallback((id: string) => {
@@ -1261,6 +1310,7 @@ export default function ZhiyuApp() {
     switch (activeTab) {
       case 'sentences': return { title: '句读', eyebrow: 'Sentence Reader', icon: BookText }
       case 'scenes': return { title: '单词/场景', eyebrow: 'Words & Scenes', icon: Layers }
+      case 'assistant': return { title: '语言助手', eyebrow: 'Language Assistant', icon: Languages }
       case 'teacher': return { title: '智语导师', eyebrow: 'AI Tutor', icon: MessageCircle }
     }
   }
@@ -1275,13 +1325,13 @@ export default function ZhiyuApp() {
 
       <main className={cn(
         "relative z-10 w-full max-w-[520px] mx-auto",
-        activeTab === 'teacher' && !showExam && !showFriends
+        (activeTab === 'teacher' || activeTab === 'assistant') && !showExam && !showFriends
           ? "h-dvh flex flex-col"
           : "min-h-dvh pb-24"
       )}>
         <header className={cn(
           "sticky top-0 z-40 safe-area-pt",
-          activeTab === 'teacher' && !showExam && !showFriends
+          (activeTab === 'teacher' || activeTab === 'assistant') && !showExam && !showFriends
             ? "relative flex-shrink-0 px-4 py-3"
             : "px-5 py-4"
         )}>
@@ -1291,7 +1341,7 @@ export default function ZhiyuApp() {
             <div className="flex items-center gap-3.5">
               <div className={cn(
                 "relative rounded-2xl glass-button flex items-center justify-center overflow-hidden group",
-                activeTab === 'teacher' && !showExam && !showFriends ? "w-10 h-10" : "w-11 h-11"
+                (activeTab === 'teacher' || activeTab === 'assistant') && !showExam && !showFriends ? "w-10 h-10" : "w-11 h-11"
               )}>
                 <div className="absolute inset-0 bg-gradient-to-br from-[oklch(0.70_0.15_280_/_0.15)] to-transparent" />
                 <PageIcon className="w-5 h-5 text-[oklch(0.80_0.15_280)] relative z-10 group-hover:scale-110 transition-transform duration-300" />
@@ -1302,7 +1352,7 @@ export default function ZhiyuApp() {
                 </p>
                 <h1 id="pageTitle" className={cn(
                   "font-semibold text-white/95 tracking-wide",
-                  activeTab === 'teacher' && !showExam && !showFriends ? "text-lg" : "text-xl"
+                  (activeTab === 'teacher' || activeTab === 'assistant') && !showExam && !showFriends ? "text-lg" : "text-xl"
                 )}>
                   {pageInfo.title}
                 </h1>
@@ -1570,6 +1620,11 @@ export default function ZhiyuApp() {
             sceneGroups={sceneGroups}
             scenes={scenes}
             onAddSentence={handleAddSentence}
+          />
+        ) : activeTab === 'assistant' ? (
+          <LanguageAssistantPage
+            onRunAssistant={runLanguageAssistant}
+            onAddSentence={(english, chinese) => handleAddSentence(english, chinese)}
           />
         ) : (
           <TeacherPage
