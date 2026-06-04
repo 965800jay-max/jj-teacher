@@ -124,6 +124,14 @@ function extractChineseLines(text: string) {
     .join('\n')
 }
 
+function isExplanationStyleText(text: string) {
+  const clean = String(text || '').trim()
+  if (!hasChinese(clean) || !/[A-Za-z]/.test(clean)) return false
+  if (/(英文|英语|English|中文意思|Chinese meaning|Meaning)\s*[:：]/i.test(clean)) return false
+
+  return /(为什么|为何|不是|意思|表示|这里|这个词|这句话|这个句子|用法|语法|区别|解释|所以|名词|动词|进行时|自然|地道)/u.test(clean)
+}
+
 export function ChatMessage({ message, compactAfter = false, onSpeak, onAddSentence, onTranslateText }: ChatMessageProps) {
   const isUser = message.role === 'user'
   const [playingId, setPlayingId] = useState<string | null>(null)
@@ -297,6 +305,10 @@ export function ChatMessage({ message, compactAfter = false, onSpeak, onAddSente
     }
 
     if (message.mode === 'chat' || message.mode === 'topic' || message.mode === 'free-chat' || message.mode === 'select-dialogue') {
+      if (isExplanationStyleText(message.text)) {
+        return { type: 'simple', text: message.text }
+      }
+
       const lines = message.text.split('\n')
       const content: { type: 'text' | 'english'; text: string; zh?: string }[] = []
       
@@ -408,8 +420,8 @@ export function ChatMessage({ message, compactAfter = false, onSpeak, onAddSente
         )}
 
         {parsed.type === 'simple' && (
-          isEnglishLike(extractEnglishLines(parsed.text))
-            ? renderEnglishBubble(extractEnglishLines(parsed.text), extractChineseLines(parsed.text), `simple-${message.id}`)
+          isEnglishLike(parsed.text.trim())
+            ? renderEnglishBubble(parsed.text.trim(), '', `simple-${message.id}`)
             : (
               <div className="relative rounded-2xl rounded-bl-md border border-white/[0.06] bg-white/[0.045] px-4 py-3 backdrop-blur-xl">
                 <p className="relative text-[14px] text-white/74 leading-relaxed whitespace-pre-wrap">{parsed.text}</p>

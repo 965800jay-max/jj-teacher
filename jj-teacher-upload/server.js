@@ -1426,8 +1426,17 @@ function isMultiExampleRequest(message) {
     && /(?:自然|日常|朋友|口语|美国|聊天|常见)/u.test(clean);
 }
 
+function isLanguageExplanationRequest(message) {
+  const clean = String(message || "").trim();
+  if (!/[\u4e00-\u9fff]/u.test(clean) || !/[A-Za-z]/.test(clean)) return false;
+  if (isDailySentenceRequest(clean) || isMultiExampleRequest(clean) || isDirectTranslationRequest(clean)) return false;
+
+  return /(?:为什么|为何|不是|意思|用法|语法|区别|这里|这个词|这句话|这个句子|解释|表示|是不是|对吗|自然吗|地道吗|怎么理解|代表什么)/u.test(clean);
+}
+
 function buildChatPrompt(message, history, mode = "chat", targetLanguage = "english", memoryProfile = {}) {
   const language = getTargetLanguageInfo(targetLanguage);
+  const languageExplanation = isLanguageExplanationRequest(message);
   const cleanHistory = history
     .filter((item) => item && typeof item.text === "string" && (item.role === "user" || item.role === "assistant"))
     .map((item) => `${item.role === "user" ? "学生" : "老师"}：${item.text}`)
@@ -1444,6 +1453,16 @@ function buildChatPrompt(message, history, mode = "chat", targetLanguage = "engl
       "4. Use short readable paragraphs on mobile.",
       "5. When continuing a conversation, pick up one concrete detail from the user and ask one natural next question.",
     ].join("\n"),
+    languageExplanation
+      ? [
+          "语言解释问题规则：",
+          "1. 用户是在问英文词义、语法、用法或为什么这样说；只回答这个问题，不要开启新话题。",
+          "2. 回答控制在 1 个紧凑解释块内，最多 3-4 行。",
+          "3. 最多给 1 个英文例句；不要列 2 个以上英文句子、替代表达或短语清单。",
+          "4. 不要使用“英文：”“中文意思：”标签，不要 Markdown，不要编号列表。",
+          "5. 解释要像老师口头说明，清楚但不刷屏。",
+        ].join("\n")
+      : "",
     isDailySentenceRequest(message)
       ? [
           "日常句子请求规则：",
@@ -1492,9 +1511,11 @@ function buildChatPrompt(message, history, mode = "chat", targetLanguage = "engl
       : "",
     mode === "topic"
       ? `Topic mode display rule: do not use labels. Put at most one complete ${language.label} practice question on its own line, directly paired with the Chinese question above.`
-      : `如果你给出${language.label}学习句子或翻译，请用“英文：”放${language.label}内容，并用“中文意思：”放中文意思。`,
-    mode === "topic" ? "" : `“英文：”只是 App 的显示标记，后面的内容仍然应该是${language.label}。`,
-    mode === "topic"
+      : languageExplanation
+        ? "语言解释显示规则：直接用中文说明核心原因；如需要英文例句，把最多 1 句英文放在同一个解释块里，不要做成清单。"
+        : `如果你给出${language.label}学习句子或翻译，请用“英文：”放${language.label}内容，并用“中文意思：”放中文意思。`,
+    mode === "topic" || languageExplanation ? "" : `“英文：”只是 App 的显示标记，后面的内容仍然应该是${language.label}。`,
+    mode === "topic" || languageExplanation
       ? ""
       : [
           "手机端排版规则：",
@@ -1586,6 +1607,29 @@ function trimDirectTranslationReply(reply, message) {
   return `英文：\n${target}\n\n中文意思：\n${meaning}`;
 }
 
+function trimLanguageExplanationReply(reply, message) {
+  if (!isLanguageExplanationRequest(message)) return reply;
+
+  const lines = String(reply || "")
+    .split(/\n+/)
+    .map((line) => line.trim().replace(/^\s*(?:[-•*]|\d+[.)、])\s*/, ""))
+    .filter(Boolean);
+  const kept = [];
+  let englishLineCount = 0;
+
+  for (const line of lines) {
+    const englishOnly = /[A-Za-z]/.test(line) && !/[\u4e00-\u9fff]/u.test(line);
+    if (englishOnly) {
+      if (englishLineCount >= 1) continue;
+      englishLineCount += 1;
+    }
+    kept.push(line);
+    if (kept.length >= 4) break;
+  }
+
+  return kept.join("\n").trim() || reply;
+}
+
 function normalizeTeacherDisplayReply(reply) {
   return String(reply || "")
     .replace(/\r\n/g, "\n")
@@ -1653,7 +1697,8 @@ async function handleWordLookup(request, response) {
 
 function finalizeTeacherReply(reply, mode, rawMessage = "") {
   const compacted = compactTeacherReply(reply, mode);
-  return mode === "topic" ? compacted : trimDirectTranslationReply(compacted, rawMessage);
+  const explanationTrimmed = trimLanguageExplanationReply(compacted, rawMessage);
+  return mode === "topic" ? explanationTrimmed : trimDirectTranslationReply(explanationTrimmed, rawMessage);
 }
 
 async function askAiTeacher(prompt, mode = "chat", targetLanguage = "english") {

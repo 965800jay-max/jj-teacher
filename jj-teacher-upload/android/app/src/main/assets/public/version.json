@@ -1,6 +1,6 @@
 {
-  "versionCode": 78,
-  "versionName": "free78",
-  "apkUrl": "https://files.catbox.moe/lcf3gp.apk",
-  "notes": "free78: 修复安卓键盘弹出时输入模块被顶上去的问题。"
+  "versionCode": 79,
+  "versionName": "free79",
+  "apkUrl": "https://files.catbox.moe/p1dsdz.apk",
+  "notes": "free79: 优化智语导师解释类问题回复，避免一个问题拆成过多句子气泡。"
 }
