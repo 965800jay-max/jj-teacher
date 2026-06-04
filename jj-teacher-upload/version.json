@@ -1,6 +1,6 @@
 {
-  "versionCode": 83,
-  "versionName": "free83",
-  "apkUrl": "https://files.catbox.moe/js8wln.apk",
-  "notes": "free83: 智语导师升级为真实场景点选对话，新增场景选择、难度、阶段推进和对话恢复。"
+  "versionCode": 84,
+  "versionName": "free84",
+  "apkUrl": "https://files.catbox.moe/wddvjr.apk",
+  "notes": "free84: 优化智语导师点选对话难度逻辑，回复选项改为真实聊天方向并隐藏等级标签。"
 }

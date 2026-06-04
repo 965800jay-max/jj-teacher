@@ -370,7 +370,6 @@ export function TeacherPage({
               <div className="relative flex gap-2 overflow-x-auto pb-1 pr-2 scrollbar-hide scroll-smooth">
                 {visibleReplyOptions.map((option, index) => {
                   const note = replyOptionMeanings[index] || '中文意思待补充'
-                  const levelLabel = index === 0 ? '简单版' : index === 1 ? '自然版' : '进阶版'
                   return (
                     <button
                       key={`${option}-${index}`}
@@ -392,9 +391,6 @@ export function TeacherPage({
                         (isSending || isReplyOptionsLoading) && "opacity-50"
                       )}
                     >
-                      <span className="mb-1 w-fit rounded-full border border-[oklch(0.70_0.15_280_/_0.22)] bg-black/20 px-2 py-0.5 text-[10px] font-semibold leading-none text-[oklch(0.78_0.15_280_/_0.72)]">
-                        {levelLabel}
-                      </span>
                       <span className="w-full overflow-hidden text-[13px] font-semibold leading-tight text-white/88 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">{option}</span>
                       <span className="mt-1 w-full truncate text-[11px] font-medium leading-tight text-[oklch(0.70_0.15_280_/_0.56)]">{note}</span>
                     </button>

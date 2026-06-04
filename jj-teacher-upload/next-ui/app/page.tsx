@@ -72,8 +72,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 83
-const CURRENT_VERSION_NAME = 'free83'
+const CURRENT_VERSION_CODE = 84
+const CURRENT_VERSION_NAME = 'free84'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -405,6 +405,14 @@ function messageModeFromServerMode(mode: string): TeacherMessage['mode'] {
   return 'chat'
 }
 
+function normalizeSelectableReplyOption(value: unknown) {
+  return String(value || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/^(?:简单版|自然版|进阶版|简单|中级|高级|easy|simple|natural|intermediate|advanced)\s*[:：-]\s*/iu, '')
+    .trim()
+}
+
 function normalizeSelectDialogueTurn(data: Record<string, unknown>) {
   const aiMessage = String(data.aiMessage || data.reply || '').trim()
   const stage = String(data.stage || data.currentStage || data.nextStage || '').replace(/\s+/g, ' ').trim().slice(0, 80)
@@ -415,7 +423,7 @@ function normalizeSelectDialogueTurn(data: Record<string, unknown>) {
   const replyOptionMeanings: string[] = []
 
   rawOptions.forEach((item, index) => {
-    const option = String(item || '').replace(/\s+/g, ' ').trim()
+    const option = normalizeSelectableReplyOption(item)
     const key = option.toLowerCase()
     if (!option || seen.has(key) || /[\u4e00-\u9fff]/.test(option)) return
     seen.add(key)

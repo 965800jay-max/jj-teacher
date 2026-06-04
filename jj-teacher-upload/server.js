@@ -989,7 +989,7 @@ async function handleAiTeacher(request, response) {
     const replyOptionMeanings = [];
 
     rawOptions.forEach((item, index) => {
-      const option = String(item || "").replace(/\s+/g, " ").trim();
+      const option = normalizeSelectableReplyOption(item);
       const key = option.toLowerCase();
       if (!option || seen.has(key) || /[\u4e00-\u9fff]/u.test(option)) return;
       seen.add(key);
@@ -1243,10 +1243,18 @@ const selectDialogueScenarios = {
 };
 
 const selectDialogueDifficultyRules = {
-  easy: "Difficulty: easy. Use short, simple sentences and common words. Keep aiMessage very easy to understand.",
-  medium: "Difficulty: intermediate. Make the conversation close to real life with useful details, but still clear for a learner.",
-  advanced: "Difficulty: advanced. Sound closer to a native speaker with richer details, natural phrasing, and deeper follow-up."
+  easy: "Difficulty: easy. Use the most common vocabulary, simple sentence structures, direct wording, and easy-to-understand questions. Avoid slang, complex clauses, and harder phrasal verbs.",
+  medium: "Difficulty: intermediate. Use natural spoken English, common phrases, light reasons or details, and real daily/workplace phrasing without becoming formal or hard.",
+  advanced: "Difficulty: advanced. Use more native-like, precise, realistic phrasing with appropriate context depth or professional detail. Keep it concise; advanced means more natural and exact, not longer."
 };
+
+function normalizeSelectableReplyOption(value) {
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/^(?:简单版|自然版|进阶版|简单|中级|高级|easy|simple|natural|intermediate|advanced)\s*[:：\-]\s*/iu, "")
+    .trim();
+}
 
 function normalizeSelectDialogueScenario(value) {
   const key = String(value || "").trim();
@@ -1288,17 +1296,22 @@ function buildSelectDialoguePrompt(message, history, targetLanguage = "english",
     safeStage ? `Current stage: ${safeStage}. Continue naturally from here and move forward only when it feels realistic.` : "Current stage: start at the first stage.",
     `Scenario details: ${scenario.details}`,
     selectDialogueDifficultyRules[difficultyId],
+    "Difficulty should not be based mainly on word count. Difficulty should be based on vocabulary difficulty, sentence structure, naturalness, context depth, and professional detail. Even in advanced mode, keep the message conversational and concise. Advanced means more natural, precise, and realistic, not longer.",
     "aiMessage rules:",
     "1. Write one natural English message as the role character.",
     "2. Stay inside the selected scenario and move through the real-world flow. Do not randomly change topics.",
     "3. Do not explain grammar, translate, grade, or mention that this is practice.",
     "4. Ask or imply one realistic next direction so the learner can continue.",
+    "5. Keep every AI turn to 1-2 short conversational sentences.",
+    "6. Ask only one question or move only one small topic forward. Do not write a long paragraph or stack multiple suggestions.",
     "replyOptions rules:",
     "1. Provide exactly 3 natural English replies the learner can tap.",
-    "2. Option 1 is easy: short, simple, beginner-friendly.",
-    "3. Option 2 is natural: what a normal person would say in real life.",
-    "4. Option 3 is advanced: more fluent, detailed, or native-like.",
-    "5. Do not include Chinese in replyOptions.",
+    "2. All 3 reply options should follow the current difficulty level, but they must represent different real chat intentions, choices, or directions.",
+    "3. Do not make option 1/2/3 into easy/natural/advanced versions of the same idea.",
+    "4. Prefer different thoughts such as agreeing, asking a follow-up, suggesting an alternative, giving a reason, expressing uncertainty, or adding a realistic detail.",
+    "5. Do not label options with Simple, Natural, Advanced, Easy, Intermediate, or any Chinese difficulty label.",
+    "6. Do not include Chinese in replyOptions.",
+    "7. Keep each option concise and directly tappable.",
     "replyOptionMeanings rules:",
     "1. Provide Simplified Chinese meanings matching replyOptions by index.",
     "2. Keep each meaning concise.",

@@ -16,9 +16,9 @@ export const teacherScenarioOptions = [
 export type TeacherScenarioId = typeof teacherScenarioOptions[number]['id']
 
 export const teacherDifficultyOptions = [
-  { id: 'easy', label: '简单', detail: '短句、简单词、容易理解' },
-  { id: 'medium', label: '中级', detail: '接近真实生活，有细节和建议' },
-  { id: 'advanced', label: '高级', detail: '更像母语者，交流更深入' }
+  { id: 'easy', label: '简单', detail: '常见词、简单句型、直接好懂' },
+  { id: 'medium', label: '中级', detail: '自然口语、常见短语、贴近日常' },
+  { id: 'advanced', label: '高级', detail: '更地道精准，可有专业细节但不变长' }
 ] as const
 
 export type TeacherDifficulty = typeof teacherDifficultyOptions[number]['id']
