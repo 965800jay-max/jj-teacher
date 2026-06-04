@@ -1235,9 +1235,11 @@ function buildLanguageAssistantPrompt(mode, input, targetLanguage = "english") {
     ],
     localize: [
       "Mode: localize stiff English.",
-      "Rewrite the input into 3 native-sounding casual English options.",
-      "Each option should have a different level of casualness or phrasing.",
-      "Return exactly 3 results.",
+      "Rewrite the input into exactly 2 native-sounding casual English options.",
+      "Do not include a normal translation, standard translation, literal translation, or natural/common duplicate.",
+      "Result 1 title must be 更口语. Make it conversational and commonly spoken.",
+      "Result 2 title must be 更随意. Make it more relaxed and casual.",
+      "Return exactly 2 results.",
     ],
     hair: [
       "Mode: hair stylist communication.",
@@ -1280,7 +1282,7 @@ function buildLanguageAssistantPrompt(mode, input, targetLanguage = "english") {
 
 function defaultAssistantTitle(mode, index) {
   if (mode === "reply") return ["简短自然版", "友好详细版", "更 local 口语版"][index] || `回复 ${index + 1}`;
-  if (mode === "localize") return `推荐表达 ${index + 1}`;
+  if (mode === "localize") return ["更口语", "更随意"][index] || `本地化 ${index + 1}`;
   if (mode === "hair") return `理发表达 ${index + 1}`;
   if (mode === "translate") return "翻译结果";
   if (mode === "explain") return "句子解释";
@@ -1303,6 +1305,10 @@ function normalizeLanguageAssistantResults(rawResults, mode, input = "") {
 
   sourceList.forEach((item, index) => {
     const source = item && typeof item === "object" ? item : {};
+    const rawTitle = String(source.title || "").replace(/\s+/g, " ").trim().slice(0, 80);
+    if (mode === "localize" && /(普通|正常|标准|直译|翻译|自然常用|常用自然|normal|standard|literal|translation)/iu.test(rawTitle)) {
+      return;
+    }
     const english = String(source.english || source.text || source.reply || "")
       .replace(/\s+/g, " ")
       .trim()
@@ -1335,7 +1341,7 @@ function normalizeLanguageAssistantResults(rawResults, mode, input = "") {
     seen.add(key);
 
     results.push({
-      title: String(source.title || defaultAssistantTitle(mode, index)).replace(/\s+/g, " ").trim().slice(0, 80),
+      title: rawTitle || defaultAssistantTitle(mode, index),
       english,
       chinese: chinese || (mode === "translate" && /[\u4e00-\u9fff]/u.test(input) ? input.slice(0, 260) : ""),
       phonetic,
@@ -1344,6 +1350,15 @@ function normalizeLanguageAssistantResults(rawResults, mode, input = "") {
       alternatives,
     });
   });
+
+  if (mode === "localize") {
+    const preferred = results.filter((item) => /(口语|随意|casual|colloquial|relaxed)/iu.test(item.title));
+    const finalResults = preferred.length >= 2 ? preferred : results;
+    return finalResults.slice(0, 2).map((item, index) => ({
+      ...item,
+      title: defaultAssistantTitle(mode, index),
+    }));
+  }
 
   return results.slice(0, 5);
 }
