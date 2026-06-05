@@ -1,6 +1,6 @@
 {
-  "versionCode": 90,
-  "versionName": "free90",
-  "apkUrl": "https://jj-teacher.onrender.com/zhiyu-tutor-free90-select-duplicate-fix-debug.apk",
-  "notes": "free90: 修复智语导师点选对话选择回复后可能连续发送两条的问题。"
+  "versionCode": 91,
+  "versionName": "free91",
+  "apkUrl": "https://jj-teacher.onrender.com/zhiyu-tutor-free91-message-menu-toggle-debug.apk",
+  "notes": "free91: 修复句子右下角三点菜单再次点击无法关闭的问题。"
 }

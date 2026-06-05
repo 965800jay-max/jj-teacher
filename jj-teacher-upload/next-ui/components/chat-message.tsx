@@ -235,7 +235,6 @@ export function ChatMessage({
     dragStartXRef.current = event.clientX
     dragKeyRef.current = key
     dragMovedRef.current = false
-    setOpenMenuKey(null)
     setDragState({ key, x: 0 })
     event.currentTarget.setPointerCapture?.(event.pointerId)
   }
@@ -244,7 +243,10 @@ export function ChatMessage({
     if (dragKeyRef.current !== key) return
     event.stopPropagation()
     const nextX = clampDrag(event.clientX - dragStartXRef.current)
-    if (Math.abs(nextX) > 5) dragMovedRef.current = true
+    if (Math.abs(nextX) > 5) {
+      dragMovedRef.current = true
+      setOpenMenuKey(null)
+    }
     setDragState({ key, x: nextX })
   }
 
