@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState, type PointerEvent } from 'react'
 import { RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { speakEnglish } from '@/lib/speech'
@@ -176,8 +176,14 @@ export function ChatMessage({
   const [meaningCache, setMeaningCache] = useState<Record<string, string>>({})
   const [loadingMeaningKey, setLoadingMeaningKey] = useState<string | null>(null)
   const [openMenuKey, setOpenMenuKey] = useState<string | null>(null)
+  const [dragState, setDragState] = useState<{ key: string; x: number } | null>(null)
+  const dragStartXRef = useRef(0)
+  const dragKeyRef = useRef<string | null>(null)
+  const dragMovedRef = useRef(false)
   const messageGapClass = compactAfter ? 'mb-1.5' : 'mb-3'
-  const messageLayerClass = openMenuKey ? 'relative z-[120]' : 'relative z-0'
+  const messageLayerClass = openMenuKey || dragState ? 'relative z-[120]' : 'relative z-0'
+  const dragThreshold = 42
+  const maxDrag = 58
 
   const handleSpeak = (text: string, id: string) => {
     const speakText = extractSpeakableEnglish(text)
@@ -215,18 +221,118 @@ export function ChatMessage({
     }
   }
 
+  const clampDrag = (value: number) => Math.max(-maxDrag, Math.min(maxDrag, value))
+
+  const resetMenuDrag = () => {
+    dragKeyRef.current = null
+    dragMovedRef.current = false
+    setDragState(null)
+  }
+
+  const handleMenuPointerDown = (event: PointerEvent<HTMLButtonElement>, key: string) => {
+    event.preventDefault()
+    event.stopPropagation()
+    dragStartXRef.current = event.clientX
+    dragKeyRef.current = key
+    dragMovedRef.current = false
+    setOpenMenuKey(null)
+    setDragState({ key, x: 0 })
+    event.currentTarget.setPointerCapture?.(event.pointerId)
+  }
+
+  const handleMenuPointerMove = (event: PointerEvent<HTMLButtonElement>, key: string) => {
+    if (dragKeyRef.current !== key) return
+    event.stopPropagation()
+    const nextX = clampDrag(event.clientX - dragStartXRef.current)
+    if (Math.abs(nextX) > 5) dragMovedRef.current = true
+    setDragState({ key, x: nextX })
+  }
+
+  const handleMenuPointerUp = (event: PointerEvent<HTMLButtonElement>, text: string, note: string, key: string) => {
+    if (dragKeyRef.current !== key) return
+    event.preventDefault()
+    event.stopPropagation()
+    event.currentTarget.releasePointerCapture?.(event.pointerId)
+    const finalX = clampDrag(event.clientX - dragStartXRef.current)
+    const didMove = dragMovedRef.current
+    resetMenuDrag()
+
+    if (finalX <= -dragThreshold) {
+      handleSpeak(text, key)
+      setOpenMenuKey(null)
+      return
+    }
+
+    if (finalX >= dragThreshold) {
+      handleToggleMeaning(key, text, note)
+      return
+    }
+
+    if (!didMove) {
+      setOpenMenuKey((current) => current === key ? null : key)
+    }
+  }
+
+  const handleMenuPointerCancel = (event: PointerEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+    resetMenuDrag()
+  }
+
   const renderBubbleMenu = (text: string, note: string, key: string, options: { showAddSentence?: boolean } = {}) => {
     const isMeaningOpen = expandedMeaningKey === key
     const meaning = note || meaningCache[key] || ''
     const showAddSentence = options.showAddSentence !== false
+    const dragX = dragState?.key === key ? dragState.x : 0
+    const isDraggingThis = dragState?.key === key
+    const dragIntent = dragX <= -dragThreshold ? 'speak' : dragX >= dragThreshold ? 'meaning' : ''
     return (
-      <div className="absolute bottom-2 right-2 z-[140]">
+      <div className="absolute bottom-2 right-2 z-[140] select-none">
+        {isDraggingThis && dragX < -6 && (
+          <div
+            className={cn(
+              "pointer-events-none absolute right-8 top-0 flex h-7 items-center rounded-lg border px-2 text-[10px] font-semibold transition-premium",
+              dragIntent === 'speak'
+                ? "border-[oklch(0.70_0.15_280_/_0.34)] bg-[oklch(0.70_0.15_280_/_0.18)] text-white"
+                : "border-white/[0.06] bg-black/45 text-white/38"
+            )}
+            style={{ opacity: Math.min(1, Math.abs(dragX) / dragThreshold) }}
+          >
+            朗读
+          </div>
+        )}
+        {isDraggingThis && dragX > 6 && (
+          <div
+            className={cn(
+              "pointer-events-none absolute left-8 top-0 flex h-7 items-center rounded-lg border px-2 text-[10px] font-semibold transition-premium",
+              dragIntent === 'meaning'
+                ? "border-[oklch(0.70_0.15_280_/_0.34)] bg-[oklch(0.70_0.15_280_/_0.18)] text-white"
+                : "border-white/[0.06] bg-black/45 text-white/38"
+            )}
+            style={{ opacity: Math.min(1, Math.abs(dragX) / dragThreshold) }}
+          >
+            中文
+          </div>
+        )}
         <button
           type="button"
-          onClick={() => setOpenMenuKey((current) => current === key ? null : key)}
+          onPointerDown={(event) => handleMenuPointerDown(event, key)}
+          onPointerMove={(event) => handleMenuPointerMove(event, key)}
+          onPointerUp={(event) => handleMenuPointerUp(event, text, note, key)}
+          onPointerCancel={handleMenuPointerCancel}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault()
+              setOpenMenuKey((current) => current === key ? null : key)
+            }
+          }}
+          style={{
+            transform: `translateX(${dragX}px)`,
+            touchAction: 'none'
+          }}
           className={cn(
-            "flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.055] bg-white/[0.025] text-[18px] leading-none text-white/35 transition-premium hover:border-[oklch(0.70_0.15_280_/_0.22)] hover:text-white/70",
-            openMenuKey === key && "border-[oklch(0.70_0.15_280_/_0.34)] bg-[oklch(0.70_0.15_280_/_0.09)] text-white/80"
+            "flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.055] bg-white/[0.025] text-[18px] leading-none text-white/35 shadow-[0_0_0_rgba(0,0,0,0)] transition-[transform,background,border-color,color,box-shadow] duration-150 hover:border-[oklch(0.70_0.15_280_/_0.22)] hover:text-white/70",
+            openMenuKey === key && "border-[oklch(0.70_0.15_280_/_0.34)] bg-[oklch(0.70_0.15_280_/_0.09)] text-white/80",
+            dragIntent && "border-[oklch(0.70_0.15_280_/_0.48)] bg-[oklch(0.70_0.15_280_/_0.16)] text-white shadow-[0_0_18px_oklch(0.70_0.15_280_/_0.18)]"
           )}
           aria-label="消息操作"
         >
@@ -391,7 +497,9 @@ export function ChatMessage({
       <div className={cn("flex justify-end animate-slide-up", messageGapClass, messageLayerClass)}>
         <div className="max-w-[86%] space-y-2">
           <div className="relative rounded-2xl rounded-br-md bg-[oklch(0.70_0.15_280_/_0.16)] backdrop-blur-xl border border-[oklch(0.70_0.15_280_/_0.24)] px-4 py-3 pr-10 shadow-[0_0_22px_oklch(0.70_0.15_280_/_0.1)]">
-            <p className="relative text-[14px] text-white/95 leading-relaxed">{message.text}</p>
+            <p className="relative text-[14px] text-white/95 leading-relaxed">
+              {isEnglishLike(message.text) ? <SpeakableText text={message.text} rate={0.9} /> : message.text}
+            </p>
             {renderBubbleMenu(message.text, messageMeaning, userTranslationKey, { showAddSentence: allowUserAddSentence })}
             {isUserTranslationOpen && (
               <p className="mt-2.5 border-t border-white/[0.08] pt-2 text-xs leading-relaxed text-[oklch(0.83_0.13_280_/_0.76)] whitespace-pre-wrap">

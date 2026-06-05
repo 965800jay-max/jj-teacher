@@ -1,6 +1,6 @@
 {
-  "versionCode": 88,
-  "versionName": "free88",
-  "apkUrl": "https://files.catbox.moe/qq7w5h.apk",
-  "notes": "free88: 修复智语导师点选对话自动保存到聊天记录的问题；只有点击保存按钮才会写入记录页面。"
+  "versionCode": 89,
+  "versionName": "free89",
+  "apkUrl": "https://files.catbox.moe/60v5td.apk",
+  "notes": "free89: 语言助手结果支持点击单词朗读和释义；导师与记录页消息三点按钮支持左滑朗读、右滑显示中文。"
 }

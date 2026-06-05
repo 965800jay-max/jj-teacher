@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Clipboard, Copy, Languages, Loader2, MessageCircle, Plus, RotateCcw, Scissors, Sparkles, Trash2, Volume2, WandSparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { speakEnglish } from '@/lib/speech'
+import { SpeakableText } from '@/components/speakable-text'
 
 export type AssistantMode = 'translate' | 'localize' | 'hair' | 'reply' | 'explain' | 'pronunciation'
 
@@ -327,7 +328,11 @@ export function LanguageAssistantPage({
                       {result.title}
                     </p>
                   )}
-                  {english && <p className="text-[17px] font-semibold leading-relaxed text-white/94">{english}</p>}
+                  {english && (
+                    <p className="text-[17px] font-semibold leading-relaxed text-white/94">
+                      <SpeakableText text={english} />
+                    </p>
+                  )}
                   {phonetic && <p className="mt-2 text-sm text-[oklch(0.70_0.15_280_/_0.70)]">/{phonetic.replace(/^\/|\/$/g, '')}/</p>}
                   {chinese && <p className="mt-3 text-sm leading-relaxed text-white/56">{chinese}</p>}
 
@@ -356,7 +361,9 @@ export function LanguageAssistantPage({
                       <p className="text-[11px] font-semibold tracking-[0.12em] text-[oklch(0.70_0.15_280_/_0.75)] uppercase">替代表达</p>
                       {result.alternatives?.map((item, altIndex) => (
                         <div key={`${item.english}-${altIndex}`} className="rounded-2xl border border-white/[0.06] bg-black/15 px-3.5 py-3">
-                          <p className="text-sm font-semibold leading-relaxed text-white/86">{item.english}</p>
+                          <p className="text-sm font-semibold leading-relaxed text-white/86">
+                            <SpeakableText text={item.english} />
+                          </p>
                           {item.chinese && <p className="mt-1.5 text-xs leading-relaxed text-white/46">{item.chinese}</p>}
                           <div className="mt-2 flex items-center gap-2">
                             <button
