@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { ChevronLeft, Clock3, MessageCircle, MessagesSquare, MoreHorizontal, PlayCircle, Trash2 } from 'lucide-react'
+import { ChevronLeft, ClipboardCheck, Clock3, MessageCircle, MessagesSquare, MoreHorizontal, PlayCircle, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ChatMessage } from '@/components/chat-message'
 import type { TeacherMessage, TutorMemoryProfile } from '@/lib/sample-data'
@@ -44,6 +44,7 @@ interface ScenesPageProps {
   records: SavedDialogueRecord[]
   onDeleteRecord?: (id: string) => void
   onContinueRecord?: (record: SavedDialogueRecord) => void
+  onStartExam?: (record: SavedDialogueRecord) => void
   onAddSentence?: (text: string, note: string) => void
   onTranslateText?: (text: string) => Promise<string>
 }
@@ -86,6 +87,7 @@ export function ScenesPage({
   records,
   onDeleteRecord,
   onContinueRecord,
+  onStartExam,
   onAddSentence,
   onTranslateText
 }: ScenesPageProps) {
@@ -130,14 +132,30 @@ export function ScenesPage({
                 {formatSavedTime(selectedRecord.updatedAt)} · 共 {selectedRecord.messageCount || messages.length} 条消息
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => onContinueRecord?.(selectedRecord)}
-              className="flex h-10 shrink-0 items-center gap-1.5 rounded-2xl border border-[oklch(0.70_0.15_280_/_0.30)] bg-[oklch(0.70_0.15_280_/_0.12)] px-3 text-xs font-semibold text-white transition-premium hover:bg-[oklch(0.70_0.15_280_/_0.18)]"
-            >
-              <PlayCircle className="h-4 w-4" />
-              继续对话
-            </button>
+            <div className="flex shrink-0 flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => onContinueRecord?.(selectedRecord)}
+                className="flex h-10 items-center justify-center gap-1.5 rounded-2xl border border-[oklch(0.70_0.15_280_/_0.30)] bg-[oklch(0.70_0.15_280_/_0.12)] px-3 text-xs font-semibold text-white transition-premium hover:bg-[oklch(0.70_0.15_280_/_0.18)]"
+              >
+                <PlayCircle className="h-4 w-4" />
+                继续对话
+              </button>
+              <button
+                type="button"
+                onClick={() => onStartExam?.(selectedRecord)}
+                disabled={!messages.length}
+                className={cn(
+                  "flex h-10 items-center justify-center gap-1.5 rounded-2xl border px-3 text-xs font-semibold transition-premium",
+                  messages.length
+                    ? "border-white/[0.10] bg-white/[0.045] text-white/82 hover:border-[oklch(0.70_0.15_280_/_0.26)] hover:text-white"
+                    : "border-white/[0.05] bg-white/[0.025] text-white/28"
+                )}
+              >
+                <ClipboardCheck className="h-4 w-4" />
+                开始考试
+              </button>
+            </div>
           </div>
           {selectedRecord.conversationStage && (
             <p className="rounded-2xl border border-white/[0.06] bg-black/20 px-3 py-2 text-xs text-white/42">

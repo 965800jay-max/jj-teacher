@@ -10,7 +10,7 @@ import { SentenceCard } from '@/components/sentence-card'
 import { ScenesPage, type SavedDialogueRecord } from '@/components/scenes-page'
 import { TeacherPage, type TeacherQuickMode } from '@/components/teacher-page'
 import { LanguageAssistantPage, type AssistantMode, type LanguageAssistantResult } from '@/components/language-assistant-page'
-import { ExamPage } from '@/components/exam-page'
+import { ExamPage, type ExamSourceItem } from '@/components/exam-page'
 import { FriendsPage } from '@/components/friends-page'
 import { AuthSheet, UpdateSheet } from '@/components/auth-sheet'
 import {
@@ -69,8 +69,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 92
-const CURRENT_VERSION_NAME = 'free92'
+const CURRENT_VERSION_CODE = 93
+const CURRENT_VERSION_NAME = 'free93'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -773,6 +773,8 @@ export default function ZhiyuApp() {
   const [isGeneratingSentence, setIsGeneratingSentence] = useState(false)
   const [generationError, setGenerationError] = useState('')
   const [showExam, setShowExam] = useState(false)
+  const [examItems, setExamItems] = useState<ExamSourceItem[]>([])
+  const [examTitle, setExamTitle] = useState('关键词填空考试')
   const [showFriends, setShowFriends] = useState(false)
   const [showAuth, setShowAuth] = useState(false)
   const [showUpdate, setShowUpdate] = useState(false)
@@ -1085,6 +1087,36 @@ export default function ZhiyuApp() {
         .includes(query)
     })
   }, [sentences, homeView, categoryFilter, searchQuery])
+
+  const startSentenceExam = useCallback(() => {
+    const items = filteredSentences
+      .filter((sentence) => sentence.text.trim())
+      .map((sentence): ExamSourceItem => ({
+        id: sentence.id,
+        text: sentence.text,
+        note: sentence.note || '中文意思待补充'
+      }))
+
+    setExamItems(items)
+    setExamTitle('句读关键词填空')
+    setShowFriends(false)
+    setShowExam(true)
+  }, [filteredSentences])
+
+  const startSavedDialogueExam = useCallback((record: SavedDialogueRecord) => {
+    const items = record.messages
+      .filter((message) => message.english.trim())
+      .map((message): ExamSourceItem => ({
+        id: `${record.id}-${message.id}`,
+        text: message.english,
+        note: message.chinese || '中文意思待补充'
+      }))
+
+    setExamItems(items)
+    setExamTitle('聊天记录关键词填空')
+    setShowFriends(false)
+    setShowExam(true)
+  }, [])
 
   const filteredVocabBook = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
@@ -1870,7 +1902,7 @@ export default function ZhiyuApp() {
   }, [authToken])
 
   const getPageTitle = () => {
-    if (showExam) return { title: '句子复习', eyebrow: 'Review', icon: Sparkles }
+    if (showExam) return { title: examTitle, eyebrow: 'Keyword Test', icon: Sparkles }
     if (showFriends) return { title: '好友', eyebrow: 'Community', icon: Users }
     switch (activeTab) {
       case 'sentences': return { title: '句读', eyebrow: 'Sentence Reader', icon: BookText }
@@ -1955,7 +1987,8 @@ export default function ZhiyuApp() {
 
         {showExam ? (
           <ExamPage
-            sentences={sentences}
+            sentences={examItems}
+            title={examTitle}
             onBack={() => setShowExam(false)}
             onComplete={() => setShowExam(false)}
           />
@@ -2003,11 +2036,11 @@ export default function ZhiyuApp() {
                 <div className="flex items-center gap-3">
                   <button
                     id="reviewButton"
-                    onClick={() => setShowExam(true)}
-                    disabled={learningCount === 0}
+                    onClick={startSentenceExam}
+                    disabled={filteredSentences.length === 0}
                     className={cn(
                       "h-10 px-4 rounded-2xl text-sm font-semibold transition-premium flex items-center gap-2",
-                      learningCount > 0 ? "glass-button-primary" : "glass-button text-white/30"
+                      filteredSentences.length > 0 ? "glass-button-primary" : "glass-button text-white/30"
                     )}
                   >
                     ✍️ 默写复习
@@ -2183,6 +2216,7 @@ export default function ZhiyuApp() {
             records={savedDialogues}
             onDeleteRecord={deleteSavedDialogue}
             onContinueRecord={continueSavedDialogue}
+            onStartExam={startSavedDialogueExam}
             onAddSentence={handleAddSentence}
             onTranslateText={translateTeacherText}
           />

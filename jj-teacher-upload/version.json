@@ -1,6 +1,6 @@
 {
-  "versionCode": 92,
-  "versionName": "free92",
-  "apkUrl": "https://jj-teacher.onrender.com/zhiyu-tutor-free92-select-reply-echo-fix-debug.apk",
-  "notes": "free92: 修复点选对话点击回复后我方句子被 AI 再重复显示一条的问题。"
+  "versionCode": 93,
+  "versionName": "free93",
+  "apkUrl": "https://jj-teacher.onrender.com/zhiyu-tutor-free93-keyword-blank-exam-debug.apk",
+  "notes": "free93: 句读复习和聊天记录考试改为关键词填空，重点训练高价值词和短语。"
 }
