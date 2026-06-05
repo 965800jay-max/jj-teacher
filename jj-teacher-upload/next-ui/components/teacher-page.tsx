@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { Send, Sparkles, Coffee, Brain, X, Trash2, Power, MousePointerClick, RefreshCw, Plus, Volume2, VolumeX, Gauge, RotateCcw } from 'lucide-react'
+import { Send, Sparkles, Coffee, Brain, X, Trash2, Power, MousePointerClick, RefreshCw, Plus, Volume2, VolumeX, Gauge, RotateCcw, Save } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ChatMessage } from '@/components/chat-message'
 import { speakEnglish } from '@/lib/speech'
@@ -30,9 +30,11 @@ interface TeacherPageProps {
   selectSceneId?: TeacherScenarioId
   selectDifficulty?: TeacherDifficulty
   selectStage?: string
+  canSaveSelectDialogue?: boolean
   onSendMessage?: (text: string, mode?: TeacherQuickMode | null) => void
   onQuickAction?: (action: TeacherQuickMode) => void
   onStartSelectDialogue?: (sceneId: TeacherScenarioId, options?: { reset?: boolean }) => void
+  onSaveSelectDialogue?: () => void
   onDifficultyChange?: (difficulty: TeacherDifficulty) => void
   onSelectReplyOption?: (option: string) => void
   onRetryReplyOptions?: () => void
@@ -84,9 +86,11 @@ export function TeacherPage({
   selectSceneId = 'daily-life',
   selectDifficulty = 'medium',
   selectStage = '',
+  canSaveSelectDialogue = false,
   onSendMessage,
   onQuickAction,
   onStartSelectDialogue,
+  onSaveSelectDialogue,
   onDifficultyChange,
   onSelectReplyOption,
   onRetryReplyOptions,
@@ -314,6 +318,23 @@ export function TeacherPage({
             <RotateCcw className="w-3.5 h-3.5" />
             新对话
           </button>
+          {activeMode === 'select' && (
+            <button
+              id="saveSelectDialogueButton"
+              type="button"
+              onClick={onSaveSelectDialogue}
+              disabled={isSending || !canSaveSelectDialogue}
+              className={cn(
+                "flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-semibold tracking-wide whitespace-nowrap transition-premium",
+                canSaveSelectDialogue && !isSending
+                  ? "border-[oklch(0.70_0.15_280_/_0.28)] bg-[oklch(0.70_0.15_280_/_0.10)] text-white/75 hover:text-white"
+                  : "border-white/[0.06] bg-white/[0.025] text-white/25"
+              )}
+            >
+              <Save className="w-3.5 h-3.5" />
+              保存
+            </button>
+          )}
         </div>
         {activeMode === 'select' && (
           <div className="mt-1 flex items-center gap-2 overflow-hidden text-[10px] font-medium text-white/30">

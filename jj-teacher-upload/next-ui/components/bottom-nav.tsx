@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { BookText, Languages, Layers, MessageCircle } from 'lucide-react'
+import { BookText, Languages, MessageCircle, MessagesSquare } from 'lucide-react'
 
 interface BottomNavProps {
   activeTab: 'sentences' | 'scenes' | 'assistant' | 'teacher'
@@ -11,7 +11,7 @@ interface BottomNavProps {
 export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   const tabs = [
     { id: 'sentences' as const, label: '句读', icon: BookText },
-    { id: 'scenes' as const, label: '单词', icon: Layers },
+    { id: 'scenes' as const, label: '记录', icon: MessagesSquare },
     { id: 'assistant' as const, label: '助手', icon: Languages },
     { id: 'teacher' as const, label: '导师', icon: MessageCircle }
   ]

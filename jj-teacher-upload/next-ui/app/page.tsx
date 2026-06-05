@@ -1,19 +1,20 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Plus, User, Users, BookOpen, Sparkles, BookText, Layers, MessageCircle, Search, X, WandSparkles, Volume2, Trash2, Languages } from 'lucide-react'
+import { Plus, User, Users, BookOpen, Sparkles, BookText, MessageCircle, Search, X, WandSparkles, Volume2, Trash2, Languages, MessagesSquare } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { speakEnglish } from '@/lib/speech'
 import { StarryBackground } from '@/components/starry-background'
 import { BottomNav } from '@/components/bottom-nav'
 import { SentenceCard } from '@/components/sentence-card'
-import { ScenesPage } from '@/components/scenes-page'
+import { ScenesPage, type SavedDialogueRecord } from '@/components/scenes-page'
 import { TeacherPage, type TeacherQuickMode } from '@/components/teacher-page'
 import { LanguageAssistantPage, type AssistantMode, type LanguageAssistantResult } from '@/components/language-assistant-page'
 import { ExamPage } from '@/components/exam-page'
 import { FriendsPage } from '@/components/friends-page'
 import { AuthSheet, UpdateSheet } from '@/components/auth-sheet'
 import {
+  getTeacherScenarioLabel,
   normalizeTeacherDifficulty,
   normalizeTeacherScenarioId,
   type TeacherDifficulty,
@@ -21,10 +22,6 @@ import {
 } from '@/lib/teacher-scenarios'
 import {
   savedSentences as initialSentences,
-  vocabGroups,
-  vocabItems,
-  sceneGroups,
-  scenes,
   type SavedSentence,
   type TeacherMessage,
   type TutorMemoryProfile
@@ -72,8 +69,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 85
-const CURRENT_VERSION_NAME = 'free85'
+const CURRENT_VERSION_CODE = 86
+const CURRENT_VERSION_NAME = 'free86'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -90,6 +87,8 @@ const DAILY_CHAT_REPEAT_KEY = 'sentence-reader-daily-chat-last'
 const MEMORY_KEY = 'sentence-reader-memory-profile'
 const LANGUAGE_ASSISTANT_STATE_KEY = 'sentence-reader-language-assistant-state'
 const SELECT_DIALOGUE_STATE_KEY = 'sentence-reader-select-dialogue-state'
+const SAVED_SELECT_DIALOGUES_KEY = 'sentence-reader-select-dialogue-records'
+const CURRENT_SELECT_DIALOGUE_RECORD_ID_KEY = 'sentence-reader-current-select-dialogue-record-id'
 const SELECT_DIALOGUE_START = 'START_SELECT_DIALOGUE'
 const TEACHER_TRANSLATION_CACHE_KEY = 'sentence-reader-teacher-translation-cache'
 const ASSISTANT_MODE_IDS: AssistantMode[] = ['translate', 'localize', 'hair', 'reply', 'explain', 'pronunciation']
@@ -516,6 +515,165 @@ function normalizeSelectDialogueState(value: unknown): SelectDialogueState {
   }
 }
 
+function normalizeSavedDialogueMessage(value: unknown, index = 0): SavedDialogueRecord['messages'][number] | null {
+  const source = value && typeof value === 'object' ? value as Record<string, unknown> : {}
+  const english = String(source.english || source.text || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 800)
+  if (!english) return null
+
+  const roleValue = String(source.role || '').trim()
+  const role = roleValue === 'user' ? 'user' : 'ai'
+
+  return {
+    id: String(source.id || makeId(`saved-dialogue-message-${index}`)),
+    role,
+    english,
+    chinese: String(source.chinese || source.meaning || '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 300),
+    createdAt: typeof source.createdAt === 'number'
+      ? source.createdAt
+      : typeof source.timestamp === 'number'
+        ? source.timestamp
+        : Date.now() + index
+  }
+}
+
+function normalizeSavedDialogueRecord(value: unknown, index = 0): SavedDialogueRecord | null {
+  const source = value && typeof value === 'object' ? value as Record<string, unknown> : {}
+  const messages = Array.isArray(source.messages)
+    ? source.messages
+        .map((message, messageIndex) => normalizeSavedDialogueMessage(message, messageIndex))
+        .filter(Boolean) as SavedDialogueRecord['messages']
+    : []
+
+  if (!messages.length) return null
+
+  const scenario = normalizeTeacherScenarioId(source.scenario)
+  const difficulty = normalizeTeacherDifficulty(source.difficulty)
+  const replyOptions = Array.isArray(source.replyOptions)
+    ? source.replyOptions
+        .map((item) => {
+          if (typeof item === 'string') {
+            return { english: item.replace(/\s+/g, ' ').trim().slice(0, 180), chinese: '' }
+          }
+          const option = item && typeof item === 'object' ? item as Record<string, unknown> : {}
+          return {
+            english: String(option.english || option.text || '')
+              .replace(/\s+/g, ' ')
+              .trim()
+              .slice(0, 180),
+            chinese: String(option.chinese || option.meaning || '')
+              .replace(/\s+/g, ' ')
+              .trim()
+              .slice(0, 180)
+          }
+        })
+        .filter((option) => option.english)
+        .slice(0, 3)
+    : []
+  const createdAt = typeof source.createdAt === 'number' ? source.createdAt : messages[0]?.createdAt || Date.now() + index
+  const updatedAt = typeof source.updatedAt === 'number' ? source.updatedAt : messages[messages.length - 1]?.createdAt || createdAt
+  const memory = source.memory && typeof source.memory === 'object' ? normalizeMemoryProfile(source.memory) : null
+
+  return {
+    id: String(source.id || makeId(`saved-dialogue-${index}`)),
+    title: String(source.title || getTeacherScenarioLabel(scenario)),
+    scenario,
+    difficulty,
+    messages,
+    replyOptions,
+    conversationStage: String(source.conversationStage || source.stage || '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 80),
+    memory,
+    createdAt,
+    updatedAt,
+    lastMessagePreview: String(source.lastMessagePreview || messages[messages.length - 1]?.english || '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 160),
+    messageCount: messages.length
+  }
+}
+
+function normalizeSavedDialogueRecords(value: unknown): SavedDialogueRecord[] {
+  if (!Array.isArray(value)) return []
+  return value
+    .map((record, index) => normalizeSavedDialogueRecord(record, index))
+    .filter((record): record is SavedDialogueRecord => Boolean(record))
+    .sort((a, b) => b.updatedAt - a.updatedAt) as SavedDialogueRecord[]
+}
+
+function buildSavedDialogueRecord({
+  id,
+  existing,
+  sourceMessages,
+  sceneId,
+  difficulty,
+  stage,
+  replyOptions,
+  replyOptionMeanings,
+  memoryProfile,
+  messageMeanings = {}
+}: {
+  id: string
+  existing?: SavedDialogueRecord
+  sourceMessages: TeacherMessage[]
+  sceneId: TeacherScenarioId
+  difficulty: TeacherDifficulty
+  stage: string
+  replyOptions: string[]
+  replyOptionMeanings: string[]
+  memoryProfile: TutorMemoryProfile
+  messageMeanings?: Record<string, string>
+}): SavedDialogueRecord | null {
+  const existingMeanings = new Map(existing?.messages.map((message) => [message.id, message.chinese]) || [])
+  const messages = sourceMessages
+    .filter((message) => !message.pending && message.mode === 'select-dialogue' && message.text.trim())
+    .map((message) => ({
+      id: message.id,
+      role: message.role === 'assistant' ? 'ai' as const : 'user' as const,
+      english: message.text.replace(/\s+/g, ' ').trim().slice(0, 800),
+      chinese: String(messageMeanings[message.id] || message.translation?.note || existingMeanings.get(message.id) || '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 300),
+      createdAt: message.timestamp || Date.now()
+    }))
+    .filter((message) => message.english)
+
+  if (!messages.length) return null
+
+  const updatedAt = Date.now()
+  const cleanOptions = replyOptions
+    .map((option, index) => ({
+      english: option.replace(/\s+/g, ' ').trim().slice(0, 180),
+      chinese: String(replyOptionMeanings[index] || '').replace(/\s+/g, ' ').trim().slice(0, 180)
+    }))
+    .filter((option) => option.english)
+    .slice(0, 3)
+
+  return {
+    id,
+    title: getTeacherScenarioLabel(sceneId),
+    scenario: sceneId,
+    difficulty,
+    messages,
+    replyOptions: cleanOptions,
+    conversationStage: stage.replace(/\s+/g, ' ').trim().slice(0, 80),
+    memory: normalizeMemoryProfile(memoryProfile),
+    createdAt: existing?.createdAt || messages[0]?.createdAt || updatedAt,
+    updatedAt,
+    lastMessagePreview: messages[messages.length - 1]?.english.replace(/\s+/g, ' ').trim().slice(0, 160) || '',
+    messageCount: messages.length
+  }
+}
+
 function buildCloudPayload(sentences: SavedSentence[], messages: TeacherMessage[], memoryProfile: TutorMemoryProfile) {
   const cleanMessages = messages
     .filter((message) => !message.pending)
@@ -579,6 +737,9 @@ export default function ZhiyuApp() {
   const [selectSceneId, setSelectSceneId] = useState<TeacherScenarioId>(DEFAULT_SELECT_DIALOGUE_STATE.sceneId)
   const [selectDifficulty, setSelectDifficulty] = useState<TeacherDifficulty>(DEFAULT_SELECT_DIALOGUE_STATE.difficulty)
   const [selectDialogueStage, setSelectDialogueStage] = useState(DEFAULT_SELECT_DIALOGUE_STATE.stage)
+  const [savedDialogues, setSavedDialogues] = useState<SavedDialogueRecord[]>([])
+  const [currentSelectRecordId, setCurrentSelectRecordId] = useState('')
+  const [toastMessage, setToastMessage] = useState('')
 
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [authToken, setAuthToken] = useState('')
@@ -587,6 +748,8 @@ export default function ZhiyuApp() {
 
   const messagesRef = useRef<TeacherMessage[]>(messages)
   const memoryProfileRef = useRef<TutorMemoryProfile>(memoryProfile)
+  const currentSelectRecordIdRef = useRef(currentSelectRecordId)
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const selectRetryRef = useRef<{
     message: string
     appendUser: boolean
@@ -605,6 +768,10 @@ export default function ZhiyuApp() {
   }, [memoryProfile])
 
   useEffect(() => {
+    currentSelectRecordIdRef.current = currentSelectRecordId
+  }, [currentSelectRecordId])
+
+  useEffect(() => {
     const storedSentences = readFirstJson<SavedSentence[]>([languageKey(SENTENCES_KEY), SENTENCES_KEY], [])
       .map((item, index) => normalizeSentence(item as Partial<SavedSentence> & Record<string, unknown>, index))
       .filter(Boolean) as SavedSentence[]
@@ -614,6 +781,11 @@ export default function ZhiyuApp() {
     const storedMemory = normalizeMemoryProfile(readJson<unknown>(MEMORY_KEY, defaultMemoryProfile()))
     const storedAssistantState = normalizeLanguageAssistantState(readJson<unknown>(LANGUAGE_ASSISTANT_STATE_KEY, DEFAULT_LANGUAGE_ASSISTANT_STATE))
     const storedSelectState = normalizeSelectDialogueState(readJson<unknown>(SELECT_DIALOGUE_STATE_KEY, DEFAULT_SELECT_DIALOGUE_STATE))
+    const storedSavedDialogues = normalizeSavedDialogueRecords(readFirstJson<unknown[]>([
+      languageKey(SAVED_SELECT_DIALOGUES_KEY),
+      SAVED_SELECT_DIALOGUES_KEY
+    ], []))
+    const storedCurrentRecordId = hasStorage() ? window.localStorage.getItem(CURRENT_SELECT_DIALOGUE_RECORD_ID_KEY) || '' : ''
     const storedUser = readJson<AppUser | null>(AUTH_USER_KEY, null)
     const storedToken = hasStorage() ? window.localStorage.getItem(AUTH_TOKEN_KEY) || '' : ''
 
@@ -622,6 +794,10 @@ export default function ZhiyuApp() {
     setVocabBook(getVocabBook())
     setMemoryProfile(storedMemory)
     setLanguageAssistantState(storedAssistantState)
+    setSavedDialogues(storedSavedDialogues)
+    if (storedCurrentRecordId && storedSavedDialogues.some((record) => record.id === storedCurrentRecordId)) {
+      setCurrentSelectRecordId(storedCurrentRecordId)
+    }
     setSelectSceneId(storedSelectState.sceneId)
     setSelectDifficulty(storedSelectState.difficulty)
     setSelectDialogueStage(storedSelectState.stage)
@@ -672,6 +848,21 @@ export default function ZhiyuApp() {
     if (!hydrated) return
     writeJson(LANGUAGE_ASSISTANT_STATE_KEY, languageAssistantState)
   }, [hydrated, languageAssistantState])
+
+  useEffect(() => {
+    if (!hydrated) return
+    writeJson(SAVED_SELECT_DIALOGUES_KEY, savedDialogues)
+    writeJson(languageKey(SAVED_SELECT_DIALOGUES_KEY), savedDialogues)
+  }, [hydrated, savedDialogues])
+
+  useEffect(() => {
+    if (!hydrated || !hasStorage()) return
+    if (currentSelectRecordId) {
+      window.localStorage.setItem(CURRENT_SELECT_DIALOGUE_RECORD_ID_KEY, currentSelectRecordId)
+    } else {
+      window.localStorage.removeItem(CURRENT_SELECT_DIALOGUE_RECORD_ID_KEY)
+    }
+  }, [hydrated, currentSelectRecordId])
 
   useEffect(() => {
     if (!hydrated) return
@@ -834,6 +1025,121 @@ export default function ZhiyuApp() {
     if (!query) return vocabBook
     return vocabBook.filter((item) => [item.word, item.phonetic, item.meaning, item.example, item.exampleZh].join(' ').toLowerCase().includes(query))
   }, [vocabBook, searchQuery])
+
+  const canSaveSelectDialogue = useMemo(
+    () => messages.some((message) => message.mode === 'select-dialogue' && !message.pending && message.text.trim()),
+    [messages]
+  )
+
+  const showToast = useCallback((message: string) => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
+    setToastMessage(message)
+    toastTimerRef.current = setTimeout(() => setToastMessage(''), 1800)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
+    }
+  }, [])
+
+  const upsertSavedSelectDialogue = useCallback(({
+    id,
+    sourceMessages = messagesRef.current,
+    sceneId = selectSceneId,
+    difficulty = selectDifficulty,
+    stage = selectDialogueStage,
+    replyOptions = selectReplyOptions,
+    replyOptionMeanings = selectReplyMeanings,
+    memory = memoryProfileRef.current,
+    messageMeanings,
+    notify = false
+  }: {
+    id?: string
+    sourceMessages?: TeacherMessage[]
+    sceneId?: TeacherScenarioId
+    difficulty?: TeacherDifficulty
+    stage?: string
+    replyOptions?: string[]
+    replyOptionMeanings?: string[]
+    memory?: TutorMemoryProfile
+    messageMeanings?: Record<string, string>
+    notify?: boolean
+  } = {}) => {
+    const recordId = id || currentSelectRecordIdRef.current || makeId('select-record')
+    const hasRecordableMessages = sourceMessages.some((message) =>
+      !message.pending && message.mode === 'select-dialogue' && message.text.trim()
+    )
+
+    if (!hasRecordableMessages) {
+      if (notify) showToast('当前没有可保存的点选对话')
+      return ''
+    }
+
+    setSavedDialogues((current) => {
+      const existing = current.find((record) => record.id === recordId)
+      const record = buildSavedDialogueRecord({
+        id: recordId,
+        existing,
+        sourceMessages,
+        sceneId,
+        difficulty,
+        stage,
+        replyOptions,
+        replyOptionMeanings,
+        memoryProfile: memory,
+        messageMeanings
+      })
+      if (!record) return current
+      return [record, ...current.filter((item) => item.id !== recordId)]
+        .sort((a, b) => b.updatedAt - a.updatedAt)
+    })
+
+    currentSelectRecordIdRef.current = recordId
+    setCurrentSelectRecordId(recordId)
+    if (notify) showToast('已保存到聊天记录')
+    return recordId
+  }, [selectDialogueStage, selectDifficulty, selectReplyMeanings, selectReplyOptions, selectSceneId, showToast])
+
+  const saveCurrentSelectDialogue = useCallback(() => {
+    upsertSavedSelectDialogue({ notify: true })
+  }, [upsertSavedSelectDialogue])
+
+  const deleteSavedDialogue = useCallback((id: string) => {
+    setSavedDialogues((current) => current.filter((record) => record.id !== id))
+    if (currentSelectRecordIdRef.current === id) {
+      currentSelectRecordIdRef.current = ''
+      setCurrentSelectRecordId('')
+    }
+  }, [])
+
+  const continueSavedDialogue = useCallback((record: SavedDialogueRecord) => {
+    const restoredMessages = record.messages.map((message): TeacherMessage => ({
+      id: message.id,
+      role: message.role === 'user' ? 'user' : 'assistant',
+      text: message.english,
+      mode: 'select-dialogue',
+      timestamp: message.createdAt || Date.now()
+    }))
+
+    setMessages(restoredMessages)
+    messagesRef.current = restoredMessages
+    setSelectSceneId(record.scenario)
+    setSelectDifficulty(record.difficulty)
+    setSelectDialogueStage(record.conversationStage)
+    setSelectReplyOptions(record.replyOptions.map((option) => option.english))
+    setSelectReplyMeanings(record.replyOptions.map((option) => option.chinese))
+    if (record.memory) setMemoryProfile(normalizeMemoryProfile(record.memory))
+    currentSelectRecordIdRef.current = record.id
+    setCurrentSelectRecordId(record.id)
+    setTeacherMode('select')
+    setActiveTab('teacher')
+    setShowExam(false)
+    setShowFriends(false)
+    setSelectReplyError('')
+    setIsSelectReplyLoading(false)
+    selectRetryRef.current = null
+  }, [])
 
   const handleAddSentence = useCallback((text?: string, note?: string, category?: string) => {
     const additions = text ? [text.trim()] : []
@@ -1080,7 +1386,12 @@ export default function ZhiyuApp() {
     if (isSending || isSelectReplyLoading) return
     const nextSceneId = normalizeTeacherScenarioId(sceneId)
     const shouldReset = options.reset !== false
+    const recordId = shouldReset
+      ? makeId('select-record')
+      : currentSelectRecordIdRef.current || makeId('select-record')
 
+    currentSelectRecordIdRef.current = recordId
+    setCurrentSelectRecordId(recordId)
     setSelectSceneId(nextSceneId)
     setTeacherMode('select')
     setActiveTab('teacher')
@@ -1127,19 +1438,33 @@ export default function ZhiyuApp() {
         memoryProfile: memoryProfileRef.current
       })
       const turn = normalizeSelectDialogueTurn(data as Record<string, unknown>)
+      const assistantMessage: TeacherMessage = {
+        id: makeId('select-message'),
+        role: 'assistant',
+        text: turn.aiMessage,
+        mode: 'select-dialogue',
+        timestamp: Date.now()
+      }
+      const nextMessages = shouldReset
+        ? [assistantMessage]
+        : messagesRef.current.filter((message) => !message.pending).concat(assistantMessage)
       setMessages((current) => current
         .filter((message) => message.id !== pendingMessage.id)
-        .concat({
-          id: makeId('select-message'),
-          role: 'assistant',
-          text: turn.aiMessage,
-          mode: 'select-dialogue',
-          timestamp: Date.now()
-        }))
+        .concat(assistantMessage))
       setSelectDialogueStage(turn.stage)
       setSelectReplyOptions(turn.replyOptions)
       setSelectReplyMeanings(turn.replyOptionMeanings)
       setSelectReplyError('')
+      upsertSavedSelectDialogue({
+        id: recordId,
+        sourceMessages: nextMessages,
+        sceneId: nextSceneId,
+        difficulty: selectDifficulty,
+        stage: turn.stage,
+        replyOptions: turn.replyOptions,
+        replyOptionMeanings: turn.replyOptionMeanings,
+        notify: false
+      })
     } catch {
       setMessages((current) => current.filter((message) => message.id !== pendingMessage.id))
       setSelectReplyError('生成失败，请重试')
@@ -1147,7 +1472,7 @@ export default function ZhiyuApp() {
       setIsSending(false)
       setIsSelectReplyLoading(false)
     }
-  }, [isSending, isSelectReplyLoading, selectDifficulty, selectSceneId])
+  }, [isSending, isSelectReplyLoading, selectDifficulty, selectSceneId, upsertSavedSelectDialogue])
 
   const sendSelectDialogueReply = useCallback(async (text: string, options: {
     appendUser?: boolean
@@ -1162,6 +1487,9 @@ export default function ZhiyuApp() {
     const requestSceneId = normalizeTeacherScenarioId(options.sceneId || selectSceneId)
     const requestDifficulty = normalizeTeacherDifficulty(options.difficulty || selectDifficulty)
     const currentStage = typeof options.stage === 'string' ? options.stage : selectDialogueStage
+    const recordId = currentSelectRecordIdRef.current || makeId('select-record')
+    const selectedOptionIndex = selectReplyOptions.findIndex((option) => option === cleanText)
+    const selectedOptionMeaning = selectedOptionIndex >= 0 ? selectReplyMeanings[selectedOptionIndex] || '' : ''
     const now = Date.now()
     const userMessage: TeacherMessage = {
       id: makeId('select-user-message'),
@@ -1182,8 +1510,11 @@ export default function ZhiyuApp() {
       .filter((message) => !message.pending)
       .slice(-10)
       .map(({ role, text }) => ({ role, text }))
+    const recordBaseMessages = messagesRef.current.filter((message) => !message.pending)
     setSelectSceneId(requestSceneId)
     setSelectDifficulty(requestDifficulty)
+    currentSelectRecordIdRef.current = recordId
+    setCurrentSelectRecordId(recordId)
     setTeacherMode('select')
     setActiveTab('teacher')
     setShowExam(false)
@@ -1215,19 +1546,34 @@ export default function ZhiyuApp() {
         memoryProfile: memoryProfileRef.current
       })
       const turn = normalizeSelectDialogueTurn(data as Record<string, unknown>)
+      const assistantMessage: TeacherMessage = {
+        id: makeId('select-assistant-message'),
+        role: 'assistant',
+        text: turn.aiMessage,
+        mode: 'select-dialogue',
+        timestamp: Date.now()
+      }
+      const nextMessages = appendUser
+        ? [...recordBaseMessages, userMessage, assistantMessage]
+        : [...recordBaseMessages, assistantMessage]
       setMessages((current) => current
         .filter((message) => message.id !== pendingMessage.id)
-        .concat({
-          id: makeId('select-assistant-message'),
-          role: 'assistant',
-          text: turn.aiMessage,
-          mode: 'select-dialogue',
-          timestamp: Date.now()
-        }))
+        .concat(assistantMessage))
       setSelectDialogueStage(turn.stage || currentStage)
       setSelectReplyOptions(turn.replyOptions)
       setSelectReplyMeanings(turn.replyOptionMeanings)
       setSelectReplyError('')
+      upsertSavedSelectDialogue({
+        id: recordId,
+        sourceMessages: nextMessages,
+        sceneId: requestSceneId,
+        difficulty: requestDifficulty,
+        stage: turn.stage || currentStage,
+        replyOptions: turn.replyOptions,
+        replyOptionMeanings: turn.replyOptionMeanings,
+        messageMeanings: selectedOptionMeaning ? { [userMessage.id]: selectedOptionMeaning } : undefined,
+        notify: false
+      })
       updateMemoryFromExchange(cleanText, turn.aiMessage, 'select-dialogue')
     } catch {
       setMessages((current) => current.filter((message) => message.id !== pendingMessage.id))
@@ -1236,7 +1582,7 @@ export default function ZhiyuApp() {
       setIsSending(false)
       setIsSelectReplyLoading(false)
     }
-  }, [isSending, isSelectReplyLoading, selectDialogueStage, selectDifficulty, selectSceneId, updateMemoryFromExchange])
+  }, [isSending, isSelectReplyLoading, selectDialogueStage, selectDifficulty, selectReplyMeanings, selectReplyOptions, selectSceneId, updateMemoryFromExchange, upsertSavedSelectDialogue])
 
   const retrySelectDialogue = useCallback(() => {
     const retry = selectRetryRef.current
@@ -1485,7 +1831,7 @@ export default function ZhiyuApp() {
     if (showFriends) return { title: '好友', eyebrow: 'Community', icon: Users }
     switch (activeTab) {
       case 'sentences': return { title: '句读', eyebrow: 'Sentence Reader', icon: BookText }
-      case 'scenes': return { title: '单词/场景', eyebrow: 'Words & Scenes', icon: Layers }
+      case 'scenes': return { title: '聊天记录', eyebrow: 'SAVED CHATS', icon: MessagesSquare }
       case 'assistant': return { title: '语言助手', eyebrow: 'Language Assistant', icon: Languages }
       case 'teacher': return { title: '智语导师', eyebrow: 'AI Tutor', icon: MessageCircle }
     }
@@ -1791,11 +2137,11 @@ export default function ZhiyuApp() {
           </section>
         ) : activeTab === 'scenes' ? (
           <ScenesPage
-            vocabGroups={vocabGroups}
-            vocabItems={vocabItems}
-            sceneGroups={sceneGroups}
-            scenes={scenes}
+            records={savedDialogues}
+            onDeleteRecord={deleteSavedDialogue}
+            onContinueRecord={continueSavedDialogue}
             onAddSentence={handleAddSentence}
+            onTranslateText={translateTeacherText}
           />
         ) : activeTab === 'assistant' ? (
           <LanguageAssistantPage
@@ -1822,9 +2168,11 @@ export default function ZhiyuApp() {
             selectSceneId={selectSceneId}
             selectDifficulty={selectDifficulty}
             selectStage={selectDialogueStage}
+            canSaveSelectDialogue={canSaveSelectDialogue}
             onSendMessage={sendTeacherMessage}
             onQuickAction={handleQuickAction}
             onStartSelectDialogue={startSelectDialogue}
+            onSaveSelectDialogue={saveCurrentSelectDialogue}
             onDifficultyChange={setSelectDifficulty}
             onSelectReplyOption={sendSelectDialogueReply}
             onRetryReplyOptions={retrySelectDialogue}
@@ -1845,6 +2193,14 @@ export default function ZhiyuApp() {
             setShowFriends(false)
           }}
         />
+      )}
+
+      {toastMessage && (
+        <div className="pointer-events-none fixed inset-x-0 bottom-[calc(5.4rem+env(safe-area-inset-bottom))] z-[160] flex justify-center px-4">
+          <div className="rounded-2xl border border-[oklch(0.70_0.15_280_/_0.24)] bg-black/82 px-4 py-2 text-sm font-semibold text-white/88 shadow-[0_12px_36px_rgba(0,0,0,0.38)] backdrop-blur-xl animate-scale-in">
+            {toastMessage}
+          </div>
+        </div>
       )}
 
       {showAddSheet && (

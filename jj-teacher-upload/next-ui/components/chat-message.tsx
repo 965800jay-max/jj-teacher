@@ -10,6 +10,8 @@ import type { TeacherMessage } from '@/lib/sample-data'
 interface ChatMessageProps {
   message: TeacherMessage
   compactAfter?: boolean
+  allowUserAddSentence?: boolean
+  messageMeaning?: string
   onSpeak?: (text: string) => void
   onAddSentence?: (text: string, note: string) => void
   onTranslateText?: (text: string) => Promise<string>
@@ -159,7 +161,15 @@ function isExplanationStyleText(text: string) {
   return /(为什么|为何|不是|意思|表示|这里|这个词|这句话|这个句子|用法|语法|区别|解释|所以|名词|动词|进行时|自然|地道)/u.test(clean)
 }
 
-export function ChatMessage({ message, compactAfter = false, onSpeak, onAddSentence, onTranslateText }: ChatMessageProps) {
+export function ChatMessage({
+  message,
+  compactAfter = false,
+  allowUserAddSentence = false,
+  messageMeaning = '',
+  onSpeak,
+  onAddSentence,
+  onTranslateText
+}: ChatMessageProps) {
   const isUser = message.role === 'user'
   const [playingId, setPlayingId] = useState<string | null>(null)
   const [expandedMeaningKey, setExpandedMeaningKey] = useState<string | null>(null)
@@ -375,14 +385,14 @@ export function ChatMessage({ message, compactAfter = false, onSpeak, onAddSente
   if (isUser) {
     const userTranslationKey = `user-message-${message.id}`
     const isUserTranslationOpen = expandedMeaningKey === userTranslationKey
-    const userTranslation = meaningCache[userTranslationKey] || ''
+    const userTranslation = messageMeaning || meaningCache[userTranslationKey] || ''
 
     return (
       <div className={cn("flex justify-end animate-slide-up", messageGapClass, messageLayerClass)}>
         <div className="max-w-[86%] space-y-2">
           <div className="relative rounded-2xl rounded-br-md bg-[oklch(0.70_0.15_280_/_0.16)] backdrop-blur-xl border border-[oklch(0.70_0.15_280_/_0.24)] px-4 py-3 pr-10 shadow-[0_0_22px_oklch(0.70_0.15_280_/_0.1)]">
             <p className="relative text-[14px] text-white/95 leading-relaxed">{message.text}</p>
-            {renderBubbleMenu(message.text, '', userTranslationKey, { showAddSentence: false })}
+            {renderBubbleMenu(message.text, messageMeaning, userTranslationKey, { showAddSentence: allowUserAddSentence })}
             {isUserTranslationOpen && (
               <p className="mt-2.5 border-t border-white/[0.08] pt-2 text-xs leading-relaxed text-[oklch(0.83_0.13_280_/_0.76)] whitespace-pre-wrap">
                 {loadingMeaningKey === userTranslationKey ? translationLoadingText(message.text) : userTranslation || translationFallback(message.text)}
@@ -426,7 +436,7 @@ export function ChatMessage({ message, compactAfter = false, onSpeak, onAddSente
                     <p className="text-[14px] text-white/74 leading-relaxed">{item.text}</p>
                   </div>
                 ) : (
-                  renderEnglishBubble(item.text, item.zh || '', `chat-${message.id}-${i}`)
+                  renderEnglishBubble(item.text, item.zh || (parsed.content.length === 1 ? messageMeaning : ''), `chat-${message.id}-${i}`)
                 )}
               </div>
             ))}
@@ -463,7 +473,7 @@ export function ChatMessage({ message, compactAfter = false, onSpeak, onAddSente
 
         {parsed.type === 'simple' && (
           isEnglishLike(parsed.text.trim())
-            ? renderEnglishBubble(parsed.text.trim(), '', `simple-${message.id}`)
+            ? renderEnglishBubble(parsed.text.trim(), messageMeaning, `simple-${message.id}`)
             : (
               <div className="relative rounded-2xl rounded-bl-md border border-white/[0.06] bg-white/[0.045] px-4 py-3 backdrop-blur-xl">
                 <p className="relative text-[14px] text-white/74 leading-relaxed whitespace-pre-wrap">{parsed.text}</p>

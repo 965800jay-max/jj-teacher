@@ -1,6 +1,6 @@
 {
-  "versionCode": 85,
-  "versionName": "free85",
-  "apkUrl": "https://files.catbox.moe/w5pzdh.apk",
-  "notes": "free85: 修复智语导师闲聊模式，像正常聊天一样回复，不再默认追加英文和中文意思学习块。"
+  "versionCode": 86,
+  "versionName": "free86",
+  "apkUrl": "https://files.catbox.moe/7qs9jl.apk",
+  "notes": "free86: 底部第二页改为聊天记录，支持保存、查看、删除和继续智语导师点选对话。"
 }
