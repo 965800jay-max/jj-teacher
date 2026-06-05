@@ -1,6 +1,6 @@
 {
-  "versionCode": 87,
-  "versionName": "free87",
-  "apkUrl": "https://files.catbox.moe/aqew2v.apk",
-  "notes": "free87: 句读句库取消云端条数裁剪；聊天记录页面支持云同步保存，并取消记录条数限制。"
+  "versionCode": 88,
+  "versionName": "free88",
+  "apkUrl": "https://files.catbox.moe/qq7w5h.apk",
+  "notes": "free88: 修复智语导师点选对话自动保存到聊天记录的问题；只有点击保存按钮才会写入记录页面。"
 }

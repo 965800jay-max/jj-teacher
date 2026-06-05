@@ -69,8 +69,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 87
-const CURRENT_VERSION_NAME = 'free87'
+const CURRENT_VERSION_CODE = 88
+const CURRENT_VERSION_NAME = 'free88'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -1475,9 +1475,6 @@ export default function ZhiyuApp() {
         mode: 'select-dialogue',
         timestamp: Date.now()
       }
-      const nextMessages = shouldReset
-        ? [assistantMessage]
-        : messagesRef.current.filter((message) => !message.pending).concat(assistantMessage)
       setMessages((current) => current
         .filter((message) => message.id !== pendingMessage.id)
         .concat(assistantMessage))
@@ -1485,16 +1482,6 @@ export default function ZhiyuApp() {
       setSelectReplyOptions(turn.replyOptions)
       setSelectReplyMeanings(turn.replyOptionMeanings)
       setSelectReplyError('')
-      upsertSavedSelectDialogue({
-        id: recordId,
-        sourceMessages: nextMessages,
-        sceneId: nextSceneId,
-        difficulty: selectDifficulty,
-        stage: turn.stage,
-        replyOptions: turn.replyOptions,
-        replyOptionMeanings: turn.replyOptionMeanings,
-        notify: false
-      })
     } catch {
       setMessages((current) => current.filter((message) => message.id !== pendingMessage.id))
       setSelectReplyError('生成失败，请重试')
@@ -1502,7 +1489,7 @@ export default function ZhiyuApp() {
       setIsSending(false)
       setIsSelectReplyLoading(false)
     }
-  }, [isSending, isSelectReplyLoading, selectDifficulty, selectSceneId, upsertSavedSelectDialogue])
+  }, [isSending, isSelectReplyLoading, selectDifficulty, selectSceneId])
 
   const sendSelectDialogueReply = useCallback(async (text: string, options: {
     appendUser?: boolean
@@ -1526,6 +1513,7 @@ export default function ZhiyuApp() {
       role: 'user',
       text: cleanText,
       mode: 'select-dialogue',
+      translation: selectedOptionMeaning ? { sentence: cleanText, note: selectedOptionMeaning } : undefined,
       timestamp: now
     }
     const pendingMessage: TeacherMessage = {
@@ -1540,7 +1528,6 @@ export default function ZhiyuApp() {
       .filter((message) => !message.pending)
       .slice(-10)
       .map(({ role, text }) => ({ role, text }))
-    const recordBaseMessages = messagesRef.current.filter((message) => !message.pending)
     setSelectSceneId(requestSceneId)
     setSelectDifficulty(requestDifficulty)
     currentSelectRecordIdRef.current = recordId
@@ -1583,9 +1570,6 @@ export default function ZhiyuApp() {
         mode: 'select-dialogue',
         timestamp: Date.now()
       }
-      const nextMessages = appendUser
-        ? [...recordBaseMessages, userMessage, assistantMessage]
-        : [...recordBaseMessages, assistantMessage]
       setMessages((current) => current
         .filter((message) => message.id !== pendingMessage.id)
         .concat(assistantMessage))
@@ -1593,17 +1577,6 @@ export default function ZhiyuApp() {
       setSelectReplyOptions(turn.replyOptions)
       setSelectReplyMeanings(turn.replyOptionMeanings)
       setSelectReplyError('')
-      upsertSavedSelectDialogue({
-        id: recordId,
-        sourceMessages: nextMessages,
-        sceneId: requestSceneId,
-        difficulty: requestDifficulty,
-        stage: turn.stage || currentStage,
-        replyOptions: turn.replyOptions,
-        replyOptionMeanings: turn.replyOptionMeanings,
-        messageMeanings: selectedOptionMeaning ? { [userMessage.id]: selectedOptionMeaning } : undefined,
-        notify: false
-      })
       updateMemoryFromExchange(cleanText, turn.aiMessage, 'select-dialogue')
     } catch {
       setMessages((current) => current.filter((message) => message.id !== pendingMessage.id))
@@ -1612,7 +1585,7 @@ export default function ZhiyuApp() {
       setIsSending(false)
       setIsSelectReplyLoading(false)
     }
-  }, [isSending, isSelectReplyLoading, selectDialogueStage, selectDifficulty, selectReplyMeanings, selectReplyOptions, selectSceneId, updateMemoryFromExchange, upsertSavedSelectDialogue])
+  }, [isSending, isSelectReplyLoading, selectDialogueStage, selectDifficulty, selectReplyMeanings, selectReplyOptions, selectSceneId, updateMemoryFromExchange])
 
   const retrySelectDialogue = useCallback(() => {
     const retry = selectRetryRef.current
