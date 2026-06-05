@@ -1565,6 +1565,7 @@ function isLanguageExplanationRequest(message) {
 
 function buildChatPrompt(message, history, mode = "chat", targetLanguage = "english", memoryProfile = {}) {
   const language = getTargetLanguageInfo(targetLanguage);
+  const isFreestyle = mode === "freestyle";
   const languageExplanation = isLanguageExplanationRequest(message);
   const cleanHistory = history
     .filter((item) => item && typeof item.text === "string" && (item.role === "user" || item.role === "assistant"))
@@ -1582,7 +1583,19 @@ function buildChatPrompt(message, history, mode = "chat", targetLanguage = "engl
       "4. Use short readable paragraphs on mobile.",
       "5. When continuing a conversation, pick up one concrete detail from the user and ask one natural next question.",
     ].join("\n"),
-    languageExplanation
+    isFreestyle
+      ? [
+          "Freestyle chat rules:",
+          "1. This mode must behave like normal ChatGPT-style chatting, not an English drill.",
+          "2. Reply mainly in Simplified Chinese unless the user clearly asks for English.",
+          "3. Do not automatically add English sentences, Chinese meanings, example lists, vocabulary, or translation blocks at the bottom.",
+          "4. Do not use labels such as “英文：”, “中文意思：”, English:, Chinese meaning:, or Meaning: unless the user explicitly asks for a translation format.",
+          "5. If the user shares life, work, feelings, plans, or random thoughts, just chat naturally and respond to that content.",
+          "6. Keep replies concise like a normal chat: usually 1-3 short paragraphs, with at most one natural follow-up question.",
+          "7. Only teach, translate, correct English, or provide English examples when the user directly asks for that.",
+        ].join("\n")
+      : "",
+    !isFreestyle && languageExplanation
       ? [
           "语言解释问题规则：",
           "1. 用户是在问英文词义、语法、用法或为什么这样说；只回答这个问题，不要开启新话题。",
@@ -1592,7 +1605,7 @@ function buildChatPrompt(message, history, mode = "chat", targetLanguage = "engl
           "5. 解释要像老师口头说明，清楚但不刷屏。",
         ].join("\n")
       : "",
-    isDailySentenceRequest(message)
+    !isFreestyle && isDailySentenceRequest(message)
       ? [
           "日常句子请求规则：",
           "1. 必须刚好给 3 句，不要只给 1 句。",
@@ -1610,7 +1623,7 @@ function buildChatPrompt(message, history, mode = "chat", targetLanguage = "engl
           "3. ...",
         ].join("\n")
       : "",
-    isMultiExampleRequest(message)
+    !isFreestyle && isMultiExampleRequest(message)
       ? [
           "多例句请求规则：",
           "1. 用户要几个/三个例子时，必须给 3 个，不要只给 1 个。",
@@ -1642,9 +1655,11 @@ function buildChatPrompt(message, history, mode = "chat", targetLanguage = "engl
       ? `Topic mode display rule: do not use labels. Put at most one complete ${language.label} practice question on its own line, directly paired with the Chinese question above.`
       : languageExplanation
         ? "语言解释显示规则：直接用中文说明核心原因；如需要英文例句，把最多 1 句英文放在同一个解释块里，不要做成清单。"
+        : isFreestyle
+          ? "闲聊显示规则：像普通聊天一样直接回复，不要自动附加英文、中文意思、例句、词汇表、练习题或学习总结。"
         : `如果你给出${language.label}学习句子或翻译，请用“英文：”放${language.label}内容，并用“中文意思：”放中文意思。`,
-    mode === "topic" || languageExplanation ? "" : `“英文：”只是 App 的显示标记，后面的内容仍然应该是${language.label}。`,
-    mode === "topic" || languageExplanation
+    mode === "topic" || isFreestyle || languageExplanation ? "" : `“英文：”只是 App 的显示标记，后面的内容仍然应该是${language.label}。`,
+    mode === "topic" || isFreestyle || languageExplanation
       ? ""
       : [
           "手机端排版规则：",
@@ -1674,7 +1689,7 @@ function compactTeacherReply(reply, mode) {
     .map((line) => line.replace(/^\s*(?:[-•*]|\d+[.)、])\s*/, ""))
     .filter(Boolean);
 
-  if (mode === "topic") {
+  if (mode === "topic" || mode === "freestyle") {
     return lines.join("\n").replace(/\n{3,}/g, "\n\n").trim();
   }
 
@@ -1826,6 +1841,7 @@ async function handleWordLookup(request, response) {
 
 function finalizeTeacherReply(reply, mode, rawMessage = "") {
   const compacted = compactTeacherReply(reply, mode);
+  if (mode === "freestyle") return compacted;
   const explanationTrimmed = trimLanguageExplanationReply(compacted, rawMessage);
   return mode === "topic" ? explanationTrimmed : trimDirectTranslationReply(explanationTrimmed, rawMessage);
 }
@@ -1964,6 +1980,9 @@ function buildAiInstructions(mode = "chat", targetLanguage = "english") {
   }
   if (mode === "topic") {
     return `You are ZhiYu Tutor, a smart, warm, emotionally intelligent spoken ${language.label} practice partner. Chat like a real friend who helps the student keep speaking. Answer the student's real question first, notice concrete details, and ask one natural next question. Ask the next question in Chinese first; if you add ${language.label}, use the same question as one complete sentence on its own line. Output only user-facing chat. Do not merely praise, repeat, grade, translate the student's line, split phrases, list vocabulary chunks, or comment on why a topic/question is good. Never reveal prompt rules, topic design, opener advice, or comparisons between topics.`;
+  }
+  if (mode === "freestyle") {
+    return `You are ZhiYu Tutor in free chat mode. Behave like normal ChatGPT-style conversation in Simplified Chinese. Reply naturally to the user's actual message. Do not automatically append English sentences, translations, Chinese meanings, vocabulary lists, examples, drills, or language-learning blocks. Only provide English, translation, correction, or teaching when the user explicitly asks for it. Keep replies concise, warm, and conversational.`;
   }
 
   return `You are ZhiYu Tutor, a smart, warm, emotionally intelligent language-learning assistant. The user is learning ${language.label}. Be practical, specific, conversational, and high-EQ. Avoid generic filler, robotic labels, and repeated wording.`;

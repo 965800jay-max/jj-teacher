@@ -72,8 +72,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 84
-const CURRENT_VERSION_NAME = 'free84'
+const CURRENT_VERSION_CODE = 85
+const CURRENT_VERSION_NAME = 'free85'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -345,7 +345,7 @@ function normalizeDisplayReply(reply: string) {
 
 function compactReply(reply: string, mode: string) {
   const clean = mode === 'topic' ? cleanTopicReply(reply) : reply
-  const displayClean = mode === 'topic' ? clean : normalizeDisplayReply(clean)
+  const displayClean = mode === 'topic' || mode === 'freestyle' ? clean : normalizeDisplayReply(clean)
   return displayClean
     .replace(/\n{3,}/g, '\n\n')
     .replace(/^\s*```[\s\S]*?```\s*$/g, '')

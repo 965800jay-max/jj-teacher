@@ -1,6 +1,6 @@
 {
-  "versionCode": 84,
-  "versionName": "free84",
-  "apkUrl": "https://files.catbox.moe/wddvjr.apk",
-  "notes": "free84: 优化智语导师点选对话难度逻辑，回复选项改为真实聊天方向并隐藏等级标签。"
+  "versionCode": 85,
+  "versionName": "free85",
+  "apkUrl": "https://files.catbox.moe/w5pzdh.apk",
+  "notes": "free85: 修复智语导师闲聊模式，像正常聊天一样回复，不再默认追加英文和中文意思学习块。"
 }
