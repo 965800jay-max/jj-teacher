@@ -69,8 +69,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 86
-const CURRENT_VERSION_NAME = 'free86'
+const CURRENT_VERSION_CODE = 87
+const CURRENT_VERSION_NAME = 'free87'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -312,6 +312,21 @@ function mergeSentences(local: SavedSentence[], remote: unknown) {
     }
   }
   return merged
+}
+
+function mergeSavedDialogueRecords(local: SavedDialogueRecord[], remote: unknown) {
+  const remoteRecords = normalizeSavedDialogueRecords(remote)
+  if (!remoteRecords.length) return local
+
+  const byId = new Map(local.map((record) => [record.id, record]))
+  for (const record of remoteRecords) {
+    const existing = byId.get(record.id)
+    if (!existing || record.updatedAt > existing.updatedAt || record.messageCount > existing.messageCount) {
+      byId.set(record.id, record)
+    }
+  }
+
+  return Array.from(byId.values()).sort((a, b) => b.updatedAt - a.updatedAt)
 }
 
 function buildDailySentenceMessage() {
@@ -674,7 +689,12 @@ function buildSavedDialogueRecord({
   }
 }
 
-function buildCloudPayload(sentences: SavedSentence[], messages: TeacherMessage[], memoryProfile: TutorMemoryProfile) {
+function buildCloudPayload(
+  sentences: SavedSentence[],
+  messages: TeacherMessage[],
+  memoryProfile: TutorMemoryProfile,
+  savedDialogues: SavedDialogueRecord[]
+) {
   const cleanMessages = messages
     .filter((message) => !message.pending)
     .slice(-80)
@@ -694,11 +714,13 @@ function buildCloudPayload(sentences: SavedSentence[], messages: TeacherMessage[
       english: {
         sentences,
         teacherMessages: cleanMessages,
+        savedDialogues,
         savedAt: Date.now()
       }
     },
     sentences,
-    teacherMessages: cleanMessages
+    teacherMessages: cleanMessages,
+    savedDialogues
   }
 }
 
@@ -931,6 +953,14 @@ export default function ZhiyuApp() {
           .filter(Boolean) as TeacherMessage[]
         setMessages(normalized)
       }
+      const remoteSavedDialogues = Array.isArray(remoteEnglish.savedDialogues)
+        ? remoteEnglish.savedDialogues
+        : Array.isArray(remoteData.savedDialogues)
+          ? remoteData.savedDialogues
+          : []
+      if (remoteSavedDialogues.length) {
+        setSavedDialogues((current) => mergeSavedDialogueRecords(current, remoteSavedDialogues))
+      }
     } catch {
       // Local learning data still works when cloud sync is unavailable.
     }
@@ -942,13 +972,13 @@ export default function ZhiyuApp() {
     syncTimerRef.current = setTimeout(() => {
       apiRequest('/api/user-data', {
         method: 'POST',
-        body: JSON.stringify({ data: buildCloudPayload(sentences, messages, memoryProfile) })
+        body: JSON.stringify({ data: buildCloudPayload(sentences, messages, memoryProfile, savedDialogues) })
       }, authToken).catch(() => {})
     }, 900)
     return () => {
       if (syncTimerRef.current) clearTimeout(syncTimerRef.current)
     }
-  }, [hydrated, authToken, sentences, messages, memoryProfile])
+  }, [hydrated, authToken, sentences, messages, memoryProfile, savedDialogues])
 
   useEffect(() => {
     if (!hydrated) return

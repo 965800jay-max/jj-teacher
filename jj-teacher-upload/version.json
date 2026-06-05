@@ -1,6 +1,6 @@
 {
-  "versionCode": 86,
-  "versionName": "free86",
-  "apkUrl": "https://files.catbox.moe/7qs9jl.apk",
-  "notes": "free86: 底部第二页改为聊天记录，支持保存、查看、删除和继续智语导师点选对话。"
+  "versionCode": 87,
+  "versionName": "free87",
+  "apkUrl": "https://files.catbox.moe/aqew2v.apk",
+  "notes": "free87: 句读句库取消云端条数裁剪；聊天记录页面支持云同步保存，并取消记录条数限制。"
 }

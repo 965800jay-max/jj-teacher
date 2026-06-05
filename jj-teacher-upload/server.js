@@ -38,7 +38,7 @@ const targetLanguages = {
 const dataDir = process.env.DATA_DIR || path.join(root, "data");
 const userStoreFile = path.join(dataDir, "users.json");
 const authTokenTtlMs = 1000 * 60 * 60 * 24 * 30;
-const maxUserDataBytes = 1000 * 1000;
+const maxUserDataBytes = 10 * 1000 * 1000;
 const adminUserId = "admin";
 const adminUsername = "admin";
 const adminPassword = "admin";
@@ -399,6 +399,75 @@ function sanitizeTeacherMessage(item) {
   return clean;
 }
 
+function sanitizeSavedDialogueMessage(item) {
+  if (!item || typeof item !== "object") return null;
+  const english = limitText(item.english || item.text, 800);
+  if (!english) return null;
+
+  return {
+    id: limitText(item.id, 80) || crypto.randomUUID(),
+    role: item.role === "user" ? "user" : "ai",
+    english,
+    chinese: limitText(item.chinese || item.meaning, 300),
+    createdAt: typeof item.createdAt === "number"
+      ? item.createdAt
+      : typeof item.timestamp === "number"
+        ? item.timestamp
+        : Date.now(),
+  };
+}
+
+function sanitizeSavedDialogueOption(item) {
+  const source = typeof item === "string" ? { english: item } : item && typeof item === "object" ? item : {};
+  const english = limitText(source.english || source.text, 180);
+  if (!english) return null;
+  return {
+    english,
+    chinese: limitText(source.chinese || source.meaning, 180),
+  };
+}
+
+function sanitizeSavedDialogueRecord(item) {
+  if (!item || typeof item !== "object") return null;
+  const messages = Array.isArray(item.messages)
+    ? item.messages.map(sanitizeSavedDialogueMessage).filter(Boolean)
+    : [];
+  if (!messages.length) return null;
+
+  const scenario = normalizeSelectDialogueScenario(item.scenario || item.sceneId);
+  const difficulty = normalizeSelectDialogueDifficulty(item.difficulty);
+  const replyOptions = Array.isArray(item.replyOptions)
+    ? item.replyOptions.map(sanitizeSavedDialogueOption).filter(Boolean).slice(0, 3)
+    : [];
+  const updatedAt = typeof item.updatedAt === "number" ? item.updatedAt : Date.now();
+  const createdAt = typeof item.createdAt === "number" ? item.createdAt : messages[0].createdAt || updatedAt;
+  const lastMessagePreview = limitText(item.lastMessagePreview, 160)
+    || limitText(messages[messages.length - 1].english, 160);
+
+  return {
+    id: limitText(item.id, 80) || crypto.randomUUID(),
+    title: limitText(item.title, 80) || scenario,
+    scenario,
+    difficulty,
+    messages,
+    replyOptions,
+    conversationStage: limitText(item.conversationStage || item.stage, 80),
+    memory: item.memory && typeof item.memory === "object" ? sanitizeMemoryProfile(item.memory) : null,
+    createdAt,
+    updatedAt,
+    lastMessagePreview,
+    messageCount: messages.length,
+  };
+}
+
+function sanitizeSavedDialogueRecords(value) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map(sanitizeSavedDialogueRecord)
+    .filter(Boolean)
+    .sort((a, b) => b.updatedAt - a.updatedAt);
+}
+
 function sanitizeMemoryList(value, maxItems = 80) {
   if (!Array.isArray(value)) return [];
   const seen = new Set();
@@ -437,11 +506,12 @@ function sanitizeLanguageData(data) {
   return {
     savedAt: typeof source.savedAt === "number" ? source.savedAt : Date.now(),
     sentences: Array.isArray(source.sentences)
-      ? source.sentences.map(sanitizeSentence).filter(Boolean).slice(0, 1000)
+      ? source.sentences.map(sanitizeSentence).filter(Boolean)
       : [],
     teacherMessages: Array.isArray(source.teacherMessages)
       ? source.teacherMessages.map(sanitizeTeacherMessage).filter(Boolean).slice(-80)
       : [],
+    savedDialogues: sanitizeSavedDialogueRecords(source.savedDialogues),
   };
 }
 
@@ -477,10 +547,13 @@ function sanitizeUserData(payload) {
   const sceneProgress = sanitizeSceneProgress(source.sceneProgress);
   const currentLanguage = normalizeTargetLanguage(settings.learningLanguage || source.learningLanguage);
   if (!languages[currentLanguage].sentences.length && Array.isArray(source.sentences)) {
-    languages[currentLanguage].sentences = source.sentences.map(sanitizeSentence).filter(Boolean).slice(0, 1000);
+    languages[currentLanguage].sentences = source.sentences.map(sanitizeSentence).filter(Boolean);
   }
   if (!languages[currentLanguage].teacherMessages.length && Array.isArray(source.teacherMessages)) {
     languages[currentLanguage].teacherMessages = source.teacherMessages.map(sanitizeTeacherMessage).filter(Boolean).slice(-80);
+  }
+  if (!languages[currentLanguage].savedDialogues.length && Array.isArray(source.savedDialogues)) {
+    languages[currentLanguage].savedDialogues = sanitizeSavedDialogueRecords(source.savedDialogues);
   }
 
   return {
@@ -493,6 +566,7 @@ function sanitizeUserData(payload) {
     languages,
     sentences: languages[currentLanguage].sentences,
     teacherMessages: languages[currentLanguage].teacherMessages,
+    savedDialogues: languages[currentLanguage].savedDialogues,
   };
 }
 
