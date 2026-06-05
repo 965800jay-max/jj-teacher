@@ -69,8 +69,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 91
-const CURRENT_VERSION_NAME = 'free91'
+const CURRENT_VERSION_CODE = 92
+const CURRENT_VERSION_NAME = 'free92'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -427,8 +427,43 @@ function normalizeSelectableReplyOption(value: unknown) {
     .trim()
 }
 
-function normalizeSelectDialogueTurn(data: Record<string, unknown>) {
-  const aiMessage = String(data.aiMessage || data.reply || '').trim()
+function comparableSentence(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/^(?:user|learner|student|you)\s*[:：-]\s*/i, '')
+    .replace(/[“”"']/g, '')
+    .replace(/[^\p{L}\p{N}\s]/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function stripSelectedReplyEcho(aiMessage: string, selectedReply = '') {
+  const cleanMessage = aiMessage.trim()
+  const cleanReply = selectedReply.trim()
+  if (!cleanMessage || !cleanReply) return cleanMessage
+
+  const replyKey = comparableSentence(cleanReply)
+  if (!replyKey) return cleanMessage
+
+  const parts = cleanMessage
+    .split(/\s*(?:【NEXT_MESSAGE】|\n{1,}|\r{1,})\s*/u)
+    .map((part) => part.trim())
+    .filter(Boolean)
+
+  if (parts.length > 1 && comparableSentence(parts[0]) === replyKey) {
+    return parts.slice(1).join('\n').trim()
+  }
+
+  const firstSentenceMatch = cleanMessage.match(/^(.+?[.!?])(?:\s+|$)(.*)$/s)
+  if (firstSentenceMatch && comparableSentence(firstSentenceMatch[1]) === replyKey) {
+    return firstSentenceMatch[2].trim()
+  }
+
+  return cleanMessage
+}
+
+function normalizeSelectDialogueTurn(data: Record<string, unknown>, selectedReply = '') {
+  const aiMessage = stripSelectedReplyEcho(String(data.aiMessage || data.reply || '').trim(), selectedReply)
   const stage = String(data.stage || data.currentStage || data.nextStage || '').replace(/\s+/g, ' ').trim().slice(0, 80)
   const rawOptions = Array.isArray(data.replyOptions) ? data.replyOptions : []
   const rawMeanings = Array.isArray(data.replyOptionMeanings) ? data.replyOptionMeanings : []
@@ -1566,7 +1601,7 @@ export default function ZhiyuApp() {
         selectStage: currentStage,
         memoryProfile: memoryProfileRef.current
       })
-      const turn = normalizeSelectDialogueTurn(data as Record<string, unknown>)
+      const turn = normalizeSelectDialogueTurn(data as Record<string, unknown>, cleanText)
       const assistantMessage: TeacherMessage = {
         id: makeId('select-assistant-message'),
         role: 'assistant',

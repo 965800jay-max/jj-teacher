@@ -1,6 +1,6 @@
 {
-  "versionCode": 91,
-  "versionName": "free91",
-  "apkUrl": "https://jj-teacher.onrender.com/zhiyu-tutor-free91-message-menu-toggle-debug.apk",
-  "notes": "free91: 修复句子右下角三点菜单再次点击无法关闭的问题。"
+  "versionCode": 92,
+  "versionName": "free92",
+  "apkUrl": "https://jj-teacher.onrender.com/zhiyu-tutor-free92-select-reply-echo-fix-debug.apk",
+  "notes": "free92: 修复点选对话点击回复后我方句子被 AI 再重复显示一条的问题。"
 }

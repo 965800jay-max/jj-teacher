@@ -1055,7 +1055,7 @@ async function handleAiTeacher(request, response) {
       targetLanguage
     );
     const data = extractJsonObject(raw) || {};
-    const aiMessage = String(data.aiMessage || data.reply || "").replace(/\s+/g, " ").trim();
+    const aiMessage = stripSelectedReplyEcho(data.aiMessage || data.reply || "", message).replace(/\s+/g, " ").trim();
     const stage = normalizeSelectDialogueStage(data.stage || data.currentStage || data.nextStage || selectStage, selectScene);
     const rawOptions = Array.isArray(data.replyOptions) ? data.replyOptions : [];
     const rawMeanings = Array.isArray(data.replyOptionMeanings) ? data.replyOptionMeanings : [];
@@ -1331,6 +1331,42 @@ function normalizeSelectableReplyOption(value) {
     .trim();
 }
 
+function comparableSelectDialogueText(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/^(?:user|learner|student|you)\s*[:：\-]\s*/i, "")
+    .replace(/[“”"']/g, "")
+    .replace(/[^\p{L}\p{N}\s]/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function stripSelectedReplyEcho(aiMessage, selectedReply) {
+  const cleanMessage = String(aiMessage || "").trim();
+  const cleanReply = String(selectedReply || "").trim();
+  if (!cleanMessage || !cleanReply || cleanReply === "START_SELECT_DIALOGUE") return cleanMessage;
+
+  const replyKey = comparableSelectDialogueText(cleanReply);
+  if (!replyKey) return cleanMessage;
+
+  const parts = cleanMessage
+    .split(teacherMessageBreak)
+    .flatMap((part) => part.split(/\r?\n+/))
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (parts.length > 1 && comparableSelectDialogueText(parts[0]) === replyKey) {
+    return parts.slice(1).join("\n").trim();
+  }
+
+  const firstSentenceMatch = cleanMessage.match(/^(.+?[.!?])(?:\s+|$)(.*)$/s);
+  if (firstSentenceMatch && comparableSelectDialogueText(firstSentenceMatch[1]) === replyKey) {
+    return firstSentenceMatch[2].trim();
+  }
+
+  return cleanMessage;
+}
+
 function normalizeSelectDialogueScenario(value) {
   const key = String(value || "").trim();
   return selectDialogueScenarios[key] ? key : "daily-life";
@@ -1379,6 +1415,7 @@ function buildSelectDialoguePrompt(message, history, targetLanguage = "english",
     "4. Ask or imply one realistic next direction so the learner can continue.",
     "5. Keep every AI turn to 1-2 short conversational sentences.",
     "6. Ask only one question or move only one small topic forward. Do not write a long paragraph or stack multiple suggestions.",
+    "7. Do not repeat, quote, restate, or include the learner's selected reply in aiMessage. Treat it as already visible in the chat and continue as the other person.",
     "replyOptions rules:",
     "1. Provide exactly 3 natural English replies the learner can tap.",
     "2. All 3 reply options should follow the current difficulty level, but they must represent different real chat intentions, choices, or directions.",
@@ -1397,7 +1434,7 @@ function buildSelectDialoguePrompt(message, history, targetLanguage = "english",
     cleanHistory ? `Recent conversation:\n${cleanHistory}` : "",
     isStart
       ? "Start the scenario as the real role character. Do not mention that this is a mode or that options will appear."
-      : `The learner selected or typed this reply: ${message}`,
+      : `The learner selected or typed this reply, and it is already shown as the learner's chat bubble. Do not repeat it in aiMessage; continue from it as the other person: ${message}`,
   ]
     .filter(Boolean)
     .join("\n\n");
