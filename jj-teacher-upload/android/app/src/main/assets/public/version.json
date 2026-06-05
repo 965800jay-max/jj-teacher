@@ -1,6 +1,6 @@
 {
-  "versionCode": 89,
-  "versionName": "free89",
-  "apkUrl": "https://files.catbox.moe/60v5td.apk",
-  "notes": "free89: 语言助手结果支持点击单词朗读和释义；导师与记录页消息三点按钮支持左滑朗读、右滑显示中文。"
+  "versionCode": 90,
+  "versionName": "free90",
+  "apkUrl": "https://jj-teacher.onrender.com/zhiyu-tutor-free90-select-duplicate-fix-debug.apk",
+  "notes": "free90: 修复智语导师点选对话选择回复后可能连续发送两条的问题。"
 }

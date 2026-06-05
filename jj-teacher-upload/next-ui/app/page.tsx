@@ -69,8 +69,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 89
-const CURRENT_VERSION_NAME = 'free89'
+const CURRENT_VERSION_CODE = 90
+const CURRENT_VERSION_NAME = 'free90'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -771,6 +771,7 @@ export default function ZhiyuApp() {
   const messagesRef = useRef<TeacherMessage[]>(messages)
   const memoryProfileRef = useRef<TutorMemoryProfile>(memoryProfile)
   const currentSelectRecordIdRef = useRef(currentSelectRecordId)
+  const selectDialogueRequestLockRef = useRef(false)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const selectRetryRef = useRef<{
     message: string
@@ -1413,7 +1414,8 @@ export default function ZhiyuApp() {
     sceneId: TeacherScenarioId = selectSceneId,
     options: { reset?: boolean } = {}
   ) => {
-    if (isSending || isSelectReplyLoading) return
+    if (selectDialogueRequestLockRef.current || isSending || isSelectReplyLoading) return
+    selectDialogueRequestLockRef.current = true
     const nextSceneId = normalizeTeacherScenarioId(sceneId)
     const shouldReset = options.reset !== false
     const recordId = shouldReset
@@ -1486,6 +1488,7 @@ export default function ZhiyuApp() {
       setMessages((current) => current.filter((message) => message.id !== pendingMessage.id))
       setSelectReplyError('生成失败，请重试')
     } finally {
+      selectDialogueRequestLockRef.current = false
       setIsSending(false)
       setIsSelectReplyLoading(false)
     }
@@ -1498,7 +1501,8 @@ export default function ZhiyuApp() {
     stage?: string
   } = {}) => {
     const cleanText = text.trim()
-    if (!cleanText || isSending || isSelectReplyLoading) return
+    if (!cleanText || selectDialogueRequestLockRef.current || isSending || isSelectReplyLoading) return
+    selectDialogueRequestLockRef.current = true
 
     const appendUser = options.appendUser !== false
     const requestSceneId = normalizeTeacherScenarioId(options.sceneId || selectSceneId)
@@ -1582,6 +1586,7 @@ export default function ZhiyuApp() {
       setMessages((current) => current.filter((message) => message.id !== pendingMessage.id))
       setSelectReplyError('生成失败，请重试')
     } finally {
+      selectDialogueRequestLockRef.current = false
       setIsSending(false)
       setIsSelectReplyLoading(false)
     }

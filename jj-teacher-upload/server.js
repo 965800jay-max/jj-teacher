@@ -61,6 +61,7 @@ const mimeTypes = {
   ".js": "application/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".png": "image/png",
+  ".apk": "application/vnd.android.package-archive",
   ".mp3": "audio/mpeg",
   ".wav": "audio/wav",
   ".webm": "audio/webm",
