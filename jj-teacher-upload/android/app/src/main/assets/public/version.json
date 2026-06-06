@@ -1,6 +1,6 @@
 {
-  "versionCode": 93,
-  "versionName": "free93",
-  "apkUrl": "https://jj-teacher.onrender.com/zhiyu-tutor-free93-keyword-blank-exam-debug.apk",
-  "notes": "free93: 句读复习和聊天记录考试改为关键词填空，重点训练高价值词和短语。"
+  "versionCode": 94,
+  "versionName": "free94",
+  "apkUrl": "https://jj-teacher.onrender.com/zhiyu-tutor-free94-exam-chinese-prompt-fix-debug.apk",
+  "notes": "free94: 修复关键词填空考试中文提示缺失，自动为没有中文的题目生成中文意思。"
 }

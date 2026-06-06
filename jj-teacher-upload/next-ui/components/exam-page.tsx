@@ -29,6 +29,7 @@ interface ExamPageProps {
   title?: string
   onComplete?: () => void
   onBack?: () => void
+  onTranslateText?: (text: string) => Promise<string>
 }
 
 const stopWords = new Set([
@@ -85,6 +86,11 @@ const valuableWords = new Set([
   'comfort', 'workout', 'machine', 'weight', 'sets', 'recovery', 'protein',
   'flight', 'hotel', 'directions', 'payment', 'receipt', 'recommendation'
 ])
+
+function isMissingChinesePrompt(value: string) {
+  const clean = value.replace(/\s+/g, '').trim()
+  return !clean || clean === '中文意思待补充' || clean === '中文待补充' || clean === '待补充'
+}
 
 function normalizeAnswer(value: string) {
   return value
@@ -176,7 +182,7 @@ function buildQuestion(item: ExamSourceItem): BlankQuestion | null {
 
   return {
     id: item.id,
-    chinese: item.note?.trim() || '中文意思待补充',
+    chinese: item.note?.trim() || '',
     original,
     blanks: ranges.slice(0, limit).sort((a, b) => a.start - b.start)
   }
@@ -251,7 +257,7 @@ function HighlightedAnswer({ question }: { question: BlankQuestion }) {
   return <>{nodes}</>
 }
 
-export function ExamPage({ sentences, title = '关键词填空考试', onComplete, onBack }: ExamPageProps) {
+export function ExamPage({ sentences, title = '关键词填空考试', onComplete, onBack, onTranslateText }: ExamPageProps) {
   const questions = useMemo(
     () => sentences.map(buildQuestion).filter(Boolean) as BlankQuestion[],
     [sentences]
@@ -260,6 +266,8 @@ export function ExamPage({ sentences, title = '关键词填空考试', onComplet
   const [answers, setAnswers] = useState<string[]>([])
   const [status, setStatus] = useState<'idle' | 'correct' | 'wrong' | 'unknown'>('idle')
   const [wrongIndices, setWrongIndices] = useState<Set<number>>(new Set())
+  const [promptCache, setPromptCache] = useState<Record<string, string>>({})
+  const [loadingPromptId, setLoadingPromptId] = useState('')
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const currentQuestion = questions[currentIndex]
 
@@ -276,6 +284,33 @@ export function ExamPage({ sentences, title = '关键词填空考试', onComplet
     setStatus('idle')
     setWrongIndices(new Set())
   }, [currentQuestion?.id])
+
+  useEffect(() => {
+    if (!currentQuestion || !onTranslateText) return
+    if (!isMissingChinesePrompt(currentQuestion.chinese) || promptCache[currentQuestion.id]) return
+
+    let cancelled = false
+    setLoadingPromptId(currentQuestion.id)
+    onTranslateText(currentQuestion.original)
+      .then((translated) => {
+        if (cancelled) return
+        const clean = translated.replace(/\s+/g, ' ').trim()
+        if (clean && !isMissingChinesePrompt(clean)) {
+          setPromptCache((current) => ({
+            ...current,
+            [currentQuestion.id]: clean
+          }))
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoadingPromptId('')
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [currentQuestion, onTranslateText, promptCache])
 
   useEffect(() => () => {
     if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current)
@@ -353,6 +388,9 @@ export function ExamPage({ sentences, title = '关键词填空考试', onComplet
   }
 
   const allFilled = currentQuestion.blanks.every((_, index) => answers[index]?.trim())
+  const chinesePrompt = !isMissingChinesePrompt(currentQuestion.chinese)
+    ? currentQuestion.chinese
+    : promptCache[currentQuestion.id] || (loadingPromptId === currentQuestion.id ? '正在生成中文提示...' : '根据中文意思补全重点词')
 
   return (
     <section id="examPage" className="px-5 py-5 animate-fade-in">
@@ -386,7 +424,7 @@ export function ExamPage({ sentences, title = '关键词填空考试', onComplet
             {title}
           </p>
           <h2 id="examPrompt" className="text-lg font-semibold text-white/95 mb-6 leading-relaxed">
-            {currentQuestion.chinese}
+            {chinesePrompt}
           </h2>
 
           <div
@@ -427,7 +465,7 @@ export function ExamPage({ sentences, title = '关键词填空考试', onComplet
                 <HighlightedAnswer question={currentQuestion} />
               </p>
               <p className="mt-3 border-t border-white/[0.06] pt-3 text-xs leading-relaxed text-white/50">
-                {currentQuestion.chinese}
+                {chinesePrompt}
               </p>
             </div>
           )}

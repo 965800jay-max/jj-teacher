@@ -69,8 +69,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 93
-const CURRENT_VERSION_NAME = 'free93'
+const CURRENT_VERSION_CODE = 94
+const CURRENT_VERSION_NAME = 'free94'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -1094,7 +1094,7 @@ export default function ZhiyuApp() {
       .map((sentence): ExamSourceItem => ({
         id: sentence.id,
         text: sentence.text,
-        note: sentence.note || '中文意思待补充'
+        note: sentence.note || ''
       }))
 
     setExamItems(items)
@@ -1109,7 +1109,7 @@ export default function ZhiyuApp() {
       .map((message): ExamSourceItem => ({
         id: `${record.id}-${message.id}`,
         text: message.english,
-        note: message.chinese || '中文意思待补充'
+        note: message.chinese || ''
       }))
 
     setExamItems(items)
@@ -1991,6 +1991,7 @@ export default function ZhiyuApp() {
             title={examTitle}
             onBack={() => setShowExam(false)}
             onComplete={() => setShowExam(false)}
+            onTranslateText={translateTeacherText}
           />
         ) : showFriends ? (
           <FriendsPage friends={friends} onRefresh={() => loadFriends()} />
