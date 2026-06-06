@@ -70,8 +70,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 96
-const CURRENT_VERSION_NAME = 'free96'
+const CURRENT_VERSION_CODE = 97
+const CURRENT_VERSION_NAME = 'free97'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 

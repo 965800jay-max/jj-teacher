@@ -533,7 +533,8 @@ export function ChatMessage({
   if (isUser) {
     const userTranslationKey = `user-message-${message.id}`
     const isUserTranslationOpen = expandedMeaningKey === userTranslationKey
-    const userTranslation = messageMeaning || meaningCache[userTranslationKey] || ''
+    const knownUserMeaning = messageMeaning || message.translation?.note || ''
+    const userTranslation = knownUserMeaning || meaningCache[userTranslationKey] || ''
 
     return (
       <div className={cn("flex justify-end animate-slide-up", messageGapClass, messageLayerClass)}>
@@ -542,22 +543,13 @@ export function ChatMessage({
             <p className="relative text-[14px] text-white/95 leading-relaxed">
               {isEnglishLike(message.text) ? <SpeakableText text={message.text} rate={0.9} /> : message.text}
             </p>
-            {renderBubbleMenu(message.text, messageMeaning, userTranslationKey, { showAddSentence: allowUserAddSentence })}
+            {renderBubbleMenu(message.text, knownUserMeaning, userTranslationKey, { showAddSentence: allowUserAddSentence })}
             {isUserTranslationOpen && (
               <p className="mt-2.5 border-t border-white/[0.08] pt-2 text-xs leading-relaxed text-[oklch(0.83_0.13_280_/_0.76)] whitespace-pre-wrap">
                 {loadingMeaningKey === userTranslationKey ? translationLoadingText(message.text) : userTranslation || translationFallback(message.text)}
               </p>
             )}
           </div>
-          
-          {message.translation && (
-            renderEnglishBubble(
-              message.translation.sentence,
-              message.translation.note,
-              `user-translation-${message.id}`,
-              'rounded-br-md border-white/[0.06] bg-white/[0.035]'
-            )
-          )}
         </div>
       </div>
     )
