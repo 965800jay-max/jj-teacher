@@ -6,6 +6,7 @@ import { Play, Trash2, Sparkles, Check, BookOpen, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { speakEnglish } from '@/lib/speech'
 import { SpeakableText } from '@/components/speakable-text'
+import { registerNativeBackHandler } from '@/lib/native-back'
 
 interface SentenceCardProps {
   text: string
@@ -44,6 +45,24 @@ export function SentenceCard({
   const [isEditingNote, setIsEditingNote] = useState(false)
   const [draftNote, setDraftNote] = useState(note)
   const lastNoteTapAtRef = useRef(0)
+
+  useEffect(() => {
+    return registerNativeBackHandler(() => {
+      if (showAiExplain) {
+        setShowAiExplain(false)
+        return true
+      }
+      if (isEditingText) {
+        setIsEditingText(false)
+        return true
+      }
+      if (isEditingNote) {
+        setIsEditingNote(false)
+        return true
+      }
+      return false
+    }, 70)
+  }, [isEditingNote, isEditingText, showAiExplain])
   const textInputRef = useRef<HTMLTextAreaElement>(null)
   const noteInputRef = useRef<HTMLTextAreaElement>(null)
 

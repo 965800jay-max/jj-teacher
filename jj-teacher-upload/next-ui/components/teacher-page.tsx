@@ -6,6 +6,7 @@ import { Send, Sparkles, Coffee, Brain, X, Trash2, Power, MousePointerClick, Ref
 import { cn } from '@/lib/utils'
 import { ChatMessage } from '@/components/chat-message'
 import { speakEnglish } from '@/lib/speech'
+import { registerNativeBackHandler } from '@/lib/native-back'
 import type { TeacherMessage, TutorMemoryProfile } from '@/lib/sample-data'
 import {
   getTeacherDifficultyLabel,
@@ -177,6 +178,28 @@ export function TeacherPage({
       if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current)
     }
   }, [])
+
+  useEffect(() => {
+    return registerNativeBackHandler(() => {
+      if (optionPreview) {
+        setOptionPreview(null)
+        return true
+      }
+      if (showScenePicker) {
+        setShowScenePicker(false)
+        return true
+      }
+      if (showDifficultyPicker) {
+        setShowDifficultyPicker(false)
+        return true
+      }
+      if (showMemory) {
+        setShowMemory(false)
+        return true
+      }
+      return false
+    }, 80)
+  }, [optionPreview, showDifficultyPicker, showMemory, showScenePicker])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

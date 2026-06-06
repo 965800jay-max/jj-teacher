@@ -13,6 +13,7 @@ import { LanguageAssistantPage, type AssistantMode, type LanguageAssistantResult
 import { ExamPage, type ExamSourceItem } from '@/components/exam-page'
 import { FriendsPage } from '@/components/friends-page'
 import { AuthSheet, UpdateSheet } from '@/components/auth-sheet'
+import { registerNativeBackHandler } from '@/lib/native-back'
 import {
   getTeacherScenarioLabel,
   normalizeTeacherDifficulty,
@@ -69,8 +70,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 94
-const CURRENT_VERSION_NAME = 'free94'
+const CURRENT_VERSION_CODE = 95
+const CURRENT_VERSION_NAME = 'free95'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -96,6 +97,11 @@ const DEFAULT_LANGUAGE_ASSISTANT_STATE: LanguageAssistantState = {
   mode: 'translate',
   inputValue: '',
   results: []
+}
+
+function isMissingExamChinese(value: string) {
+  const clean = String(value || '').replace(/\s+/g, ' ').trim()
+  return !clean || clean === '中文意思待补充' || clean === '中文待补充' || clean === '待补充' || clean === '正在生成中文提示...'
 }
 const DEFAULT_SELECT_DIALOGUE_STATE: SelectDialogueState = {
   sceneId: 'daily-life',
@@ -775,6 +781,8 @@ export default function ZhiyuApp() {
   const [showExam, setShowExam] = useState(false)
   const [examItems, setExamItems] = useState<ExamSourceItem[]>([])
   const [examTitle, setExamTitle] = useState('关键词填空考试')
+  const [isPreparingExam, setIsPreparingExam] = useState(false)
+  const [examPrepMessage, setExamPrepMessage] = useState('')
   const [showFriends, setShowFriends] = useState(false)
   const [showAuth, setShowAuth] = useState(false)
   const [showUpdate, setShowUpdate] = useState(false)
@@ -798,6 +806,7 @@ export default function ZhiyuApp() {
   const [selectDialogueStage, setSelectDialogueStage] = useState(DEFAULT_SELECT_DIALOGUE_STATE.stage)
   const [savedDialogues, setSavedDialogues] = useState<SavedDialogueRecord[]>([])
   const [currentSelectRecordId, setCurrentSelectRecordId] = useState('')
+  const [selectedSavedDialogueId, setSelectedSavedDialogueId] = useState<string | null>(null)
   const [toastMessage, setToastMessage] = useState('')
 
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -809,6 +818,8 @@ export default function ZhiyuApp() {
   const memoryProfileRef = useRef<TutorMemoryProfile>(memoryProfile)
   const currentSelectRecordIdRef = useRef(currentSelectRecordId)
   const selectDialogueRequestLockRef = useRef(false)
+  const translateTeacherTextRef = useRef<(text: string) => Promise<string>>(async () => '')
+  const nativeBackExitAtRef = useRef(0)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const selectRetryRef = useRef<{
     message: string
@@ -1088,7 +1099,33 @@ export default function ZhiyuApp() {
     })
   }, [sentences, homeView, categoryFilter, searchQuery])
 
-  const startSentenceExam = useCallback(() => {
+  const prepareExamSourceItems = useCallback(async (items: ExamSourceItem[]) => {
+    return Promise.all(items.map(async (item) => {
+      const cleanText = item.text.replace(/\s+/g, ' ').trim()
+      const cleanNote = String(item.note || '').replace(/\s+/g, ' ').trim()
+      if (!cleanText || !isMissingExamChinese(cleanNote)) {
+        return { ...item, text: cleanText, note: cleanNote }
+      }
+
+      try {
+        const translated = await translateTeacherTextRef.current(cleanText)
+        const note = String(translated || '').replace(/\s+/g, ' ').trim()
+        return {
+          ...item,
+          text: cleanText,
+          note: isMissingExamChinese(note) ? '中文提示生成失败，请重试' : note
+        }
+      } catch {
+        return {
+          ...item,
+          text: cleanText,
+          note: '中文提示生成失败，请重试'
+        }
+      }
+    }))
+  }, [])
+
+  const startSentenceExam = useCallback(async () => {
     const items = filteredSentences
       .filter((sentence) => sentence.text.trim())
       .map((sentence): ExamSourceItem => ({
@@ -1097,13 +1134,33 @@ export default function ZhiyuApp() {
         note: sentence.note || ''
       }))
 
-    setExamItems(items)
     setExamTitle('句读关键词填空')
     setShowFriends(false)
-    setShowExam(true)
-  }, [filteredSentences])
+    if (!items.length) {
+      setExamItems([])
+      setShowExam(true)
+      return
+    }
 
-  const startSavedDialogueExam = useCallback((record: SavedDialogueRecord) => {
+    setExamPrepMessage('正在准备中文提示...')
+    setIsPreparingExam(true)
+    try {
+      const preparedItems = await prepareExamSourceItems(items)
+      const notesById = new Map(preparedItems.map((item) => [item.id, item.note]))
+      setSentences((current) => current.map((sentence) => {
+        const preparedNote = notesById.get(sentence.id)
+        if (!preparedNote || !isMissingExamChinese(sentence.note || '')) return sentence
+        return { ...sentence, note: preparedNote }
+      }))
+      setExamItems(preparedItems)
+      setShowExam(true)
+    } finally {
+      setIsPreparingExam(false)
+      setExamPrepMessage('')
+    }
+  }, [filteredSentences, prepareExamSourceItems])
+
+  const startSavedDialogueExam = useCallback(async (record: SavedDialogueRecord) => {
     const items = record.messages
       .filter((message) => message.english.trim())
       .map((message): ExamSourceItem => ({
@@ -1112,11 +1169,38 @@ export default function ZhiyuApp() {
         note: message.chinese || ''
       }))
 
-    setExamItems(items)
     setExamTitle('聊天记录关键词填空')
     setShowFriends(false)
-    setShowExam(true)
-  }, [])
+    if (!items.length) {
+      setExamItems([])
+      setShowExam(true)
+      return
+    }
+
+    setExamPrepMessage('正在准备中文提示...')
+    setIsPreparingExam(true)
+    try {
+      const preparedItems = await prepareExamSourceItems(items)
+      const notesById = new Map(preparedItems.map((item) => [item.id, item.note]))
+      setSavedDialogues((current) => current.map((savedRecord) => {
+        if (savedRecord.id !== record.id) return savedRecord
+        return {
+          ...savedRecord,
+          messages: savedRecord.messages.map((message) => {
+            const preparedNote = notesById.get(`${savedRecord.id}-${message.id}`)
+            if (!preparedNote || !isMissingExamChinese(message.chinese || '')) return message
+            return { ...message, chinese: preparedNote }
+          }),
+          updatedAt: Date.now()
+        }
+      }))
+      setExamItems(preparedItems)
+      setShowExam(true)
+    } finally {
+      setIsPreparingExam(false)
+      setExamPrepMessage('')
+    }
+  }, [prepareExamSourceItems])
 
   const filteredVocabBook = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
@@ -1350,6 +1434,8 @@ export default function ZhiyuApp() {
     })
     return meaning
   }, [])
+
+  translateTeacherTextRef.current = translateTeacherText
 
   const runLanguageAssistant = useCallback(async (mode: AssistantMode, text: string) => {
     const cleanText = text.trim()
@@ -1901,6 +1987,63 @@ export default function ZhiyuApp() {
     }
   }, [authToken])
 
+  useEffect(() => {
+    return registerNativeBackHandler(() => {
+      if (showAddSheet) {
+        closeAddSheet()
+        return true
+      }
+      if (showAuth) {
+        setShowAuth(false)
+        return true
+      }
+      if (showUpdate) {
+        setShowUpdate(false)
+        return true
+      }
+      if (isPreparingExam) {
+        showToast(examPrepMessage || '正在准备考试...')
+        return true
+      }
+      if (showExam) {
+        setShowExam(false)
+        return true
+      }
+      if (showFriends) {
+        setShowFriends(false)
+        return true
+      }
+      if (activeTab === 'scenes' && selectedSavedDialogueId) {
+        setSelectedSavedDialogueId(null)
+        return true
+      }
+      if (activeTab !== 'sentences') {
+        setActiveTab('sentences')
+        return true
+      }
+
+      const now = Date.now()
+      if (now - nativeBackExitAtRef.current < 1800) {
+        return false
+      }
+      nativeBackExitAtRef.current = now
+      showToast('再滑一次退出应用')
+      return true
+    }, 0)
+  }, [
+    activeTab,
+    closeAddSheet,
+    examPrepMessage,
+    isPreparingExam,
+    selectedSavedDialogueId,
+    showAddSheet,
+    showAuth,
+    showExam,
+    showFriends,
+    showToast,
+    showUpdate
+  ])
+
   const getPageTitle = () => {
     if (showExam) return { title: examTitle, eyebrow: 'Keyword Test', icon: Sparkles }
     if (showFriends) return { title: '好友', eyebrow: 'Community', icon: Users }
@@ -2215,6 +2358,8 @@ export default function ZhiyuApp() {
         ) : activeTab === 'scenes' ? (
           <ScenesPage
             records={savedDialogues}
+            selectedRecordId={selectedSavedDialogueId}
+            onSelectedRecordIdChange={setSelectedSavedDialogueId}
             onDeleteRecord={deleteSavedDialogue}
             onContinueRecord={continueSavedDialogue}
             onStartExam={startSavedDialogueExam}
@@ -2269,8 +2414,20 @@ export default function ZhiyuApp() {
             setActiveTab(tab)
             setShowExam(false)
             setShowFriends(false)
+            setSelectedSavedDialogueId(null)
           }}
         />
+      )}
+
+      {isPreparingExam && (
+        <div className="fixed inset-0 z-[155] flex items-center justify-center bg-black/72 px-6 backdrop-blur-md animate-fade-in">
+          <div className="relative w-full max-w-[320px] overflow-hidden rounded-3xl border border-[oklch(0.70_0.15_280_/_0.22)] bg-black/88 p-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+            <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/18 to-transparent" />
+            <div className="mx-auto mb-4 h-9 w-9 rounded-full border-2 border-white/15 border-t-[oklch(0.70_0.15_280)] animate-spin" />
+            <p className="text-sm font-semibold text-white/88">{examPrepMessage || '正在准备考试...'}</p>
+            <p className="mt-2 text-xs leading-relaxed text-white/42">中文提示准备好后会自动进入考试。</p>
+          </div>
+        </div>
       )}
 
       {toastMessage && (

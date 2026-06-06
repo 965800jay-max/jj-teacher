@@ -1,9 +1,10 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ChevronLeft, ClipboardCheck, Clock3, MessageCircle, MessagesSquare, MoreHorizontal, PlayCircle, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ChatMessage } from '@/components/chat-message'
+import { registerNativeBackHandler } from '@/lib/native-back'
 import type { TeacherMessage, TutorMemoryProfile } from '@/lib/sample-data'
 import {
   getTeacherDifficultyLabel,
@@ -42,6 +43,8 @@ export interface SavedDialogueRecord {
 
 interface ScenesPageProps {
   records: SavedDialogueRecord[]
+  selectedRecordId?: string | null
+  onSelectedRecordIdChange?: (id: string | null) => void
   onDeleteRecord?: (id: string) => void
   onContinueRecord?: (record: SavedDialogueRecord) => void
   onStartExam?: (record: SavedDialogueRecord) => void
@@ -85,18 +88,39 @@ function getLastPreview(record: SavedDialogueRecord) {
 
 export function ScenesPage({
   records,
+  selectedRecordId: controlledSelectedRecordId,
+  onSelectedRecordIdChange,
   onDeleteRecord,
   onContinueRecord,
   onStartExam,
   onAddSentence,
   onTranslateText
 }: ScenesPageProps) {
-  const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null)
+  const [internalSelectedRecordId, setInternalSelectedRecordId] = useState<string | null>(null)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
+  const selectedRecordId = controlledSelectedRecordId !== undefined ? controlledSelectedRecordId : internalSelectedRecordId
+  const setSelectedRecordId = (id: string | null) => {
+    if (controlledSelectedRecordId === undefined) setInternalSelectedRecordId(id)
+    onSelectedRecordIdChange?.(id)
+  }
   const selectedRecord = useMemo(
     () => records.find((record) => record.id === selectedRecordId) || null,
     [records, selectedRecordId]
   )
+
+  useEffect(() => {
+    return registerNativeBackHandler(() => {
+      if (openMenuId) {
+        setOpenMenuId(null)
+        return true
+      }
+      if (selectedRecordId) {
+        setSelectedRecordId(null)
+        return true
+      }
+      return false
+    }, 60)
+  }, [openMenuId, selectedRecordId])
 
   const handleDelete = (id: string) => {
     setOpenMenuId(null)

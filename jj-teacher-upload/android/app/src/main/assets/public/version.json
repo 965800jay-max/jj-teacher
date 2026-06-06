@@ -1,6 +1,6 @@
 {
-  "versionCode": 94,
-  "versionName": "free94",
-  "apkUrl": "https://jj-teacher.onrender.com/zhiyu-tutor-free94-exam-chinese-prompt-fix-debug.apk",
-  "notes": "free94: 修复关键词填空考试中文提示缺失，自动为没有中文的题目生成中文意思。"
+  "versionCode": 95,
+  "versionName": "free95",
+  "apkUrl": "https://jj-teacher.onrender.com/zhiyu-tutor-free95-android-back-exam-prompts-debug.apk",
+  "notes": "free95: 适配 Android 全面屏返回手势层级，主页需要再次返回才退出；关键词填空考试进入前预先准备中文提示。"
 }

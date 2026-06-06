@@ -1,10 +1,11 @@
 'use client'
 
-import { useRef, useState, type PointerEvent } from 'react'
+import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { speakEnglish } from '@/lib/speech'
 import { SpeakableText } from '@/components/speakable-text'
+import { registerNativeBackHandler } from '@/lib/native-back'
 import type { TeacherMessage } from '@/lib/sample-data'
 
 interface ChatMessageProps {
@@ -184,6 +185,20 @@ export function ChatMessage({
   const messageLayerClass = openMenuKey || dragState ? 'relative z-[120]' : 'relative z-0'
   const dragThreshold = 42
   const maxDrag = 58
+
+  useEffect(() => {
+    return registerNativeBackHandler(() => {
+      if (openMenuKey) {
+        setOpenMenuKey(null)
+        return true
+      }
+      if (expandedMeaningKey) {
+        setExpandedMeaningKey(null)
+        return true
+      }
+      return false
+    }, 90)
+  }, [expandedMeaningKey, openMenuKey])
 
   const handleSpeak = (text: string, id: string) => {
     const speakText = extractSpeakableEnglish(text)
