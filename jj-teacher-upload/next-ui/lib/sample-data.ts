@@ -14,7 +14,7 @@ export interface TeacherMessage {
   id: string
   role: 'user' | 'assistant'
   text: string
-  mode?: 'chat' | 'topic' | 'daily-sentences' | 'free-chat' | 'select-dialogue'
+  mode?: 'chat' | 'topic' | 'daily-sentences' | 'free-chat' | 'select-dialogue' | 'select-study'
   pending?: boolean
   translation?: {
     sentence: string

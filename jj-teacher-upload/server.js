@@ -385,7 +385,9 @@ function sanitizeTeacherMessage(item) {
   if (!text) return null;
 
   const clean = { role: item.role, text };
-  if (item.mode === "freestyle") clean.mode = "freestyle";
+  if (["chat", "topic", "daily-sentences", "free-chat", "freestyle", "select-dialogue", "select-study"].includes(item.mode)) {
+    clean.mode = item.mode;
+  }
 
   if (item.translation && typeof item.translation === "object") {
     const sentence = limitText(item.translation.sentence, 240);
@@ -1055,6 +1057,11 @@ async function handleAiTeacher(request, response) {
       targetLanguage
     );
     const data = extractJsonObject(raw) || {};
+    const studyQuestionHint = looksLikeSelectStudyQuestion(message);
+    const turnType = normalizeSelectDialogueTurnType(
+      data.turnType || data.messageType || data.type,
+      studyQuestionHint ? "study-question" : "dialogue"
+    );
     const aiMessage = stripSelectedReplyEcho(data.aiMessage || data.reply || "", message).replace(/\s+/g, " ").trim();
     const stage = normalizeSelectDialogueStage(data.stage || data.currentStage || data.nextStage || selectStage, selectScene);
     const rawOptions = Array.isArray(data.replyOptions) ? data.replyOptions : [];
@@ -1072,17 +1079,18 @@ async function handleAiTeacher(request, response) {
       replyOptionMeanings.push(String(rawMeanings[index] || "").trim().slice(0, 180));
     });
 
-    if (!aiMessage || replyOptions.length < 2) {
+    if (!aiMessage || (turnType !== "study-question" && replyOptions.length < 2)) {
       sendJson(response, 502, { error: "No selectable dialogue returned", message: "生成失败，请重试" });
       return;
     }
 
     sendJson(response, 200, {
-      aiMessage: aiMessage.slice(0, 500),
-      reply: aiMessage.slice(0, 500),
-      stage,
-      replyOptions: replyOptions.slice(0, 3),
-      replyOptionMeanings: replyOptionMeanings.slice(0, 3),
+      turnType,
+      aiMessage: aiMessage.slice(0, turnType === "study-question" ? 900 : 500),
+      reply: aiMessage.slice(0, turnType === "study-question" ? 900 : 500),
+      stage: turnType === "study-question" ? selectStage : stage,
+      replyOptions: turnType === "study-question" ? [] : replyOptions.slice(0, 3),
+      replyOptionMeanings: turnType === "study-question" ? [] : replyOptionMeanings.slice(0, 3),
     });
     return;
   }
@@ -1331,6 +1339,45 @@ function normalizeSelectableReplyOption(value) {
     .trim();
 }
 
+function looksLikeSelectStudyQuestion(value) {
+  const clean = String(value || "").replace(/\s+/g, " ").trim();
+  if (!clean || clean === "START_SELECT_DIALOGUE") return false;
+
+  const lower = clean.toLowerCase();
+  const chineseStudyHints = [
+    "\u4ec0\u4e48\u610f\u601d",
+    "\u600e\u4e48\u7406\u89e3",
+    "\u4e3a\u4ec0\u4e48",
+    "\u4e3a\u5565",
+    "\u7ffb\u8bd1",
+    "\u540d\u8bcd",
+    "\u52a8\u8bcd",
+    "\u5f62\u5bb9\u8bcd",
+    "\u526f\u8bcd",
+    "\u77ed\u8bed",
+    "\u5355\u8bcd",
+    "\u8bed\u6cd5",
+    "\u7528\u6cd5",
+    "\u53ef\u4ee5\u7406\u89e3",
+    "\u600e\u4e48\u8bf4",
+    "\u533a\u522b",
+    "\u53d1\u97f3",
+    "\u97f3\u6807",
+    "\u662f\u4e0d\u662f"
+  ];
+  if (/[\u4e00-\u9fff]/u.test(clean) && chineseStudyHints.some((hint) => clean.includes(hint))) {
+    return true;
+  }
+
+  return /\b(what does .+ mean|what'?s .+ mean|meaning of|translate|can you explain|explain (this|that|the word|the phrase)|why (do we|does it|is it|use|using)|grammar|noun|verb|adjective|adverb|phrase|word meaning|pronunciation|pronounce)\b/i.test(lower);
+}
+
+function normalizeSelectDialogueTurnType(value, fallback = "dialogue") {
+  const clean = String(value || "").trim().toLowerCase();
+  if (clean === "study-question" || clean === "study" || clean === "learning-question") return "study-question";
+  return fallback === "study-question" ? "study-question" : "dialogue";
+}
+
 function comparableSelectDialogueText(value) {
   return String(value || "")
     .toLowerCase()
@@ -1386,6 +1433,7 @@ function normalizeSelectDialogueStage(value, scenarioKey) {
 function buildSelectDialoguePrompt(message, history, targetLanguage = "english", memoryProfile = {}, scenarioKey = "daily-life", difficultyKey = "medium", currentStage = "") {
   const language = getTargetLanguageInfo(targetLanguage);
   const isStart = message === "START_SELECT_DIALOGUE";
+  const isStudyQuestionHint = looksLikeSelectStudyQuestion(message);
   const scenarioId = normalizeSelectDialogueScenario(scenarioKey);
   const difficultyId = normalizeSelectDialogueDifficulty(difficultyKey);
   const scenario = selectDialogueScenarios[scenarioId];
@@ -1400,7 +1448,8 @@ function buildSelectDialoguePrompt(message, history, targetLanguage = "english",
   return [
     `The learner is practicing spoken ${language.label} through a point-and-click real-world scenario mode.`,
     "Return compact JSON only. No Markdown. No extra text.",
-    'Required shape: {"aiMessage":"","replyOptions":["","",""],"replyOptionMeanings":["","",""],"stage":""}',
+    'Required shape: {"turnType":"dialogue","aiMessage":"","replyOptions":["","",""],"replyOptionMeanings":["","",""],"stage":""}',
+    'turnType must be either "dialogue" or "study-question".',
     `Scenario: ${scenario.label}.`,
     `AI role: ${scenario.aiRole}. Act as this real person, not as a teacher, grammar explainer, exam app, or chatbot.`,
     `Stage flow: ${scenario.stages.join(" -> ")}.`,
@@ -1408,6 +1457,13 @@ function buildSelectDialoguePrompt(message, history, targetLanguage = "english",
     `Scenario details: ${scenario.details}`,
     selectDialogueDifficultyRules[difficultyId],
     "Difficulty should not be based mainly on word count. Difficulty should be based on vocabulary difficulty, sentence structure, naturalness, context depth, and professional detail. Even in advanced mode, keep the message conversational and concise. Advanced means more natural, precise, and realistic, not longer.",
+    "Message type rules:",
+    "1. If the learner is answering the scenario character, return turnType \"dialogue\" and continue role play.",
+    "2. If the learner asks an English-learning question about a word, phrase, grammar, translation, meaning, part of speech, pronunciation, or why an expression is used, return turnType \"study-question\".",
+    "3. For turnType \"study-question\", pause role play. Do not act as the scenario character. Answer the learning question directly in the learner's current language. If the question is Chinese, answer in Chinese. If the question is English, answer in English.",
+    "4. For turnType \"study-question\", include the word/phrase meaning, Chinese translation when useful, usage scene, and one simple example. Keep it compact and practical.",
+    "5. For turnType \"study-question\", keep stage unchanged and return replyOptions as an empty array. The app will keep the previous scenario reply chips.",
+    isStudyQuestionHint ? "Message type hint: this learner message looks like a study question. Treat it as turnType \"study-question\" unless it is clearly a scenario reply." : "",
     "aiMessage rules:",
     "1. Write one natural English message as the role character.",
     "2. Stay inside the selected scenario and move through the real-world flow. Do not randomly change topics.",
@@ -1434,7 +1490,9 @@ function buildSelectDialoguePrompt(message, history, targetLanguage = "english",
     cleanHistory ? `Recent conversation:\n${cleanHistory}` : "",
     isStart
       ? "Start the scenario as the real role character. Do not mention that this is a mode or that options will appear."
-      : `The learner selected or typed this reply, and it is already shown as the learner's chat bubble. Do not repeat it in aiMessage; continue from it as the other person: ${message}`,
+      : isStudyQuestionHint
+        ? `The learner asked this learning question. Answer it as study help, not role play: ${message}`
+        : `The learner selected or typed this reply, and it is already shown as the learner's chat bubble. Do not repeat it in aiMessage; continue from it as the other person: ${message}`,
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -2085,7 +2143,7 @@ function buildAiInstructions(mode = "chat", targetLanguage = "english") {
     return `You are a compact mobile ${language.label} language assistant. Return valid compact JSON only with a results array. English must be natural, spoken, local, and directly usable. No Markdown, no prose outside JSON.`;
   }
   if (mode === "select-dialogue") {
-    return `You run a point-and-click spoken ${language.label} chat practice mode. Return valid compact JSON only with aiMessage, replyOptions, and replyOptionMeanings. No Markdown, no labels outside JSON.`;
+    return `You run a point-and-click spoken ${language.label} chat practice mode. Return valid compact JSON only with turnType, aiMessage, replyOptions, replyOptionMeanings, and stage. No Markdown, no labels outside JSON.`;
   }
   if (mode === "memory") {
     return "You update long-term user memory for a language learning app. Return valid compact JSON only.";

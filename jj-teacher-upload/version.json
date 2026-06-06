@@ -1,6 +1,6 @@
 {
-  "versionCode": 95,
-  "versionName": "free95",
-  "apkUrl": "https://jj-teacher.onrender.com/zhiyu-tutor-free95-android-back-exam-prompts-debug.apk",
-  "notes": "free95: 适配 Android 全面屏返回手势层级，主页需要再次返回才退出；关键词填空考试进入前预先准备中文提示。"
+  "versionCode": 96,
+  "versionName": "free96",
+  "apkUrl": "https://jj-teacher.onrender.com/zhiyu-tutor-free96-select-study-question-debug.apk",
+  "notes": "free96: 点选对话新增学习提问模式，英语问题会用金色气泡解答，不再误触发场景角色扮演。"
 }

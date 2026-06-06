@@ -70,8 +70,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 95
-const CURRENT_VERSION_NAME = 'free95'
+const CURRENT_VERSION_CODE = 96
+const CURRENT_VERSION_NAME = 'free96'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const TARGET_LANGUAGE = 'english'
 
@@ -223,7 +223,7 @@ function normalizeMessage(item: Partial<TeacherMessage> & Record<string, unknown
   const role = item.role === 'assistant' ? 'assistant' : item.role === 'user' ? 'user' : null
   const text = String(item.text || '').trim()
   if (!role || !text) return null
-  const mode = item.mode === 'topic' || item.mode === 'daily-sentences' || item.mode === 'free-chat' || item.mode === 'chat' || item.mode === 'select-dialogue'
+  const mode = item.mode === 'topic' || item.mode === 'daily-sentences' || item.mode === 'free-chat' || item.mode === 'chat' || item.mode === 'select-dialogue' || item.mode === 'select-study'
     ? item.mode
     : undefined
   const translation = item.translation && typeof item.translation === 'object'
@@ -425,6 +425,13 @@ function messageModeFromServerMode(mode: string): TeacherMessage['mode'] {
   return 'chat'
 }
 
+function normalizeSelectDialogueTurnType(value: unknown) {
+  const clean = String(value || '').trim().toLowerCase()
+  return clean === 'study-question' || clean === 'study' || clean === 'learning-question'
+    ? 'study-question'
+    : 'dialogue'
+}
+
 function normalizeSelectableReplyOption(value: unknown) {
   return String(value || '')
     .replace(/\s+/g, ' ')
@@ -470,6 +477,7 @@ function stripSelectedReplyEcho(aiMessage: string, selectedReply = '') {
 
 function normalizeSelectDialogueTurn(data: Record<string, unknown>, selectedReply = '') {
   const aiMessage = stripSelectedReplyEcho(String(data.aiMessage || data.reply || '').trim(), selectedReply)
+  const turnType = normalizeSelectDialogueTurnType(data.turnType || data.messageType || data.type)
   const stage = String(data.stage || data.currentStage || data.nextStage || '').replace(/\s+/g, ' ').trim().slice(0, 80)
   const rawOptions = Array.isArray(data.replyOptions) ? data.replyOptions : []
   const rawMeanings = Array.isArray(data.replyOptionMeanings) ? data.replyOptionMeanings : []
@@ -486,12 +494,13 @@ function normalizeSelectDialogueTurn(data: Record<string, unknown>, selectedRepl
     replyOptionMeanings.push(String(rawMeanings[index] || '').trim().slice(0, 180))
   })
 
-  if (!aiMessage || replyOptions.length < 2) {
+  if (!aiMessage || (turnType !== 'study-question' && replyOptions.length < 2)) {
     throw new Error('生成失败，请重试')
   }
 
   return {
-    aiMessage: aiMessage.slice(0, 500),
+    turnType,
+    aiMessage: aiMessage.slice(0, turnType === 'study-question' ? 900 : 500),
     stage,
     replyOptions: replyOptions.slice(0, 3),
     replyOptionMeanings: replyOptionMeanings.slice(0, 3)
@@ -1606,7 +1615,7 @@ export default function ZhiyuApp() {
     }
 
     const history = shouldReset ? [] : messagesRef.current
-      .filter((message) => !message.pending)
+      .filter((message) => !message.pending && message.mode !== 'select-study')
       .slice(-10)
       .map(({ role, text }) => ({ role, text }))
 
@@ -1676,13 +1685,13 @@ export default function ZhiyuApp() {
     const pendingMessage: TeacherMessage = {
       id: makeId('select-assistant-pending'),
       role: 'assistant',
-      text: 'AI 正在继续对话...',
+      text: 'AI 正在处理...',
       mode: 'select-dialogue',
       pending: true,
       timestamp: now + 1
     }
     const history = messagesRef.current
-      .filter((message) => !message.pending)
+      .filter((message) => !message.pending && message.mode !== 'select-study')
       .slice(-10)
       .map(({ role, text }) => ({ role, text }))
     setSelectSceneId(requestSceneId)
@@ -1696,8 +1705,6 @@ export default function ZhiyuApp() {
     setSelectReplyError('')
     setIsSelectReplyLoading(true)
     setIsSending(true)
-    setSelectReplyOptions([])
-    setSelectReplyMeanings([])
     selectRetryRef.current = {
       message: cleanText,
       appendUser: false,
@@ -1720,19 +1727,26 @@ export default function ZhiyuApp() {
         memoryProfile: memoryProfileRef.current
       })
       const turn = normalizeSelectDialogueTurn(data as Record<string, unknown>, cleanText)
+      const isStudyQuestion = turn.turnType === 'study-question'
       const assistantMessage: TeacherMessage = {
-        id: makeId('select-assistant-message'),
+        id: makeId(isStudyQuestion ? 'select-study-answer' : 'select-assistant-message'),
         role: 'assistant',
         text: turn.aiMessage,
-        mode: 'select-dialogue',
+        mode: isStudyQuestion ? 'select-study' : 'select-dialogue',
         timestamp: Date.now()
       }
       setMessages((current) => current
         .filter((message) => message.id !== pendingMessage.id)
+        .map((message) => isStudyQuestion && message.id === userMessage.id
+          ? { ...message, mode: 'select-study' as const }
+          : message
+        )
         .concat(assistantMessage))
-      setSelectDialogueStage(turn.stage || currentStage)
-      setSelectReplyOptions(turn.replyOptions)
-      setSelectReplyMeanings(turn.replyOptionMeanings)
+      if (!isStudyQuestion) {
+        setSelectDialogueStage(turn.stage || currentStage)
+        setSelectReplyOptions(turn.replyOptions)
+        setSelectReplyMeanings(turn.replyOptionMeanings)
+      }
       setSelectReplyError('')
       updateMemoryFromExchange(cleanText, turn.aiMessage, 'select-dialogue')
     } catch {

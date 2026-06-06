@@ -172,6 +172,7 @@ export function ChatMessage({
   onTranslateText
 }: ChatMessageProps) {
   const isUser = message.role === 'user'
+  const isStudyMessage = message.mode === 'select-study'
   const [playingId, setPlayingId] = useState<string | null>(null)
   const [expandedMeaningKey, setExpandedMeaningKey] = useState<string | null>(null)
   const [meaningCache, setMeaningCache] = useState<Record<string, string>>({})
@@ -504,6 +505,30 @@ export function ChatMessage({
   }
 
   const parsed = parseContent()
+
+  if (isStudyMessage) {
+    return (
+      <div className={cn("flex animate-slide-up", isUser ? "justify-end" : "justify-start", messageGapClass, messageLayerClass)}>
+        <div className="max-w-[86%] space-y-1.5">
+          <p className={cn(
+            "text-[10px] font-semibold tracking-[0.16em] uppercase",
+            isUser ? "text-right text-[oklch(0.82_0.12_88_/_0.70)]" : "text-[oklch(0.82_0.12_88_/_0.78)]"
+          )}>
+            {isUser ? '学习提问' : '学习解答'}
+          </p>
+          <div className={cn(
+            "relative rounded-2xl border px-4 py-3 backdrop-blur-xl shadow-[0_0_20px_oklch(0.82_0.12_88_/_0.08)]",
+            isUser ? "rounded-br-md" : "rounded-bl-md",
+            "border-[oklch(0.82_0.12_88_/_0.26)] bg-[oklch(0.82_0.12_88_/_0.09)]"
+          )}>
+            <p className="whitespace-pre-wrap text-[14px] font-medium leading-relaxed text-white/86">
+              {message.text}
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if (isUser) {
     const userTranslationKey = `user-message-${message.id}`
