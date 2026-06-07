@@ -91,6 +91,133 @@ function cleanText(value?: string) {
   return String(value || '').replace(/\s+/g, ' ').trim()
 }
 
+export function AssistantResultCard({
+  result,
+  index = 0,
+  onCopy,
+  onAddSentence
+}: {
+  result: LanguageAssistantResult
+  index?: number
+  onCopy?: (text: string) => void
+  onAddSentence?: (english: string, chinese: string) => void
+}) {
+  const english = cleanText(result.english)
+  const chinese = cleanText(result.chinese)
+  const phonetic = cleanText(result.phonetic)
+  const copyText = english || chinese || result.alternatives?.map((item) => item.english).join('\n') || ''
+
+  const renderActionButtons = () => (
+    <div className="mt-4 flex flex-wrap items-center gap-2">
+      {english && (
+        <button
+          type="button"
+          onClick={() => speakEnglish(english, { mode: english.split(/\s+/).length > 1 ? 'sentence' : 'word' })}
+          className="flex h-9 items-center gap-1.5 rounded-2xl glass-button px-3 text-xs font-semibold text-white/60 transition-premium hover:text-white"
+        >
+          <Volume2 className="w-3.5 h-3.5" />
+          朗读
+        </button>
+      )}
+      {onCopy && copyText && (
+        <button
+          type="button"
+          onClick={() => onCopy(copyText)}
+          className="flex h-9 items-center gap-1.5 rounded-2xl glass-button px-3 text-xs font-semibold text-white/60 transition-premium hover:text-white"
+        >
+          <Copy className="w-3.5 h-3.5" />
+          复制
+        </button>
+      )}
+      {english && chinese && onAddSentence && (
+        <button
+          type="button"
+          onClick={() => onAddSentence(english, chinese)}
+          className="flex h-9 items-center gap-1.5 rounded-2xl border border-[oklch(0.70_0.15_280_/_0.28)] bg-[oklch(0.70_0.15_280_/_0.10)] px-3 text-xs font-semibold text-[oklch(0.84_0.13_280)] transition-premium hover:bg-[oklch(0.70_0.15_280_/_0.16)]"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          加入句库
+        </button>
+      )}
+    </div>
+  )
+
+  return (
+    <div
+      className="relative overflow-hidden rounded-[1.6rem] border border-white/[0.07] bg-white/[0.045] p-4 backdrop-blur-xl animate-slide-up"
+      style={{ animationDelay: `${index * 45}ms` }}
+    >
+      <div className="top-highlight" />
+      {result.title && (
+        <p className="mb-3 text-[11px] font-semibold tracking-[0.14em] text-[oklch(0.70_0.15_280)] uppercase">
+          {result.title}
+        </p>
+      )}
+      {english && (
+        <p className="text-[17px] font-semibold leading-relaxed text-white/94">
+          <SpeakableText text={english} />
+        </p>
+      )}
+      {phonetic && <p className="mt-2 text-sm text-[oklch(0.70_0.15_280_/_0.70)]">/{phonetic.replace(/^\/|\/$/g, '')}/</p>}
+      {chinese && <p className="mt-3 text-sm leading-relaxed text-white/56">{chinese}</p>}
+
+      {result.scene && (
+        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] px-3.5 py-3">
+          <p className="mb-1 text-[11px] font-semibold tracking-[0.12em] text-[oklch(0.70_0.15_280_/_0.75)] uppercase">使用场景</p>
+          <p className="text-sm leading-relaxed text-white/62">{result.scene}</p>
+        </div>
+      )}
+
+      {Boolean(result.keyPoints?.length) && (
+        <div className="mt-4 space-y-2">
+          <p className="text-[11px] font-semibold tracking-[0.12em] text-[oklch(0.70_0.15_280_/_0.75)] uppercase">重点词/短语</p>
+          <div className="flex flex-wrap gap-2">
+            {result.keyPoints?.map((point, pointIndex) => (
+              <span key={`${point}-${pointIndex}`} className="rounded-full border border-white/[0.07] bg-white/[0.035] px-3 py-1.5 text-xs text-white/58">
+                {point}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {Boolean(result.alternatives?.length) && (
+        <div className="mt-4 space-y-2">
+          <p className="text-[11px] font-semibold tracking-[0.12em] text-[oklch(0.70_0.15_280_/_0.75)] uppercase">替代表达</p>
+          {result.alternatives?.map((item, altIndex) => (
+            <div key={`${item.english}-${altIndex}`} className="rounded-2xl border border-white/[0.06] bg-black/15 px-3.5 py-3">
+              <p className="text-sm font-semibold leading-relaxed text-white/86">
+                <SpeakableText text={item.english} />
+              </p>
+              {item.chinese && <p className="mt-1.5 text-xs leading-relaxed text-white/46">{item.chinese}</p>}
+              <div className="mt-2 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => speakEnglish(item.english, { mode: 'sentence' })}
+                  className="h-7 rounded-xl glass-button px-2 text-[11px] text-white/55 transition-premium hover:text-white"
+                >
+                  朗读
+                </button>
+                {onAddSentence && (
+                  <button
+                    type="button"
+                    onClick={() => onAddSentence(item.english, item.chinese)}
+                    className="h-7 rounded-xl border border-[oklch(0.70_0.15_280_/_0.24)] bg-[oklch(0.70_0.15_280_/_0.09)] px-2 text-[11px] font-semibold text-[oklch(0.84_0.13_280)]"
+                  >
+                    加句读
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {renderActionButtons()}
+    </div>
+  )
+}
+
 export function LanguageAssistantPage({
   mode,
   inputValue,
@@ -167,44 +294,6 @@ export function LanguageAssistantPage({
     if (!cleanEnglish || !cleanChinese) return
     onAddSentence(cleanEnglish, cleanChinese)
     showToast('已加入句库')
-  }
-
-  const renderActionButtons = (result: LanguageAssistantResult, copyText: string) => {
-    const english = cleanText(result.english)
-    const chinese = cleanText(result.chinese)
-
-    return (
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        {english && (
-          <button
-            type="button"
-            onClick={() => speakEnglish(english, { mode: english.split(/\s+/).length > 1 ? 'sentence' : 'word' })}
-            className="flex h-9 items-center gap-1.5 rounded-2xl glass-button px-3 text-xs font-semibold text-white/60 transition-premium hover:text-white"
-          >
-            <Volume2 className="w-3.5 h-3.5" />
-            朗读
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={() => handleCopy(copyText)}
-          className="flex h-9 items-center gap-1.5 rounded-2xl glass-button px-3 text-xs font-semibold text-white/60 transition-premium hover:text-white"
-        >
-          <Copy className="w-3.5 h-3.5" />
-          复制
-        </button>
-        {english && chinese && (
-          <button
-            type="button"
-            onClick={() => handleAddSentence(english, chinese)}
-            className="flex h-9 items-center gap-1.5 rounded-2xl border border-[oklch(0.70_0.15_280_/_0.28)] bg-[oklch(0.70_0.15_280_/_0.10)] px-3 text-xs font-semibold text-[oklch(0.84_0.13_280)] transition-premium hover:bg-[oklch(0.70_0.15_280_/_0.16)]"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            加入句库
-          </button>
-        )}
-      </div>
-    )
   }
 
   return (
@@ -310,86 +399,15 @@ export function LanguageAssistantPage({
       <div id="languageAssistantResults" className="min-h-0 flex-1 overflow-y-auto pt-3 pb-[calc(88px+env(safe-area-inset-bottom))] scrollbar-hide">
         {results.length > 0 ? (
           <div className="space-y-3">
-            {results.map((result, index) => {
-              const english = cleanText(result.english)
-              const chinese = cleanText(result.chinese)
-              const phonetic = cleanText(result.phonetic)
-              const copyText = english || chinese || result.alternatives?.map((item) => item.english).join('\n') || ''
-
-              return (
-                <div
-                  key={result.id || `${mode}-${index}`}
-                  className="relative overflow-hidden rounded-[1.6rem] border border-white/[0.07] bg-white/[0.045] p-4 backdrop-blur-xl animate-slide-up"
-                  style={{ animationDelay: `${index * 45}ms` }}
-                >
-                  <div className="top-highlight" />
-                  {result.title && (
-                    <p className="mb-3 text-[11px] font-semibold tracking-[0.14em] text-[oklch(0.70_0.15_280)] uppercase">
-                      {result.title}
-                    </p>
-                  )}
-                  {english && (
-                    <p className="text-[17px] font-semibold leading-relaxed text-white/94">
-                      <SpeakableText text={english} />
-                    </p>
-                  )}
-                  {phonetic && <p className="mt-2 text-sm text-[oklch(0.70_0.15_280_/_0.70)]">/{phonetic.replace(/^\/|\/$/g, '')}/</p>}
-                  {chinese && <p className="mt-3 text-sm leading-relaxed text-white/56">{chinese}</p>}
-
-                  {result.scene && (
-                    <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] px-3.5 py-3">
-                      <p className="mb-1 text-[11px] font-semibold tracking-[0.12em] text-[oklch(0.70_0.15_280_/_0.75)] uppercase">使用场景</p>
-                      <p className="text-sm leading-relaxed text-white/62">{result.scene}</p>
-                    </div>
-                  )}
-
-                  {Boolean(result.keyPoints?.length) && (
-                    <div className="mt-4 space-y-2">
-                      <p className="text-[11px] font-semibold tracking-[0.12em] text-[oklch(0.70_0.15_280_/_0.75)] uppercase">重点词/短语</p>
-                      <div className="flex flex-wrap gap-2">
-                        {result.keyPoints?.map((point, pointIndex) => (
-                          <span key={`${point}-${pointIndex}`} className="rounded-full border border-white/[0.07] bg-white/[0.035] px-3 py-1.5 text-xs text-white/58">
-                            {point}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {Boolean(result.alternatives?.length) && (
-                    <div className="mt-4 space-y-2">
-                      <p className="text-[11px] font-semibold tracking-[0.12em] text-[oklch(0.70_0.15_280_/_0.75)] uppercase">替代表达</p>
-                      {result.alternatives?.map((item, altIndex) => (
-                        <div key={`${item.english}-${altIndex}`} className="rounded-2xl border border-white/[0.06] bg-black/15 px-3.5 py-3">
-                          <p className="text-sm font-semibold leading-relaxed text-white/86">
-                            <SpeakableText text={item.english} />
-                          </p>
-                          {item.chinese && <p className="mt-1.5 text-xs leading-relaxed text-white/46">{item.chinese}</p>}
-                          <div className="mt-2 flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => speakEnglish(item.english, { mode: 'sentence' })}
-                              className="h-7 rounded-xl glass-button px-2 text-[11px] text-white/55 transition-premium hover:text-white"
-                            >
-                              朗读
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleAddSentence(item.english, item.chinese)}
-                              className="h-7 rounded-xl border border-[oklch(0.70_0.15_280_/_0.24)] bg-[oklch(0.70_0.15_280_/_0.09)] px-2 text-[11px] font-semibold text-[oklch(0.84_0.13_280)]"
-                            >
-                              加句读
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {renderActionButtons(result, copyText)}
-                </div>
-              )
-            })}
+            {results.map((result, index) => (
+              <AssistantResultCard
+                key={result.id || `${mode}-${index}`}
+                result={result}
+                index={index}
+                onCopy={handleCopy}
+                onAddSentence={handleAddSentence}
+              />
+            ))}
           </div>
         ) : (
           <div className="flex h-full min-h-[180px] flex-col items-center justify-center text-center">

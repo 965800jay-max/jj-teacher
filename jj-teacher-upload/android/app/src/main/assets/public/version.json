@@ -1,6 +1,6 @@
 {
-  "versionCode": 98,
-  "versionName": "free98",
-  "apkUrl": "https://jj-teacher.onrender.com/zhiyu-tutor-free98-private-access-debug.apk",
-  "notes": "free98: 仅允许授权账号 965800jay@gmail.com 使用，未登录或其他账号会被前端和后端拦截。"
+  "versionCode": 99,
+  "versionName": "free99",
+  "apkUrl": "https://jj-teacher.onrender.com/zhiyu-tutor-free99-sentence-ai-explain-preload-debug.apk",
+  "notes": "free99: 句读 AI 解答改用语言助手同款结构化卡片，并为句读列表后台预加载句子解释。"
 }

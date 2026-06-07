@@ -70,8 +70,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 98
-const CURRENT_VERSION_NAME = 'free98'
+const CURRENT_VERSION_CODE = 99
+const CURRENT_VERSION_NAME = 'free99'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const ALLOWED_APP_EMAIL = '965800jay@gmail.com'
 const TARGET_LANGUAGE = 'english'
@@ -191,6 +191,11 @@ function clearStoredAuth() {
   if (!hasStorage()) return
   window.localStorage.removeItem(AUTH_TOKEN_KEY)
   window.localStorage.removeItem(AUTH_USER_KEY)
+}
+
+function isAuthAccessError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error || '')
+  return /登录|授权账号|仅限授权|使用权限|请先登录/.test(message)
 }
 
 function languageKey(key: string) {
@@ -563,6 +568,25 @@ function normalizeLanguageAssistantResults(data: Record<string, unknown>): Langu
   return results.slice(0, 5)
 }
 
+function serializeSentenceAiExplanation(results: LanguageAssistantResult[]) {
+  return JSON.stringify({
+    type: 'language-assistant-explain',
+    version: 1,
+    results
+  })
+}
+
+function hasStructuredSentenceAiExplanation(value?: string) {
+  const clean = String(value || '').trim()
+  if (!clean) return false
+  try {
+    const parsed = JSON.parse(clean) as { results?: unknown[] } | unknown[]
+    return Array.isArray(parsed) || Array.isArray((parsed as { results?: unknown[] }).results)
+  } catch {
+    return false
+  }
+}
+
 function normalizeAssistantModeValue(value: unknown): AssistantMode {
   return ASSISTANT_MODE_IDS.includes(value as AssistantMode) ? value as AssistantMode : 'translate'
 }
@@ -844,9 +868,11 @@ export default function ZhiyuApp() {
   const [friends, setFriends] = useState<FriendItem[]>([])
 
   const messagesRef = useRef<TeacherMessage[]>(messages)
+  const sentencesRef = useRef<SavedSentence[]>(sentences)
   const memoryProfileRef = useRef<TutorMemoryProfile>(memoryProfile)
   const currentSelectRecordIdRef = useRef(currentSelectRecordId)
   const selectDialogueRequestLockRef = useRef(false)
+  const sentenceAiPreloadInFlightRef = useRef(new Set<string>())
   const translateTeacherTextRef = useRef<(text: string) => Promise<string>>(async () => '')
   const nativeBackExitAtRef = useRef(0)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -862,6 +888,10 @@ export default function ZhiyuApp() {
   useEffect(() => {
     messagesRef.current = messages
   }, [messages])
+
+  useEffect(() => {
+    sentencesRef.current = sentences
+  }, [sentences])
 
   useEffect(() => {
     memoryProfileRef.current = memoryProfile
@@ -993,6 +1023,15 @@ export default function ZhiyuApp() {
     window.localStorage.setItem(APP_PAGE_KEY, activeTab)
   }, [hydrated, activeTab])
 
+  const clearAuthState = useCallback(() => {
+    setAuthToken('')
+    setUser(undefined)
+    setIsLoggedIn(false)
+    setFriends([])
+    clearStoredAuth()
+    setShowAuth(true)
+  }, [])
+
   const loadFriends = useCallback(async (token = authToken) => {
     if (!token) return
     try {
@@ -1006,10 +1045,11 @@ export default function ZhiyuApp() {
         sentenceCount: Number(item.sentenceCount || item.sentencesCount || 0),
         lastActive: item.updatedAt ? '最近同步过' : '已注册'
       })))
-    } catch {
+    } catch (error) {
+      if (isAuthAccessError(error)) clearAuthState()
       setFriends([])
     }
-  }, [authToken])
+  }, [authToken, clearAuthState])
 
   const pullCloudData = useCallback(async (token = authToken) => {
     if (!token) return
@@ -1042,10 +1082,11 @@ export default function ZhiyuApp() {
       if (remoteSavedDialogues.length) {
         setSavedDialogues((current) => mergeSavedDialogueRecords(current, remoteSavedDialogues))
       }
-    } catch {
+    } catch (error) {
+      if (isAuthAccessError(error)) clearAuthState()
       // Local learning data still works when cloud sync is unavailable.
     }
-  }, [authToken])
+  }, [authToken, clearAuthState])
 
   useEffect(() => {
     if (!hydrated || !authToken) return
@@ -1054,12 +1095,14 @@ export default function ZhiyuApp() {
       apiRequest('/api/user-data', {
         method: 'POST',
         body: JSON.stringify({ data: buildCloudPayload(sentences, messages, memoryProfile, savedDialogues) })
-      }, authToken).catch(() => {})
+      }, authToken).catch((error) => {
+        if (isAuthAccessError(error)) clearAuthState()
+      })
     }, 900)
     return () => {
       if (syncTimerRef.current) clearTimeout(syncTimerRef.current)
     }
-  }, [hydrated, authToken, sentences, messages, memoryProfile, savedDialogues])
+  }, [hydrated, authToken, sentences, messages, memoryProfile, savedDialogues, clearAuthState])
 
   useEffect(() => {
     if (!hydrated) return
@@ -1528,26 +1571,82 @@ export default function ZhiyuApp() {
     ))
   }, [])
 
-  const handleAiExplain = useCallback(async (id: string) => {
-    const sentence = sentences.find((item) => item.id === id)
-    if (!sentence || sentence.aiExplanation) return
+  const generateSentenceAiExplanation = useCallback(async (id: string) => {
+    const sentence = sentencesRef.current.find((item) => item.id === id)
+    if (!sentence || hasStructuredSentenceAiExplanation(sentence.aiExplanation)) return
+    if (sentenceAiPreloadInFlightRef.current.has(id)) return
 
+    sentenceAiPreloadInFlightRef.current.add(id)
     try {
-      const data = await requestAiTeacher({ mode: 'explain', sentence: sentence.text })
-      const explanation = String(data.reply || '').trim()
+      const data = await requestAiTeacher({
+        mode: 'language-assistant',
+        assistantMode: 'explain',
+        message: sentence.text
+      })
+      const results = normalizeLanguageAssistantResults(data as Record<string, unknown>)
+      const explanation = results.length
+        ? serializeSentenceAiExplanation(results)
+        : serializeSentenceAiExplanation([{
+            id: makeId('sentence-ai-empty'),
+            title: '句子解释',
+            english: sentence.text,
+            chinese: sentence.note,
+            scene: '这次没有拿到完整解答，请稍后再试。',
+            keyPoints: [],
+            alternatives: []
+          }])
       setSentences((current) => current.map((item) =>
-        item.id === id
+        item.id === id && item.text === sentence.text
           ? { ...item, aiExplanation: explanation || '这次没有拿到解答，请稍后再试。' }
           : item
       ))
     } catch {
       setSentences((current) => current.map((item) =>
-        item.id === id
-          ? { ...item, aiExplanation: '这次没有拿到解答，请稍后再试。' }
+        item.id === id && item.text === sentence.text && !item.aiExplanation
+          ? {
+              ...item,
+              aiExplanation: serializeSentenceAiExplanation([{
+                id: makeId('sentence-ai-error'),
+                title: '句子解释',
+                english: sentence.text,
+                chinese: sentence.note,
+                scene: '这次没有拿到解答，请稍后再试。',
+                keyPoints: [],
+                alternatives: []
+              }])
+            }
           : item
       ))
+    } finally {
+      sentenceAiPreloadInFlightRef.current.delete(id)
     }
-  }, [sentences])
+  }, [])
+
+  const handleAiExplain = useCallback(async (id: string) => {
+    await generateSentenceAiExplanation(id)
+  }, [generateSentenceAiExplanation])
+
+  useEffect(() => {
+    if (!hydrated || !authToken || homeView === 'vocab') return
+    const missingIds = filteredSentences
+      .filter((sentence) => !sentence.aiExplanation)
+      .map((sentence) => sentence.id)
+    if (!missingIds.length) return
+
+    let cancelled = false
+    const preload = async () => {
+      for (const id of missingIds) {
+        if (cancelled) break
+        await generateSentenceAiExplanation(id)
+        await new Promise((resolve) => window.setTimeout(resolve, 350))
+      }
+    }
+
+    preload().catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [authToken, filteredSentences, generateSentenceAiExplanation, homeView, hydrated])
 
   const updateMemoryFromExchange = useCallback(async (
     userMessage: string,

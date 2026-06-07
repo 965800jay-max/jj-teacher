@@ -6,6 +6,7 @@ import { Play, Trash2, Sparkles, Check, BookOpen, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { speakEnglish } from '@/lib/speech'
 import { SpeakableText } from '@/components/speakable-text'
+import { AssistantResultCard, type LanguageAssistantResult } from '@/components/language-assistant-page'
 import { registerNativeBackHandler } from '@/lib/native-back'
 
 interface SentenceCardProps {
@@ -21,6 +22,59 @@ interface SentenceCardProps {
   onDelete?: () => void
   onToggleLearned?: () => void
   onAiExplain?: () => void
+}
+
+function parseAiExplanationResults(value: string | undefined, text: string, note: string): LanguageAssistantResult[] {
+  const clean = String(value || '').trim()
+  if (!clean) return []
+
+  try {
+    const parsed = JSON.parse(clean) as { results?: LanguageAssistantResult[] } | LanguageAssistantResult[]
+    const rawResults = Array.isArray(parsed) ? parsed : Array.isArray(parsed.results) ? parsed.results : []
+    const results = rawResults
+      .map((item, index) => ({
+        id: String(item.id || `sentence-ai-${index}`),
+        title: String(item.title || '句子解释'),
+        english: String(item.english || text),
+        chinese: String(item.chinese || note),
+        phonetic: String(item.phonetic || ''),
+        scene: String(item.scene || ''),
+        keyPoints: Array.isArray(item.keyPoints) ? item.keyPoints.map((point) => String(point)).filter(Boolean) : [],
+        alternatives: Array.isArray(item.alternatives)
+          ? item.alternatives
+              .map((alternative) => ({
+                english: String(alternative.english || '').trim(),
+                chinese: String(alternative.chinese || '').trim()
+              }))
+              .filter((alternative) => alternative.english)
+          : []
+      }))
+      .filter((item) => item.english || item.chinese || item.scene || item.keyPoints.length || item.alternatives.length)
+    if (results.length) return results
+  } catch {
+    // Legacy plain-text explanations are rendered in the same card shell below.
+  }
+
+  return [{
+    id: 'sentence-ai-legacy',
+    title: '句子解释',
+    english: text,
+    chinese: note,
+    scene: clean,
+    keyPoints: [],
+    alternatives: []
+  }]
+}
+
+function hasStructuredAiExplanation(value: string | undefined) {
+  const clean = String(value || '').trim()
+  if (!clean) return false
+  try {
+    const parsed = JSON.parse(clean) as { results?: unknown[] } | unknown[]
+    return Array.isArray(parsed) || Array.isArray((parsed as { results?: unknown[] }).results)
+  } catch {
+    return false
+  }
 }
 
 export function SentenceCard({
@@ -97,8 +151,10 @@ export function SentenceCard({
     setIsAiClicked(true)
     setTimeout(() => setIsAiClicked(false), 300)
     setShowAiExplain(true)
-    if (!aiExplanation) onAiExplain?.()
+    if (!hasStructuredAiExplanation(aiExplanation)) onAiExplain?.()
   }
+
+  const aiExplanationResults = parseAiExplanationResults(aiExplanation, text, note)
 
   const openTextInput = () => {
     if (!onUpdateText) return
@@ -305,14 +361,15 @@ export function SentenceCard({
               </button>
             </div>
 
-            <div className="rounded-2xl border border-white/[0.06] bg-white/[0.035] px-4 py-4 mb-5">
-              <p className="text-[15px] font-semibold text-white/95 leading-relaxed">{text}</p>
-              {note && <p className="text-sm text-white/45 leading-relaxed mt-2">{note}</p>}
-            </div>
-
-            {aiExplanation ? (
-              <div className="space-y-3 text-[15px] text-white/72 leading-relaxed whitespace-pre-wrap">
-                {aiExplanation}
+            {aiExplanationResults.length ? (
+              <div className="space-y-3">
+                {aiExplanationResults.map((result, index) => (
+                  <AssistantResultCard
+                    key={result.id || `${text}-${index}`}
+                    result={result}
+                    index={index}
+                  />
+                ))}
               </div>
             ) : (
               <div className="flex items-center gap-3 text-sm text-white/45 py-4">

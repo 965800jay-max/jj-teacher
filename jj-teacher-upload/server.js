@@ -391,7 +391,7 @@ function sanitizeSentence(item) {
     category: normalizeGeneratedCategory(limitText(item.category, 40), text, limitText(item.note, 500)),
     learned: Boolean(item.learned),
     learnedAt: typeof item.learnedAt === "number" ? item.learnedAt : null,
-    aiExplanation: limitText(item.aiExplanation, 1200),
+    aiExplanation: limitText(item.aiExplanation, 5000),
   };
 }
 
