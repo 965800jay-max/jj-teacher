@@ -38,6 +38,7 @@ const targetLanguages = {
 const dataDir = process.env.DATA_DIR || path.join(root, "data");
 const userStoreFile = path.join(dataDir, "users.json");
 const authTokenTtlMs = 1000 * 60 * 60 * 24 * 30;
+const allowedUserEmail = normalizeEmail(process.env.ALLOWED_USER_EMAIL || "965800jay@gmail.com");
 const maxUserDataBytes = 10 * 1000 * 1000;
 const adminUserId = "admin";
 const adminUsername = "admin";
@@ -237,6 +238,10 @@ function isAdminUser(user) {
   return user?.role === "admin" || user?.id === adminUserId || user?.username === adminUsername;
 }
 
+function isAllowedAppUser(user) {
+  return normalizeEmail(user?.email) === allowedUserEmail;
+}
+
 function getActiveBanUntil(user) {
   const bannedUntil = Number(user?.bannedUntil || 0);
   return Number.isFinite(bannedUntil) && bannedUntil > Date.now() ? bannedUntil : 0;
@@ -300,6 +305,13 @@ async function requireUser(request) {
     throw httpError(401, "账号不存在，请重新登录。");
   }
 
+  if (!isAllowedAppUser(user)) {
+    delete store.sessions[token];
+    revokeUserSessions(store, user.id);
+    await saveUserStore(store);
+    throw httpError(403, "此软件仅限授权账号使用。");
+  }
+
   if (clearExpiredBan(user)) store._dirty = true;
   const bannedUntil = getActiveBanUntil(user);
   if (bannedUntil && !isAdminUser(user)) {
@@ -308,6 +320,12 @@ async function requireUser(request) {
 
   session.expiresAt = Date.now() + authTokenTtlMs;
   return { store, user, token };
+}
+
+async function requireApiAccess(request) {
+  const auth = await requireUser(request);
+  await saveUserStore(auth.store);
+  return auth;
 }
 
 function publicUser(user) {
@@ -589,6 +607,7 @@ async function handleAuthRegister(request, response) {
 
   if (!name) throw httpError(400, "请填写昵称。");
   if (!validateEmail(email)) throw httpError(400, "邮箱格式不正确。");
+  if (email !== allowedUserEmail) throw httpError(403, "此软件仅限授权账号使用。");
   if (password.length < 6) throw httpError(400, "密码至少 6 位。");
 
   const store = await loadUserStore();
@@ -621,6 +640,11 @@ async function handleAuthLogin(request, response) {
   const store = await loadUserStore();
   const user = findUserByLogin(store, login);
   if (!user || !verifyPassword(password, user)) throw httpError(401, "账号或密码不正确。");
+  if (!isAllowedAppUser(user)) {
+    revokeUserSessions(store, user.id);
+    await saveUserStore(store);
+    throw httpError(403, "此软件仅限授权账号使用。");
+  }
   if (clearExpiredBan(user)) store._dirty = true;
   const bannedUntil = getActiveBanUntil(user);
   if (bannedUntil && !isAdminUser(user)) {
@@ -693,7 +717,7 @@ async function handleListUsers(request, response) {
   const { store } = await requireUser(request);
   await saveUserStore(store);
   const users = Object.values(store.users)
-    .filter((user) => !isAdminUser(user))
+    .filter((user) => !isAdminUser(user) && isAllowedAppUser(user))
     .map(publicUser)
     .sort((left, right) => String(left.name || "").localeCompare(String(right.name || ""), "zh-Hans-CN"));
   sendJson(response, 200, { users });
@@ -833,6 +857,8 @@ async function handleReadMessages(request, response) {
 }
 
 async function handleSpeech(request, response) {
+  await requireApiAccess(request);
+
   let payload;
   try {
     payload = JSON.parse(await collectBody(request));
@@ -930,6 +956,8 @@ function decodeAudioBase64(audioBase64) {
 }
 
 async function handleTranscribe(request, response) {
+  await requireApiAccess(request);
+
   if (!aiApiKey) {
     sendJson(response, 503, {
       error: "AI transcription is not configured",
@@ -967,6 +995,8 @@ async function handleTranscribe(request, response) {
 }
 
 async function handleAiTeacher(request, response) {
+  await requireApiAccess(request);
+
   let payload;
   try {
     payload = JSON.parse(await collectBody(request));
@@ -1134,6 +1164,8 @@ async function handleAiTeacher(request, response) {
 }
 
 async function handleAiMemory(request, response) {
+  await requireApiAccess(request);
+
   const payload = await readJsonBody(request);
   const currentMemory = sanitizeMemoryProfile(payload.memoryProfile || payload.memory);
   const userMessage = limitText(payload.userMessage || payload.message, 2000);
@@ -1968,6 +2000,8 @@ function extractJsonObject(text) {
 }
 
 async function handleWordLookup(request, response) {
+  await requireApiAccess(request);
+
   if (!aiApiKey) {
     sendJson(response, 503, {
       error: "AI word lookup is not configured",

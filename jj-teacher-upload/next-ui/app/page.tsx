@@ -70,9 +70,10 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 97
-const CURRENT_VERSION_NAME = 'free97'
+const CURRENT_VERSION_CODE = 98
+const CURRENT_VERSION_NAME = 'free98'
 const API_BASE = 'https://jj-teacher.onrender.com'
+const ALLOWED_APP_EMAIL = '965800jay@gmail.com'
 const TARGET_LANGUAGE = 'english'
 
 const SENTENCES_KEY = 'sentence-reader-sentences'
@@ -172,6 +173,24 @@ function inferSentenceCategory(text = '', note = '') {
 
 function hasStorage() {
   return typeof window !== 'undefined' && Boolean(window.localStorage)
+}
+
+function normalizeAppEmail(value?: string) {
+  return String(value || '').trim().toLowerCase()
+}
+
+function isAllowedAppUser(user?: AppUser | null) {
+  return normalizeAppEmail(user?.email) === ALLOWED_APP_EMAIL
+}
+
+function getStoredAuthToken() {
+  return hasStorage() ? window.localStorage.getItem(AUTH_TOKEN_KEY) || '' : ''
+}
+
+function clearStoredAuth() {
+  if (!hasStorage()) return
+  window.localStorage.removeItem(AUTH_TOKEN_KEY)
+  window.localStorage.removeItem(AUTH_USER_KEY)
 }
 
 function languageKey(key: string) {
@@ -373,12 +392,13 @@ function compactReply(reply: string, mode: string) {
 }
 
 async function apiRequest(path: string, options: RequestInit = {}, token = '') {
+  const resolvedToken = token || getStoredAuthToken()
   const headers: Record<string, string> = {
     Accept: 'application/json',
     ...(options.body ? { 'Content-Type': 'application/json' } : {}),
     ...(options.headers as Record<string, string> | undefined)
   }
-  if (token) headers.Authorization = `Bearer ${token}`
+  if (resolvedToken) headers.Authorization = `Bearer ${resolvedToken}`
 
   const response = await fetch(`${API_BASE}${path}`, {
     ...options,
@@ -891,10 +911,13 @@ export default function ZhiyuApp() {
     setHomeView(storedView === 'learned' || storedView === 'vocab' ? storedView : 'learning')
     const storedPage = hasStorage() ? window.localStorage.getItem(APP_PAGE_KEY) : ''
     if (storedPage === 'teacher' || storedPage === 'assistant' || storedPage === 'scenes' || storedPage === 'sentences') setActiveTab(storedPage)
-    if (storedToken && storedUser) {
+    if (storedToken && storedUser && isAllowedAppUser(storedUser)) {
       setAuthToken(storedToken)
       setUser(storedUser)
       setIsLoggedIn(true)
+    } else if (storedToken || storedUser) {
+      clearStoredAuth()
+      setShowAuth(true)
     }
     setHydrated(true)
   }, [])
@@ -1958,6 +1981,7 @@ export default function ZhiyuApp() {
     const nextUser = data.user as AppUser
     const token = String(data.token || '')
     if (!token || !nextUser) throw new Error('登录失败，请稍后再试。')
+    if (!isAllowedAppUser(nextUser)) throw new Error('此软件仅限授权账号使用。')
     setAuthToken(token)
     setUser(nextUser)
     setIsLoggedIn(true)
@@ -1977,6 +2001,7 @@ export default function ZhiyuApp() {
     const nextUser = data.user as AppUser
     const token = String(data.token || '')
     if (!token || !nextUser) throw new Error('注册失败，请稍后再试。')
+    if (!isAllowedAppUser(nextUser)) throw new Error('此软件仅限授权账号使用。')
     setAuthToken(token)
     setUser(nextUser)
     setIsLoggedIn(true)
@@ -1993,8 +2018,7 @@ export default function ZhiyuApp() {
     setIsLoggedIn(false)
     setFriends([])
     if (hasStorage()) {
-      window.localStorage.removeItem(AUTH_TOKEN_KEY)
-      window.localStorage.removeItem(AUTH_USER_KEY)
+      clearStoredAuth()
     }
     if (token) {
       apiRequest('/api/auth/logout', { method: 'POST' }, token).catch(() => {})
@@ -2071,6 +2095,54 @@ export default function ZhiyuApp() {
 
   const pageInfo = getPageTitle()
   const PageIcon = pageInfo.icon
+  const hasAppAccess = isLoggedIn && isAllowedAppUser(user)
+
+  if (!hydrated || !hasAppAccess) {
+    return (
+      <div className="zhiyu-app-min bg-[#030308] relative overflow-hidden isolate">
+        <StarryBackground />
+        <div className="fixed inset-0 z-[1] pointer-events-none bg-[#030308]/55" aria-hidden="true" />
+        <main className="relative z-10 min-h-screen w-full max-w-[520px] mx-auto flex items-center justify-center px-6 safe-area-pt safe-area-pb">
+          <section className="w-full glass-card rounded-[2rem] p-7 overflow-hidden">
+            <div className="inner-glow rounded-[2rem]" />
+            <div className="top-highlight" />
+            <div className="relative">
+              <div className="w-16 h-16 rounded-3xl glass-card-accent flex items-center justify-center mb-6">
+                <MessageCircle className="w-7 h-7 text-[oklch(0.82_0.16_280)]" />
+              </div>
+              <p className="text-[10px] text-[oklch(0.72_0.16_280)] font-semibold tracking-[0.18em] uppercase mb-2">
+                PRIVATE ACCESS
+              </p>
+              <h1 className="text-2xl font-semibold text-white/95 tracking-wide">
+                智语导师仅限授权账号使用
+              </h1>
+              <p className="mt-4 text-sm text-white/48 leading-relaxed">
+                请使用 {ALLOWED_APP_EMAIL} 登录。未登录或其他账号无法使用学习、AI、云同步和朗读功能。
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowAuth(true)}
+                disabled={!hydrated}
+                className="mt-7 w-full h-12 rounded-2xl glass-button-primary text-sm font-semibold transition-premium disabled:opacity-50"
+              >
+                {hydrated ? '登录授权账号' : '正在准备...'}
+              </button>
+            </div>
+          </section>
+        </main>
+
+        <AuthSheet
+          isOpen={showAuth}
+          onClose={() => setShowAuth(false)}
+          isLoggedIn={false}
+          user={undefined}
+          onLogin={handleLogin}
+          onRegister={handleRegister}
+          onLogout={handleLogout}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="zhiyu-app-min bg-[#030308] relative overflow-hidden isolate">

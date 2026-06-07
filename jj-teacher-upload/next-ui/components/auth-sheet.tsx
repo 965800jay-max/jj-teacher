@@ -171,7 +171,7 @@ export function AuthSheet({
             // 未登录状态
             <form onSubmit={handleSubmit} className="space-y-5">
               <p id="authStatusText" className="text-sm text-white/45 mb-6 leading-relaxed">
-                {status || '登录后会同步你的句子、学习状态和导师聊天记录。'}
+                {status || '请使用授权账号登录。登录后会同步句子、学习状态和导师聊天记录。'}
               </p>
 
               {mode === 'register' && (

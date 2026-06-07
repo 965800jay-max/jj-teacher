@@ -2,6 +2,7 @@
 
 const API_BASE = 'https://jj-teacher.onrender.com'
 const DEFAULT_VOICE_LANGUAGE = 'en-US'
+const AUTH_TOKEN_KEY = 'sentence-reader-auth-token'
 
 type NativeAudioPlugin = {
   play?: (options: { url: string; rate?: number }) => Promise<void>
@@ -22,6 +23,10 @@ let currentAudio: HTMLAudioElement | null = null
 let speechSessionId = 0
 let nativeAudioAvailable = true
 const audioCache = new Map<string, string>()
+
+function getStoredAuthToken() {
+  return typeof window === 'undefined' ? '' : window.localStorage.getItem(AUTH_TOKEN_KEY) || ''
+}
 
 function getNativeAudio() {
   return typeof window === 'undefined' ? null : window.Capacitor?.Plugins?.NativeAudio || null
@@ -78,9 +83,12 @@ async function fetchSpeechAudioUrl(text: string, mode: 'sentence' | 'word') {
   if (cached) return cached
 
   try {
+    const token = getStoredAuthToken()
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (token) headers.Authorization = `Bearer ${token}`
     const response = await fetch(`${API_BASE}/api/speech`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
         text,
         mode,

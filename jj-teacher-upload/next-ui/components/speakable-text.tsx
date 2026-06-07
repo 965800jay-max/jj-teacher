@@ -25,6 +25,11 @@ interface SpeakableTextProps {
 
 const TOKEN_PATTERN = /[A-Za-z]+(?:['’][A-Za-z]+)?|\d+(?:[.,]\d+)?|[^\w\s]+|\s+/g
 const API_BASE = 'https://jj-teacher.onrender.com'
+const AUTH_TOKEN_KEY = 'sentence-reader-auth-token'
+
+function getStoredAuthToken() {
+  return typeof window === 'undefined' ? '' : window.localStorage.getItem(AUTH_TOKEN_KEY) || ''
+}
 
 function getTokens(text: string) {
   return text.match(TOKEN_PATTERN) || [text]
@@ -69,9 +74,13 @@ export function SpeakableText({
 
     let cancelled = false
     setIsLoading(true)
+    const token = getStoredAuthToken()
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (token) headers.Authorization = `Bearer ${token}`
+
     fetch(`${API_BASE}/api/word-lookup`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ word: activeWord })
     })
       .then((response) => response.json().then((data) => ({ ok: response.ok, data })))
