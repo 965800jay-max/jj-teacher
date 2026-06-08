@@ -448,6 +448,22 @@ function sanitizeSavedDialogueOption(item) {
   };
 }
 
+function sanitizeCustomDialogueContext(item) {
+  const source = item && typeof item === "object" ? item : {};
+  const scenarioName = limitText(source.scenarioName || source.title || source.sceneName, 80);
+  const roleA = limitText(source.roleA || source.userRole || source.learnerRole, 40);
+  const roleB = limitText(source.roleB || source.aiRole || source.partnerRole, 40);
+  const sourceDialogue = limitText(source.sourceDialogue || source.chineseDialogue || source.dialogue, 4000);
+
+  if (!scenarioName || !roleA || !roleB) return null;
+  return {
+    scenarioName,
+    roleA,
+    roleB,
+    sourceDialogue,
+  };
+}
+
 function sanitizeSavedDialogueRecord(item) {
   if (!item || typeof item !== "object") return null;
   const messages = Array.isArray(item.messages)
@@ -464,16 +480,18 @@ function sanitizeSavedDialogueRecord(item) {
   const createdAt = typeof item.createdAt === "number" ? item.createdAt : messages[0].createdAt || updatedAt;
   const lastMessagePreview = limitText(item.lastMessagePreview, 160)
     || limitText(messages[messages.length - 1].english, 160);
+  const customContext = sanitizeCustomDialogueContext(item.customContext);
 
   return {
     id: limitText(item.id, 80) || crypto.randomUUID(),
-    title: limitText(item.title, 80) || scenario,
+    title: limitText(item.title, 80) || customContext?.scenarioName || scenario,
     scenario,
     difficulty,
     messages,
     replyOptions,
     conversationStage: limitText(item.conversationStage || item.stage, 80),
     memory: item.memory && typeof item.memory === "object" ? sanitizeMemoryProfile(item.memory) : null,
+    customContext,
     createdAt,
     updatedAt,
     lastMessagePreview,
@@ -1070,19 +1088,59 @@ async function handleAiTeacher(request, response) {
     return;
   }
 
+  if (mode === "custom-dialogue") {
+    const scenarioName = limitText(payload.scenarioName || payload.title || payload.sceneName, 80);
+    const roleA = limitText(payload.roleA || payload.userRole || payload.learnerRole, 40);
+    const roleB = limitText(payload.roleB || payload.aiRole || payload.partnerRole, 40);
+    const chineseDialogue = limitText(payload.chineseDialogue || payload.dialogue || payload.message, 4000);
+    const complete = Boolean(payload.complete);
+
+    if (!scenarioName || !roleA || !roleB || !chineseDialogue) {
+      sendJson(response, 400, { error: "Custom dialogue fields are required", message: "请填写场景、角色和中文对话" });
+      return;
+    }
+
+    const raw = await askAiTeacher(
+      buildCustomDialoguePrompt({ scenarioName, roleA, roleB, chineseDialogue, complete }, targetLanguage),
+      mode,
+      targetLanguage
+    );
+    const data = extractJsonObject(raw) || {};
+    const messages = normalizeCustomDialogueMessages(data.messages || data.dialogue || data.conversation, roleA, roleB);
+    const replyOptions = Array.isArray(data.replyOptions)
+      ? data.replyOptions.map(sanitizeSavedDialogueOption).filter(Boolean).slice(0, 3)
+      : [];
+
+    if (messages.length < 2) {
+      sendJson(response, 502, { error: "No custom dialogue returned", message: "生成失败，请重试" });
+      return;
+    }
+
+    sendJson(response, 200, {
+      title: limitText(data.title, 80) || scenarioName,
+      stage: limitText(data.stage || data.currentStage, 80) || (complete ? "complete custom scene" : "custom scene"),
+      messages,
+      replyOptions,
+    });
+    return;
+  }
+
   if (mode === "select-dialogue") {
     const message = String(payload.message || "").trim();
     const history = Array.isArray(payload.messages) ? payload.messages.slice(-10) : [];
+    const customContext = sanitizeCustomDialogueContext(payload.customContext);
     const selectScene = normalizeSelectDialogueScenario(payload.selectScene || payload.scene || payload.scenario);
     const selectDifficulty = normalizeSelectDialogueDifficulty(payload.selectDifficulty || payload.difficulty);
-    const selectStage = normalizeSelectDialogueStage(payload.selectStage || payload.stage, selectScene);
+    const selectStage = customContext
+      ? limitText(payload.selectStage || payload.stage, 80)
+      : normalizeSelectDialogueStage(payload.selectStage || payload.stage, selectScene);
     if (!message) {
       sendJson(response, 400, { error: "Message is required" });
       return;
     }
 
     const raw = await askAiTeacher(
-      buildSelectDialoguePrompt(message, history, targetLanguage, memoryProfile, selectScene, selectDifficulty, selectStage),
+      buildSelectDialoguePrompt(message, history, targetLanguage, memoryProfile, selectScene, selectDifficulty, selectStage, customContext),
       mode,
       targetLanguage
     );
@@ -1093,7 +1151,9 @@ async function handleAiTeacher(request, response) {
       studyQuestionHint ? "study-question" : "dialogue"
     );
     const aiMessage = stripSelectedReplyEcho(data.aiMessage || data.reply || "", message).replace(/\s+/g, " ").trim();
-    const stage = normalizeSelectDialogueStage(data.stage || data.currentStage || data.nextStage || selectStage, selectScene);
+    const stage = customContext
+      ? limitText(data.stage || data.currentStage || data.nextStage || selectStage, 80)
+      : normalizeSelectDialogueStage(data.stage || data.currentStage || data.nextStage || selectStage, selectScene);
     const rawOptions = Array.isArray(data.replyOptions) ? data.replyOptions : [];
     const rawMeanings = Array.isArray(data.replyOptionMeanings) ? data.replyOptionMeanings : [];
     const seen = new Set();
@@ -1462,14 +1522,80 @@ function normalizeSelectDialogueStage(value, scenarioKey) {
   return scenario.stages.includes(clean) ? clean : "";
 }
 
-function buildSelectDialoguePrompt(message, history, targetLanguage = "english", memoryProfile = {}, scenarioKey = "daily-life", difficultyKey = "medium", currentStage = "") {
+function normalizeCustomDialogueMessage(item, roleA = "Role A", roleB = "Role B", index = 0) {
+  const source = item && typeof item === "object" ? item : {};
+  const english = limitText(source.english || source.text || source.message, 800).replace(/\s+/g, " ").trim();
+  if (!english) return null;
+
+  const speaker = limitText(source.speaker || source.name || (index % 2 === 0 ? roleA : roleB), 40);
+  const roleValue = String(source.role || "").trim().toLowerCase();
+  const isAi = roleValue === "ai"
+    || roleValue === "assistant"
+    || roleValue === "roleb"
+    || speaker.toLowerCase() === String(roleB).toLowerCase();
+
+  return {
+    speaker: speaker || (isAi ? roleB : roleA),
+    role: isAi ? "ai" : "user",
+    english,
+    chinese: limitText(source.chinese || source.meaning || source.translation, 300),
+  };
+}
+
+function normalizeCustomDialogueMessages(value, roleA = "Role A", roleB = "Role B") {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item, index) => normalizeCustomDialogueMessage(item, roleA, roleB, index))
+    .filter(Boolean)
+    .slice(0, 60);
+}
+
+function buildCustomDialoguePrompt(input, targetLanguage = "english") {
+  const language = getTargetLanguageInfo(targetLanguage);
+  const scenarioName = limitText(input.scenarioName, 80);
+  const roleA = limitText(input.roleA, 40);
+  const roleB = limitText(input.roleB, 40);
+  const chineseDialogue = limitText(input.chineseDialogue, 4000);
+  const complete = Boolean(input.complete);
+
+  return [
+    `Create a custom spoken ${language.label} conversation for a Chinese learner.`,
+    "Return compact JSON only. No Markdown. No text outside JSON.",
+    'Required shape: {"title":"","stage":"","messages":[{"speaker":"","role":"user","english":"","chinese":""}],"replyOptions":[{"english":"","chinese":""}]}',
+    "Core rules:",
+    "1. Think about the entire conversation and the real-world goal.",
+    "2. Do not translate line by line.",
+    "3. Rewrite naturally so it sounds like real Americans speaking.",
+    "4. Use natural spoken American English. Avoid textbook English, translation-style English, Chinese-thinking English, and robotic customer-service tone.",
+    "5. Keep the personalities and real roles of both speakers.",
+    "6. Maintain context and make the scene coherent.",
+    "7. Keep each message conversational and phone-friendly.",
+    "8. Provide concise Simplified Chinese meanings for each English message.",
+    `Scenario name: ${scenarioName}`,
+    `Role A: ${roleA}. This is the learner's practice role. Use role value "user" for this role.`,
+    `Role B: ${roleB}. This is the AI's continuing role. Use role value "ai" for this role.`,
+    complete
+      ? "Completion mode: the user gave only part of a Chinese scene. Continue it into a complete realistic scene before rewriting it into English. Keep it useful for practice, not too long."
+      : "Generation mode: rewrite the provided Chinese dialogue into natural English based on the full context. Add only small missing context if needed for the dialogue to feel real.",
+    "For hair or salon scenes, if relevant, continue through natural consultation details such as sides, back, top, bangs, style, perm, products, maintenance, and next appointment. Do not force every detail if the scene is not hair related.",
+    "For other scenes, complete the natural real-world flow for that scene.",
+    "replyOptions rules:",
+    "1. Provide exactly 3 possible next replies for Role A after this conversation.",
+    "2. Each option must be natural spoken English with a concise Simplified Chinese meaning.",
+    "3. Options should represent different real intentions or directions, not difficulty levels.",
+    `Chinese scene dialogue:\n${chineseDialogue}`,
+  ].join("\n\n");
+}
+
+function buildSelectDialoguePrompt(message, history, targetLanguage = "english", memoryProfile = {}, scenarioKey = "daily-life", difficultyKey = "medium", currentStage = "", customContext = null) {
   const language = getTargetLanguageInfo(targetLanguage);
   const isStart = message === "START_SELECT_DIALOGUE";
   const isStudyQuestionHint = looksLikeSelectStudyQuestion(message);
   const scenarioId = normalizeSelectDialogueScenario(scenarioKey);
   const difficultyId = normalizeSelectDialogueDifficulty(difficultyKey);
   const scenario = selectDialogueScenarios[scenarioId];
-  const safeStage = normalizeSelectDialogueStage(currentStage, scenarioId);
+  const safeStage = customContext ? limitText(currentStage, 80) : normalizeSelectDialogueStage(currentStage, scenarioId);
+  const safeCustomContext = sanitizeCustomDialogueContext(customContext);
   const cleanHistory = Array.isArray(history)
     ? history
         .filter((item) => item && typeof item.text === "string" && (item.role === "user" || item.role === "assistant"))
@@ -1482,11 +1608,22 @@ function buildSelectDialoguePrompt(message, history, targetLanguage = "english",
     "Return compact JSON only. No Markdown. No extra text.",
     'Required shape: {"turnType":"dialogue","aiMessage":"","replyOptions":["","",""],"replyOptionMeanings":["","",""],"stage":""}',
     'turnType must be either "dialogue" or "study-question".',
-    `Scenario: ${scenario.label}.`,
-    `AI role: ${scenario.aiRole}. Act as this real person, not as a teacher, grammar explainer, exam app, or chatbot.`,
-    `Stage flow: ${scenario.stages.join(" -> ")}.`,
-    safeStage ? `Current stage: ${safeStage}. Continue naturally from here and move forward only when it feels realistic.` : "Current stage: start at the first stage.",
-    `Scenario details: ${scenario.details}`,
+    safeCustomContext
+      ? [
+          `Scenario: ${safeCustomContext.scenarioName}.`,
+          `Learner role: ${safeCustomContext.roleA}. The learner's selected reply should speak as this role.`,
+          `AI role: ${safeCustomContext.roleB}. Act as this real person, not as a teacher, grammar explainer, exam app, or chatbot.`,
+          safeStage ? `Current stage/context: ${safeStage}. Continue naturally from here.` : "Current stage/context: continue from the existing custom conversation.",
+          safeCustomContext.sourceDialogue ? `Original Chinese scene context:\n${safeCustomContext.sourceDialogue}` : "",
+          "Custom scenario rules: preserve the roles, goal, and context of this user-created scene. Do not restart from a generic built-in scenario.",
+        ].filter(Boolean).join("\n")
+      : [
+          `Scenario: ${scenario.label}.`,
+          `AI role: ${scenario.aiRole}. Act as this real person, not as a teacher, grammar explainer, exam app, or chatbot.`,
+          `Stage flow: ${scenario.stages.join(" -> ")}.`,
+          safeStage ? `Current stage: ${safeStage}. Continue naturally from here and move forward only when it feels realistic.` : "Current stage: start at the first stage.",
+          `Scenario details: ${scenario.details}`,
+        ].join("\n"),
     selectDialogueDifficultyRules[difficultyId],
     "Difficulty should not be based mainly on word count. Difficulty should be based on vocabulary difficulty, sentence structure, naturalness, context depth, and professional detail. Even in advanced mode, keep the message conversational and concise. Advanced means more natural, precise, and realistic, not longer.",
     "Message type rules:",
@@ -1515,9 +1652,17 @@ function buildSelectDialoguePrompt(message, history, targetLanguage = "english",
     "replyOptionMeanings rules:",
     "1. Provide Simplified Chinese meanings matching replyOptions by index.",
     "2. Keep each meaning concise.",
-    "stage rules:",
-    "1. Return the current or next stage as exactly one value from the stage flow.",
-    "2. Do not invent stage names.",
+    customContext
+      ? [
+          "stage rules:",
+          "1. Return a short stage/context label for the current custom conversation moment.",
+          "2. Keep it concise and useful for restoring the conversation.",
+        ].join("\n")
+      : [
+          "stage rules:",
+          "1. Return the current or next stage as exactly one value from the stage flow.",
+          "2. Do not invent stage names.",
+        ].join("\n"),
     formatMemoryForPrompt(memoryProfile),
     cleanHistory ? `Recent conversation:\n${cleanHistory}` : "",
     isStart
@@ -2159,6 +2304,7 @@ function getAiReasoningEffort(mode) {
 function getAiMaxOutputTokens(mode) {
   if (mode === "memory") return Math.max(aiMaxOutputTokens, 1400);
   if (mode === "language-assistant") return Math.max(aiMaxOutputTokens, 1200);
+  if (mode === "custom-dialogue") return Math.max(aiMaxOutputTokens, 2200);
   return mode === "convert-language" ? aiConvertMaxOutputTokens : aiMaxOutputTokens;
 }
 
@@ -2175,6 +2321,9 @@ function buildAiInstructions(mode = "chat", targetLanguage = "english") {
   }
   if (mode === "language-assistant") {
     return `You are a compact mobile ${language.label} language assistant. Return valid compact JSON only with a results array. English must be natural, spoken, local, and directly usable. No Markdown, no prose outside JSON.`;
+  }
+  if (mode === "custom-dialogue") {
+    return `You create natural spoken American ${language.label} custom scene dialogues for a Chinese learner. Return valid compact JSON only with title, stage, messages, and replyOptions. Do not translate line by line. No Markdown, no prose outside JSON.`;
   }
   if (mode === "select-dialogue") {
     return `You run a point-and-click spoken ${language.label} chat practice mode. Return valid compact JSON only with turnType, aiMessage, replyOptions, replyOptionMeanings, and stage. No Markdown, no labels outside JSON.`;

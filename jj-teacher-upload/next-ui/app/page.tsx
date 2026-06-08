@@ -7,7 +7,7 @@ import { speakEnglish } from '@/lib/speech'
 import { StarryBackground } from '@/components/starry-background'
 import { BottomNav } from '@/components/bottom-nav'
 import { SentenceCard } from '@/components/sentence-card'
-import { ScenesPage, type SavedDialogueRecord } from '@/components/scenes-page'
+import { ScenesPage, type CustomDialogueBuilderInput, type SavedDialogueRecord, type SavedDialogueCustomContext } from '@/components/scenes-page'
 import { TeacherPage, type TeacherQuickMode } from '@/components/teacher-page'
 import { LanguageAssistantPage, type AssistantMode, type LanguageAssistantResult } from '@/components/language-assistant-page'
 import { ExamPage, type ExamSourceItem } from '@/components/exam-page'
@@ -45,6 +45,7 @@ interface SelectDialogueState {
   stage: string
   replyOptions: string[]
   replyOptionMeanings: string[]
+  customContext: SavedDialogueCustomContext | null
 }
 
 interface AppUser {
@@ -70,8 +71,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 99
-const CURRENT_VERSION_NAME = 'free99'
+const CURRENT_VERSION_CODE = 100
+const CURRENT_VERSION_NAME = 'free100'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const ALLOWED_APP_EMAIL = '965800jay@gmail.com'
 const TARGET_LANGUAGE = 'english'
@@ -109,7 +110,8 @@ const DEFAULT_SELECT_DIALOGUE_STATE: SelectDialogueState = {
   difficulty: 'medium',
   stage: '',
   replyOptions: [],
-  replyOptionMeanings: []
+  replyOptionMeanings: [],
+  customContext: null
 }
 
 const DAILY_LINES = [
@@ -620,8 +622,31 @@ function normalizeSelectDialogueState(value: unknown): SelectDialogueState {
     difficulty: normalizeTeacherDifficulty(source.difficulty),
     stage: String(source.stage || '').replace(/\s+/g, ' ').trim().slice(0, 80),
     replyOptions,
-    replyOptionMeanings
+    replyOptionMeanings,
+    customContext: normalizeCustomDialogueContext(source.customContext)
   }
+}
+
+function normalizeCustomDialogueContext(value: unknown): SavedDialogueCustomContext | null {
+  const source = value && typeof value === 'object' ? value as Record<string, unknown> : {}
+  const scenarioName = String(source.scenarioName || source.title || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 80)
+  const roleA = String(source.roleA || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 40)
+  const roleB = String(source.roleB || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 40)
+  const sourceDialogue = String(source.sourceDialogue || source.chineseDialogue || '')
+    .trim()
+    .slice(0, 4000)
+
+  if (!scenarioName || !roleA || !roleB) return null
+  return { scenarioName, roleA, roleB, sourceDialogue }
 }
 
 function normalizeSavedDialogueMessage(value: unknown, index = 0): SavedDialogueRecord['messages'][number] | null {
@@ -687,6 +712,7 @@ function normalizeSavedDialogueRecord(value: unknown, index = 0): SavedDialogueR
   const createdAt = typeof source.createdAt === 'number' ? source.createdAt : messages[0]?.createdAt || Date.now() + index
   const updatedAt = typeof source.updatedAt === 'number' ? source.updatedAt : messages[messages.length - 1]?.createdAt || createdAt
   const memory = source.memory && typeof source.memory === 'object' ? normalizeMemoryProfile(source.memory) : null
+  const customContext = normalizeCustomDialogueContext(source.customContext)
 
   return {
     id: String(source.id || makeId(`saved-dialogue-${index}`)),
@@ -706,7 +732,8 @@ function normalizeSavedDialogueRecord(value: unknown, index = 0): SavedDialogueR
       .replace(/\s+/g, ' ')
       .trim()
       .slice(0, 160),
-    messageCount: messages.length
+    messageCount: messages.length,
+    customContext
   }
 }
 
@@ -728,7 +755,8 @@ function buildSavedDialogueRecord({
   replyOptions,
   replyOptionMeanings,
   memoryProfile,
-  messageMeanings = {}
+  messageMeanings = {},
+  customContext = null
 }: {
   id: string
   existing?: SavedDialogueRecord
@@ -740,6 +768,7 @@ function buildSavedDialogueRecord({
   replyOptionMeanings: string[]
   memoryProfile: TutorMemoryProfile
   messageMeanings?: Record<string, string>
+  customContext?: SavedDialogueCustomContext | null
 }): SavedDialogueRecord | null {
   const existingMeanings = new Map(existing?.messages.map((message) => [message.id, message.chinese]) || [])
   const messages = sourceMessages
@@ -779,8 +808,25 @@ function buildSavedDialogueRecord({
     createdAt: existing?.createdAt || messages[0]?.createdAt || updatedAt,
     updatedAt,
     lastMessagePreview: messages[messages.length - 1]?.english.replace(/\s+/g, ' ').trim().slice(0, 160) || '',
-    messageCount: messages.length
+    messageCount: messages.length,
+    customContext: customContext ? normalizeCustomDialogueContext(customContext) : existing?.customContext || null
   }
+}
+
+function inferCustomTeacherScenarioId(value: string): TeacherScenarioId {
+  const text = value.toLowerCase()
+  if (/(美发|理发|发型|剪发|烫发|染发|hair|barber|salon)/iu.test(text)) return 'hair-client'
+  if (/(预约|客户|沟通|appointment|booking|client|customer)/iu.test(text)) return 'appointment'
+  if (/(餐厅|点餐|服务员|restaurant|food|order)/iu.test(text)) return 'restaurant'
+  if (/(咖啡|coffee|barista)/iu.test(text)) return 'coffee-shop'
+  if (/(购物|店员|试穿|尺码|shopping|store)/iu.test(text)) return 'shopping'
+  if (/(健身|训练|gym|fitness|workout)/iu.test(text)) return 'gym'
+  if (/(旅行|机场|酒店|交通|travel|airport|hotel)/iu.test(text)) return 'travel'
+  if (/(工作|会议|同事|work|meeting|coworker)/iu.test(text)) return 'work'
+  if (/(租房|房东|维修|rent|landlord)/iu.test(text)) return 'renting'
+  if (/(医疗|看病|医生|症状|medical|doctor)/iu.test(text)) return 'medical'
+  if (/(社交|朋友|聊天|friend|social|chat)/iu.test(text)) return 'social-chat'
+  return 'daily-life'
 }
 
 function buildCloudPayload(
@@ -857,6 +903,7 @@ export default function ZhiyuApp() {
   const [selectSceneId, setSelectSceneId] = useState<TeacherScenarioId>(DEFAULT_SELECT_DIALOGUE_STATE.sceneId)
   const [selectDifficulty, setSelectDifficulty] = useState<TeacherDifficulty>(DEFAULT_SELECT_DIALOGUE_STATE.difficulty)
   const [selectDialogueStage, setSelectDialogueStage] = useState(DEFAULT_SELECT_DIALOGUE_STATE.stage)
+  const [selectCustomContext, setSelectCustomContext] = useState<SavedDialogueCustomContext | null>(DEFAULT_SELECT_DIALOGUE_STATE.customContext)
   const [savedDialogues, setSavedDialogues] = useState<SavedDialogueRecord[]>([])
   const [currentSelectRecordId, setCurrentSelectRecordId] = useState('')
   const [selectedSavedDialogueId, setSelectedSavedDialogueId] = useState<string | null>(null)
@@ -871,6 +918,7 @@ export default function ZhiyuApp() {
   const sentencesRef = useRef<SavedSentence[]>(sentences)
   const memoryProfileRef = useRef<TutorMemoryProfile>(memoryProfile)
   const currentSelectRecordIdRef = useRef(currentSelectRecordId)
+  const selectCustomContextRef = useRef<SavedDialogueCustomContext | null>(selectCustomContext)
   const selectDialogueRequestLockRef = useRef(false)
   const sentenceAiPreloadInFlightRef = useRef(new Set<string>())
   const translateTeacherTextRef = useRef<(text: string) => Promise<string>>(async () => '')
@@ -900,6 +948,10 @@ export default function ZhiyuApp() {
   useEffect(() => {
     currentSelectRecordIdRef.current = currentSelectRecordId
   }, [currentSelectRecordId])
+
+  useEffect(() => {
+    selectCustomContextRef.current = selectCustomContext
+  }, [selectCustomContext])
 
   useEffect(() => {
     const storedSentences = readFirstJson<SavedSentence[]>([languageKey(SENTENCES_KEY), SENTENCES_KEY], [])
@@ -933,6 +985,7 @@ export default function ZhiyuApp() {
     setSelectDialogueStage(storedSelectState.stage)
     setSelectReplyOptions(storedSelectState.replyOptions)
     setSelectReplyMeanings(storedSelectState.replyOptionMeanings)
+    setSelectCustomContext(storedSelectState.customContext)
     if (storedSelectState.replyOptions.length || storedMessages.some((message) => message.mode === 'select-dialogue')) {
       setTeacherMode('select')
     }
@@ -1004,9 +1057,10 @@ export default function ZhiyuApp() {
       difficulty: selectDifficulty,
       stage: selectDialogueStage,
       replyOptions: selectReplyOptions,
-      replyOptionMeanings: selectReplyMeanings
+      replyOptionMeanings: selectReplyMeanings,
+      customContext: selectCustomContext
     })
-  }, [hydrated, selectSceneId, selectDifficulty, selectDialogueStage, selectReplyOptions, selectReplyMeanings])
+  }, [hydrated, selectSceneId, selectDifficulty, selectDialogueStage, selectReplyOptions, selectReplyMeanings, selectCustomContext])
 
   useEffect(() => {
     if (!hydrated || !hasStorage()) return
@@ -1300,6 +1354,104 @@ export default function ZhiyuApp() {
     }
   }, [])
 
+  const createCustomDialogueRecord = useCallback(async (input: CustomDialogueBuilderInput) => {
+    const scenarioName = input.scenarioName.replace(/\s+/g, ' ').trim()
+    const roleA = input.roleA.replace(/\s+/g, ' ').trim()
+    const roleB = input.roleB.replace(/\s+/g, ' ').trim()
+    const chineseDialogue = input.chineseDialogue.trim()
+    if (!scenarioName || !roleA || !roleB || !chineseDialogue) {
+      throw new Error('请填写场景名称、两个角色和中文对话。')
+    }
+
+    const data = await requestAiTeacher({
+      mode: 'custom-dialogue',
+      scenarioName,
+      roleA,
+      roleB,
+      chineseDialogue,
+      complete: input.complete
+    })
+    const rawMessages = Array.isArray(data.messages) ? data.messages : []
+    const now = Date.now()
+    const messages = rawMessages
+      .map((item: unknown, index: number) => {
+        const source = item && typeof item === 'object' ? item as Record<string, unknown> : {}
+        const english = String(source.english || source.text || '')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .slice(0, 800)
+        if (!english) return null
+        const speaker = String(source.speaker || '')
+          .replace(/\s+/g, ' ')
+          .trim()
+        const roleValue = String(source.role || '').trim().toLowerCase()
+        const role = roleValue === 'ai' || roleValue === 'assistant' || speaker === roleB ? 'ai' as const : 'user' as const
+        return {
+          id: makeId(`custom-dialogue-message-${index}`),
+          role,
+          english,
+          chinese: String(source.chinese || source.meaning || '')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .slice(0, 300),
+          createdAt: now + index
+        }
+      })
+      .filter(Boolean) as SavedDialogueRecord['messages']
+
+    if (messages.length < 2) throw new Error('生成失败，请重试。')
+
+    const rawReplyOptions = Array.isArray(data.replyOptions) ? data.replyOptions : []
+    const replyOptions = rawReplyOptions
+      .map((item: unknown) => {
+        if (typeof item === 'string') {
+          return { english: item.replace(/\s+/g, ' ').trim().slice(0, 180), chinese: '' }
+        }
+        const source = item && typeof item === 'object' ? item as Record<string, unknown> : {}
+        return {
+          english: String(source.english || source.text || '')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .slice(0, 180),
+          chinese: String(source.chinese || source.meaning || '')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .slice(0, 180)
+        }
+      })
+      .filter((option) => option.english)
+      .slice(0, 3)
+
+    const customContext: SavedDialogueCustomContext = {
+      scenarioName,
+      roleA,
+      roleB,
+      sourceDialogue: chineseDialogue
+    }
+    const record: SavedDialogueRecord = {
+      id: makeId('custom-record'),
+      title: scenarioName,
+      scenario: inferCustomTeacherScenarioId(`${scenarioName} ${roleA} ${roleB} ${chineseDialogue}`),
+      difficulty: 'medium',
+      messages,
+      replyOptions,
+      conversationStage: String(data.stage || (input.complete ? '完整场景' : '自定义场景'))
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 80),
+      memory: normalizeMemoryProfile(memoryProfileRef.current),
+      createdAt: now,
+      updatedAt: Date.now(),
+      lastMessagePreview: messages[messages.length - 1]?.english.replace(/\s+/g, ' ').trim().slice(0, 160) || '',
+      messageCount: messages.length,
+      customContext
+    }
+
+    setSavedDialogues((current) => [record, ...current.filter((item) => item.id !== record.id)])
+    showToast('已生成并保存到聊天记录')
+    return record
+  }, [showToast])
+
   const upsertSavedSelectDialogue = useCallback(({
     id,
     sourceMessages = messagesRef.current,
@@ -1310,6 +1462,7 @@ export default function ZhiyuApp() {
     replyOptionMeanings = selectReplyMeanings,
     memory = memoryProfileRef.current,
     messageMeanings,
+    customContext = selectCustomContextRef.current,
     notify = false
   }: {
     id?: string
@@ -1321,6 +1474,7 @@ export default function ZhiyuApp() {
     replyOptionMeanings?: string[]
     memory?: TutorMemoryProfile
     messageMeanings?: Record<string, string>
+    customContext?: SavedDialogueCustomContext | null
     notify?: boolean
   } = {}) => {
     const recordId = id || currentSelectRecordIdRef.current || makeId('select-record')
@@ -1345,7 +1499,8 @@ export default function ZhiyuApp() {
         replyOptions,
         replyOptionMeanings,
         memoryProfile: memory,
-        messageMeanings
+        messageMeanings,
+        customContext
       })
       if (!record) return current
       return [record, ...current.filter((item) => item.id !== recordId)]
@@ -1376,6 +1531,7 @@ export default function ZhiyuApp() {
       role: message.role === 'user' ? 'user' : 'assistant',
       text: message.english,
       mode: 'select-dialogue',
+      translation: message.chinese ? { sentence: message.english, note: message.chinese } : undefined,
       timestamp: message.createdAt || Date.now()
     }))
 
@@ -1384,6 +1540,7 @@ export default function ZhiyuApp() {
     setSelectSceneId(record.scenario)
     setSelectDifficulty(record.difficulty)
     setSelectDialogueStage(record.conversationStage)
+    setSelectCustomContext(record.customContext || null)
     setSelectReplyOptions(record.replyOptions.map((option) => option.english))
     setSelectReplyMeanings(record.replyOptions.map((option) => option.chinese))
     if (record.memory) setMemoryProfile(normalizeMemoryProfile(record.memory))
@@ -1691,6 +1848,7 @@ export default function ZhiyuApp() {
     setSelectReplyError('')
     setIsSelectReplyLoading(false)
     setSelectDialogueStage('')
+    setSelectCustomContext(null)
     selectRetryRef.current = null
   }, [])
 
@@ -1717,6 +1875,7 @@ export default function ZhiyuApp() {
     setSelectReplyOptions([])
     setSelectReplyMeanings([])
     setSelectDialogueStage('')
+    setSelectCustomContext(null)
     setIsSelectReplyLoading(true)
     setIsSending(true)
     selectRetryRef.current = {
@@ -1846,6 +2005,7 @@ export default function ZhiyuApp() {
         selectScene: requestSceneId,
         selectDifficulty: requestDifficulty,
         selectStage: currentStage,
+        customContext: selectCustomContextRef.current || undefined,
         memoryProfile: memoryProfileRef.current
       })
       const turn = normalizeSelectDialogueTurn(data as Record<string, unknown>, cleanText)
@@ -2550,6 +2710,7 @@ export default function ZhiyuApp() {
             onStartExam={startSavedDialogueExam}
             onAddSentence={handleAddSentence}
             onTranslateText={translateTeacherText}
+            onGenerateCustomDialogue={createCustomDialogueRecord}
           />
         ) : activeTab === 'assistant' ? (
           <LanguageAssistantPage

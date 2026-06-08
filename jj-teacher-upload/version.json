@@ -1,6 +1,6 @@
 {
-  "versionCode": 99,
-  "versionName": "free99",
-  "apkUrl": "https://jj-teacher.onrender.com/zhiyu-tutor-free99-sentence-ai-explain-preload-debug.apk",
-  "notes": "free99: 句读 AI 解答改用语言助手同款结构化卡片，并为句读列表后台预加载句子解释。"
+  "versionCode": 100,
+  "versionName": "free100",
+  "apkUrl": "https://jj-teacher.onrender.com/zhiyu-tutor-free100-custom-dialogue-builder-debug.apk",
+  "notes": "free100: 记录页新增自定义场景对话，可用中文写场景、AI 生成或补全自然美式英文对话，并自动保存为可继续练习的聊天记录。"
 }
