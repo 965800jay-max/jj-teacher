@@ -1,6 +1,6 @@
 {
-  "versionCode": 101,
-  "versionName": "free101",
-  "apkUrl": "https://jj-teacher.onrender.com/zhiyu-tutor-free101-study-answer-word-lookup-debug.apk",
-  "notes": "free101: 点选对话里的学习提问/学习解答支持点击英文单词朗读，并弹出和正常句子一致的单词释义、例句、加入生词本和加入句读功能。"
+  "versionCode": 102,
+  "versionName": "free102",
+  "apkUrl": "https://jj-teacher.onrender.com/zhiyu-tutor-free102-vocab-test-example-switch-debug.apk",
+  "notes": "free102: 生词本新增三选一单词考试，并给每个生词例句增加“换一句”功能，可用 AI 生成新的自然例句和中文意思。"
 }

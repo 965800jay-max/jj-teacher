@@ -71,8 +71,14 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 101
-const CURRENT_VERSION_NAME = 'free101'
+interface VocabExamQuestion {
+  id: string
+  target: VocabBookItem
+  choices: VocabBookItem[]
+}
+
+const CURRENT_VERSION_CODE = 102
+const CURRENT_VERSION_NAME = 'free102'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const ALLOWED_APP_EMAIL = '965800jay@gmail.com'
 const TARGET_LANGUAGE = 'english'
@@ -829,6 +835,46 @@ function inferCustomTeacherScenarioId(value: string): TeacherScenarioId {
   return 'daily-life'
 }
 
+function shuffleItems<T>(items: T[]) {
+  const next = [...items]
+  for (let index = next.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1))
+    const item = next[index]
+    next[index] = next[swapIndex]
+    next[swapIndex] = item
+  }
+  return next
+}
+
+function uniqueVocabItems(items: VocabBookItem[]) {
+  const seen = new Set<string>()
+  const result: VocabBookItem[] = []
+  items.forEach((item) => {
+    const key = item.word.trim().toLowerCase()
+    if (!key || seen.has(key)) return
+    seen.add(key)
+    result.push(item)
+  })
+  return result
+}
+
+function buildVocabExamQuestions(sourceItems: VocabBookItem[], allItems: VocabBookItem[]) {
+  const pool = uniqueVocabItems(allItems)
+  if (pool.length < 3) return []
+
+  return shuffleItems(uniqueVocabItems(sourceItems))
+    .map((target, index): VocabExamQuestion | null => {
+      const distractors = shuffleItems(pool.filter((item) => item.word !== target.word)).slice(0, 2)
+      if (distractors.length < 2) return null
+      return {
+        id: `${target.word}-${index}`,
+        target,
+        choices: shuffleItems([target, ...distractors])
+      }
+    })
+    .filter(Boolean) as VocabExamQuestion[]
+}
+
 function buildCloudPayload(
   sentences: SavedSentence[],
   messages: TeacherMessage[],
@@ -890,6 +936,13 @@ export default function ZhiyuApp() {
 
   const [sentences, setSentences] = useState<SavedSentence[]>(initialSentences)
   const [vocabBook, setVocabBook] = useState<VocabBookItem[]>([])
+  const [vocabExamActive, setVocabExamActive] = useState(false)
+  const [vocabExamQuestions, setVocabExamQuestions] = useState<VocabExamQuestion[]>([])
+  const [vocabExamIndex, setVocabExamIndex] = useState(0)
+  const [vocabExamSelected, setVocabExamSelected] = useState('')
+  const [vocabExamCorrectCount, setVocabExamCorrectCount] = useState(0)
+  const [vocabExampleOverrides, setVocabExampleOverrides] = useState<Record<string, { example: string; exampleZh: string }>>({})
+  const [vocabExampleLoadingWord, setVocabExampleLoadingWord] = useState('')
   const [messages, setMessages] = useState<TeacherMessage[]>([])
   const [memoryProfile, setMemoryProfile] = useState<TutorMemoryProfile>(() => defaultMemoryProfile())
   const [speechRate, setSpeechRate] = useState(1)
@@ -1337,6 +1390,10 @@ export default function ZhiyuApp() {
     return vocabBook.filter((item) => [item.word, item.phonetic, item.meaning, item.example, item.exampleZh].join(' ').toLowerCase().includes(query))
   }, [vocabBook, searchQuery])
 
+  const canStartVocabExam = vocabBook.length >= 3 && filteredVocabBook.length > 0
+  const currentVocabExamQuestion = vocabExamQuestions[vocabExamIndex] || null
+  const isVocabExamComplete = vocabExamActive && vocabExamQuestions.length > 0 && vocabExamIndex >= vocabExamQuestions.length
+
   const canSaveSelectDialogue = useMemo(
     () => messages.some((message) => message.mode === 'select-dialogue' && !message.pending && message.text.trim()),
     [messages]
@@ -1347,6 +1404,70 @@ export default function ZhiyuApp() {
     setToastMessage(message)
     toastTimerRef.current = setTimeout(() => setToastMessage(''), 1800)
   }, [])
+
+  const startVocabExam = useCallback(() => {
+    if (vocabBook.length < 3) {
+      showToast('至少需要 3 个生词才能考试')
+      return
+    }
+
+    const questions = buildVocabExamQuestions(filteredVocabBook, vocabBook)
+    if (!questions.length) {
+      showToast('当前没有可考试的生词')
+      return
+    }
+
+    setVocabExamQuestions(questions)
+    setVocabExamIndex(0)
+    setVocabExamSelected('')
+    setVocabExamCorrectCount(0)
+    setVocabExamActive(true)
+  }, [filteredVocabBook, showToast, vocabBook])
+
+  const submitVocabExamAnswer = useCallback(() => {
+    const question = vocabExamQuestions[vocabExamIndex]
+    if (!question || !vocabExamSelected) return
+
+    const isCorrect = vocabExamSelected === question.target.word
+    if (isCorrect) {
+      setVocabExamCorrectCount((count) => count + 1)
+      showToast('答对了')
+    } else {
+      showToast(`正确答案：${question.target.word}`)
+    }
+
+    setVocabExamIndex((index) => index + 1)
+    setVocabExamSelected('')
+  }, [showToast, vocabExamIndex, vocabExamQuestions, vocabExamSelected])
+
+  const switchVocabExample = useCallback(async (item: VocabBookItem) => {
+    if (vocabExampleLoadingWord) return
+    const currentExample = vocabExampleOverrides[item.word]?.example || item.example
+    setVocabExampleLoadingWord(item.word)
+    try {
+      const data = await requestAiTeacher({
+        mode: 'vocab-example',
+        word: item.word,
+        meaning: item.meaning,
+        previousExample: currentExample
+      })
+      const example = String(data.english || data.example || '').replace(/\s+/g, ' ').trim()
+      const exampleZh = String(data.chinese || data.exampleZh || '').replace(/\s+/g, ' ').trim()
+      if (!example) throw new Error('生成失败，请重试')
+      setVocabExampleOverrides((current) => ({
+        ...current,
+        [item.word]: {
+          example: example.slice(0, 240),
+          exampleZh: exampleZh.slice(0, 240)
+        }
+      }))
+      showToast('已换一句')
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : '生成失败，请重试')
+    } finally {
+      setVocabExampleLoadingWord('')
+    }
+  }, [showToast, vocabExampleLoadingWord, vocabExampleOverrides])
 
   useEffect(() => {
     return () => {
@@ -2310,6 +2431,10 @@ export default function ZhiyuApp() {
         setShowFriends(false)
         return true
       }
+      if (vocabExamActive) {
+        setVocabExamActive(false)
+        return true
+      }
       if (activeTab === 'scenes' && selectedSavedDialogueId) {
         setSelectedSavedDialogueId(null)
         return true
@@ -2338,7 +2463,8 @@ export default function ZhiyuApp() {
     showExam,
     showFriends,
     showToast,
-    showUpdate
+    showUpdate,
+    vocabExamActive
   ])
 
   const getPageTitle = () => {
@@ -2586,50 +2712,190 @@ export default function ZhiyuApp() {
 
             {homeView === 'vocab' ? (
               <div id="vocabBookList" className="space-y-3">
-                {filteredVocabBook.length > 0 ? (
-                  filteredVocabBook.map((item, index) => (
-                    <div
-                      key={item.word}
-                      className="relative glass-card rounded-3xl p-5 overflow-hidden animate-slide-up"
-                      style={{ animationDelay: `${index * 40}ms` }}
-                    >
-                      <div className="inner-glow rounded-3xl" />
-                      <div className="top-highlight" />
-                      <div className="relative flex items-start justify-between gap-4">
-                        <div className="min-w-0">
-                          <h2 className="text-xl font-semibold text-white/95">{item.word}</h2>
-                          {item.phonetic && <p className="mt-1 text-sm text-white/40">/{item.phonetic}/</p>}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => speakEnglish(item.word, { mode: 'word', rate: speechRate })}
-                            className="w-10 h-10 rounded-2xl glass-button flex items-center justify-center text-white/60 hover:text-white transition-premium"
-                            aria-label="朗读单词"
-                          >
-                            <Volume2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => removeVocabBookItem(item.word)}
-                            className="w-10 h-10 rounded-2xl glass-button flex items-center justify-center text-white/45 hover:text-[oklch(0.70_0.22_25)] transition-premium"
-                            aria-label="移出生词本"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="relative mt-4 space-y-3">
-                        <p className="text-[15px] text-white/76 leading-relaxed">{item.meaning}</p>
-                        {item.example && (
-                          <div className="rounded-2xl border border-white/[0.06] bg-white/[0.035] px-4 py-3">
-                            <p className="text-sm text-white/72 leading-relaxed">{item.example}</p>
-                            {item.exampleZh && <p className="mt-2 text-xs text-white/42 leading-relaxed">{item.exampleZh}</p>}
-                          </div>
-                        )}
-                      </div>
+                <div className="relative glass-card rounded-3xl p-4 overflow-hidden animate-slide-up">
+                  <div className="inner-glow rounded-3xl" />
+                  <div className="relative flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[oklch(0.70_0.15_280)]">Vocab Test</p>
+                      <h2 className="mt-1 text-base font-semibold text-white/92">单词考试</h2>
+                      <p className="mt-1 text-xs text-white/38">
+                        看提示，从 3 个单词里选正确答案。
+                      </p>
                     </div>
-                  ))
+                    <button
+                      type="button"
+                      onClick={vocabExamActive ? () => setVocabExamActive(false) : startVocabExam}
+                      disabled={!vocabExamActive && !canStartVocabExam}
+                      className={cn(
+                        "shrink-0 h-10 rounded-2xl px-4 text-sm font-semibold transition-premium",
+                        vocabExamActive
+                          ? "glass-button text-white/72 hover:text-white"
+                          : canStartVocabExam
+                            ? "glass-button-primary"
+                            : "glass-button text-white/30"
+                      )}
+                    >
+                      {vocabExamActive ? '退出' : '开始考试'}
+                    </button>
+                  </div>
+                  {!canStartVocabExam && !vocabExamActive && (
+                    <p className="relative mt-3 rounded-2xl border border-white/[0.06] bg-white/[0.035] px-3 py-2 text-xs text-white/38">
+                      至少需要 3 个生词才能开始。
+                    </p>
+                  )}
+                </div>
+
+                {vocabExamActive && (
+                  <div id="vocabExamPanel" className="relative glass-card rounded-3xl p-5 overflow-hidden animate-slide-up">
+                    <div className="inner-glow rounded-3xl" />
+                    <div className="top-highlight" />
+                    {isVocabExamComplete ? (
+                      <div className="relative text-center py-4">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[oklch(0.70_0.15_280)]">Finished</p>
+                        <h2 className="mt-2 text-2xl font-semibold text-white/95">
+                          {vocabExamCorrectCount} / {vocabExamQuestions.length}
+                        </h2>
+                        <p className="mt-2 text-sm text-white/45">这轮单词考试完成了。</p>
+                        <div className="mt-5 grid grid-cols-2 gap-3">
+                          <button
+                            type="button"
+                            onClick={startVocabExam}
+                            className="h-11 rounded-2xl glass-button-primary text-sm font-semibold"
+                          >
+                            再来一轮
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setVocabExamActive(false)}
+                            className="h-11 rounded-2xl glass-button text-sm font-semibold text-white/65"
+                          >
+                            完成
+                          </button>
+                        </div>
+                      </div>
+                    ) : currentVocabExamQuestion ? (
+                      <div className="relative">
+                        <div className="mb-4 flex items-center justify-between gap-3">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[oklch(0.70_0.15_280)]">
+                            {vocabExamIndex + 1} / {vocabExamQuestions.length}
+                          </p>
+                          <p className="text-xs font-semibold text-white/35">三选一</p>
+                        </div>
+                        <div className="rounded-2xl border border-white/[0.06] bg-white/[0.035] px-4 py-3">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/35">中文提示</p>
+                          <p className="mt-2 text-[15px] leading-relaxed text-white/82">
+                            {currentVocabExamQuestion.target.meaning || currentVocabExamQuestion.target.exampleZh || '选择对应的英文单词'}
+                          </p>
+                          {currentVocabExamQuestion.target.exampleZh && (
+                            <p className="mt-2 text-xs leading-relaxed text-white/42">
+                              {currentVocabExamQuestion.target.exampleZh}
+                            </p>
+                          )}
+                        </div>
+                        <div className="mt-4 space-y-2">
+                          {currentVocabExamQuestion.choices.map((choice) => (
+                            <button
+                              key={choice.word}
+                              type="button"
+                              onClick={() => setVocabExamSelected(choice.word)}
+                              className={cn(
+                                "w-full min-h-12 rounded-2xl border px-4 py-3 text-left text-base font-semibold transition-premium",
+                                vocabExamSelected === choice.word
+                                  ? "border-[oklch(0.70_0.15_280_/_0.48)] bg-[oklch(0.70_0.15_280_/_0.18)] text-white shadow-[0_0_18px_oklch(0.70_0.15_280_/_0.16)]"
+                                  : "border-white/[0.07] bg-white/[0.035] text-white/70 hover:text-white"
+                              )}
+                            >
+                              {choice.word}
+                            </button>
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={submitVocabExamAnswer}
+                          disabled={!vocabExamSelected}
+                          className={cn(
+                            "mt-4 h-11 w-full rounded-2xl text-sm font-semibold transition-premium",
+                            vocabExamSelected ? "glass-button-primary" : "glass-button text-white/30"
+                          )}
+                        >
+                          提交
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                )}
+
+                {filteredVocabBook.length > 0 ? (
+                  filteredVocabBook.map((item, index) => {
+                    const displayExample = vocabExampleOverrides[item.word] || { example: item.example, exampleZh: item.exampleZh }
+                    return (
+                      <div
+                        key={item.word}
+                        className="relative glass-card rounded-3xl p-5 overflow-hidden animate-slide-up"
+                        style={{ animationDelay: `${index * 40}ms` }}
+                      >
+                        <div className="inner-glow rounded-3xl" />
+                        <div className="top-highlight" />
+                        <div className="relative flex items-start justify-between gap-4">
+                          <div className="min-w-0">
+                            <h2 className="text-xl font-semibold text-white/95">{item.word}</h2>
+                            {item.phonetic && <p className="mt-1 text-sm text-white/40">/{item.phonetic}/</p>}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => speakEnglish(item.word, { mode: 'word', rate: speechRate })}
+                              className="w-10 h-10 rounded-2xl glass-button flex items-center justify-center text-white/60 hover:text-white transition-premium"
+                              aria-label="朗读单词"
+                            >
+                              <Volume2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => removeVocabBookItem(item.word)}
+                              className="w-10 h-10 rounded-2xl glass-button flex items-center justify-center text-white/45 hover:text-[oklch(0.70_0.22_25)] transition-premium"
+                              aria-label="移出生词本"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="relative mt-4 space-y-3">
+                          <p className="text-[15px] text-white/76 leading-relaxed">{item.meaning}</p>
+                          <div className="rounded-2xl border border-white/[0.06] bg-white/[0.035] px-4 py-3">
+                            <div className="mb-2 flex items-center justify-between gap-3">
+                              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/35">Example</p>
+                              <div className="flex items-center gap-2">
+                                {displayExample.example && (
+                                  <button
+                                    type="button"
+                                    onClick={() => speakEnglish(displayExample.example, { mode: 'sentence', rate: speechRate })}
+                                    className="h-8 rounded-xl glass-button px-3 text-xs font-semibold text-white/60 hover:text-white transition-premium"
+                                  >
+                                    朗读
+                                  </button>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => switchVocabExample(item)}
+                                  disabled={Boolean(vocabExampleLoadingWord)}
+                                  className="h-8 rounded-xl glass-button px-3 text-xs font-semibold text-white/62 hover:text-white transition-premium disabled:opacity-40"
+                                >
+                                  {vocabExampleLoadingWord === item.word ? '生成中' : '换一句'}
+                                </button>
+                              </div>
+                            </div>
+                            {displayExample.example ? (
+                              <p className="text-sm text-white/72 leading-relaxed">{displayExample.example}</p>
+                            ) : (
+                              <p className="text-sm text-white/38 leading-relaxed">点击“换一句”生成一个新的自然例句。</p>
+                            )}
+                            {displayExample.exampleZh && <p className="mt-2 text-xs text-white/42 leading-relaxed">{displayExample.exampleZh}</p>}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })
                 ) : (
                   <div id="emptyVocabState" className="text-center py-20 animate-fade-in">
                     <div className="w-20 h-20 rounded-3xl glass-card mx-auto mb-6 flex items-center justify-center">

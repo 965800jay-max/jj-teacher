@@ -1088,6 +1088,43 @@ async function handleAiTeacher(request, response) {
     return;
   }
 
+  if (mode === "vocab-example") {
+    const word = limitText(payload.word || payload.phrase, 80).toLowerCase();
+    const meaning = limitText(payload.meaning, 240);
+    const previousExample = limitText(payload.previousExample || payload.example, 240);
+    if (!/^[a-z]+(?:[ '\-][a-z]+)*$/.test(word)) {
+      sendJson(response, 400, { error: "Invalid word", message: "单词无效" });
+      return;
+    }
+
+    const prompt = [
+      "Generate one new natural spoken American English example sentence for a Chinese learner.",
+      "Return compact JSON only. No Markdown. No extra text.",
+      'Required shape: {"english":"","chinese":""}',
+      "Rules:",
+      "1. Use the target word or phrase naturally in the English sentence.",
+      "2. Keep it short, spoken, local, and directly useful.",
+      "3. Avoid textbook tone, stiff wording, and translation-style English.",
+      "4. Do not reuse the previous example.",
+      "5. Provide a concise Simplified Chinese meaning of the whole sentence.",
+      `Target word or phrase: ${word}`,
+      meaning ? `Chinese meaning/context: ${meaning}` : "",
+      previousExample ? `Previous example to avoid: ${previousExample}` : "",
+    ].filter(Boolean).join("\n");
+
+    const raw = await askAiTeacher(prompt, mode, targetLanguage);
+    const data = extractJsonObject(raw) || {};
+    const english = String(data.english || data.example || "").replace(/\s+/g, " ").trim().slice(0, 220);
+    const chinese = String(data.chinese || data.exampleZh || data.meaning || "").replace(/\s+/g, " ").trim().slice(0, 220);
+    if (!english) {
+      sendJson(response, 502, { error: "No example returned", message: "生成失败，请重试" });
+      return;
+    }
+
+    sendJson(response, 200, { english, chinese });
+    return;
+  }
+
   if (mode === "custom-dialogue") {
     const scenarioName = limitText(payload.scenarioName || payload.title || payload.sceneName, 80);
     const roleA = limitText(payload.roleA || payload.userRole || payload.learnerRole, 40);
@@ -2305,6 +2342,7 @@ function getAiMaxOutputTokens(mode) {
   if (mode === "memory") return Math.max(aiMaxOutputTokens, 1400);
   if (mode === "language-assistant") return Math.max(aiMaxOutputTokens, 1200);
   if (mode === "custom-dialogue") return Math.max(aiMaxOutputTokens, 2200);
+  if (mode === "vocab-example") return Math.max(aiMaxOutputTokens, 500);
   return mode === "convert-language" ? aiConvertMaxOutputTokens : aiMaxOutputTokens;
 }
 
@@ -2321,6 +2359,9 @@ function buildAiInstructions(mode = "chat", targetLanguage = "english") {
   }
   if (mode === "language-assistant") {
     return `You are a compact mobile ${language.label} language assistant. Return valid compact JSON only with a results array. English must be natural, spoken, local, and directly usable. No Markdown, no prose outside JSON.`;
+  }
+  if (mode === "vocab-example") {
+    return `You generate one short natural spoken American ${language.label} example sentence for a vocabulary word. Return valid compact JSON only with english and chinese.`;
   }
   if (mode === "custom-dialogue") {
     return `You create natural spoken American ${language.label} custom scene dialogues for a Chinese learner. Return valid compact JSON only with title, stage, messages, and replyOptions. Do not translate line by line. No Markdown, no prose outside JSON.`;
