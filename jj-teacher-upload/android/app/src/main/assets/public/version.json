@@ -1,6 +1,6 @@
 {
-  "versionCode": 102,
-  "versionName": "free102",
-  "apkUrl": "https://files.catbox.moe/x2zidj.apk",
-  "notes": "free102: 生词本新增三选一单词考试，并给每个生词例句增加“换一句”功能，可用 AI 生成新的自然例句和中文意思。"
+  "versionCode": 103,
+  "versionName": "free103",
+  "apkUrl": "https://files.catbox.moe/smnxer.apk",
+  "notes": "free103: 生词本新增 AI 单词教练，支持进入单词详情页造句批改、继续追问、朗读例句并把自然表达加入句读。"
 }

@@ -1125,6 +1125,145 @@ async function handleAiTeacher(request, response) {
     return;
   }
 
+  if (mode === "vocab-coach-check") {
+    const word = limitText(payload.word || payload.phrase, 80).toLowerCase();
+    const phonetic = limitText(payload.phonetic, 120);
+    const meaning = limitText(payload.meaning, 300);
+    const example = limitText(payload.example, 300);
+    const exampleZh = limitText(payload.exampleZh, 300);
+    const sentence = limitText(payload.sentence || payload.message, 800);
+    if (!/^[a-z]+(?:[ '\-][a-z]+)*$/.test(word)) {
+      sendJson(response, 400, { error: "Invalid word", message: "单词无效" });
+      return;
+    }
+    if (!sentence) {
+      sendJson(response, 400, { error: "Sentence is required", message: "请输入句子" });
+      return;
+    }
+
+    const prompt = [
+      "You are an AI vocabulary coach for a Chinese learner of spoken American English.",
+      "Check the user's English sentence that tries to use the target word or phrase.",
+      "Return compact JSON only. No Markdown. No prose outside JSON.",
+      'Required shape: {"status":"correct|unnatural|incorrect","title":"","original":"","chinese":"","expressions":[{"english":"","chinese":""}],"explanation":"","usageTip":""}',
+      "Rules:",
+      "1. Judge grammar, whether the target word is used correctly, and whether the sentence sounds natural.",
+      "2. If it is wrong or unnatural, provide 1-3 more natural spoken American English expressions.",
+      "3. If it is correct, still provide a more casual or more natural option when useful.",
+      "4. Keep explanations short and clear in Simplified Chinese.",
+      "5. Avoid textbook English, translation-style English, and long lectures.",
+      "6. The expressions must be directly usable and include a Simplified Chinese meaning.",
+      `Target word or phrase: ${word}`,
+      phonetic ? `Phonetic: ${phonetic}` : "",
+      meaning ? `Chinese meaning/context: ${meaning}` : "",
+      example ? `Saved example: ${example}` : "",
+      exampleZh ? `Saved example Chinese: ${exampleZh}` : "",
+      `User sentence: ${sentence}`,
+    ].filter(Boolean).join("\n");
+
+    const raw = await askAiTeacher(prompt, mode, targetLanguage);
+    const data = extractJsonObject(raw) || {};
+    const statusRaw = String(data.status || data.result || "").trim().toLowerCase();
+    const status = /correct|right|good|准确|正确/.test(statusRaw)
+      ? "correct"
+      : /unnatural|awkward|不自然|生硬/.test(statusRaw)
+        ? "unnatural"
+        : "incorrect";
+    const expressionsSource = Array.isArray(data.expressions)
+      ? data.expressions
+      : Array.isArray(data.naturalExpressions)
+        ? data.naturalExpressions
+        : [];
+    const expressions = expressionsSource.map((item) => {
+      const source = item && typeof item === "object" ? item : {};
+      return {
+        english: String(source.english || source.text || source.sentence || item || "").replace(/\s+/g, " ").trim().slice(0, 260),
+        chinese: String(source.chinese || source.meaning || source.note || "").replace(/\s+/g, " ").trim().slice(0, 260),
+      };
+    }).filter((item) => item.english).slice(0, 4);
+
+    const fallbackExpression = String(data.natural || data.naturalExpression || data.better || data.corrected || "").replace(/\s+/g, " ").trim();
+    if (!expressions.length && fallbackExpression) {
+      expressions.push({
+        english: fallbackExpression.slice(0, 260),
+        chinese: String(data.chinese || data.meaning || "").replace(/\s+/g, " ").trim().slice(0, 260),
+      });
+    }
+
+    sendJson(response, 200, {
+      status,
+      title: String(data.title || data.resultText || "").replace(/\s+/g, " ").trim().slice(0, 120),
+      original: sentence,
+      chinese: String(data.chinese || data.meaning || "").replace(/\s+/g, " ").trim().slice(0, 260),
+      expressions,
+      explanation: String(data.explanation || data.reason || data.note || "").replace(/\s+/g, " ").trim().slice(0, 520),
+      usageTip: String(data.usageTip || data.suggestion || data.tip || "").replace(/\s+/g, " ").trim().slice(0, 360),
+    });
+    return;
+  }
+
+  if (mode === "vocab-coach-ask") {
+    const word = limitText(payload.word || payload.phrase, 80).toLowerCase();
+    const phonetic = limitText(payload.phonetic, 120);
+    const meaning = limitText(payload.meaning, 300);
+    const example = limitText(payload.example, 300);
+    const exampleZh = limitText(payload.exampleZh, 300);
+    const question = limitText(payload.question || payload.message, 1000);
+    const history = Array.isArray(payload.history) ? payload.history.slice(0, 4) : [];
+    if (!/^[a-z]+(?:[ '\-][a-z]+)*$/.test(word)) {
+      sendJson(response, 400, { error: "Invalid word", message: "单词无效" });
+      return;
+    }
+    if (!question) {
+      sendJson(response, 400, { error: "Question is required", message: "请输入问题" });
+      return;
+    }
+
+    const userUsesChinese = /[\u4e00-\u9fff]/.test(question);
+    const prompt = [
+      "You are an AI vocabulary coach for a mobile English-learning app.",
+      "Answer the user's follow-up question about the target word or phrase.",
+      "Return compact JSON only. No Markdown. No prose outside JSON.",
+      'Required shape: {"answer":"","examples":[{"english":"","chinese":""}]}',
+      "Rules:",
+      "1. If the user asks in Chinese, answer in Simplified Chinese. If the user asks in English, answer in English.",
+      "2. Be concise, clear, and useful for an English learner.",
+      "3. Do not write a long lecture.",
+      "4. You may include 1-3 natural spoken American English examples with Chinese meanings.",
+      "5. Focus on helping the user actually use the word correctly.",
+      `Target word or phrase: ${word}`,
+      phonetic ? `Phonetic: ${phonetic}` : "",
+      meaning ? `Chinese meaning/context: ${meaning}` : "",
+      example ? `Saved example: ${example}` : "",
+      exampleZh ? `Saved example Chinese: ${exampleZh}` : "",
+      history.length ? `Recent practice history JSON: ${JSON.stringify(history).slice(0, 1600)}` : "",
+      `User question (${userUsesChinese ? "Chinese" : "English"}): ${question}`,
+    ].filter(Boolean).join("\n");
+
+    const raw = await askAiTeacher(prompt, mode, targetLanguage);
+    const data = extractJsonObject(raw) || {};
+    const examplesSource = Array.isArray(data.examples)
+      ? data.examples
+      : Array.isArray(data.sentences)
+        ? data.sentences
+        : [];
+    const examples = examplesSource.map((item) => {
+      const source = item && typeof item === "object" ? item : {};
+      return {
+        english: String(source.english || source.text || source.sentence || item || "").replace(/\s+/g, " ").trim().slice(0, 260),
+        chinese: String(source.chinese || source.meaning || source.note || "").replace(/\s+/g, " ").trim().slice(0, 260),
+      };
+    }).filter((item) => item.english).slice(0, 3);
+    const answer = String(data.answer || data.reply || data.explanation || "").replace(/\s+/g, " ").trim().slice(0, 900);
+    if (!answer) {
+      sendJson(response, 502, { error: "No answer returned", message: "生成失败，请重试" });
+      return;
+    }
+
+    sendJson(response, 200, { answer, examples });
+    return;
+  }
+
   if (mode === "custom-dialogue") {
     const scenarioName = limitText(payload.scenarioName || payload.title || payload.sceneName, 80);
     const roleA = limitText(payload.roleA || payload.userRole || payload.learnerRole, 40);
@@ -2343,6 +2482,8 @@ function getAiMaxOutputTokens(mode) {
   if (mode === "language-assistant") return Math.max(aiMaxOutputTokens, 1200);
   if (mode === "custom-dialogue") return Math.max(aiMaxOutputTokens, 2200);
   if (mode === "vocab-example") return Math.max(aiMaxOutputTokens, 500);
+  if (mode === "vocab-coach-check") return Math.max(aiMaxOutputTokens, 900);
+  if (mode === "vocab-coach-ask") return Math.max(aiMaxOutputTokens, 900);
   return mode === "convert-language" ? aiConvertMaxOutputTokens : aiMaxOutputTokens;
 }
 
@@ -2362,6 +2503,12 @@ function buildAiInstructions(mode = "chat", targetLanguage = "english") {
   }
   if (mode === "vocab-example") {
     return `You generate one short natural spoken American ${language.label} example sentence for a vocabulary word. Return valid compact JSON only with english and chinese.`;
+  }
+  if (mode === "vocab-coach-check") {
+    return `You are a concise ${language.label} vocabulary coach. Check one user sentence using a target word. Return valid compact JSON only with status, title, original, chinese, expressions, explanation, and usageTip.`;
+  }
+  if (mode === "vocab-coach-ask") {
+    return `You are a concise ${language.label} vocabulary coach. Answer one follow-up question about a target word. Return valid compact JSON only with answer and examples.`;
   }
   if (mode === "custom-dialogue") {
     return `You create natural spoken American ${language.label} custom scene dialogues for a Chinese learner. Return valid compact JSON only with title, stage, messages, and replyOptions. Do not translate line by line. No Markdown, no prose outside JSON.`;
