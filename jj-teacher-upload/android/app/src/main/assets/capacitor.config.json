@@ -1,7 +1,7 @@
 {
 	"appId": "com.sentencereader.app",
-	"appName": "JJ老师",
-	"webDir": "www",
+	"appName": "智语导师",
+	"webDir": "next-ui/out",
 	"server": {
 		"androidScheme": "https"
 	}
