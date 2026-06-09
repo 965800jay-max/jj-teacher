@@ -71,8 +71,8 @@ interface UpdateInfo {
   notes: string
 }
 
-const CURRENT_VERSION_CODE = 100
-const CURRENT_VERSION_NAME = 'free100'
+const CURRENT_VERSION_CODE = 101
+const CURRENT_VERSION_NAME = 'free101'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const ALLOWED_APP_EMAIL = '965800jay@gmail.com'
 const TARGET_LANGUAGE = 'english'

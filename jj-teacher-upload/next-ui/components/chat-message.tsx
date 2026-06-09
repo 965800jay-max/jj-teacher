@@ -506,6 +506,30 @@ export function ChatMessage({
 
   const parsed = parseContent()
 
+  const renderStudySpeakableText = (text: string) => {
+    const lines = String(text || '').split(/\n/)
+    return (
+      <span className="block">
+        {lines.map((line, index) => {
+          if (!line.trim()) return <span key={index} className="block h-2" />
+          return (
+            <span key={index} className={cn('block', index > 0 && 'mt-1.5')}>
+              <SpeakableText
+                text={line}
+                rate={0.9}
+                wordClassName={cn(
+                  'font-semibold',
+                  isUser ? 'text-white/94' : 'text-white/90'
+                )}
+                punctuationClassName={isUser ? 'text-white/88' : 'text-white/82'}
+              />
+            </span>
+          )
+        })}
+      </span>
+    )
+  }
+
   if (isStudyMessage) {
     return (
       <div className={cn("flex animate-slide-up", isUser ? "justify-end" : "justify-start", messageGapClass, messageLayerClass)}>
@@ -522,7 +546,7 @@ export function ChatMessage({
             "border-[oklch(0.82_0.12_88_/_0.26)] bg-[oklch(0.82_0.12_88_/_0.09)]"
           )}>
             <p className="whitespace-pre-wrap text-[14px] font-medium leading-relaxed text-white/86">
-              {message.text}
+              {renderStudySpeakableText(message.text)}
             </p>
           </div>
         </div>

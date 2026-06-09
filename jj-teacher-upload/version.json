@@ -1,6 +1,6 @@
 {
-  "versionCode": 100,
-  "versionName": "free100",
-  "apkUrl": "https://jj-teacher.onrender.com/zhiyu-tutor-free100-custom-dialogue-builder-debug.apk",
-  "notes": "free100: 记录页新增自定义场景对话，可用中文写场景、AI 生成或补全自然美式英文对话，并自动保存为可继续练习的聊天记录。"
+  "versionCode": 101,
+  "versionName": "free101",
+  "apkUrl": "https://jj-teacher.onrender.com/zhiyu-tutor-free101-study-answer-word-lookup-debug.apk",
+  "notes": "free101: 点选对话里的学习提问/学习解答支持点击英文单词朗读，并弹出和正常句子一致的单词释义、例句、加入生词本和加入句读功能。"
 }
