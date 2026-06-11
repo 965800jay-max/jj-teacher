@@ -77,6 +77,11 @@ interface VocabExamQuestion {
   choices: VocabBookItem[]
 }
 
+interface VocabExamResult {
+  selected: string
+  isCorrect: boolean
+}
+
 interface VocabCoachExpression {
   english: string
   chinese: string
@@ -106,8 +111,8 @@ interface VocabCoachQuestionEntry {
 
 type VocabCoachEntry = VocabCoachCheckEntry | VocabCoachQuestionEntry
 
-const CURRENT_VERSION_CODE = 103
-const CURRENT_VERSION_NAME = 'free103'
+const CURRENT_VERSION_CODE = 104
+const CURRENT_VERSION_NAME = 'free104'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const ALLOWED_APP_EMAIL = '965800jay@gmail.com'
 const TARGET_LANGUAGE = 'english'
@@ -1046,6 +1051,7 @@ export default function ZhiyuApp() {
   const [vocabExamQuestions, setVocabExamQuestions] = useState<VocabExamQuestion[]>([])
   const [vocabExamIndex, setVocabExamIndex] = useState(0)
   const [vocabExamSelected, setVocabExamSelected] = useState('')
+  const [vocabExamResult, setVocabExamResult] = useState<VocabExamResult | null>(null)
   const [vocabExamCorrectCount, setVocabExamCorrectCount] = useState(0)
   const [vocabExampleOverrides, setVocabExampleOverrides] = useState<Record<string, { example: string; exampleZh: string }>>({})
   const [vocabExampleLoadingWord, setVocabExampleLoadingWord] = useState('')
@@ -1523,6 +1529,7 @@ export default function ZhiyuApp() {
   const canStartVocabExam = vocabBook.length >= 3 && filteredVocabBook.length > 0
   const currentVocabExamQuestion = vocabExamQuestions[vocabExamIndex] || null
   const isVocabExamComplete = vocabExamActive && vocabExamQuestions.length > 0 && vocabExamIndex >= vocabExamQuestions.length
+  const isLastVocabExamQuestion = vocabExamQuestions.length > 0 && vocabExamIndex >= vocabExamQuestions.length - 1
 
   const canSaveSelectDialogue = useMemo(
     () => messages.some((message) => message.mode === 'select-dialogue' && !message.pending && message.text.trim()),
@@ -1550,25 +1557,44 @@ export default function ZhiyuApp() {
     setVocabExamQuestions(questions)
     setVocabExamIndex(0)
     setVocabExamSelected('')
+    setVocabExamResult(null)
     setVocabExamCorrectCount(0)
     setVocabExamActive(true)
   }, [filteredVocabBook, showToast, vocabBook])
 
+  const stopVocabExam = useCallback(() => {
+    setVocabExamActive(false)
+    setVocabExamSelected('')
+    setVocabExamResult(null)
+  }, [])
+
   const submitVocabExamAnswer = useCallback(() => {
     const question = vocabExamQuestions[vocabExamIndex]
-    if (!question || !vocabExamSelected) return
+    if (!question || !vocabExamSelected || vocabExamResult) return
 
     const isCorrect = vocabExamSelected === question.target.word
     if (isCorrect) {
       setVocabExamCorrectCount((count) => count + 1)
-      showToast('答对了')
-    } else {
-      showToast(`正确答案：${question.target.word}`)
+    }
+
+    setVocabExamResult({
+      selected: vocabExamSelected,
+      isCorrect
+    })
+  }, [vocabExamIndex, vocabExamQuestions, vocabExamResult, vocabExamSelected])
+
+  const goToNextVocabExamQuestion = useCallback(() => {
+    if (!vocabExamResult) return
+
+    if (vocabExamIndex >= vocabExamQuestions.length - 1) {
+      stopVocabExam()
+      return
     }
 
     setVocabExamIndex((index) => index + 1)
     setVocabExamSelected('')
-  }, [showToast, vocabExamIndex, vocabExamQuestions, vocabExamSelected])
+    setVocabExamResult(null)
+  }, [stopVocabExam, vocabExamIndex, vocabExamQuestions.length, vocabExamResult])
 
   const switchVocabExample = useCallback(async (item: VocabBookItem) => {
     if (vocabExampleLoadingWord) return
@@ -2848,7 +2874,7 @@ export default function ZhiyuApp() {
           <FriendsPage friends={friends} onRefresh={() => loadFriends()} />
         ) : activeTab === 'sentences' ? (
           selectedVocabItem ? (
-            <section id="vocabDetailPage" className="px-4 py-3 flex-1 animate-fade-in space-y-4">
+            <section id="vocabDetailPage" className="px-4 py-3 flex-1 animate-fade-in space-y-3">
               <button
                 type="button"
                 onClick={closeVocabDetail}
@@ -2857,15 +2883,15 @@ export default function ZhiyuApp() {
                 ‹ 返回
               </button>
 
-              <div className="relative glass-card rounded-3xl p-5 overflow-hidden">
+              <div className="relative glass-card rounded-3xl p-4 overflow-hidden">
                 <div className="inner-glow rounded-3xl" />
                 <div className="top-highlight" />
                 <div className="relative flex items-start justify-between gap-4">
                   <div className="min-w-0">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[oklch(0.70_0.15_280)]">Word</p>
-                    <h2 className="mt-2 text-3xl font-semibold text-white/95">{selectedVocabItem.word}</h2>
+                    <h2 className="mt-1.5 text-3xl font-semibold text-white/95">{selectedVocabItem.word}</h2>
                     {selectedVocabItem.phonetic && <p className="mt-1 text-sm text-white/42">/{selectedVocabItem.phonetic}/</p>}
-                    <p className="mt-4 text-[15px] leading-relaxed text-white/76">{selectedVocabItem.meaning || '中文释义待补充'}</p>
+                    <p className="mt-3 text-[15px] leading-relaxed text-white/76">{selectedVocabItem.meaning || '中文释义待补充'}</p>
                   </div>
                   <button
                     type="button"
@@ -2878,7 +2904,7 @@ export default function ZhiyuApp() {
                 </div>
               </div>
 
-              <div className="relative glass-card rounded-3xl p-5 overflow-hidden">
+              <div className="relative glass-card rounded-3xl p-4 overflow-hidden">
                 <div className="inner-glow rounded-3xl" />
                 <div className="relative">
                   <div className="mb-3 flex items-center justify-between gap-3">
@@ -2919,18 +2945,21 @@ export default function ZhiyuApp() {
                 </div>
               </div>
 
-              <div className="relative glass-card rounded-3xl p-5 overflow-hidden">
+              <div className="relative glass-card rounded-3xl p-4 overflow-hidden">
                 <div className="inner-glow rounded-3xl" />
                 <div className="relative space-y-3">
                   <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[oklch(0.70_0.15_280)]">Practice</p>
-                    <h3 className="mt-1 text-base font-semibold text-white/90">造句练习</h3>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[oklch(0.70_0.15_280)]">AI Word Coach</p>
+                    <h3 className="mt-1 text-base font-semibold text-white/90">AI单词教练</h3>
+                    <p className="mt-1 text-xs leading-relaxed text-white/40">
+                      用这个单词造一句英文，AI会帮你判断是否正确、自然，并给你更地道的说法。
+                    </p>
                   </div>
                   <textarea
                     value={vocabCoachSentence}
                     onChange={(event) => setVocabCoachSentence(event.target.value)}
-                    placeholder="用这个单词造一个英文句子..."
-                    className="min-h-[104px] w-full resize-none rounded-2xl border border-white/[0.07] bg-black/25 px-4 py-3 text-[15px] leading-relaxed text-white/86 outline-none placeholder:text-white/28 focus:border-[oklch(0.70_0.15_280_/_0.45)]"
+                    placeholder={`用 ${selectedVocabItem.word} 造一个英文句子...`}
+                    className="min-h-[88px] w-full resize-none rounded-2xl border border-white/[0.07] bg-black/25 px-4 py-3 text-[15px] leading-relaxed text-white/86 outline-none placeholder:text-white/28 focus:border-[oklch(0.70_0.15_280_/_0.45)]"
                   />
                   <button
                     type="button"
@@ -2946,40 +2975,13 @@ export default function ZhiyuApp() {
                 </div>
               </div>
 
-              <div className="relative glass-card rounded-3xl p-5 overflow-hidden">
-                <div className="inner-glow rounded-3xl" />
-                <div className="relative space-y-3">
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[oklch(0.70_0.15_280)]">Ask More</p>
-                    <h3 className="mt-1 text-base font-semibold text-white/90">继续提问</h3>
-                  </div>
-                  <textarea
-                    value={vocabCoachQuestion}
-                    onChange={(event) => setVocabCoachQuestion(event.target.value)}
-                    placeholder="继续问这个单词的问题..."
-                    className="min-h-[88px] w-full resize-none rounded-2xl border border-white/[0.07] bg-black/25 px-4 py-3 text-sm leading-relaxed text-white/86 outline-none placeholder:text-white/28 focus:border-[oklch(0.70_0.15_280_/_0.45)]"
-                  />
-                  <button
-                    type="button"
-                    onClick={askVocabCoachQuestion}
-                    disabled={vocabCoachQuestionLoading || !vocabCoachQuestion.trim()}
-                    className={cn(
-                      "h-10 w-full rounded-2xl text-sm font-semibold transition-premium",
-                      vocabCoachQuestionLoading || !vocabCoachQuestion.trim() ? "glass-button text-white/30" : "glass-button-primary"
-                    )}
-                  >
-                    {vocabCoachQuestionLoading ? 'AI 回答中...' : '继续问 AI'}
-                  </button>
-                </div>
-              </div>
-
+              {selectedVocabCoachEntries.length > 0 && (
               <div className="space-y-3">
                 <div className="px-1">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[oklch(0.70_0.15_280)]">Coach Result</p>
                   <h3 className="mt-1 text-base font-semibold text-white/90">AI 批改结果</h3>
                 </div>
-                {selectedVocabCoachEntries.length > 0 ? (
-                  selectedVocabCoachEntries.map((entry) => (
+                {selectedVocabCoachEntries.slice(0, 1).map((entry) => (
                     <div key={entry.id} className="relative glass-card rounded-3xl p-5 overflow-hidden">
                       <div className="inner-glow rounded-3xl" />
                       <div className="relative space-y-3">
@@ -3086,16 +3088,60 @@ export default function ZhiyuApp() {
                         )}
                       </div>
                     </div>
-                  ))
-                ) : (
-                  <div className="relative glass-card rounded-3xl p-6 text-center overflow-hidden">
-                    <div className="inner-glow rounded-3xl" />
-                    <p className="relative text-sm leading-relaxed text-white/42">
-                      用这个单词造一句英文，AI 会帮你判断是否正确、自然，并给你更地道的说法。
-                    </p>
-                  </div>
+                ))}
+                {selectedVocabCoachEntries.length > 1 && (
+                  <details className="relative glass-card rounded-3xl p-4 overflow-hidden">
+                    <summary className="relative cursor-pointer text-sm font-semibold text-white/58">
+                      最近练习 {selectedVocabCoachEntries.length - 1}
+                    </summary>
+                    <div className="relative mt-3 space-y-2">
+                      {selectedVocabCoachEntries.slice(1).map((entry) => (
+                        <div key={`history-${entry.id}`} className="rounded-2xl border border-white/[0.06] bg-white/[0.03] px-4 py-3">
+                          {entry.type === 'check' ? (
+                            <>
+                              <p className="text-xs font-semibold text-white/38">你的句子</p>
+                              <p className="mt-1 text-sm leading-relaxed text-white/72">{entry.userSentence}</p>
+                              <p className="mt-2 text-xs leading-relaxed text-white/45">{entry.title}</p>
+                            </>
+                          ) : (
+                            <>
+                              <p className="text-xs font-semibold text-white/38">追问</p>
+                              <p className="mt-1 text-sm leading-relaxed text-white/72">{entry.question}</p>
+                              <p className="mt-2 text-xs leading-relaxed text-white/45">{entry.answer}</p>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </details>
                 )}
+                <div className="relative glass-card rounded-3xl p-4 overflow-hidden">
+                  <div className="inner-glow rounded-3xl" />
+                  <div className="relative space-y-3">
+                    <p className="text-xs font-semibold text-white/52">继续问这个单词的问题</p>
+                    <div className="flex items-end gap-2">
+                      <textarea
+                        value={vocabCoachQuestion}
+                        onChange={(event) => setVocabCoachQuestion(event.target.value)}
+                        placeholder={`为什么这里不能用 ${selectedVocabItem.word}？`}
+                        className="min-h-[48px] flex-1 resize-none rounded-2xl border border-white/[0.07] bg-black/25 px-4 py-3 text-sm leading-relaxed text-white/86 outline-none placeholder:text-white/28 focus:border-[oklch(0.70_0.15_280_/_0.45)]"
+                      />
+                      <button
+                        type="button"
+                        onClick={askVocabCoachQuestion}
+                        disabled={vocabCoachQuestionLoading || !vocabCoachQuestion.trim()}
+                        className={cn(
+                          "h-12 shrink-0 rounded-2xl px-4 text-sm font-semibold transition-premium",
+                          vocabCoachQuestionLoading || !vocabCoachQuestion.trim() ? "glass-button text-white/30" : "glass-button-primary"
+                        )}
+                      >
+                        {vocabCoachQuestionLoading ? '发送中' : '发送'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
+              )}
             </section>
           ) : (
           <section id="sentencesPage" className="px-4 py-3 flex-1 animate-fade-in">
@@ -3212,7 +3258,7 @@ export default function ZhiyuApp() {
                     </div>
                     <button
                       type="button"
-                      onClick={vocabExamActive ? () => setVocabExamActive(false) : startVocabExam}
+                      onClick={vocabExamActive ? stopVocabExam : startVocabExam}
                       disabled={!vocabExamActive && !canStartVocabExam}
                       className={cn(
                         "shrink-0 h-10 rounded-2xl px-4 text-sm font-semibold transition-premium",
@@ -3234,7 +3280,17 @@ export default function ZhiyuApp() {
                 </div>
 
                 {vocabExamActive && (
-                  <div id="vocabExamPanel" className="relative glass-card rounded-3xl p-5 overflow-hidden animate-slide-up">
+                  <div
+                    id="vocabExamPanel"
+                    className={cn(
+                      "relative glass-card rounded-3xl p-5 overflow-hidden animate-slide-up transition-premium",
+                      vocabExamResult?.isCorrect
+                        ? "border-[oklch(0.76_0.18_145_/_0.34)] bg-[oklch(0.76_0.18_145_/_0.055)]"
+                        : vocabExamResult
+                          ? "border-[oklch(0.66_0.23_25_/_0.34)] bg-[oklch(0.66_0.23_25_/_0.055)]"
+                          : ""
+                    )}
+                  >
                     <div className="inner-glow rounded-3xl" />
                     <div className="top-highlight" />
                     {isVocabExamComplete ? (
@@ -3254,7 +3310,7 @@ export default function ZhiyuApp() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => setVocabExamActive(false)}
+                            onClick={stopVocabExam}
                             className="h-11 rounded-2xl glass-button text-sm font-semibold text-white/65"
                           >
                             完成
@@ -3281,32 +3337,70 @@ export default function ZhiyuApp() {
                           )}
                         </div>
                         <div className="mt-4 space-y-2">
-                          {currentVocabExamQuestion.choices.map((choice) => (
-                            <button
-                              key={choice.word}
-                              type="button"
-                              onClick={() => setVocabExamSelected(choice.word)}
-                              className={cn(
-                                "w-full min-h-12 rounded-2xl border px-4 py-3 text-left text-base font-semibold transition-premium",
-                                vocabExamSelected === choice.word
-                                  ? "border-[oklch(0.70_0.15_280_/_0.48)] bg-[oklch(0.70_0.15_280_/_0.18)] text-white shadow-[0_0_18px_oklch(0.70_0.15_280_/_0.16)]"
-                                  : "border-white/[0.07] bg-white/[0.035] text-white/70 hover:text-white"
-                              )}
-                            >
-                              {choice.word}
-                            </button>
-                          ))}
+                          {currentVocabExamQuestion.choices.map((choice) => {
+                            const isCorrectChoice = choice.word === currentVocabExamQuestion.target.word
+                            const isSelectedChoice = choice.word === vocabExamSelected
+                            const isWrongSelectedChoice = Boolean(vocabExamResult && isSelectedChoice && !isCorrectChoice)
+
+                            return (
+                              <button
+                                key={choice.word}
+                                type="button"
+                                onClick={() => {
+                                  if (!vocabExamResult) setVocabExamSelected(choice.word)
+                                }}
+                                disabled={Boolean(vocabExamResult)}
+                                className={cn(
+                                  "w-full min-h-12 rounded-2xl border px-4 py-3 text-left text-base font-semibold transition-premium disabled:cursor-default",
+                                  vocabExamResult
+                                    ? isCorrectChoice
+                                      ? "border-[oklch(0.76_0.18_145_/_0.55)] bg-[oklch(0.76_0.18_145_/_0.16)] text-[oklch(0.90_0.10_145)] shadow-[0_0_18px_oklch(0.76_0.18_145_/_0.14)]"
+                                      : isWrongSelectedChoice
+                                        ? "border-[oklch(0.66_0.23_25_/_0.55)] bg-[oklch(0.66_0.23_25_/_0.16)] text-[oklch(0.88_0.11_25)]"
+                                        : "border-white/[0.06] bg-white/[0.025] text-white/32"
+                                    : isSelectedChoice
+                                      ? "border-[oklch(0.70_0.15_280_/_0.48)] bg-[oklch(0.70_0.15_280_/_0.18)] text-white shadow-[0_0_18px_oklch(0.70_0.15_280_/_0.16)]"
+                                      : "border-white/[0.07] bg-white/[0.035] text-white/70 hover:text-white"
+                                )}
+                              >
+                                {choice.word}
+                              </button>
+                            )
+                          })}
                         </div>
+                        {vocabExamResult && (
+                          <div className={cn(
+                            "mt-4 rounded-2xl border px-4 py-4",
+                            vocabExamResult.isCorrect
+                              ? "border-[oklch(0.76_0.18_145_/_0.42)] bg-[oklch(0.76_0.18_145_/_0.10)]"
+                              : "border-[oklch(0.66_0.23_25_/_0.42)] bg-[oklch(0.66_0.23_25_/_0.10)]"
+                          )}>
+                            <p className={cn(
+                              "text-xl font-semibold",
+                              vocabExamResult.isCorrect ? "text-[oklch(0.84_0.15_145)]" : "text-[oklch(0.82_0.14_25)]"
+                            )}>
+                              {vocabExamResult.isCorrect ? '✅ 回答正确' : '❌ 回答错误'}
+                            </p>
+                            <p className="mt-3 text-sm font-semibold text-white/82">
+                              正确答案：{currentVocabExamQuestion.target.word}
+                            </p>
+                            {(currentVocabExamQuestion.target.meaning || currentVocabExamQuestion.target.exampleZh) && (
+                              <p className="mt-2 text-sm leading-relaxed text-white/58">
+                                {currentVocabExamQuestion.target.word} = {currentVocabExamQuestion.target.meaning || currentVocabExamQuestion.target.exampleZh}
+                              </p>
+                            )}
+                          </div>
+                        )}
                         <button
                           type="button"
-                          onClick={submitVocabExamAnswer}
-                          disabled={!vocabExamSelected}
+                          onClick={vocabExamResult ? goToNextVocabExamQuestion : submitVocabExamAnswer}
+                          disabled={!vocabExamResult && !vocabExamSelected}
                           className={cn(
                             "mt-4 h-11 w-full rounded-2xl text-sm font-semibold transition-premium",
-                            vocabExamSelected ? "glass-button-primary" : "glass-button text-white/30"
+                            vocabExamResult || vocabExamSelected ? "glass-button-primary" : "glass-button text-white/30"
                           )}
                         >
-                          提交
+                          {vocabExamResult ? (isLastVocabExamQuestion ? '完成考试' : '下一题') : '提交'}
                         </button>
                       </div>
                     ) : null}

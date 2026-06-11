@@ -1,6 +1,6 @@
 {
-  "versionCode": 103,
-  "versionName": "free103",
-  "apkUrl": "https://files.catbox.moe/smnxer.apk",
-  "notes": "free103: 生词本新增 AI 单词教练，支持进入单词详情页造句批改、继续追问、朗读例句并把自然表达加入句读。"
+  "versionCode": 104,
+  "versionName": "free104",
+  "apkUrl": "https://files.catbox.moe/zs3nus.apk",
+  "notes": "free104: 优化生词本单词考试反馈，答题后在题卡内显示对错和正确答案；压缩单词详情页，AI批改和继续追问改为提交后动态显示。"
 }
