@@ -201,7 +201,7 @@ export function SentenceCard({
       {/* 顶部光线 */}
       <div className="top-highlight" />
       
-      <div className="relative p-6">
+      <div className="relative p-5">
         {/* 英文句子 - 可点击单词，双击可修改 */}
         {isEditingText ? (
           <textarea
@@ -225,7 +225,7 @@ export function SentenceCard({
           />
         ) : (
           <div
-            className="text-lg text-white/95 leading-relaxed mb-4 font-medium"
+            className="text-[17px] text-white/95 leading-relaxed mb-3.5 font-semibold"
             onDoubleClick={openTextInput}
           >
             <SpeakableText text={text} rate={speechRate} onDoubleTap={openTextInput} />
@@ -252,11 +252,11 @@ export function SentenceCard({
             }}
             placeholder="点击添加中文意思"
             rows={1}
-            className="mb-6 block w-full min-h-[1.5rem] resize-none bg-transparent border-0 p-0 text-sm text-[oklch(0.70_0.15_280_/_0.7)] placeholder:text-[oklch(0.70_0.15_280_/_0.7)] outline-none leading-relaxed"
+            className="mb-5 block w-full min-h-[1.5rem] resize-none bg-transparent border-0 p-0 text-sm text-[oklch(0.70_0.15_280_/_0.7)] placeholder:text-[oklch(0.70_0.15_280_/_0.7)] outline-none leading-relaxed"
           />
         ) : (
           <p
-            className="text-sm text-[oklch(0.70_0.15_280_/_0.7)] mb-6 leading-relaxed"
+            className="text-sm text-[oklch(0.70_0.15_280_/_0.7)] mb-5 leading-relaxed"
             onDoubleClick={openNoteInput}
             onPointerUp={handleNotePointerUp}
           >
@@ -265,11 +265,11 @@ export function SentenceCard({
         )}
 
         {/* 操作按钮 */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <button
             onClick={handleSpeak}
             className={cn(
-              "flex items-center justify-center w-11 h-11 rounded-2xl glass-button text-white/60 hover:text-white transition-premium",
+              "flex items-center justify-center w-10 h-10 rounded-2xl glass-button text-white/60 hover:text-white transition-premium",
               isPlayClicked && "scale-90 brightness-125"
             )}
             aria-label="朗读整句"
@@ -283,7 +283,7 @@ export function SentenceCard({
           <button
             onClick={handleAiClick}
             className={cn(
-              "flex shrink-0 items-center gap-2 h-11 px-4 rounded-2xl text-sm font-semibold tracking-wide whitespace-nowrap transition-premium",
+              "flex shrink-0 items-center gap-2 h-10 px-3.5 rounded-2xl text-sm font-semibold tracking-wide whitespace-nowrap transition-premium",
               showAiExplain 
                 ? "glass-button-primary" 
                 : "glass-button text-white/60 hover:text-white/90",
@@ -302,7 +302,7 @@ export function SentenceCard({
           <button
             onClick={onToggleLearned}
             className={cn(
-              "flex items-center justify-center w-11 h-11 rounded-2xl transition-premium",
+              "flex items-center justify-center w-10 h-10 rounded-2xl transition-premium",
               learned 
                 ? "bg-[oklch(0.72_0.18_155_/_0.15)] border border-[oklch(0.72_0.18_155_/_0.3)] text-[oklch(0.80_0.18_155)]" 
                 : "glass-button text-white/45 hover:text-white/80"
@@ -322,7 +322,7 @@ export function SentenceCard({
               }
             }}
             className={cn(
-              "flex items-center justify-center w-11 h-11 rounded-2xl transition-premium",
+              "flex items-center justify-center w-10 h-10 rounded-2xl transition-premium",
               isDeleting 
                 ? "bg-[oklch(0.62_0.22_25_/_0.15)] border border-[oklch(0.62_0.22_25_/_0.3)] text-[oklch(0.70_0.22_25)]" 
                 : "glass-button text-white/45 hover:text-[oklch(0.70_0.22_25)]"

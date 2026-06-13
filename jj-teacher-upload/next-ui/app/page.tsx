@@ -112,8 +112,8 @@ interface VocabCoachQuestionEntry {
 
 type VocabCoachEntry = VocabCoachCheckEntry | VocabCoachQuestionEntry
 
-const CURRENT_VERSION_CODE = 105
-const CURRENT_VERSION_NAME = 'free105'
+const CURRENT_VERSION_CODE = 106
+const CURRENT_VERSION_NAME = 'free106'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const ALLOWED_APP_EMAIL = '965800jay@gmail.com'
 const TARGET_LANGUAGE = 'english'
@@ -1045,7 +1045,7 @@ export default function ZhiyuApp() {
   const [showAuth, setShowAuth] = useState(false)
   const [showUpdate, setShowUpdate] = useState(false)
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null)
-  const [appTheme, setAppTheme] = useState<AppTheme>('night')
+  const [appTheme, setAppTheme] = useState<AppTheme>('day')
   const [hydrated, setHydrated] = useState(false)
 
   const [sentences, setSentences] = useState<SavedSentence[]>(initialSentences)
@@ -1161,7 +1161,7 @@ export default function ZhiyuApp() {
     setSelectReplyOptions(storedSelectState.replyOptions)
     setSelectReplyMeanings(storedSelectState.replyOptionMeanings)
     setSelectCustomContext(storedSelectState.customContext)
-    setAppTheme(storedTheme === 'day' ? 'day' : 'night')
+    setAppTheme(storedTheme === 'night' ? 'night' : 'day')
     if (storedSelectState.replyOptions.length || storedMessages.some((message) => message.mode === 'select-dialogue')) {
       setTeacherMode('select')
     }
@@ -2744,14 +2744,14 @@ export default function ZhiyuApp() {
   ])
 
   const getPageTitle = () => {
-    if (showExam) return { title: examTitle, eyebrow: 'Keyword Test', icon: Sparkles }
-    if (showFriends) return { title: '好友', eyebrow: 'Community', icon: Users }
-    if (activeTab === 'sentences' && selectedVocabItem) return { title: '单词详情', eyebrow: 'AI Word Coach', icon: BookOpen }
+    if (showExam) return { title: examTitle, eyebrow: 'KEYWORD TEST', icon: Sparkles }
+    if (showFriends) return { title: '好友', eyebrow: 'COMMUNITY', icon: Users }
+    if (activeTab === 'sentences' && selectedVocabItem) return { title: '单词详情', eyebrow: 'AI WORD COACH', icon: BookOpen }
     switch (activeTab) {
-      case 'sentences': return { title: '句读', eyebrow: 'Sentence Reader', icon: BookText }
+      case 'sentences': return { title: '句读', eyebrow: 'SENTENCE READER', icon: BookText }
       case 'scenes': return { title: '聊天记录', eyebrow: 'SAVED CHATS', icon: MessagesSquare }
-      case 'assistant': return { title: '语言助手', eyebrow: 'Language Assistant', icon: Languages }
-      case 'teacher': return { title: '智语导师', eyebrow: 'AI Tutor', icon: MessageCircle }
+      case 'assistant': return { title: '语言助手', eyebrow: 'LANGUAGE ASSISTANT', icon: Languages }
+      case 'teacher': return { title: '智语导师', eyebrow: 'AI TUTOR', icon: MessageCircle }
     }
   }
 

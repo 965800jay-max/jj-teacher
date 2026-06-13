@@ -144,7 +144,7 @@ export function AssistantResultCard({
 
   return (
     <div
-      className="relative overflow-hidden rounded-[1.6rem] border border-white/[0.07] bg-white/[0.045] p-4 backdrop-blur-xl animate-slide-up"
+      className="relative overflow-hidden glass-card rounded-[1.55rem] p-4 animate-slide-up"
       style={{ animationDelay: `${index * 45}ms` }}
     >
       <div className="top-highlight" />
@@ -162,7 +162,7 @@ export function AssistantResultCard({
       {chinese && <p className="mt-3 text-sm leading-relaxed text-white/56">{chinese}</p>}
 
       {result.scene && (
-        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] px-3.5 py-3">
+          <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] px-3.5 py-3">
           <p className="mb-1 text-[11px] font-semibold tracking-[0.12em] text-[oklch(0.70_0.15_280_/_0.75)] uppercase">使用场景</p>
           <p className="text-sm leading-relaxed text-white/62">{result.scene}</p>
         </div>
@@ -325,7 +325,7 @@ export function LanguageAssistantPage({
         </div>
       </div>
 
-      <div className="relative rounded-[1.5rem] border border-white/[0.07] bg-white/[0.04] p-3 backdrop-blur-xl">
+      <div className="relative glass-card rounded-[1.5rem] p-3">
         <textarea
           id="languageAssistantInput"
           value={inputValue}
@@ -334,8 +334,8 @@ export function LanguageAssistantPage({
             if (error) setError('')
           }}
           placeholder={activeMode.placeholder}
-          rows={5}
-          className="min-h-[118px] w-full resize-none border-0 bg-transparent px-1 pb-9 pt-1 text-[15px] leading-relaxed text-white/92 outline-none placeholder:text-[oklch(0.70_0.15_280_/_0.48)]"
+          rows={4}
+          className="min-h-[108px] w-full resize-none border-0 bg-transparent px-1 pb-9 pt-1 text-[15px] leading-relaxed text-white/92 outline-none placeholder:text-[oklch(0.70_0.15_280_/_0.48)]"
         />
         <div className="absolute bottom-3 right-3 flex items-center gap-2">
           <button

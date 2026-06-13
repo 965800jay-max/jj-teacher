@@ -214,7 +214,7 @@ export function ScenesPage({
           返回记录
         </button>
 
-        <div className="mb-4 rounded-3xl border border-white/[0.07] bg-white/[0.035] p-4 backdrop-blur-xl">
+        <div className="mb-4 glass-card rounded-3xl p-4">
           <div className="mb-3 flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[oklch(0.70_0.15_280)]">
@@ -288,12 +288,11 @@ export function ScenesPage({
   }
 
   return (
-    <section id="chatRecordsPage" className="relative px-4 py-4 pb-28 animate-fade-in">
-      <div className="mb-5">
-        <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[oklch(0.70_0.15_280)]">
-          SAVED CHATS
+    <section id="chatRecordsPage" className="relative px-4 py-3 pb-28 animate-fade-in">
+      <div className="mb-3 flex items-center justify-between gap-3 px-1">
+        <p className="text-xs font-semibold text-white/42">
+          {records.length ? `已保存 ${records.length} 条记录` : '保存后的对话会显示在这里'}
         </p>
-        <h2 className="text-xl font-semibold text-white/95">聊天记录</h2>
       </div>
 
       {records.length > 0 ? (
@@ -310,7 +309,7 @@ export function ScenesPage({
                 onKeyDown={(event) => {
                   if (event.key === 'Enter' || event.key === ' ') setSelectedRecordId(record.id)
                 }}
-                className="relative rounded-3xl border border-white/[0.07] bg-white/[0.035] p-4 pr-14 text-left backdrop-blur-xl transition-premium animate-slide-up hover:border-[oklch(0.70_0.15_280_/_0.22)] hover:bg-white/[0.055]"
+                className="relative glass-card rounded-3xl p-4 pr-14 text-left transition-premium animate-slide-up hover:border-[oklch(0.70_0.15_280_/_0.22)]"
                 style={{ animationDelay: `${index * 40}ms` }}
               >
                 <div className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent" />
@@ -386,7 +385,7 @@ export function ScenesPage({
       <button
         type="button"
         onClick={openBuilder}
-        className="fixed bottom-[calc(5.8rem+env(safe-area-inset-bottom))] right-5 z-40 flex h-14 items-center gap-2 rounded-3xl border border-[oklch(0.70_0.15_280_/_0.30)] bg-[oklch(0.70_0.15_280_/_0.16)] px-4 text-sm font-semibold text-white shadow-[0_0_28px_oklch(0.70_0.15_280_/_0.22)] backdrop-blur-xl transition-premium active:scale-95"
+        className="fixed bottom-[calc(5.8rem+env(safe-area-inset-bottom))] right-5 z-40 flex h-14 items-center gap-2 rounded-3xl glass-button-primary px-4 text-sm font-semibold transition-premium active:scale-95"
       >
         <Plus className="h-5 w-5" />
         新建对话
@@ -399,7 +398,7 @@ export function ScenesPage({
             aria-label="关闭新建对话"
             onClick={() => !builderLoadingMode && setShowBuilder(false)}
           />
-          <div className="relative w-full max-w-[520px] max-h-[88dvh] overflow-y-auto rounded-[2rem] border border-white/[0.08] bg-[#08080f]/95 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.55)] backdrop-blur-2xl animate-scale-in">
+          <div className="relative w-full max-w-[520px] max-h-[88dvh] overflow-y-auto glass-sheet rounded-[2rem] p-5 animate-scale-in">
             <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/16 to-transparent" />
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>

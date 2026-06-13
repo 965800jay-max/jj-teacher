@@ -36,7 +36,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
             id={`${tab.id}Nav`}
             onClick={() => onTabChange(tab.id)}
             className={cn(
-              "flex-1 flex items-center justify-center gap-1.5 py-3 transition-premium relative group"
+              "flex-1 flex items-center justify-center gap-1.5 py-2.5 transition-premium relative group"
             )}
             aria-current={activeTab === tab.id ? 'page' : undefined}
           >
@@ -50,7 +50,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
             
             {/* 背景高亮 - 渐变紫光 */}
             <div className={cn(
-              "absolute inset-x-3 inset-y-1.5 rounded-2xl transition-all duration-400 overflow-hidden",
+              "absolute inset-x-3 inset-y-2 rounded-2xl transition-all duration-400 overflow-hidden",
               activeTab === tab.id 
                 ? "bg-gradient-to-b from-[oklch(0.70_0.15_280_/_0.15)] via-[oklch(0.55_0.18_300_/_0.08)] to-transparent shadow-[0_0_20px_oklch(0.65_0.18_290_/_0.08)]" 
                 : "bg-transparent group-hover:bg-white/[0.03]"

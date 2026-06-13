@@ -1,6 +1,6 @@
 {
-  "versionCode": 105,
-  "versionName": "free105",
-  "apkUrl": "https://files.catbox.moe/06gg42.apk",
-  "notes": "free105: 新增白天模式，保留夜间黑紫玻璃风，可在顶部切换并自动记住上次使用的主题。"
+  "versionCode": 106,
+  "versionName": "free106",
+  "apkUrl": "https://files.catbox.moe/ctilr2.apk",
+  "notes": "free106: 统一浅色玻璃拟态 UI，优化页面层级、卡片密度、底部导航和白天默认视觉。"
 }
