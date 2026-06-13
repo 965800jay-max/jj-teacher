@@ -23,7 +23,11 @@ interface ShootingStar {
   maxLife: number
 }
 
-export function StarryBackground() {
+interface StarryBackgroundProps {
+  mode?: 'night' | 'day'
+}
+
+export function StarryBackground({ mode = 'night' }: StarryBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const starsRef = useRef<Star[]>([])
   const shootingStarsRef = useRef<ShootingStar[]>([])
@@ -97,20 +101,22 @@ export function StarryBackground() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       ctx.globalCompositeOperation = 'source-over'
       ctx.globalAlpha = 1
+      const isDay = mode === 'day'
 
-      // Draw stars
+      // Draw stars / daylight dust
       for (const star of starsRef.current) {
-        let alpha = star.opacity
+        let alpha = isDay ? star.opacity * 0.55 : star.opacity
 
         if (star.isTwinkling) {
           alpha = star.opacity * (0.3 + 0.7 * Math.abs(Math.sin(time * star.twinkleSpeed + star.twinklePhase)))
+          if (isDay) alpha *= 0.55
         }
 
-        // Draw glow for bigger stars
+        // Draw glow for bigger stars / soft daylight particles
         if (star.size > 1) {
           const grd = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, star.size * 2.5)
-          grd.addColorStop(0, `rgba(200, 210, 255, ${alpha * 0.18})`)
-          grd.addColorStop(1, 'rgba(200, 210, 255, 0)')
+          grd.addColorStop(0, isDay ? `rgba(132, 108, 210, ${alpha * 0.16})` : `rgba(200, 210, 255, ${alpha * 0.18})`)
+          grd.addColorStop(1, isDay ? 'rgba(132, 108, 210, 0)' : 'rgba(200, 210, 255, 0)')
           ctx.fillStyle = grd
           ctx.beginPath()
           ctx.arc(star.x, star.y, star.size * 2.5, 0, Math.PI * 2)
@@ -118,15 +124,15 @@ export function StarryBackground() {
         }
 
         // Draw star core
-        ctx.fillStyle = `rgba(220, 225, 255, ${alpha})`
+        ctx.fillStyle = isDay ? `rgba(132, 108, 210, ${alpha})` : `rgba(220, 225, 255, ${alpha})`
         ctx.beginPath()
-        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2)
+        ctx.arc(star.x, star.y, isDay ? star.size * 1.25 : star.size, 0, Math.PI * 2)
         ctx.fill()
       }
 
-      // Spawn shooting stars every 4-8 seconds
+      // Spawn shooting stars every 4-8 seconds in night mode
       const now = Date.now()
-      if (now - lastShootingRef.current > (Math.random() * 4000 + 4000)) {
+      if (!isDay && now - lastShootingRef.current > (Math.random() * 4000 + 4000)) {
         shootingStarsRef.current.push(createShootingStar())
         lastShootingRef.current = now
       }
@@ -186,13 +192,13 @@ export function StarryBackground() {
       window.removeEventListener('resize', resizeCanvas)
       cancelAnimationFrame(animationRef.current)
     }
-  }, [])
+  }, [mode])
 
   return (
     <canvas
       ref={canvasRef}
       className="starry-canvas fixed inset-0 pointer-events-none z-0 opacity-70"
-      style={{ background: '#030308' }}
+      style={{ background: mode === 'day' ? '#f6f2ff' : '#030308' }}
       aria-hidden="true"
     />
   )

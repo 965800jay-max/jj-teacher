@@ -1,6 +1,6 @@
 {
-  "versionCode": 104,
-  "versionName": "free104",
-  "apkUrl": "https://files.catbox.moe/zs3nus.apk",
-  "notes": "free104: 优化生词本单词考试反馈，答题后在题卡内显示对错和正确答案；压缩单词详情页，AI批改和继续追问改为提交后动态显示。"
+  "versionCode": 105,
+  "versionName": "free105",
+  "apkUrl": "https://files.catbox.moe/06gg42.apk",
+  "notes": "free105: 新增白天模式，保留夜间黑紫玻璃风，可在顶部切换并自动记住上次使用的主题。"
 }

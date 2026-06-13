@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Plus, User, Users, BookOpen, Sparkles, BookText, MessageCircle, Search, X, WandSparkles, Volume2, Trash2, Languages, MessagesSquare } from 'lucide-react'
+import { Plus, User, Users, BookOpen, Sparkles, BookText, MessageCircle, Search, X, WandSparkles, Volume2, Trash2, Languages, MessagesSquare, Sun, Moon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { speakEnglish } from '@/lib/speech'
 import { StarryBackground } from '@/components/starry-background'
@@ -32,6 +32,7 @@ import { ADD_WORD_EXAMPLE_EVENT, getVocabBook, removeVocabBookItem, VOCAB_BOOK_E
 type ActiveTab = 'sentences' | 'scenes' | 'assistant' | 'teacher'
 type HomeView = 'learning' | 'learned' | 'vocab'
 type AddMode = 'manual' | 'ai'
+type AppTheme = 'night' | 'day'
 
 interface LanguageAssistantState {
   mode: AssistantMode
@@ -111,8 +112,8 @@ interface VocabCoachQuestionEntry {
 
 type VocabCoachEntry = VocabCoachCheckEntry | VocabCoachQuestionEntry
 
-const CURRENT_VERSION_CODE = 104
-const CURRENT_VERSION_NAME = 'free104'
+const CURRENT_VERSION_CODE = 105
+const CURRENT_VERSION_NAME = 'free105'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const ALLOWED_APP_EMAIL = '965800jay@gmail.com'
 const TARGET_LANGUAGE = 'english'
@@ -134,6 +135,7 @@ const SAVED_SELECT_DIALOGUES_KEY = 'sentence-reader-select-dialogue-records'
 const CURRENT_SELECT_DIALOGUE_RECORD_ID_KEY = 'sentence-reader-current-select-dialogue-record-id'
 const SELECT_DIALOGUE_START = 'START_SELECT_DIALOGUE'
 const TEACHER_TRANSLATION_CACHE_KEY = 'sentence-reader-teacher-translation-cache'
+const APP_THEME_KEY = 'sentence-reader-app-theme'
 const ASSISTANT_MODE_IDS: AssistantMode[] = ['translate', 'localize', 'hair', 'reply', 'explain', 'pronunciation']
 const DEFAULT_LANGUAGE_ASSISTANT_STATE: LanguageAssistantState = {
   mode: 'translate',
@@ -1043,6 +1045,7 @@ export default function ZhiyuApp() {
   const [showAuth, setShowAuth] = useState(false)
   const [showUpdate, setShowUpdate] = useState(false)
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null)
+  const [appTheme, setAppTheme] = useState<AppTheme>('night')
   const [hydrated, setHydrated] = useState(false)
 
   const [sentences, setSentences] = useState<SavedSentence[]>(initialSentences)
@@ -1141,6 +1144,7 @@ export default function ZhiyuApp() {
     const storedCurrentRecordId = hasStorage() ? window.localStorage.getItem(CURRENT_SELECT_DIALOGUE_RECORD_ID_KEY) || '' : ''
     const storedUser = readJson<AppUser | null>(AUTH_USER_KEY, null)
     const storedToken = hasStorage() ? window.localStorage.getItem(AUTH_TOKEN_KEY) || '' : ''
+    const storedTheme = hasStorage() ? window.localStorage.getItem(APP_THEME_KEY) : ''
 
     if (storedSentences.length) setSentences(storedSentences)
     if (storedMessages.length) setMessages(storedMessages)
@@ -1157,6 +1161,7 @@ export default function ZhiyuApp() {
     setSelectReplyOptions(storedSelectState.replyOptions)
     setSelectReplyMeanings(storedSelectState.replyOptionMeanings)
     setSelectCustomContext(storedSelectState.customContext)
+    setAppTheme(storedTheme === 'day' ? 'day' : 'night')
     if (storedSelectState.replyOptions.length || storedMessages.some((message) => message.mode === 'select-dialogue')) {
       setTeacherMode('select')
     }
@@ -1175,6 +1180,15 @@ export default function ZhiyuApp() {
     }
     setHydrated(true)
   }, [])
+
+  useEffect(() => {
+    if (!hydrated) return
+    if (hasStorage()) window.localStorage.setItem(APP_THEME_KEY, appTheme)
+    document.documentElement.dataset.zhiyuTheme = appTheme
+    document.documentElement.style.background = appTheme === 'day' ? '#f6f2ff' : '#030308'
+    document.body.style.background = appTheme === 'day' ? '#f6f2ff' : '#030308'
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', appTheme === 'day' ? '#f6f2ff' : '#0f0a14')
+  }, [appTheme, hydrated])
 
   useEffect(() => {
     if (!hydrated) return
@@ -2744,12 +2758,20 @@ export default function ZhiyuApp() {
   const pageInfo = getPageTitle()
   const PageIcon = pageInfo.icon
   const hasAppAccess = isLoggedIn && isAllowedAppUser(user)
+  const isDayMode = appTheme === 'day'
+  const toggleAppTheme = () => setAppTheme((theme) => theme === 'day' ? 'night' : 'day')
 
   if (!hydrated || !hasAppAccess) {
     return (
-      <div className="zhiyu-app-min bg-[#030308] relative overflow-hidden isolate">
-        <StarryBackground />
-        <div className="fixed inset-0 z-[1] pointer-events-none bg-[#030308]/55" aria-hidden="true" />
+      <div className={cn(
+        "zhiyu-app-min relative overflow-hidden isolate",
+        isDayMode ? "theme-day bg-[#f6f2ff]" : "theme-night bg-[#030308]"
+      )}>
+        <StarryBackground mode={appTheme} />
+        <div className={cn(
+          "fixed inset-0 z-[1] pointer-events-none",
+          isDayMode ? "bg-[oklch(0.98_0.025_286_/_0.48)]" : "bg-[#030308]/55"
+        )} aria-hidden="true" />
         <main className="relative z-10 min-h-screen w-full max-w-[520px] mx-auto flex items-center justify-center px-6 safe-area-pt safe-area-pb">
           <section className="w-full glass-card rounded-[2rem] p-7 overflow-hidden">
             <div className="inner-glow rounded-[2rem]" />
@@ -2793,9 +2815,15 @@ export default function ZhiyuApp() {
   }
 
   return (
-    <div className="zhiyu-app-min bg-[#030308] relative overflow-hidden isolate">
-      <StarryBackground />
-      <div className="fixed inset-0 z-[1] pointer-events-none bg-[#030308]/45" aria-hidden="true" />
+    <div className={cn(
+      "zhiyu-app-min relative overflow-hidden isolate",
+      isDayMode ? "theme-day bg-[#f6f2ff]" : "theme-night bg-[#030308]"
+    )}>
+      <StarryBackground mode={appTheme} />
+      <div className={cn(
+        "fixed inset-0 z-[1] pointer-events-none",
+        isDayMode ? "bg-[oklch(0.98_0.025_286_/_0.38)]" : "bg-[#030308]/45"
+      )} aria-hidden="true" />
 
       <main className={cn(
         "relative z-10 w-full max-w-[520px] mx-auto",
@@ -2833,6 +2861,21 @@ export default function ZhiyuApp() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <button
+                id="themeToggleButton"
+                type="button"
+                onClick={toggleAppTheme}
+                className="group relative w-10 h-10 rounded-2xl glass-button flex items-center justify-center text-white/50 hover:text-white/90 transition-premium overflow-hidden"
+                aria-label={isDayMode ? '切换夜晚模式' : '切换白天模式'}
+                title={isDayMode ? '夜晚模式' : '白天模式'}
+              >
+                <div className="inner-glow" />
+                {isDayMode ? (
+                  <Moon className="w-[18px] h-[18px] relative z-10" />
+                ) : (
+                  <Sun className="w-[18px] h-[18px] relative z-10" />
+                )}
+              </button>
               <button
                 id="accountButton"
                 onClick={() => setShowAuth(true)}
