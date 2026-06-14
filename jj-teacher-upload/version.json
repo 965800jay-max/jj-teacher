@@ -1,6 +1,6 @@
 {
-  "versionCode": 106,
-  "versionName": "free106",
-  "apkUrl": "https://files.catbox.moe/ctilr2.apk",
-  "notes": "free106: 统一浅色玻璃拟态 UI，优化页面层级、卡片密度、底部导航和白天默认视觉。"
+  "versionCode": 107,
+  "versionName": "free107",
+  "apkUrl": "https://files.catbox.moe/uzo7ln.apk",
+  "notes": "free107: UI 改为成熟中性色产品风，使用白灰背景、纯白卡片、蓝色强调，并压缩 Header、底部导航和句子卡片操作。"
 }

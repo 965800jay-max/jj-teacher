@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Play, Trash2, Sparkles, Check, BookOpen, X } from 'lucide-react'
+import { Play, Trash2, Sparkles, Check, BookOpen, X, MoreHorizontal } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { speakEnglish } from '@/lib/speech'
 import { SpeakableText } from '@/components/speakable-text'
@@ -98,6 +98,7 @@ export function SentenceCard({
   const [draftText, setDraftText] = useState(text)
   const [isEditingNote, setIsEditingNote] = useState(false)
   const [draftNote, setDraftNote] = useState(note)
+  const [showMoreMenu, setShowMoreMenu] = useState(false)
   const lastNoteTapAtRef = useRef(0)
 
   useEffect(() => {
@@ -114,9 +115,13 @@ export function SentenceCard({
         setIsEditingNote(false)
         return true
       }
+      if (showMoreMenu) {
+        setShowMoreMenu(false)
+        return true
+      }
       return false
     }, 70)
-  }, [isEditingNote, isEditingText, showAiExplain])
+  }, [isEditingNote, isEditingText, showAiExplain, showMoreMenu])
   const textInputRef = useRef<HTMLTextAreaElement>(null)
   const noteInputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -299,38 +304,53 @@ export function SentenceCard({
 
           <div className="flex-1" />
 
-          <button
-            onClick={onToggleLearned}
-            className={cn(
-              "flex items-center justify-center w-10 h-10 rounded-2xl transition-premium",
-              learned 
-                ? "bg-[oklch(0.72_0.18_155_/_0.15)] border border-[oklch(0.72_0.18_155_/_0.3)] text-[oklch(0.80_0.18_155)]" 
-                : "glass-button text-white/45 hover:text-white/80"
-            )}
-            aria-label={learned ? "标记为学习中" : "标记为已学会"}
-          >
-            {learned ? <Check className="w-[18px] h-[18px]" /> : <BookOpen className="w-[18px] h-[18px]" />}
-          </button>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowMoreMenu((current) => !current)}
+              className={cn(
+                "flex items-center justify-center w-10 h-10 rounded-2xl glass-button text-white/45 hover:text-white/80 transition-premium",
+                showMoreMenu && "border-[oklch(0.55_0.16_255_/_0.35)] text-white/80"
+              )}
+              aria-label="更多操作"
+            >
+              <MoreHorizontal className="w-[18px] h-[18px]" />
+            </button>
 
-          <button
-            onClick={() => {
-              if (isDeleting) {
-                onDelete?.()
-              } else {
-                setIsDeleting(true)
-                setTimeout(() => setIsDeleting(false), 3000)
-              }
-            }}
-            className={cn(
-              "flex items-center justify-center w-10 h-10 rounded-2xl transition-premium",
-              isDeleting 
-                ? "bg-[oklch(0.62_0.22_25_/_0.15)] border border-[oklch(0.62_0.22_25_/_0.3)] text-[oklch(0.70_0.22_25)]" 
-                : "glass-button text-white/45 hover:text-[oklch(0.70_0.22_25)]"
+            {showMoreMenu && (
+              <div className="absolute right-0 top-11 z-[60] w-[164px] rounded-2xl border border-white/[0.08] bg-black/90 p-1.5 shadow-[0_12px_36px_rgba(0,0,0,0.32)] backdrop-blur-xl animate-scale-in">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onToggleLearned?.()
+                    setShowMoreMenu(false)
+                  }}
+                  className="flex h-9 w-full items-center gap-2 rounded-xl px-2.5 text-left text-[12px] font-semibold text-white/72 transition-premium hover:bg-white/[0.06] hover:text-white"
+                >
+                  {learned ? <BookOpen className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5" />}
+                  {learned ? '还原学习中' : '移到已学会'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isDeleting) {
+                      onDelete?.()
+                    } else {
+                      setIsDeleting(true)
+                      setTimeout(() => setIsDeleting(false), 3000)
+                    }
+                  }}
+                  className={cn(
+                    "flex h-9 w-full items-center gap-2 rounded-xl px-2.5 text-left text-[12px] font-semibold transition-premium hover:bg-white/[0.06]",
+                    isDeleting ? "text-[oklch(0.62_0.22_25)]" : "text-white/72"
+                  )}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  {isDeleting ? '再次点击确认' : '删除'}
+                </button>
+              </div>
             )}
-            aria-label="删除句子"
-          >
-            <Trash2 className="w-[18px] h-[18px]" />
-          </button>
+          </div>
         </div>
 
       </div>

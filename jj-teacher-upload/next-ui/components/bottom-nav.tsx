@@ -21,11 +21,10 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
       id="bottom-nav"
       className="fixed bottom-0 left-0 right-0 z-50 safe-area-pb"
     >
-      {/* 高级玻璃背景 */}
+      {/* 产品级浅色导航背景 */}
       <div className="absolute inset-0 glass-nav" />
       
-      {/* 顶部光线 */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-[#E5E7EB]" />
       
       <div className="relative max-w-[520px] mx-auto flex">
         {tabs.map((tab) => {
@@ -42,32 +41,32 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
           >
             {/* 活跃指示器 - 顶部光线 */}
             <div className={cn(
-              "absolute top-0 w-16 h-[2px] rounded-full transition-all duration-500",
+              "absolute top-0 w-10 h-[2px] rounded-full transition-all duration-300",
               activeTab === tab.id 
-                ? "opacity-100 bg-gradient-to-r from-transparent via-[oklch(0.70_0.15_280)] to-transparent shadow-[0_0_12px_oklch(0.70_0.15_280_/_0.5)]" 
+                ? "opacity-100 bg-[#2563EB]" 
                 : "opacity-0"
             )} />
             
-            {/* 背景高亮 - 渐变紫光 */}
+            {/* 选中浅蓝底 */}
             <div className={cn(
-              "absolute inset-x-3 inset-y-2 rounded-2xl transition-all duration-400 overflow-hidden",
+              "absolute inset-x-3 inset-y-2 rounded-2xl transition-all duration-300 overflow-hidden",
               activeTab === tab.id 
-                ? "bg-gradient-to-b from-[oklch(0.70_0.15_280_/_0.15)] via-[oklch(0.55_0.18_300_/_0.08)] to-transparent shadow-[0_0_20px_oklch(0.65_0.18_290_/_0.08)]" 
-                : "bg-transparent group-hover:bg-white/[0.03]"
+                ? "bg-[#EEF4FF]" 
+                : "bg-transparent group-hover:bg-[#F3F4F6]"
             )} />
 
             <Icon className={cn(
               "relative w-4 h-4 transition-all duration-300",
               activeTab === tab.id
-                ? "text-[oklch(0.80_0.15_280)]"
-                : "text-white/36 group-hover:text-white/58"
+                ? "text-[#2563EB]"
+                : "text-[#9CA3AF] group-hover:text-[#6B7280]"
             )} />
             
             <span className={cn(
               "relative text-[14px] tracking-wide transition-all duration-300",
               activeTab === tab.id 
-                ? "font-semibold text-white" 
-                : "font-medium text-white/40 group-hover:text-white/60"
+                ? "font-semibold text-[#2563EB]" 
+                : "font-medium text-[#9CA3AF] group-hover:text-[#6B7280]"
             )}>
               {tab.label}
             </span>

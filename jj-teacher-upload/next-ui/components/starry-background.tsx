@@ -115,8 +115,8 @@ export function StarryBackground({ mode = 'night' }: StarryBackgroundProps) {
         // Draw glow for bigger stars / soft daylight particles
         if (star.size > 1) {
           const grd = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, star.size * 2.5)
-          grd.addColorStop(0, isDay ? `rgba(132, 108, 210, ${alpha * 0.16})` : `rgba(200, 210, 255, ${alpha * 0.18})`)
-          grd.addColorStop(1, isDay ? 'rgba(132, 108, 210, 0)' : 'rgba(200, 210, 255, 0)')
+          grd.addColorStop(0, isDay ? `rgba(37, 99, 235, ${alpha * 0.08})` : `rgba(200, 210, 255, ${alpha * 0.18})`)
+          grd.addColorStop(1, isDay ? 'rgba(37, 99, 235, 0)' : 'rgba(200, 210, 255, 0)')
           ctx.fillStyle = grd
           ctx.beginPath()
           ctx.arc(star.x, star.y, star.size * 2.5, 0, Math.PI * 2)
@@ -124,7 +124,7 @@ export function StarryBackground({ mode = 'night' }: StarryBackgroundProps) {
         }
 
         // Draw star core
-        ctx.fillStyle = isDay ? `rgba(132, 108, 210, ${alpha})` : `rgba(220, 225, 255, ${alpha})`
+        ctx.fillStyle = isDay ? `rgba(148, 163, 184, ${alpha * 0.6})` : `rgba(220, 225, 255, ${alpha})`
         ctx.beginPath()
         ctx.arc(star.x, star.y, isDay ? star.size * 1.25 : star.size, 0, Math.PI * 2)
         ctx.fill()
@@ -198,7 +198,7 @@ export function StarryBackground({ mode = 'night' }: StarryBackgroundProps) {
     <canvas
       ref={canvasRef}
       className="starry-canvas fixed inset-0 pointer-events-none z-0 opacity-70"
-      style={{ background: mode === 'day' ? '#f6f2ff' : '#030308' }}
+      style={{ background: mode === 'day' ? '#F7F8FA' : '#030308' }}
       aria-hidden="true"
     />
   )

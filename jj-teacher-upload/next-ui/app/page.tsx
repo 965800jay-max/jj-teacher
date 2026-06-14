@@ -112,8 +112,8 @@ interface VocabCoachQuestionEntry {
 
 type VocabCoachEntry = VocabCoachCheckEntry | VocabCoachQuestionEntry
 
-const CURRENT_VERSION_CODE = 106
-const CURRENT_VERSION_NAME = 'free106'
+const CURRENT_VERSION_CODE = 107
+const CURRENT_VERSION_NAME = 'free107'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const ALLOWED_APP_EMAIL = '965800jay@gmail.com'
 const TARGET_LANGUAGE = 'english'
@@ -1185,9 +1185,9 @@ export default function ZhiyuApp() {
     if (!hydrated) return
     if (hasStorage()) window.localStorage.setItem(APP_THEME_KEY, appTheme)
     document.documentElement.dataset.zhiyuTheme = appTheme
-    document.documentElement.style.background = appTheme === 'day' ? '#f6f2ff' : '#030308'
-    document.body.style.background = appTheme === 'day' ? '#f6f2ff' : '#030308'
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', appTheme === 'day' ? '#f6f2ff' : '#0f0a14')
+    document.documentElement.style.background = appTheme === 'day' ? '#F7F8FA' : '#030308'
+    document.body.style.background = appTheme === 'day' ? '#F7F8FA' : '#030308'
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', appTheme === 'day' ? '#F7F8FA' : '#0f0a14')
   }, [appTheme, hydrated])
 
   useEffect(() => {
@@ -2756,7 +2756,6 @@ export default function ZhiyuApp() {
   }
 
   const pageInfo = getPageTitle()
-  const PageIcon = pageInfo.icon
   const hasAppAccess = isLoggedIn && isAllowedAppUser(user)
   const isDayMode = appTheme === 'day'
   const toggleAppTheme = () => setAppTheme((theme) => theme === 'day' ? 'night' : 'day')
@@ -2765,12 +2764,12 @@ export default function ZhiyuApp() {
     return (
       <div className={cn(
         "zhiyu-app-min relative overflow-hidden isolate",
-        isDayMode ? "theme-day bg-[#f6f2ff]" : "theme-night bg-[#030308]"
+        isDayMode ? "theme-day bg-[#F7F8FA]" : "theme-night bg-[#030308]"
       )}>
         <StarryBackground mode={appTheme} />
         <div className={cn(
           "fixed inset-0 z-[1] pointer-events-none",
-          isDayMode ? "bg-[oklch(0.98_0.025_286_/_0.48)]" : "bg-[#030308]/55"
+          isDayMode ? "bg-[#F7F8FA]/60" : "bg-[#030308]/55"
         )} aria-hidden="true" />
         <main className="relative z-10 min-h-screen w-full max-w-[520px] mx-auto flex items-center justify-center px-6 safe-area-pt safe-area-pb">
           <section className="w-full glass-card rounded-[2rem] p-7 overflow-hidden">
@@ -2817,12 +2816,12 @@ export default function ZhiyuApp() {
   return (
     <div className={cn(
       "zhiyu-app-min relative overflow-hidden isolate",
-      isDayMode ? "theme-day bg-[#f6f2ff]" : "theme-night bg-[#030308]"
+      isDayMode ? "theme-day bg-[#F7F8FA]" : "theme-night bg-[#030308]"
     )}>
       <StarryBackground mode={appTheme} />
       <div className={cn(
         "fixed inset-0 z-[1] pointer-events-none",
-        isDayMode ? "bg-[oklch(0.98_0.025_286_/_0.38)]" : "bg-[#030308]/45"
+        isDayMode ? "bg-[#F7F8FA]/55" : "bg-[#030308]/45"
       )} aria-hidden="true" />
 
       <main className={cn(
@@ -2840,21 +2839,14 @@ export default function ZhiyuApp() {
           <div className="absolute inset-0 glass-nav" />
 
           <div className="relative flex items-center justify-between">
-            <div className="flex items-center gap-3.5">
-              <div className={cn(
-                "relative rounded-2xl glass-button flex items-center justify-center overflow-hidden group",
-                (activeTab === 'teacher' || activeTab === 'assistant') && !showExam && !showFriends ? "w-10 h-10" : "w-11 h-11"
-              )}>
-                <div className="absolute inset-0 bg-gradient-to-br from-[oklch(0.70_0.15_280_/_0.15)] to-transparent" />
-                <PageIcon className="w-5 h-5 text-[oklch(0.80_0.15_280)] relative z-10 group-hover:scale-110 transition-transform duration-300" />
-              </div>
+            <div className="flex min-w-0 items-center">
               <div>
-                <p className="text-[10px] text-[oklch(0.70_0.15_280)] font-semibold tracking-[0.2em] uppercase mb-0.5">
+                <p className="text-[10px] text-[oklch(0.50_0.16_255)] font-semibold tracking-[0.2em] uppercase mb-0.5">
                   {pageInfo.eyebrow}
                 </p>
                 <h1 id="pageTitle" className={cn(
-                  "font-semibold text-white/95 tracking-wide",
-                  (activeTab === 'teacher' || activeTab === 'assistant') && !showExam && !showFriends ? "text-lg" : "text-xl"
+                  "font-bold text-white/95 tracking-normal",
+                  (activeTab === 'teacher' || activeTab === 'assistant') && !showExam && !showFriends ? "text-[22px]" : "text-2xl"
                 )}>
                   {pageInfo.title}
                 </h1>
