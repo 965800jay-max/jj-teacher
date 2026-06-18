@@ -1,6 +1,6 @@
 {
-  "versionCode": 107,
-  "versionName": "free107",
-  "apkUrl": "https://files.catbox.moe/uzo7ln.apk",
-  "notes": "free107: UI 改为成熟中性色产品风，使用白灰背景、纯白卡片、蓝色强调，并压缩 Header、底部导航和句子卡片操作。"
+  "versionCode": 108,
+  "versionName": "free108",
+  "apkUrl": "https://files.catbox.moe/ig5z28.apk",
+  "notes": "free108: 智语导师点选对话新增 AI Grammar Coach，手动英文输入有问题时会显示语法优化卡片，保留原对话回复。"
 }

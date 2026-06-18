@@ -20,7 +20,17 @@ export interface TeacherMessage {
     sentence: string
     note: string
   }
+  grammarCoach?: GrammarCoachFeedback
   timestamp: number
+}
+
+export interface GrammarCoachFeedback {
+  needed: boolean
+  yourSentence: string
+  naturalVersion: string
+  mistakes: string[]
+  nativeSpeakerTip: string
+  chinese?: string
 }
 
 export interface TutorMemoryProfile {

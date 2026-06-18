@@ -1307,6 +1307,7 @@ async function handleAiTeacher(request, response) {
     const customContext = sanitizeCustomDialogueContext(payload.customContext);
     const selectScene = normalizeSelectDialogueScenario(payload.selectScene || payload.scene || payload.scenario);
     const selectDifficulty = normalizeSelectDialogueDifficulty(payload.selectDifficulty || payload.difficulty);
+    const grammarCoachRequested = Boolean(payload.grammarCoach || payload.grammarCoachRequested);
     const selectStage = customContext
       ? limitText(payload.selectStage || payload.stage, 80)
       : normalizeSelectDialogueStage(payload.selectStage || payload.stage, selectScene);
@@ -1316,7 +1317,7 @@ async function handleAiTeacher(request, response) {
     }
 
     const raw = await askAiTeacher(
-      buildSelectDialoguePrompt(message, history, targetLanguage, memoryProfile, selectScene, selectDifficulty, selectStage, customContext),
+      buildSelectDialoguePrompt(message, history, targetLanguage, memoryProfile, selectScene, selectDifficulty, selectStage, customContext, grammarCoachRequested),
       mode,
       targetLanguage
     );
@@ -1332,6 +1333,9 @@ async function handleAiTeacher(request, response) {
       : normalizeSelectDialogueStage(data.stage || data.currentStage || data.nextStage || selectStage, selectScene);
     const rawOptions = Array.isArray(data.replyOptions) ? data.replyOptions : [];
     const rawMeanings = Array.isArray(data.replyOptionMeanings) ? data.replyOptionMeanings : [];
+    const grammarCoach = turnType === "dialogue" && grammarCoachRequested
+      ? normalizeGrammarCoachFeedback(data.grammarCoach, message)
+      : null;
     const seen = new Set();
     const replyOptions = [];
     const replyOptionMeanings = [];
@@ -1357,6 +1361,7 @@ async function handleAiTeacher(request, response) {
       stage: turnType === "study-question" ? selectStage : stage,
       replyOptions: turnType === "study-question" ? [] : replyOptions.slice(0, 3),
       replyOptionMeanings: turnType === "study-question" ? [] : replyOptionMeanings.slice(0, 3),
+      grammarCoach,
     });
     return;
   }
@@ -1682,6 +1687,45 @@ function stripSelectedReplyEcho(aiMessage, selectedReply) {
   return cleanMessage;
 }
 
+function normalizeGrammarCoachFeedback(value, fallbackSentence) {
+  const source = value && typeof value === "object" ? value : {};
+  const needed = Boolean(source.needed || source.hasIssue || source.hasIssues);
+  if (!needed) return null;
+
+  const yourSentence = limitText(source.yourSentence || source.original || source.userSentence || fallbackSentence, 240)
+    .replace(/\s+/g, " ")
+    .trim();
+  const naturalVersion = limitText(source.naturalVersion || source.natural || source.corrected || source.better, 260)
+    .replace(/\s+/g, " ")
+    .trim();
+  const mistakes = Array.isArray(source.mistakes)
+    ? source.mistakes
+        .map((item) => limitText(item, 180).replace(/\s+/g, " ").trim())
+        .filter(Boolean)
+        .slice(0, 4)
+    : String(source.mistakes || source.explanation || "")
+        .split(/\n+|;|；/)
+        .map((item) => limitText(item, 180).replace(/\s+/g, " ").trim())
+        .filter(Boolean)
+        .slice(0, 4);
+  const nativeSpeakerTip = limitText(source.nativeSpeakerTip || source.tip || source.usageTip, 260)
+    .replace(/\s+/g, " ")
+    .trim();
+  const chinese = limitText(source.chinese || source.meaning || source.translation, 220)
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!yourSentence || !naturalVersion || !mistakes.length) return null;
+  return {
+    needed: true,
+    yourSentence,
+    naturalVersion,
+    mistakes,
+    nativeSpeakerTip,
+    chinese,
+  };
+}
+
 function normalizeSelectDialogueScenario(value) {
   const key = String(value || "").trim();
   return selectDialogueScenarios[key] ? key : "daily-life";
@@ -1763,7 +1807,7 @@ function buildCustomDialoguePrompt(input, targetLanguage = "english") {
   ].join("\n\n");
 }
 
-function buildSelectDialoguePrompt(message, history, targetLanguage = "english", memoryProfile = {}, scenarioKey = "daily-life", difficultyKey = "medium", currentStage = "", customContext = null) {
+function buildSelectDialoguePrompt(message, history, targetLanguage = "english", memoryProfile = {}, scenarioKey = "daily-life", difficultyKey = "medium", currentStage = "", customContext = null, grammarCoachRequested = false) {
   const language = getTargetLanguageInfo(targetLanguage);
   const isStart = message === "START_SELECT_DIALOGUE";
   const isStudyQuestionHint = looksLikeSelectStudyQuestion(message);
@@ -1782,7 +1826,7 @@ function buildSelectDialoguePrompt(message, history, targetLanguage = "english",
   return [
     `The learner is practicing spoken ${language.label} through a point-and-click real-world scenario mode.`,
     "Return compact JSON only. No Markdown. No extra text.",
-    'Required shape: {"turnType":"dialogue","aiMessage":"","replyOptions":["","",""],"replyOptionMeanings":["","",""],"stage":""}',
+    'Required shape: {"turnType":"dialogue","aiMessage":"","replyOptions":["","",""],"replyOptionMeanings":["","",""],"stage":"","grammarCoach":{"needed":false,"yourSentence":"","naturalVersion":"","mistakes":[],"nativeSpeakerTip":"","chinese":""}}',
     'turnType must be either "dialogue" or "study-question".',
     safeCustomContext
       ? [
@@ -1828,6 +1872,16 @@ function buildSelectDialoguePrompt(message, history, targetLanguage = "english",
     "replyOptionMeanings rules:",
     "1. Provide Simplified Chinese meanings matching replyOptions by index.",
     "2. Keep each meaning concise.",
+    "grammarCoach rules:",
+    grammarCoachRequested
+      ? [
+          "1. The learner manually typed an English sentence. Continue the role-play normally in aiMessage; do not correct inside aiMessage.",
+          "2. If the learner's English has grammar, spelling, tense, collocation, or unnatural-expression issues, set grammarCoach.needed to true.",
+          "3. If the sentence is already correct and natural, set grammarCoach.needed to false and leave other grammarCoach fields empty.",
+          "4. When needed is true, set yourSentence to the learner's original sentence, naturalVersion to a more natural spoken American English version, mistakes to 1-4 concise Simplified Chinese explanations, nativeSpeakerTip to one concise Simplified Chinese usage tip, and chinese to the Simplified Chinese meaning of naturalVersion.",
+          "5. Do not rewrite or replace the user's visible chat bubble. The app will show grammarCoach as a separate card below your normal reply.",
+        ].join("\n")
+      : "Set grammarCoach.needed to false and leave other grammarCoach fields empty.",
     customContext
       ? [
           "stage rules:",
@@ -2514,7 +2568,7 @@ function buildAiInstructions(mode = "chat", targetLanguage = "english") {
     return `You create natural spoken American ${language.label} custom scene dialogues for a Chinese learner. Return valid compact JSON only with title, stage, messages, and replyOptions. Do not translate line by line. No Markdown, no prose outside JSON.`;
   }
   if (mode === "select-dialogue") {
-    return `You run a point-and-click spoken ${language.label} chat practice mode. Return valid compact JSON only with turnType, aiMessage, replyOptions, replyOptionMeanings, and stage. No Markdown, no labels outside JSON.`;
+    return `You run a point-and-click spoken ${language.label} chat practice mode. Return valid compact JSON only with turnType, aiMessage, replyOptions, replyOptionMeanings, stage, and grammarCoach. No Markdown, no labels outside JSON.`;
   }
   if (mode === "memory") {
     return "You update long-term user memory for a language learning app. Return valid compact JSON only.";

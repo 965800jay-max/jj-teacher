@@ -23,6 +23,7 @@ import {
 } from '@/lib/teacher-scenarios'
 import {
   savedSentences as initialSentences,
+  type GrammarCoachFeedback,
   type SavedSentence,
   type TeacherMessage,
   type TutorMemoryProfile
@@ -112,8 +113,8 @@ interface VocabCoachQuestionEntry {
 
 type VocabCoachEntry = VocabCoachCheckEntry | VocabCoachQuestionEntry
 
-const CURRENT_VERSION_CODE = 107
-const CURRENT_VERSION_NAME = 'free107'
+const CURRENT_VERSION_CODE = 108
+const CURRENT_VERSION_NAME = 'free108'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const ALLOWED_APP_EMAIL = '965800jay@gmail.com'
 const TARGET_LANGUAGE = 'english'
@@ -300,14 +301,65 @@ function normalizeMessage(item: Partial<TeacherMessage> & Record<string, unknown
         note: String((item.translation as { note?: unknown }).note || '')
       }
     : undefined
+  const grammarCoach = normalizeGrammarCoachFeedback(item.grammarCoach, text)
   return {
     id: String(item.id || makeId(`message-${index}`)),
     role,
     text,
     mode,
     translation: translation?.sentence ? translation : undefined,
+    grammarCoach: grammarCoach || undefined,
     timestamp: typeof item.timestamp === 'number' ? item.timestamp : Date.now() + index
   }
+}
+
+function normalizeGrammarCoachFeedback(value: unknown, fallbackSentence = ''): GrammarCoachFeedback | null {
+  const source = value && typeof value === 'object' ? value as Record<string, unknown> : null
+  if (!source) return null
+  const needed = Boolean(source.needed ?? source.hasIssue ?? source.hasIssues)
+  if (!needed) return null
+
+  const yourSentence = String(source.yourSentence || source.original || source.userSentence || fallbackSentence)
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 240)
+  const naturalVersion = String(source.naturalVersion || source.natural || source.corrected || source.better || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 260)
+  const mistakes = Array.isArray(source.mistakes)
+    ? source.mistakes
+        .map((item) => String(item || '').replace(/\s+/g, ' ').trim())
+        .filter(Boolean)
+        .slice(0, 4)
+    : String(source.mistakes || source.explanation || '')
+        .split(/\n+|；|;/)
+        .map((item) => item.replace(/\s+/g, ' ').trim())
+        .filter(Boolean)
+        .slice(0, 4)
+  const nativeSpeakerTip = String(source.nativeSpeakerTip || source.tip || source.usageTip || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 260)
+  const chinese = String(source.chinese || source.meaning || source.translation || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 220)
+
+  if (!yourSentence || !naturalVersion || !mistakes.length) return null
+  return {
+    needed: true,
+    yourSentence,
+    naturalVersion,
+    mistakes,
+    nativeSpeakerTip,
+    chinese: chinese || undefined
+  }
+}
+
+function shouldCheckGrammarCoach(text: string, selectedOptionIndex: number) {
+  const clean = text.trim()
+  return selectedOptionIndex < 0 && /[A-Za-z]/.test(clean) && !/[\u4e00-\u9fff]/.test(clean)
 }
 
 function defaultMemoryProfile(enabled = true): TutorMemoryProfile {
@@ -548,6 +600,7 @@ function normalizeSelectDialogueTurn(data: Record<string, unknown>, selectedRepl
   const aiMessage = stripSelectedReplyEcho(String(data.aiMessage || data.reply || '').trim(), selectedReply)
   const turnType = normalizeSelectDialogueTurnType(data.turnType || data.messageType || data.type)
   const stage = String(data.stage || data.currentStage || data.nextStage || '').replace(/\s+/g, ' ').trim().slice(0, 80)
+  const grammarCoach = normalizeGrammarCoachFeedback(data.grammarCoach, selectedReply)
   const rawOptions = Array.isArray(data.replyOptions) ? data.replyOptions : []
   const rawMeanings = Array.isArray(data.replyOptionMeanings) ? data.replyOptionMeanings : []
   const seen = new Set<string>()
@@ -572,7 +625,8 @@ function normalizeSelectDialogueTurn(data: Record<string, unknown>, selectedRepl
     aiMessage: aiMessage.slice(0, turnType === 'study-question' ? 900 : 500),
     stage,
     replyOptions: replyOptions.slice(0, 3),
-    replyOptionMeanings: replyOptionMeanings.slice(0, 3)
+    replyOptionMeanings: replyOptionMeanings.slice(0, 3),
+    grammarCoach: turnType === 'study-question' ? null : grammarCoach
   }
 }
 
@@ -2345,6 +2399,7 @@ export default function ZhiyuApp() {
     const recordId = currentSelectRecordIdRef.current || makeId('select-record')
     const selectedOptionIndex = selectReplyOptions.findIndex((option) => option === cleanText)
     const selectedOptionMeaning = selectedOptionIndex >= 0 ? selectReplyMeanings[selectedOptionIndex] || '' : ''
+    const grammarCoachRequested = shouldCheckGrammarCoach(cleanText, selectedOptionIndex)
     const now = Date.now()
     const userMessage: TeacherMessage = {
       id: makeId('select-user-message'),
@@ -2396,6 +2451,7 @@ export default function ZhiyuApp() {
         selectScene: requestSceneId,
         selectDifficulty: requestDifficulty,
         selectStage: currentStage,
+        grammarCoach: grammarCoachRequested,
         customContext: selectCustomContextRef.current || undefined,
         memoryProfile: memoryProfileRef.current
       })
@@ -2406,6 +2462,7 @@ export default function ZhiyuApp() {
         role: 'assistant',
         text: turn.aiMessage,
         mode: isStudyQuestion ? 'select-study' : 'select-dialogue',
+        grammarCoach: grammarCoachRequested && turn.grammarCoach ? turn.grammarCoach : undefined,
         timestamp: Date.now()
       }
       setMessages((current) => current
