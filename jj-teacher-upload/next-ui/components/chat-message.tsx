@@ -637,13 +637,6 @@ export function ChatMessage({
               {renderStudySpeakableText(message.text)}
             </p>
           </div>
-          {message.grammarCoach && (
-            <GrammarCoachCard
-              feedback={message.grammarCoach}
-              onSpeak={onSpeak}
-              onAddSentence={onAddSentence}
-            />
-          )}
         </div>
       </div>
     )
@@ -669,6 +662,13 @@ export function ChatMessage({
               </p>
             )}
           </div>
+          {message.grammarCoach && (
+            <GrammarCoachCard
+              feedback={message.grammarCoach}
+              onSpeak={onSpeak}
+              onAddSentence={onAddSentence}
+            />
+          )}
         </div>
       </div>
     )
@@ -742,13 +742,6 @@ export function ChatMessage({
             )
         )}
 
-        {message.grammarCoach && (
-          <GrammarCoachCard
-            feedback={message.grammarCoach}
-            onSpeak={onSpeak}
-            onAddSentence={onAddSentence}
-          />
-        )}
       </div>
     </div>
   )

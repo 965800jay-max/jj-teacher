@@ -1879,7 +1879,7 @@ function buildSelectDialoguePrompt(message, history, targetLanguage = "english",
           "2. If the learner's English has grammar, spelling, tense, collocation, or unnatural-expression issues, set grammarCoach.needed to true.",
           "3. If the sentence is already correct and natural, set grammarCoach.needed to false and leave other grammarCoach fields empty.",
           "4. When needed is true, set yourSentence to the learner's original sentence, naturalVersion to a more natural spoken American English version, mistakes to 1-4 concise Simplified Chinese explanations, nativeSpeakerTip to one concise Simplified Chinese usage tip, and chinese to the Simplified Chinese meaning of naturalVersion.",
-          "5. Do not rewrite or replace the user's visible chat bubble. The app will show grammarCoach as a separate card below your normal reply.",
+          "5. Do not rewrite or replace the user's visible chat bubble. The app will show grammarCoach as a separate card below the learner's original sentence.",
         ].join("\n")
       : "Set grammarCoach.needed to false and leave other grammarCoach fields empty.",
     customContext

@@ -1,6 +1,6 @@
 {
-  "versionCode": 109,
-  "versionName": "free109",
-  "apkUrl": "https://files.catbox.moe/rswfw2.apk",
-  "notes": "free109: 语法优化卡片改为显示在用户错误英文句子下方，并自动迁移旧记录里的语法卡位置。"
+  "versionCode": 110,
+  "versionName": "free110",
+  "apkUrl": "https://files.catbox.moe/br76a9.apk",
+  "notes": "free110: 修复语法优化卡片没有显示的问题，卡片现在正确显示在用户错误英文句子下方。"
 }

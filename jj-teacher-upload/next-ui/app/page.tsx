@@ -113,8 +113,8 @@ interface VocabCoachQuestionEntry {
 
 type VocabCoachEntry = VocabCoachCheckEntry | VocabCoachQuestionEntry
 
-const CURRENT_VERSION_CODE = 109
-const CURRENT_VERSION_NAME = 'free109'
+const CURRENT_VERSION_CODE = 110
+const CURRENT_VERSION_NAME = 'free110'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const ALLOWED_APP_EMAIL = '965800jay@gmail.com'
 const TARGET_LANGUAGE = 'english'
