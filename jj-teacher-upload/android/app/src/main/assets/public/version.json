@@ -1,6 +1,6 @@
 {
-  "versionCode": 108,
-  "versionName": "free108",
-  "apkUrl": "https://files.catbox.moe/ig5z28.apk",
-  "notes": "free108: 智语导师点选对话新增 AI Grammar Coach，手动英文输入有问题时会显示语法优化卡片，保留原对话回复。"
+  "versionCode": 109,
+  "versionName": "free109",
+  "apkUrl": "https://files.catbox.moe/rswfw2.apk",
+  "notes": "free109: 语法优化卡片改为显示在用户错误英文句子下方，并自动迁移旧记录里的语法卡位置。"
 }

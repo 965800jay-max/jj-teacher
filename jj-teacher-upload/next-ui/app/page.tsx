@@ -113,8 +113,8 @@ interface VocabCoachQuestionEntry {
 
 type VocabCoachEntry = VocabCoachCheckEntry | VocabCoachQuestionEntry
 
-const CURRENT_VERSION_CODE = 108
-const CURRENT_VERSION_NAME = 'free108'
+const CURRENT_VERSION_CODE = 109
+const CURRENT_VERSION_NAME = 'free109'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const ALLOWED_APP_EMAIL = '965800jay@gmail.com'
 const TARGET_LANGUAGE = 'english'
@@ -311,6 +311,36 @@ function normalizeMessage(item: Partial<TeacherMessage> & Record<string, unknown
     grammarCoach: grammarCoach || undefined,
     timestamp: typeof item.timestamp === 'number' ? item.timestamp : Date.now() + index
   }
+}
+
+function moveGrammarCoachToPreviousUser(messages: TeacherMessage[]) {
+  let changed = false
+  let lastUserIndex = -1
+  const next = messages.map((message) => ({ ...message }))
+
+  next.forEach((message, index) => {
+    if (message.role === 'user') {
+      lastUserIndex = index
+      return
+    }
+
+    if (message.role !== 'assistant' || !message.grammarCoach || lastUserIndex < 0) return
+
+    const userMessage = next[lastUserIndex]
+    if (!userMessage.grammarCoach) {
+      next[lastUserIndex] = {
+        ...userMessage,
+        grammarCoach: message.grammarCoach
+      }
+    }
+    next[index] = {
+      ...message,
+      grammarCoach: undefined
+    }
+    changed = true
+  })
+
+  return changed ? next : messages
 }
 
 function normalizeGrammarCoachFeedback(value: unknown, fallbackSentence = ''): GrammarCoachFeedback | null {
@@ -1185,9 +1215,9 @@ export default function ZhiyuApp() {
     const storedSentences = readFirstJson<SavedSentence[]>([languageKey(SENTENCES_KEY), SENTENCES_KEY], [])
       .map((item, index) => normalizeSentence(item as Partial<SavedSentence> & Record<string, unknown>, index))
       .filter(Boolean) as SavedSentence[]
-    const storedMessages = readFirstJson<TeacherMessage[]>([languageKey(TEACHER_CHAT_KEY), TEACHER_CHAT_KEY], [])
+    const storedMessages = moveGrammarCoachToPreviousUser(readFirstJson<TeacherMessage[]>([languageKey(TEACHER_CHAT_KEY), TEACHER_CHAT_KEY], [])
       .map((item, index) => normalizeMessage(item as Partial<TeacherMessage> & Record<string, unknown>, index))
-      .filter(Boolean) as TeacherMessage[]
+      .filter(Boolean) as TeacherMessage[])
     const storedMemory = normalizeMemoryProfile(readJson<unknown>(MEMORY_KEY, defaultMemoryProfile()))
     const storedAssistantState = normalizeLanguageAssistantState(readJson<unknown>(LANGUAGE_ASSISTANT_STATE_KEY, DEFAULT_LANGUAGE_ASSISTANT_STATE))
     const storedSelectState = normalizeSelectDialogueState(readJson<unknown>(SELECT_DIALOGUE_STATE_KEY, DEFAULT_SELECT_DIALOGUE_STATE))
@@ -1369,9 +1399,9 @@ export default function ZhiyuApp() {
           ? remoteData.teacherMessages
           : []
       if (remoteMessages.length > messagesRef.current.filter((item) => !item.pending).length) {
-        const normalized = remoteMessages
+        const normalized = moveGrammarCoachToPreviousUser(remoteMessages
           .map((item: Record<string, unknown>, index: number) => normalizeMessage(item, index))
-          .filter(Boolean) as TeacherMessage[]
+          .filter(Boolean) as TeacherMessage[])
         setMessages(normalized)
       }
       const remoteSavedDialogues = Array.isArray(remoteEnglish.savedDialogues)
@@ -1871,14 +1901,14 @@ export default function ZhiyuApp() {
   }, [])
 
   const continueSavedDialogue = useCallback((record: SavedDialogueRecord) => {
-    const restoredMessages = record.messages.map((message): TeacherMessage => ({
+    const restoredMessages = moveGrammarCoachToPreviousUser(record.messages.map((message): TeacherMessage => ({
       id: message.id,
       role: message.role === 'user' ? 'user' : 'assistant',
       text: message.english,
       mode: 'select-dialogue',
       translation: message.chinese ? { sentence: message.english, note: message.chinese } : undefined,
       timestamp: message.createdAt || Date.now()
-    }))
+    })))
 
     setMessages(restoredMessages)
     messagesRef.current = restoredMessages
@@ -2457,21 +2487,36 @@ export default function ZhiyuApp() {
       })
       const turn = normalizeSelectDialogueTurn(data as Record<string, unknown>, cleanText)
       const isStudyQuestion = turn.turnType === 'study-question'
+      const grammarCoach = !isStudyQuestion && grammarCoachRequested && turn.grammarCoach ? turn.grammarCoach : undefined
       const assistantMessage: TeacherMessage = {
         id: makeId(isStudyQuestion ? 'select-study-answer' : 'select-assistant-message'),
         role: 'assistant',
         text: turn.aiMessage,
         mode: isStudyQuestion ? 'select-study' : 'select-dialogue',
-        grammarCoach: grammarCoachRequested && turn.grammarCoach ? turn.grammarCoach : undefined,
         timestamp: Date.now()
       }
-      setMessages((current) => current
-        .filter((message) => message.id !== pendingMessage.id)
-        .map((message) => isStudyQuestion && message.id === userMessage.id
-          ? { ...message, mode: 'select-study' as const }
-          : message
-        )
-        .concat(assistantMessage))
+      setMessages((current) => {
+        const withoutPending = current.filter((message) => message.id !== pendingMessage.id)
+        const exactUserIndex = withoutPending.findIndex((message) => message.id === userMessage.id)
+        const latestUserIndex = withoutPending.reduce((lastIndex, message, index) => (
+          message.role === 'user' ? index : lastIndex
+        ), -1)
+        const coachTargetIndex = exactUserIndex >= 0 ? exactUserIndex : latestUserIndex
+
+        return withoutPending
+          .map((message, index) => {
+            const nextMessage = isStudyQuestion && message.id === userMessage.id
+              ? { ...message, mode: 'select-study' as const }
+              : message
+
+            if (grammarCoach && index === coachTargetIndex && nextMessage.role === 'user') {
+              return { ...nextMessage, grammarCoach }
+            }
+
+            return nextMessage
+          })
+          .concat(assistantMessage)
+      })
       if (!isStudyQuestion) {
         setSelectDialogueStage(turn.stage || currentStage)
         setSelectReplyOptions(turn.replyOptions)
