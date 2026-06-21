@@ -1,7 +1,7 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Plus, User, Users, BookOpen, Sparkles, BookText, MessageCircle, Search, X, WandSparkles, Volume2, Trash2, Languages, MessagesSquare, Sun, Moon } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
+import { Plus, User, Users, BookOpen, Sparkles, BookText, MessageCircle, Search, X, WandSparkles, Volume2, Trash2, Languages, MessagesSquare, Sun, Moon, ImagePlus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { speakEnglish } from '@/lib/speech'
 import { StarryBackground } from '@/components/starry-background'
@@ -89,6 +89,12 @@ interface VocabCoachExpression {
   chinese: string
 }
 
+interface ImageSentenceImportItem {
+  english: string
+  chinese: string
+  category?: string
+}
+
 interface VocabCoachCheckEntry {
   id: string
   type: 'check'
@@ -113,8 +119,8 @@ interface VocabCoachQuestionEntry {
 
 type VocabCoachEntry = VocabCoachCheckEntry | VocabCoachQuestionEntry
 
-const CURRENT_VERSION_CODE = 110
-const CURRENT_VERSION_NAME = 'free110'
+const CURRENT_VERSION_CODE = 111
+const CURRENT_VERSION_NAME = 'free111'
 const API_BASE = 'https://jj-teacher.onrender.com'
 const ALLOWED_APP_EMAIL = '965800jay@gmail.com'
 const TARGET_LANGUAGE = 'english'
@@ -272,6 +278,46 @@ function writeJson(key: string, value: unknown) {
 
 function makeId(prefix = 'id') {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+}
+
+function readFileAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result || ''))
+    reader.onerror = () => reject(new Error('图片读取失败，请重试'))
+    reader.readAsDataURL(file)
+  })
+}
+
+function normalizeImageSentenceImportItems(data: Record<string, unknown>): ImageSentenceImportItem[] {
+  const rawItems = Array.isArray(data.sentences)
+    ? data.sentences
+    : Array.isArray(data.results)
+      ? data.results
+      : []
+  const seen = new Set<string>()
+
+  return rawItems
+    .map((item) => {
+      const source = item && typeof item === 'object' ? item as Record<string, unknown> : {}
+      const english = String(source.english || source.text || source.sentence || '')
+        .replace(/\s+/g, ' ')
+        .replace(/\s+([,.!?;:])/g, '$1')
+        .trim()
+        .slice(0, 260)
+      const chinese = String(source.chinese || source.meaning || source.translation || source.note || '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 260)
+      const category = normalizeCategoryName(String(source.category || '') || inferSentenceCategory(english, chinese))
+      if (!english || !/[a-z]/i.test(english) || /[\u4e00-\u9fff]/.test(english)) return null
+      const key = english.toLowerCase()
+      if (seen.has(key)) return null
+      seen.add(key)
+      return { english, chinese: chinese || '中文意思待补充', category }
+    })
+    .filter(Boolean)
+    .slice(0, 20) as ImageSentenceImportItem[]
 }
 
 function normalizeSentence(item: Partial<SavedSentence> & Record<string, unknown>, index = 0): SavedSentence | null {
@@ -1120,6 +1166,7 @@ export default function ZhiyuApp() {
   const [generatedSentence, setGeneratedSentence] = useState<{ english: string; chinese: string; category: string } | null>(null)
   const [isGeneratingSentence, setIsGeneratingSentence] = useState(false)
   const [generationError, setGenerationError] = useState('')
+  const [isImageSentenceImporting, setIsImageSentenceImporting] = useState(false)
   const [showExam, setShowExam] = useState(false)
   const [examItems, setExamItems] = useState<ExamSourceItem[]>([])
   const [examTitle, setExamTitle] = useState('关键词填空考试')
@@ -1180,6 +1227,7 @@ export default function ZhiyuApp() {
   const selectDialogueRequestLockRef = useRef(false)
   const sentenceAiPreloadInFlightRef = useRef(new Set<string>())
   const translateTeacherTextRef = useRef<(text: string) => Promise<string>>(async () => '')
+  const imageSentenceInputRef = useRef<HTMLInputElement | null>(null)
   const nativeBackExitAtRef = useRef(0)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const selectRetryRef = useRef<{
@@ -1947,6 +1995,69 @@ export default function ZhiyuApp() {
     setSentences((current) => [...newItems, ...current])
     setHomeView('learning')
   }, [])
+
+  const handleAddImageSentences = useCallback((items: ImageSentenceImportItem[]) => {
+    const existing = new Set(sentencesRef.current.map((item) => item.text.replace(/\s+/g, ' ').trim().toLowerCase()))
+    const seen = new Set<string>()
+    const newItems = items
+      .map((item) => {
+        const english = item.english.replace(/\s+/g, ' ').trim()
+        const chinese = item.chinese.replace(/\s+/g, ' ').trim()
+        const key = english.toLowerCase()
+        if (!english || existing.has(key) || seen.has(key)) return null
+        seen.add(key)
+        return {
+          id: makeId('image-sentence'),
+          text: english,
+          note: chinese || '中文意思待补充',
+          category: normalizeCategoryName(item.category || inferSentenceCategory(english, chinese)),
+          learned: false,
+          learnedAt: null,
+          aiExplanation: ''
+        }
+      })
+      .filter(Boolean) as SavedSentence[]
+
+    if (!newItems.length) return 0
+    setSentences((current) => [...newItems, ...current])
+    setHomeView('learning')
+    return newItems.length
+  }, [])
+
+  const handleImageSentenceUpload = useCallback(async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file || isImageSentenceImporting) return
+    if (!file.type.startsWith('image/')) {
+      showToast('请选择图片文件')
+      return
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      showToast('图片太大，请换一张小一点的图片')
+      return
+    }
+
+    setIsImageSentenceImporting(true)
+    try {
+      const image = await readFileAsDataUrl(file)
+      const data = await requestAiTeacher({
+        mode: 'image-sentences',
+        image,
+        imageType: file.type
+      })
+      const items = normalizeImageSentenceImportItems(data as Record<string, unknown>)
+      if (!items.length) {
+        showToast('没有识别到英文句子')
+        return
+      }
+      const addedCount = handleAddImageSentences(items)
+      showToast(addedCount > 0 ? `已加入 ${addedCount} 个句子` : '这些句子已经在句库里')
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : '识别失败，请重试')
+    } finally {
+      setIsImageSentenceImporting(false)
+    }
+  }, [handleAddImageSentences, isImageSentenceImporting, showToast])
 
   useEffect(() => {
     const handleAddWordExample = (event: Event) => {
@@ -3319,7 +3430,14 @@ export default function ZhiyuApp() {
               </label>
 
               {homeView !== 'vocab' && (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <input
+                    ref={imageSentenceInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageSentenceUpload}
+                  />
                   <button
                     id="reviewButton"
                     onClick={startSentenceExam}
@@ -3330,6 +3448,18 @@ export default function ZhiyuApp() {
                     )}
                   >
                     ✍️ 默写复习
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => imageSentenceInputRef.current?.click()}
+                    disabled={isImageSentenceImporting}
+                    className={cn(
+                      "h-10 shrink-0 px-3 rounded-2xl text-xs font-semibold transition-premium flex items-center gap-1.5",
+                      isImageSentenceImporting ? "glass-button text-white/35" : "glass-button text-white/75 hover:text-white"
+                    )}
+                  >
+                    <ImagePlus className="w-4 h-4" />
+                    {isImageSentenceImporting ? '识别中' : '识别图片'}
                   </button>
                   <div className="min-w-0 flex-1 flex items-center justify-end gap-2">
                     <span className="text-[11px] text-white/35 font-medium">语速</span>

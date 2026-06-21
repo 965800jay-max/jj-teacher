@@ -1,6 +1,6 @@
 {
-  "versionCode": 110,
-  "versionName": "free110",
-  "apkUrl": "https://files.catbox.moe/br76a9.apk",
-  "notes": "free110: 修复语法优化卡片没有显示的问题，卡片现在正确显示在用户错误英文句子下方。"
+  "versionCode": 111,
+  "versionName": "free111",
+  "apkUrl": "https://files.catbox.moe/6w9mgk.apk",
+  "notes": "free111: 首页新增图片识别句子导入，可从图片提取英文句子并自动补中文意思。"
 }

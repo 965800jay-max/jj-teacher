@@ -55,6 +55,7 @@ const memoryListFields = [
   "avoid",
 ];
 const maxTranscriptionAudioBytes = Number(process.env.MAX_TRANSCRIPTION_AUDIO_BYTES || 10 * 1024 * 1024);
+const maxImageImportBytes = Number(process.env.MAX_IMAGE_IMPORT_BYTES || 8 * 1024 * 1024);
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -350,6 +351,19 @@ function publicUser(user) {
 
 function limitText(value, maxLength) {
   return String(value || "").trim().slice(0, maxLength);
+}
+
+function normalizeImportImageDataUrl(value) {
+  const image = String(value || "").trim();
+  const match = image.match(/^data:image\/(png|jpe?g|webp);base64,([a-z0-9+/=]+)$/i);
+  if (!match) return "";
+
+  const byteEstimate = Math.ceil(match[2].length * 0.75);
+  if (byteEstimate > maxImageImportBytes) {
+    throw httpError(413, "图片太大，请换一张更小的图片。");
+  }
+
+  return image;
 }
 
 function normalizeTargetLanguage(code) {
@@ -879,7 +893,7 @@ async function handleSpeech(request, response) {
 
   let payload;
   try {
-    payload = JSON.parse(await collectBody(request));
+    payload = await readJsonBody(request, Math.ceil(maxImageImportBytes * 1.45) + 10000);
   } catch {
     sendJson(response, 400, { error: "Invalid request" });
     return;
@@ -1034,6 +1048,30 @@ async function handleAiTeacher(request, response) {
   const mode = String(payload.mode || "chat");
   const targetLanguage = normalizeTargetLanguage(payload.targetLanguage);
   const memoryProfile = sanitizeMemoryProfile(payload.memoryProfile || payload.memory);
+  if (mode === "image-sentences") {
+    let imageDataUrl;
+    try {
+      imageDataUrl = normalizeImportImageDataUrl(payload.image || payload.imageData);
+    } catch (error) {
+      sendJson(response, error.status || 400, {
+        error: "Invalid image",
+        message: error.message || "图片无效，请重新选择。",
+      });
+      return;
+    }
+
+    if (!imageDataUrl) {
+      sendJson(response, 400, { error: "Image is required", message: "请选择图片。" });
+      return;
+    }
+
+    const raw = await askAiTeacherWithImage(buildImageSentencesPrompt(targetLanguage), imageDataUrl, mode, targetLanguage);
+    const data = extractJsonObject(raw) || {};
+    const sentences = normalizeImageSentenceResults(data.sentences || data.results || data);
+    sendJson(response, 200, { sentences });
+    return;
+  }
+
   if (mode === "convert-language") {
     const sourceLanguage = normalizeTargetLanguage(payload.sourceLanguage);
     const reply = await askAiTeacher(buildConvertLanguagePrompt(payload, sourceLanguage, targetLanguage), mode, targetLanguage);
@@ -1520,6 +1558,24 @@ function buildGenerateSentencePrompt(chinese, targetLanguage = "english") {
     "Category must be short Simplified Chinese. Prefer one of: 理发, 客户沟通, 日常, 健身, 约会, 其他.",
     "Only create a new category if it is clearly useful and no preferred category fits. Keep it under 6 Chinese characters.",
     `Chinese meaning: ${chinese}`,
+  ].join("\n");
+}
+
+function buildImageSentencesPrompt(targetLanguage = "english") {
+  const language = getTargetLanguageInfo(targetLanguage);
+  return [
+    `Read the uploaded image and extract useful ${language.label} learning sentences.`,
+    "Return compact JSON only. No Markdown. No explanation.",
+    'Required shape: {"sentences":[{"english":"","chinese":"","category":""}]}',
+    "Rules:",
+    "1. Extract one or multiple complete English sentences or practical spoken phrases from the image.",
+    "2. Ignore app UI labels, buttons, watermarks, random single words, names, timestamps, and decorative text unless they are clearly a useful learning sentence.",
+    "3. If the image already has a Chinese meaning near an English sentence, use that Chinese meaning.",
+    "4. If the image has no Chinese meaning for a sentence, translate it into concise natural Simplified Chinese.",
+    "5. Do not translate line by line when context shows a better natural Chinese meaning.",
+    "6. Keep the English exactly useful and natural; fix only obvious OCR spacing or punctuation mistakes.",
+    "7. Remove duplicates. Return at most 20 items.",
+    "8. Category must be short Simplified Chinese. Prefer: 理发, 客户沟通, 日常, 健身, 约会, 其他.",
   ].join("\n");
 }
 
@@ -2069,6 +2125,39 @@ function normalizeLanguageAssistantResults(rawResults, mode, input = "") {
   return results.slice(0, 5);
 }
 
+function normalizeImageSentenceResults(rawResults) {
+  const sourceList = Array.isArray(rawResults) ? rawResults : [rawResults];
+  const results = [];
+  const seen = new Set();
+
+  for (const item of sourceList) {
+    const source = item && typeof item === "object" ? item : {};
+    const english = String(source.english || source.text || source.sentence || "")
+      .replace(/\s+/g, " ")
+      .replace(/\s+([,.!?;:])/g, "$1")
+      .trim()
+      .slice(0, 260);
+    const chinese = String(source.chinese || source.meaning || source.translation || source.note || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 260);
+    if (!english || !/[a-z]/i.test(english) || /[\u4e00-\u9fff]/u.test(english)) continue;
+
+    const key = english.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    results.push({
+      english,
+      chinese: chinese || "中文意思待补充",
+      category: normalizeGeneratedCategory(String(source.category || ""), english, chinese),
+    });
+    if (results.length >= 20) break;
+  }
+
+  return results;
+}
+
 function normalizeGeneratedCategory(category, english = "", chinese = "") {
   const raw = String(category || "").replace(/\s+/g, "").trim();
   const text = `${raw} ${english} ${chinese}`.toLowerCase();
@@ -2443,6 +2532,33 @@ async function askAiTeacher(prompt, mode = "chat", targetLanguage = "english") {
   return extractAiText(data).trim();
 }
 
+async function askAiTeacherWithImage(prompt, imageDataUrl, mode = "image-sentences", targetLanguage = "english") {
+  const input = [
+    {
+      role: "user",
+      content: [
+        { type: "input_text", text: prompt },
+        { type: "input_image", image_url: imageDataUrl },
+      ],
+    },
+  ];
+  const aiResponse = await fetch(aiResponsesUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${aiApiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(buildAiRequestBody(input, mode, targetLanguage)),
+  });
+
+  const data = await aiResponse.json().catch(() => ({}));
+  if (!aiResponse.ok) {
+    throw new Error(data.error?.message || `AI image request failed: ${aiResponse.status}`);
+  }
+
+  return extractAiText(data).trim();
+}
+
 async function askAiTeacherStream(prompt, mode = "chat", targetLanguage = "english", onDelta = () => {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), aiStreamTimeoutMs);
@@ -2504,10 +2620,10 @@ async function askAiTeacherStream(prompt, mode = "chat", targetLanguage = "engli
   }
 }
 
-function buildAiRequestBody(prompt, mode = "chat", targetLanguage = "english", stream = false) {
+function buildAiRequestBody(input, mode = "chat", targetLanguage = "english", stream = false) {
   const body = {
     model: aiModel,
-    input: prompt,
+    input,
     instructions: buildAiInstructions(mode, targetLanguage),
     reasoning: {
       effort: getAiReasoningEffort(mode),
@@ -2533,6 +2649,7 @@ function getAiReasoningEffort(mode) {
 
 function getAiMaxOutputTokens(mode) {
   if (mode === "memory") return Math.max(aiMaxOutputTokens, 1400);
+  if (mode === "image-sentences") return Math.max(aiMaxOutputTokens, 1600);
   if (mode === "language-assistant") return Math.max(aiMaxOutputTokens, 1200);
   if (mode === "custom-dialogue") return Math.max(aiMaxOutputTokens, 2200);
   if (mode === "vocab-example") return Math.max(aiMaxOutputTokens, 500);
@@ -2551,6 +2668,9 @@ function buildAiInstructions(mode = "chat", targetLanguage = "english") {
   }
   if (mode === "generate-sentence") {
     return `Return compact JSON only. Generate one natural spoken ${language.label} sentence from the Chinese meaning, with a short Chinese category. No Markdown, no extra text.`;
+  }
+  if (mode === "image-sentences") {
+    return `You extract useful ${language.label} learning sentences from images. Return valid compact JSON only with a sentences array. Each item must include english, chinese, and category. No Markdown, no prose outside JSON.`;
   }
   if (mode === "language-assistant") {
     return `You are a compact mobile ${language.label} language assistant. Return valid compact JSON only with a results array. English must be natural, spoken, local, and directly usable. No Markdown, no prose outside JSON.`;
