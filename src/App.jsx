@@ -192,7 +192,9 @@ function authHeaders(token = getStoredSession()) {
 
 function serverUrl(path) {
   if (/^https?:\/\//i.test(path)) return path
-  return serverApiBaseUrl ? `${serverApiBaseUrl}${path}` : path
+  if (!serverApiBaseUrl) return path
+  const normalizedPath = path.startsWith('./') ? path.slice(1) : path
+  return `${serverApiBaseUrl}${normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`}`
 }
 
 function cloudTtsUrl(text, speechSettings = currentSpeechSettings) {
@@ -2049,7 +2051,7 @@ function Dashboard({ courses, loadingCourseId, onPractice, onNavigate, savedItem
           </div>
           <button className="primary-button" type="button" onClick={() => onPractice(primaryCourse.id, getContinueLesson(primaryCourse))} disabled={isPrimaryLoading}>
             <CirclePlay size={18} />
-            {isPrimaryLoading ? '加载中' : '继续练习'}
+            {isPrimaryLoading ? '加载中' : '开始学习'}
           </button>
         </div>
 
@@ -2105,7 +2107,7 @@ function CoursesView({ courses, query, loadingCourseId, onOpenCourse, onPractice
           <CourseCard
             key={course.id}
             course={course}
-            actionLabel={loadingCourseId === course.id ? '加载中' : '练习'}
+            actionLabel={loadingCourseId === course.id ? '加载中' : '开始学习'}
             onOpen={() => onOpenCourse(course.id)}
             onAction={() => onPractice(course.id, getContinueLesson(course))}
           />
@@ -2146,7 +2148,7 @@ function CourseDetail({ course, loadingCourseId, onBack, onPractice }) {
         </div>
         <button className="primary-button hero-action" type="button" onClick={() => onPractice(course.id, getContinueLesson(course))} disabled={isLoading}>
           <Play size={18} />
-          {isLoading ? '加载中' : '继续学习'}
+          {isLoading ? '加载中' : '开始学习'}
         </button>
       </section>
 
@@ -3140,7 +3142,7 @@ function ExitGameDialog({ onClose, onExitHome, onExitCourses }) {
           <ChevronRight size={18} />
         </button>
         <button className="primary-button" type="button" onClick={onClose}>
-          继续学习
+          开始学习
           <Play size={18} />
         </button>
       </section>
