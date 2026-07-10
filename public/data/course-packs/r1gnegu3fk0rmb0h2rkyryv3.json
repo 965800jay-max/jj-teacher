@@ -1,0 +1,3464 @@
+{
+  "capturedAt": "2026-07-08T06:00:35.172Z",
+  "source": "https://julebu.ai",
+  "coursePack": {
+    "id": "r1gnegu3fk0rmb0h2rkyryv3",
+    "title": "Level 1 04. Who Am I",
+    "description": "Little Fox 启蒙动画《Who Am I》：通过工具和物品猜职业，反复操练 I have… / This is my… 句型，认识各行各业。20 集短视频，每集约 1.5 分钟，适合零基础启蒙。",
+    "cover": "https://assets.julebu.ai/images/course-packs/yqlsk7sqbskwr0f8a3a6psu4/ff61b3edf66bb1f8fc1bf8ebf836c09be00b370c11191d23c69f0acf56d2e696.jpg",
+    "author": {
+      "type": "user",
+      "name": "未知用户",
+      "username": "user_o1ijbs",
+      "id": "v2ezhz5sthzi",
+      "avatar": "https://assets.julebu.ai/avatars/0d4a1e4623a65da2be92b887c84f377257cef72ded09e88a816fa28a93171e1c.jpeg"
+    },
+    "usageCount": 2,
+    "freeTrialCourseCount": 4,
+    "courseCount": 20,
+    "mode": "chinese_to_english",
+    "presetKey": "advanced"
+  },
+  "courses": [
+    {
+      "id": "uh3sxmp20kowy0sd5z3ytg0t",
+      "order": 1,
+      "title": "001 我有一把勺子",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/c5248e6a-5baf-469a-b064-08095818140f.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "ohbccdwuyzryf330md0cbmms",
+          "content": "I have a spoon.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "rhed2ikaumfbd5voyeq13hmm",
+          "content": "I have a tall hat.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "wh8lmtrtjo7rmnsxom44en10",
+          "content": "I have a white apron.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "be5pt6p51lubhpg08kpesy0k",
+          "content": "I have some pans.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "qlmxuz0p1mlkbkhv0k5qxr6l",
+          "content": "I have a big pot.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "wzojtkwj19d1uoad0nbo9q1q",
+          "content": "I have a knife.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "igl5w8wx9qvv3546jr7px80v",
+          "content": "I have some vegetables.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "amo7rla5hymv9i0l3h3jqqky",
+          "content": "Who am I?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "v2guiwvboxoa22d415uy07n1",
+          "content": "I am a chef.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "ptw9x7prggpjh9jntv4ja4ij",
+          "order": 1,
+          "chinese": "我有一把勺子。",
+          "english": "I have a spoon",
+          "soundmark": "aɪ hæv; həv ə; eɪ spuːn",
+          "type": "sentence",
+          "sentenceId": "ohbccdwuyzryf330md0cbmms",
+          "image": null,
+          "startTime": 12.6,
+          "endTime": 16.31
+        },
+        {
+          "id": "c6r2oe1ha6pp38w6arsbapki",
+          "order": 2,
+          "chinese": "我有一顶高高的帽子。",
+          "english": "I have a tall hat",
+          "soundmark": "aɪ hæv; həv ə; eɪ tɔːl hæt",
+          "type": "sentence",
+          "sentenceId": "rhed2ikaumfbd5voyeq13hmm",
+          "image": null,
+          "startTime": 22.94,
+          "endTime": 25.5
+        },
+        {
+          "id": "ix5tipa9ghvsx7hscjqcj3sl",
+          "order": 3,
+          "chinese": "我有一条白围裙。",
+          "english": "I have a white apron",
+          "soundmark": "aɪ hæv; həv ə; eɪ waɪt ˈeɪprən",
+          "type": "sentence",
+          "sentenceId": "wh8lmtrtjo7rmnsxom44en10",
+          "image": null,
+          "startTime": 31.26,
+          "endTime": 33.71
+        },
+        {
+          "id": "ed8c7xg9my4utc2gqfrqp77d",
+          "order": 4,
+          "chinese": "我有几个平底锅。",
+          "english": "I have some pans",
+          "soundmark": "aɪ hæv; həv sʌm; səm pænz",
+          "type": "sentence",
+          "sentenceId": "be5pt6p51lubhpg08kpesy0k",
+          "image": null,
+          "startTime": 39.56,
+          "endTime": 41.97
+        },
+        {
+          "id": "zsjk05eunsel2w59pso7xbda",
+          "order": 5,
+          "chinese": "我有一口大锅。",
+          "english": "I have a big pot",
+          "soundmark": "aɪ hæv; həv ə; eɪ bɪɡ pɑːt",
+          "type": "sentence",
+          "sentenceId": "qlmxuz0p1mlkbkhv0k5qxr6l",
+          "image": null,
+          "startTime": 47.9,
+          "endTime": 50.5
+        },
+        {
+          "id": "hwu5b7uhq2le1vj3e7o89ccs",
+          "order": 6,
+          "chinese": "我有一把刀。",
+          "english": "I have a knife",
+          "soundmark": "aɪ hæv; həv ə; eɪ naɪf",
+          "type": "sentence",
+          "sentenceId": "wzojtkwj19d1uoad0nbo9q1q",
+          "image": null,
+          "startTime": 56.22,
+          "endTime": 58.36
+        },
+        {
+          "id": "rc7y44h3zvoq90o9ri8pphev",
+          "order": 7,
+          "chinese": "我有一些蔬菜。",
+          "english": "I have some vegetables",
+          "soundmark": "aɪ hæv; həv sʌm; səm ˈvedʒtəb(ə)lz",
+          "type": "sentence",
+          "sentenceId": "igl5w8wx9qvv3546jr7px80v",
+          "image": null,
+          "startTime": 64.56,
+          "endTime": 67.13
+        },
+        {
+          "id": "vzz08pebtqc1qrucep9pruca",
+          "order": 8,
+          "chinese": "我是谁？",
+          "english": "Who am I ?",
+          "soundmark": "huː æm; əm aɪ",
+          "type": "sentence",
+          "sentenceId": "amo7rla5hymv9i0l3h3jqqky",
+          "image": null,
+          "startTime": 72.34,
+          "endTime": 74.65
+        },
+        {
+          "id": "wf82k679gpj2ks0csp7n2kpg",
+          "order": 9,
+          "chinese": "我是一名厨师。",
+          "english": "I am a chef",
+          "soundmark": "aɪ æm; əm ə; eɪ ʃef",
+          "type": "sentence",
+          "sentenceId": "v2guiwvboxoa22d415uy07n1",
+          "image": null,
+          "startTime": 79.81,
+          "endTime": 82.11
+        }
+      ]
+    },
+    {
+      "id": "t7kq1vrlexucpa8fwa94xtaa",
+      "order": 2,
+      "title": "002 我有一把扳手",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/8e9d69ba-e456-4e09-8afe-197580ad1804.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "dtt3atpz29w7ce2ip49ls1pq",
+          "content": "I have a wrench.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "w0heoo9jedvpv2xxv1bvzbjz",
+          "content": "I have many cars.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "nx5jrxuxygqublcrua67jq9j",
+          "content": "I have some tires.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "rpmw519v66erfvg64d61k9og",
+          "content": "I have a tow truck.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ypbqqdt85o4flzla910fpzy4",
+          "content": "I have a toolbox.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "lfipm5dcy0op2hj0w7hhrgsi",
+          "content": "I have a car lift.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "m5171hawm7nu8xzgoqr6h8z6",
+          "content": "I have a big garage.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "hj46wo1smcbzllmckxk7j3m3",
+          "content": "Who am I?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "zbbx7l8jwopfpj3oauncdgmb",
+          "content": "I am a mechanic.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "qnrg99wtfvr5hnnkpm2x03xc",
+          "order": 1,
+          "chinese": "我有一把扳手。",
+          "english": "I have a wrench",
+          "soundmark": "aɪ hæv; həv ə; eɪ rentʃ",
+          "type": "sentence",
+          "sentenceId": "dtt3atpz29w7ce2ip49ls1pq",
+          "image": null,
+          "startTime": 12.67,
+          "endTime": 15.99
+        },
+        {
+          "id": "ypx4us3so7trt92v64ulikie",
+          "order": 2,
+          "chinese": "我有很多汽车。",
+          "english": "I have many cars",
+          "soundmark": "aɪ hæv; həv ˈmeni kɑːrz",
+          "type": "sentence",
+          "sentenceId": "w0heoo9jedvpv2xxv1bvzbjz",
+          "image": null,
+          "startTime": 23.13,
+          "endTime": 25.33
+        },
+        {
+          "id": "u3qcbciqepklcewwguu1z4zh",
+          "order": 3,
+          "chinese": "我有一些轮胎。",
+          "english": "I have some tires",
+          "soundmark": "aɪ hæv; həv sʌm; səm ˈtaɪərz",
+          "type": "sentence",
+          "sentenceId": "nx5jrxuxygqublcrua67jq9j",
+          "image": null,
+          "startTime": 31.45,
+          "endTime": 33.46
+        },
+        {
+          "id": "ge2nsyj8yjz4wmrfd8iqayba",
+          "order": 4,
+          "chinese": "我有一辆拖车。",
+          "english": "I have a tow truck",
+          "soundmark": "aɪ hæv; həv ə; eɪ toʊ trʌk",
+          "type": "sentence",
+          "sentenceId": "rpmw519v66erfvg64d61k9og",
+          "image": null,
+          "startTime": 39.78,
+          "endTime": 41.9
+        },
+        {
+          "id": "o971gmbul9fk6dsok6z0fs4s",
+          "order": 5,
+          "chinese": "我有一个工具箱。",
+          "english": "I have a toolbox",
+          "soundmark": "aɪ hæv; həv ə; eɪ ˈtuːlbɑːks",
+          "type": "sentence",
+          "sentenceId": "ypbqqdt85o4flzla910fpzy4",
+          "image": null,
+          "startTime": 48.11,
+          "endTime": 50.06
+        },
+        {
+          "id": "mjo5d3p9w7slt6fedbctkq9t",
+          "order": 6,
+          "chinese": "我有一台汽车升降机。",
+          "english": "I have a car lift",
+          "soundmark": "aɪ hæv; həv ə; eɪ kɑːr lɪft",
+          "type": "sentence",
+          "sentenceId": "lfipm5dcy0op2hj0w7hhrgsi",
+          "image": null,
+          "startTime": 56.42,
+          "endTime": 58.53
+        },
+        {
+          "id": "gi98vulhuiz589y6q0zqhj3f",
+          "order": 7,
+          "chinese": "我有一个大车库。",
+          "english": "I have a big garage",
+          "soundmark": "aɪ hæv; həv ə; eɪ bɪɡ ɡəˈrɑːʒ",
+          "type": "sentence",
+          "sentenceId": "m5171hawm7nu8xzgoqr6h8z6",
+          "image": null,
+          "startTime": 64.75,
+          "endTime": 67.18
+        },
+        {
+          "id": "zsgcsd0m294z8t6ho2slbjxm",
+          "order": 8,
+          "chinese": "我是谁？",
+          "english": "Who am I ?",
+          "soundmark": "huː æm; əm aɪ",
+          "type": "sentence",
+          "sentenceId": "hj46wo1smcbzllmckxk7j3m3",
+          "image": null,
+          "startTime": 72.58,
+          "endTime": 74.66
+        },
+        {
+          "id": "xyj1upxcl7qfkooadu4n7g5v",
+          "order": 9,
+          "chinese": "我是一名修理工。",
+          "english": "I am a mechanic",
+          "soundmark": "aɪ æm; əm ə; eɪ məˈkænɪk; mɪˈkænɪk",
+          "type": "sentence",
+          "sentenceId": "zbbx7l8jwopfpj3oauncdgmb",
+          "image": null,
+          "startTime": 80.44,
+          "endTime": 82.71
+        }
+      ]
+    },
+    {
+      "id": "rbjpxoaa2eqm6z7lbv2dd3rc",
+      "order": 3,
+      "title": "003 这是我的水桶",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/c0b6c784-76e7-44a5-b029-4eaa80b4f447.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "e2upooirukzg5g0dqpurauav",
+          "content": "This is my bucket.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "mw8d2cwg225sw7ec8jbuiyp0",
+          "content": "This is my roller.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vdkv730sd8l686zp4b636at9",
+          "content": "This is my tray.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "zbt8805kryl2ta4026ldsnce",
+          "content": "This is my ladder.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ufu1c43zane1bvwoc958g0wk",
+          "content": "This is my cap.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ucs9tb2e6fa5pyl3ciuxdggk",
+          "content": "This is my brush.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "i6xv1in8nk8m4rd6eevrmsvc",
+          "content": "These are my paint cans.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "th86e2shtay5d9aybsj7kd9e",
+          "content": "Who am I?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "sz8a83otjkxthac0vcyhyfw3",
+          "content": "I am a painter.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "veiwtt484zmcemgrecmpapy1",
+          "order": 1,
+          "chinese": "这是我的桶。",
+          "english": "This is my bucket",
+          "soundmark": "ðɪs ɪz maɪ ˈbʌkɪt",
+          "type": "sentence",
+          "sentenceId": "e2upooirukzg5g0dqpurauav",
+          "image": null,
+          "startTime": 12.4,
+          "endTime": 16.16
+        },
+        {
+          "id": "hmeexl1iubr2zr9x5en8r514",
+          "order": 2,
+          "chinese": "这是我的滚筒。",
+          "english": "This is my roller",
+          "soundmark": "ðɪs ɪz maɪ ˈroʊlər",
+          "type": "sentence",
+          "sentenceId": "mw8d2cwg225sw7ec8jbuiyp0",
+          "image": null,
+          "startTime": 22.74,
+          "endTime": 25.05
+        },
+        {
+          "id": "iz7jz7vv2udgw1hb105za0oh",
+          "order": 3,
+          "chinese": "这是我的托盘。",
+          "english": "This is my tray",
+          "soundmark": "ðɪs ɪz maɪ treɪ",
+          "type": "sentence",
+          "sentenceId": "vdkv730sd8l686zp4b636at9",
+          "image": null,
+          "startTime": 31.08,
+          "endTime": 33.39
+        },
+        {
+          "id": "g96ckpi909yo735lm58xawmu",
+          "order": 4,
+          "chinese": "这是我的梯子。",
+          "english": "This is my ladder",
+          "soundmark": "ðɪs ɪz maɪ ˈlædər",
+          "type": "sentence",
+          "sentenceId": "zbt8805kryl2ta4026ldsnce",
+          "image": null,
+          "startTime": 39.41,
+          "endTime": 41.71
+        },
+        {
+          "id": "m0bw29c6amyyegddfa8c9c37",
+          "order": 5,
+          "chinese": "这是我的帽子。",
+          "english": "This is my cap",
+          "soundmark": "ðɪs ɪz maɪ kæp",
+          "type": "sentence",
+          "sentenceId": "ufu1c43zane1bvwoc958g0wk",
+          "image": null,
+          "startTime": 47.73,
+          "endTime": 49.89
+        },
+        {
+          "id": "dh56dawnhxe51ntdg9b3qk6n",
+          "order": 6,
+          "chinese": "这是我的刷子。",
+          "english": "This is my brush",
+          "soundmark": "ðɪs ɪz maɪ brʌʃ",
+          "type": "sentence",
+          "sentenceId": "ucs9tb2e6fa5pyl3ciuxdggk",
+          "image": null,
+          "startTime": 56.04,
+          "endTime": 58.48
+        },
+        {
+          "id": "qa372cmfkgr1wwug9fme6gno",
+          "order": 7,
+          "chinese": "这些是我的油漆罐。",
+          "english": "These are my paint cans",
+          "soundmark": "ðiːz ɑːr; ər maɪ peɪnt kænz",
+          "type": "sentence",
+          "sentenceId": "i6xv1in8nk8m4rd6eevrmsvc",
+          "image": null,
+          "startTime": 64.38,
+          "endTime": 66.91
+        },
+        {
+          "id": "b36a2dt6bq5jhjf3ero45wi5",
+          "order": 8,
+          "chinese": "我是谁？",
+          "english": "Who am I ?",
+          "soundmark": "huː æm; əm aɪ",
+          "type": "sentence",
+          "sentenceId": "th86e2shtay5d9aybsj7kd9e",
+          "image": null,
+          "startTime": 72.15,
+          "endTime": 74.21
+        },
+        {
+          "id": "de6amv9n5gccajq9d0x2gw5h",
+          "order": 9,
+          "chinese": "我是一名粉刷匠。",
+          "english": "I am a painter",
+          "soundmark": "aɪ æm; əm ə; eɪ ˈpeɪntər",
+          "type": "sentence",
+          "sentenceId": "sz8a83otjkxthac0vcyhyfw3",
+          "image": null,
+          "startTime": 80.05,
+          "endTime": 82.74
+        }
+      ]
+    },
+    {
+      "id": "yvlti8iub25z9w3z6gh2ckl0",
+      "order": 4,
+      "title": "004 这是我的吉他",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/d14e3331-9412-4f02-b6cc-c8a12e8b5ef7.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "v8bt22n73yvsp5upkurfqrwn",
+          "content": "This is my guitar.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "h442g4mb8oacbyzaets8d2gi",
+          "content": "This is my piano.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "j1ai1ialz9xgwf7zdyqkjieo",
+          "content": "This is my sheet music.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "cqlsa6bdlkiwipj8li800uwo",
+          "content": "These are my drums.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "uznfqc7osin8hyhhmxk7ag6d",
+          "content": "This is my microphone.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "qhn7u2xzj7667eekutfyu3dd",
+          "content": "These are my speakers.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "hxc769f4mg0hwdl3vhii8e92",
+          "content": "This is my stage.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "yob4duo8be5ol2e3ycjdwhqn",
+          "content": "Who am I?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "b3tdf27d1rm70y1ip6hi3azx",
+          "content": "I am a musician.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "ihlkk63quvwsiipamr1dj8mm",
+          "order": 1,
+          "chinese": "这是我的吉他。",
+          "english": "This is my guitar",
+          "soundmark": "ðɪs ɪz maɪ ɡɪˈtɑːr",
+          "type": "sentence",
+          "sentenceId": "v8bt22n73yvsp5upkurfqrwn",
+          "image": null,
+          "startTime": 12.33,
+          "endTime": 15.81
+        },
+        {
+          "id": "yzbhayigb5qlpscx7ihh8lmf",
+          "order": 2,
+          "chinese": "这是我的钢琴。",
+          "english": "This is my piano",
+          "soundmark": "ðɪs ɪz maɪ piˈænoʊ",
+          "type": "sentence",
+          "sentenceId": "h442g4mb8oacbyzaets8d2gi",
+          "image": null,
+          "startTime": 22.19,
+          "endTime": 24.3
+        },
+        {
+          "id": "n4ar5oqpdq3xp24oh9ue0qfe",
+          "order": 3,
+          "chinese": "这是我的乐谱。",
+          "english": "This is my sheet music",
+          "soundmark": "ðɪs ɪz maɪ ʃiːt ˈmjuːzɪk",
+          "type": "sentence",
+          "sentenceId": "j1ai1ialz9xgwf7zdyqkjieo",
+          "image": null,
+          "startTime": 30.51,
+          "endTime": 32.85
+        },
+        {
+          "id": "q8gh9zi6gd1lft9iht6q1gzq",
+          "order": 4,
+          "chinese": "这些是我的鼓。",
+          "english": "These are my drums",
+          "soundmark": "ðiːz ɑːr; ər maɪ drʌmz",
+          "type": "sentence",
+          "sentenceId": "cqlsa6bdlkiwipj8li800uwo",
+          "image": null,
+          "startTime": 38.84,
+          "endTime": 41.13
+        },
+        {
+          "id": "oa6pvfkpo5m3w6ivs9uw6mpu",
+          "order": 5,
+          "chinese": "这是我的麦克风。",
+          "english": "This is my microphone",
+          "soundmark": "ðɪs ɪz maɪ ˈmaɪkrəfoʊn",
+          "type": "sentence",
+          "sentenceId": "uznfqc7osin8hyhhmxk7ag6d",
+          "image": null,
+          "startTime": 47.17,
+          "endTime": 49.43
+        },
+        {
+          "id": "gysfjw7amjx2w3uhbc1bf58q",
+          "order": 6,
+          "chinese": "这些是我的音箱。",
+          "english": "These are my speakers",
+          "soundmark": "ðiːz ɑːr; ər maɪ ˈspikər",
+          "type": "sentence",
+          "sentenceId": "qhn7u2xzj7667eekutfyu3dd",
+          "image": null,
+          "startTime": 55.49,
+          "endTime": 57.67
+        },
+        {
+          "id": "sx7wmb9jwo3rtzcniyolw6qw",
+          "order": 7,
+          "chinese": "这是我的舞台。",
+          "english": "This is my stage",
+          "soundmark": "ðɪs ɪz maɪ steɪdʒ",
+          "type": "sentence",
+          "sentenceId": "hxc769f4mg0hwdl3vhii8e92",
+          "image": null,
+          "startTime": 63.8,
+          "endTime": 66.01
+        },
+        {
+          "id": "q9fj7fzbkac2ez1qxnx727fx",
+          "order": 8,
+          "chinese": "我是谁？",
+          "english": "Who am I ?",
+          "soundmark": "huː æm; əm aɪ",
+          "type": "sentence",
+          "sentenceId": "yob4duo8be5ol2e3ycjdwhqn",
+          "image": null,
+          "startTime": 71.63,
+          "endTime": 73.77
+        },
+        {
+          "id": "ja0pshrqiw0reqr5gu20mcbl",
+          "order": 9,
+          "chinese": "我是一名音乐家。",
+          "english": "I am a musician",
+          "soundmark": "aɪ æm; əm ə; eɪ mjuˈzɪʃ(ə)n",
+          "type": "sentence",
+          "sentenceId": "b3tdf27d1rm70y1ip6hi3azx",
+          "image": null,
+          "startTime": 79.56,
+          "endTime": 81.95
+        }
+      ]
+    },
+    {
+      "id": "hknvrcsjaszlti6k5ohe70zp",
+      "order": 5,
+      "title": "005 我有一把小锤子",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/b82ab10b-72f2-4284-8c63-d06b4a12e3b1.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "u3t51hzoc20vgdbir4pmie7w",
+          "content": "I have a tiny hammer.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ejfa2wf6p6td4zk0ao3fa95o",
+          "content": "I have a bandage.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "daqpy9dzu7or792vchqkkgfo",
+          "content": "I have an X-ray.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "qt29ql4kngqvdfdwy4ueqkz4",
+          "content": "I have a small light.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "zytfppt9aya1oflxhx2iam6g",
+          "content": "I have a white coat.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "c344k5ea5b0p7z3ki2hi8vvv",
+          "content": "I have a thermometer.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "rlfwymfw4507sr5nvg749xwi",
+          "content": "I have a patient.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "nzldfalfqddrfr0i6efs5zsx",
+          "content": "Who am I?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "bq589ymr23zd5bb4zmwo7ypn",
+          "content": "I am a doctor.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "brhmehdeptjvgockz68tckrt",
+          "order": 1,
+          "chinese": "我有一把小锤子。",
+          "english": "I have a tiny hammer",
+          "soundmark": "aɪ hæv; həv ə; eɪ ˈtaɪni ˈhæmər",
+          "type": "sentence",
+          "sentenceId": "u3t51hzoc20vgdbir4pmie7w",
+          "image": null,
+          "startTime": 12.4,
+          "endTime": 16.38
+        },
+        {
+          "id": "v62hlptbt44ilg2uls2eqq2w",
+          "order": 2,
+          "chinese": "我有一条绷带。",
+          "english": "I have a bandage",
+          "soundmark": "aɪ hæv; həv ə; eɪ ˈbændɪdʒ",
+          "type": "sentence",
+          "sentenceId": "ejfa2wf6p6td4zk0ao3fa95o",
+          "image": null,
+          "startTime": 22.82,
+          "endTime": 25.09
+        },
+        {
+          "id": "velw4xhoj4nu5yu9nkn10d6v",
+          "order": 3,
+          "chinese": "我有一张X光片。",
+          "english": "I have an X-ray",
+          "soundmark": "aɪ hæv; həv æn; ən ˈeks reɪ",
+          "type": "sentence",
+          "sentenceId": "daqpy9dzu7or792vchqkkgfo",
+          "image": null,
+          "startTime": 31.14,
+          "endTime": 33.38
+        },
+        {
+          "id": "o7c7xmll4ogzdv95tpdyd6md",
+          "order": 4,
+          "chinese": "我有一盏小灯。",
+          "english": "I have a small light",
+          "soundmark": "aɪ hæv; həv ə; eɪ smɔːl laɪt",
+          "type": "sentence",
+          "sentenceId": "qt29ql4kngqvdfdwy4ueqkz4",
+          "image": null,
+          "startTime": 39.47,
+          "endTime": 42.06
+        },
+        {
+          "id": "kmq32b9zy6prium6ynrgdak2",
+          "order": 5,
+          "chinese": "我有一件白大褂。",
+          "english": "I have a white coat",
+          "soundmark": "aɪ hæv; həv ə; eɪ waɪt koʊt",
+          "type": "sentence",
+          "sentenceId": "zytfppt9aya1oflxhx2iam6g",
+          "image": null,
+          "startTime": 47.79,
+          "endTime": 50.19
+        },
+        {
+          "id": "no0h3fzw5p50knvduqilewiz",
+          "order": 6,
+          "chinese": "我有一支体温计。",
+          "english": "I have a thermometer",
+          "soundmark": "aɪ hæv; həv ə; eɪ θərˈmɑːmɪtər",
+          "type": "sentence",
+          "sentenceId": "c344k5ea5b0p7z3ki2hi8vvv",
+          "image": null,
+          "startTime": 56.11,
+          "endTime": 58.53
+        },
+        {
+          "id": "k1mlfjo2m83klo70m1fcs9q9",
+          "order": 7,
+          "chinese": "我有一位病人。",
+          "english": "I have a patient",
+          "soundmark": "aɪ hæv; həv ə; eɪ ˈpeɪʃ(ə)nt",
+          "type": "sentence",
+          "sentenceId": "rlfwymfw4507sr5nvg749xwi",
+          "image": null,
+          "startTime": 64.43,
+          "endTime": 66.64
+        },
+        {
+          "id": "ya54m94a669rksc4jt3g0zhy",
+          "order": 8,
+          "chinese": "我是谁？",
+          "english": "Who am I ?",
+          "soundmark": "huː æm; əm aɪ",
+          "type": "sentence",
+          "sentenceId": "nzldfalfqddrfr0i6efs5zsx",
+          "image": null,
+          "startTime": 72.2,
+          "endTime": 74.46
+        },
+        {
+          "id": "baeq5ulm1z3cjtralem1as0t",
+          "order": 9,
+          "chinese": "我是一名医生。",
+          "english": "I am a doctor",
+          "soundmark": "aɪ æm; əm ə; eɪ ˈdɑːktər",
+          "type": "sentence",
+          "sentenceId": "bq589ymr23zd5bb4zmwo7ypn",
+          "image": null,
+          "startTime": 80.13,
+          "endTime": 82.53
+        }
+      ]
+    },
+    {
+      "id": "djoaekn5du9ctbwdnj3ftu1u",
+      "order": 6,
+      "title": "006 我有一把拖把",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/8f44570d-48a7-4892-8155-5f1569e9b956.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "rrp1gphpeido4kz79mmej5c9",
+          "content": "I have a mop.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "hi0a55z2webbicepmrcvucg8",
+          "content": "I have a big bucket.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ee5hswsshuq83uxsgtm17fag",
+          "content": "I have many keys.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "i12s4m76eiw5gc80ym7vltzo",
+          "content": "I have some rags.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "g6abe1y50s8zdn4o11at9dcb",
+          "content": "I have a spray bottle.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "qt0rv9t9d3fs751e35e3cyr7",
+          "content": "I have a wide broom.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "a4fihtbd2ev9wv57dbcfrk6o",
+          "content": "I have a trash can.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "yh5g7ten65ryuz700dfvjn4t",
+          "content": "Who am I?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "u6xzlb0jnewi0ntqug0p0k8u",
+          "content": "I am a custodian.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "m405qyq1s5x6ngkdhrq9z4zc",
+          "order": 1,
+          "chinese": "我有一把拖把。",
+          "english": "I have a mop",
+          "soundmark": "aɪ hæv; həv ə; eɪ mɑːp",
+          "type": "sentence",
+          "sentenceId": "rrp1gphpeido4kz79mmej5c9",
+          "image": null,
+          "startTime": 12.67,
+          "endTime": 16.13
+        },
+        {
+          "id": "avmi72srjnlaxtggq2bqsqx8",
+          "order": 2,
+          "chinese": "我有一个大水桶。",
+          "english": "I have a big bucket",
+          "soundmark": "aɪ hæv; həv ə; eɪ bɪɡ ˈbʌkɪt",
+          "type": "sentence",
+          "sentenceId": "hi0a55z2webbicepmrcvucg8",
+          "image": null,
+          "startTime": 23.11,
+          "endTime": 25.37
+        },
+        {
+          "id": "mnx6qqenql1fqdcf14oac8mn",
+          "order": 3,
+          "chinese": "我有许多钥匙。",
+          "english": "I have many keys",
+          "soundmark": "aɪ hæv; həv ˈmeni kiːz",
+          "type": "sentence",
+          "sentenceId": "ee5hswsshuq83uxsgtm17fag",
+          "image": null,
+          "startTime": 31.41,
+          "endTime": 33.6
+        },
+        {
+          "id": "ejf909cadm545a51bmwhaoqc",
+          "order": 4,
+          "chinese": "我有一些抹布。",
+          "english": "I have some rags",
+          "soundmark": "aɪ hæv; həv sʌm; səm ræɡz",
+          "type": "sentence",
+          "sentenceId": "i12s4m76eiw5gc80ym7vltzo",
+          "image": null,
+          "startTime": 39.73,
+          "endTime": 41.84
+        },
+        {
+          "id": "g4vwqnghhiyfgv9uf0d6qwdy",
+          "order": 5,
+          "chinese": "我有一个喷雾瓶。",
+          "english": "I have a spray bottle",
+          "soundmark": "aɪ hæv; həv ə; eɪ spreɪ ˈbɑːt(ə)l",
+          "type": "sentence",
+          "sentenceId": "g6abe1y50s8zdn4o11at9dcb",
+          "image": null,
+          "startTime": 48.06,
+          "endTime": 50.27
+        },
+        {
+          "id": "ww4ic905igs3sr7u01zuf2nz",
+          "order": 6,
+          "chinese": "我有一把宽扫帚。",
+          "english": "I have a wide broom",
+          "soundmark": "aɪ hæv; həv ə; eɪ waɪd bruːm",
+          "type": "sentence",
+          "sentenceId": "qt0rv9t9d3fs751e35e3cyr7",
+          "image": null,
+          "startTime": 56.38,
+          "endTime": 58.72
+        },
+        {
+          "id": "ffsllfvsg4boe782gnsg66qq",
+          "order": 7,
+          "chinese": "我有一个垃圾桶。",
+          "english": "I have a trash can",
+          "soundmark": "aɪ hæv; həv ə; eɪ træʃ kæn; kən",
+          "type": "sentence",
+          "sentenceId": "a4fihtbd2ev9wv57dbcfrk6o",
+          "image": null,
+          "startTime": 64.72,
+          "endTime": 66.92
+        },
+        {
+          "id": "c7e20rzy9psxac3kp5klo1jb",
+          "order": 8,
+          "chinese": "我是谁？",
+          "english": "Who am I ?",
+          "soundmark": "huː æm; əm aɪ",
+          "type": "sentence",
+          "sentenceId": "yh5g7ten65ryuz700dfvjn4t",
+          "image": null,
+          "startTime": 72.48,
+          "endTime": 74.39
+        },
+        {
+          "id": "kdljeflqb1crp7s8ybaigxrz",
+          "order": 9,
+          "chinese": "我是一名清洁工。",
+          "english": "I am a custodian",
+          "soundmark": "aɪ æm; əm ə; eɪ kʌˈstoʊdiən",
+          "type": "sentence",
+          "sentenceId": "u6xzlb0jnewi0ntqug0p0k8u",
+          "image": null,
+          "startTime": 80.47,
+          "endTime": 82.91
+        }
+      ]
+    },
+    {
+      "id": "pydeu9u42ofnpk6l2surkn2c",
+      "order": 7,
+      "title": "007 这是我的包",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/9b0b9e6d-4ff3-4652-b22d-aa622d6a63bb.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "rixbqp03gznvc05e9yjs90d1",
+          "content": "This is my bag.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "kdrkmsre680wzodivpfhe7qi",
+          "content": "This is my jacket.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vl07ueulb8475738m8u8gfxz",
+          "content": "This is my blue hat.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "i1hx9xhhwqia26tq2e0nbz9y",
+          "content": "These are letters.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ua7m6lkvhov4dnufhxnu1t14",
+          "content": "This is a stamp.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "zj0ygm1xfvqsgs4heve8ve2r",
+          "content": "This is a mailbox.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "tb82qsbwut8wrgaewavk8k4r",
+          "content": "This is my truck.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "iekrmx8povjf14yzg9oydsqx",
+          "content": "Who am I?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "cjgd1ntg7jzup9gfazfnw1ib",
+          "content": "I am a mail carrier.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "lmd2mpaxw7d5ktkyuwr5jbzz",
+          "order": 1,
+          "chinese": "这是我的包。",
+          "english": "This is my bag",
+          "soundmark": "ðɪs ɪz maɪ bæɡ",
+          "type": "sentence",
+          "sentenceId": "rixbqp03gznvc05e9yjs90d1",
+          "image": null,
+          "startTime": 11.33,
+          "endTime": 14.99
+        },
+        {
+          "id": "o9lli6pfe0uuiiy1e8m83kxo",
+          "order": 2,
+          "chinese": "这是我的夹克。",
+          "english": "This is my jacket",
+          "soundmark": "ðɪs ɪz maɪ ˈdʒækɪt",
+          "type": "sentence",
+          "sentenceId": "kdrkmsre680wzodivpfhe7qi",
+          "image": null,
+          "startTime": 21.18,
+          "endTime": 23.25
+        },
+        {
+          "id": "v7n1e8qs27p45m9idaj2lc0b",
+          "order": 3,
+          "chinese": "这是我的蓝帽子。",
+          "english": "This is my blue hat",
+          "soundmark": "ðɪs ɪz maɪ bluː hæt",
+          "type": "sentence",
+          "sentenceId": "vl07ueulb8475738m8u8gfxz",
+          "image": null,
+          "startTime": 29.5,
+          "endTime": 31.91
+        },
+        {
+          "id": "po0gys2rdu3swsqwmasjukwq",
+          "order": 4,
+          "chinese": "这些是信件。",
+          "english": "These are letters",
+          "soundmark": "ðiːz ɑːr; ər ˈletərz",
+          "type": "sentence",
+          "sentenceId": "i1hx9xhhwqia26tq2e0nbz9y",
+          "image": null,
+          "startTime": 37.81,
+          "endTime": 39.84
+        },
+        {
+          "id": "k4du7otv1lyiivs5530tln7c",
+          "order": 5,
+          "chinese": "这是一枚邮票。",
+          "english": "This is a stamp",
+          "soundmark": "ðɪs ɪz ə; eɪ stæmp",
+          "type": "sentence",
+          "sentenceId": "ua7m6lkvhov4dnufhxnu1t14",
+          "image": null,
+          "startTime": 46.15,
+          "endTime": 48.4
+        },
+        {
+          "id": "a6wo94liyih7urbutabt793a",
+          "order": 6,
+          "chinese": "这是一个邮箱。",
+          "english": "This is a mailbox",
+          "soundmark": "ðɪs ɪz ə; eɪ ˈmeɪlbɑːks",
+          "type": "sentence",
+          "sentenceId": "zj0ygm1xfvqsgs4heve8ve2r",
+          "image": null,
+          "startTime": 54.49,
+          "endTime": 56.99
+        },
+        {
+          "id": "cygesb8d9v40ckmcgxmdeyk7",
+          "order": 7,
+          "chinese": "这是我的卡车。",
+          "english": "This is my truck",
+          "soundmark": "ðɪs ɪz maɪ trʌk",
+          "type": "sentence",
+          "sentenceId": "tb82qsbwut8wrgaewavk8k4r",
+          "image": null,
+          "startTime": 62.77,
+          "endTime": 65.15
+        },
+        {
+          "id": "s2dg2oe49o3pnc165nckczu9",
+          "order": 8,
+          "chinese": "我是谁？",
+          "english": "Who am I ?",
+          "soundmark": "huː æm; əm aɪ",
+          "type": "sentence",
+          "sentenceId": "iekrmx8povjf14yzg9oydsqx",
+          "image": null,
+          "startTime": 70.6,
+          "endTime": 72.82
+        },
+        {
+          "id": "l3awcihuzlxe6id2mzk8y1e7",
+          "order": 9,
+          "chinese": "我是一名邮递员。",
+          "english": "I am a mail carrier",
+          "soundmark": "aɪ æm; əm ə; eɪ meɪl ˈkæriər",
+          "type": "sentence",
+          "sentenceId": "cjgd1ntg7jzup9gfazfnw1ib",
+          "image": null,
+          "startTime": 78.02,
+          "endTime": 81.23
+        }
+      ]
+    },
+    {
+      "id": "gg4ov23veujjy4w6sioorrlj",
+      "order": 8,
+      "title": "008 我有一件白大褂",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/80bb95d3-dffa-4285-b5ef-24d73ee9bba6.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "e82qvvol1kdp95vo0qqx89jd",
+          "content": "I have a white coat.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "gw6djxqkwc71ku4dcf8hd9u9",
+          "content": "This is my computer.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "fqifbqsna9v1er69if7sfyyt",
+          "content": "I have a microscope.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "rb16xs1wbbeb1gc0r08trvxz",
+          "content": "These are my goggles.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "cmzbhqgj0zretquvrlup1dp5",
+          "content": "I have a test tube.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "pxxo6gr35a7vk8j3uucec9y0",
+          "content": "This is my beaker.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "axug4n3bqu2zi7e2ue7snwjs",
+          "content": "I have a laboratory.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "zob9arys8mopjm5vy2x9p5t4",
+          "content": "Who am I?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "t7zlfzv02cyttx0aa5x1q9xo",
+          "content": "I am a scientist.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "ony84g2aswwtbbv59v5o2zsr",
+          "order": 1,
+          "chinese": "我有一件白大褂。",
+          "english": "I have a white coat",
+          "soundmark": "aɪ hæv; həv ə; eɪ waɪt koʊt",
+          "type": "sentence",
+          "sentenceId": "e82qvvol1kdp95vo0qqx89jd",
+          "image": null,
+          "startTime": 11.27,
+          "endTime": 14.93
+        },
+        {
+          "id": "rriagmj59s5g1q4r6jbn5ja3",
+          "order": 2,
+          "chinese": "这是我的电脑。",
+          "english": "This is my computer",
+          "soundmark": "ðɪs ɪz maɪ kəmˈpjuːtər",
+          "type": "sentence",
+          "sentenceId": "gw6djxqkwc71ku4dcf8hd9u9",
+          "image": null,
+          "startTime": 21.09,
+          "endTime": 23.16
+        },
+        {
+          "id": "nlfwgddrr075zp4q059ni0hr",
+          "order": 3,
+          "chinese": "我有一台显微镜。",
+          "english": "I have a microscope",
+          "soundmark": "aɪ hæv; həv ə; eɪ ˈmaɪkrəskoʊp",
+          "type": "sentence",
+          "sentenceId": "fqifbqsna9v1er69if7sfyyt",
+          "image": null,
+          "startTime": 29.4,
+          "endTime": 31.42
+        },
+        {
+          "id": "dfnhs5b0kb4ffy8rdhlig4l5",
+          "order": 4,
+          "chinese": "这是我的护目镜。",
+          "english": "These are my goggles",
+          "soundmark": "ðiːz ɑːr; ər maɪ ˈɡɑːɡ(ə)lz",
+          "type": "sentence",
+          "sentenceId": "rb16xs1wbbeb1gc0r08trvxz",
+          "image": null,
+          "startTime": 37.72,
+          "endTime": 39.72
+        },
+        {
+          "id": "tlucc92wb3q7i8avadz61qz1",
+          "order": 5,
+          "chinese": "我有一根试管。",
+          "english": "I have a test tube",
+          "soundmark": "aɪ hæv; həv ə; eɪ test tuːb",
+          "type": "sentence",
+          "sentenceId": "cmzbhqgj0zretquvrlup1dp5",
+          "image": null,
+          "startTime": 46.06,
+          "endTime": 48.19
+        },
+        {
+          "id": "vy2sd942w6jzeph3v6qir2sj",
+          "order": 6,
+          "chinese": "这是我的烧杯。",
+          "english": "This is my beaker",
+          "soundmark": "ðɪs ɪz maɪ ˈbiːkər",
+          "type": "sentence",
+          "sentenceId": "pxxo6gr35a7vk8j3uucec9y0",
+          "image": null,
+          "startTime": 54.39,
+          "endTime": 56.45
+        },
+        {
+          "id": "c5fu3m0tlf1rw3d5e6ase2j0",
+          "order": 7,
+          "chinese": "我有一间实验室。",
+          "english": "I have a laboratory",
+          "soundmark": "aɪ hæv; həv ə; eɪ ˈlæbrətɔːri",
+          "type": "sentence",
+          "sentenceId": "axug4n3bqu2zi7e2ue7snwjs",
+          "image": null,
+          "startTime": 62.7,
+          "endTime": 64.78
+        },
+        {
+          "id": "gt0wt8ei9hd89l2brr35mipd",
+          "order": 8,
+          "chinese": "我是谁？",
+          "english": "Who am I ?",
+          "soundmark": "huː æm; əm aɪ",
+          "type": "sentence",
+          "sentenceId": "zob9arys8mopjm5vy2x9p5t4",
+          "image": null,
+          "startTime": 70.53,
+          "endTime": 72.45
+        },
+        {
+          "id": "e551oj4c2rdjz5yppgnky1vt",
+          "order": 9,
+          "chinese": "我是一名科学家。",
+          "english": "I am a scientist",
+          "soundmark": "aɪ æm; əm ə; eɪ ˈsaɪəntɪst",
+          "type": "sentence",
+          "sentenceId": "t7zlfzv02cyttx0aa5x1q9xo",
+          "image": null,
+          "startTime": 78.58,
+          "endTime": 81.11
+        }
+      ]
+    },
+    {
+      "id": "dck2t6h63k9p7anc80hmmj2g",
+      "order": 9,
+      "title": "009 这是我的医院",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/2576286b-ef49-4483-8d13-5fc248e133b9.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "ns3c3x2t0eh92p8879mbq22j",
+          "content": "This is my hospital.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "sd5sccv5gmyfcx5cramofw3g",
+          "content": "I have a scale.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "zs17num09egejyoh7yr37xm0",
+          "content": "These are animals.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "cnlm4iwuxxfi89656s59ixcs",
+          "content": "I have leashes.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xb6xftrak2rk3weewdtypnyi",
+          "content": "This is my white coat.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "df08sjdck572j46unfvo635f",
+          "content": "I have pet treats.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "j8owouivlqhlrugo95s63jyx",
+          "content": "This is medicine.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "fo5spsxn5x8nigdbkamqm6v4",
+          "content": "Who am I?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "e2mol7ollnk07xzb8ejev34w",
+          "content": "I am a vet.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "rlov4avumykz6ro3imqf1pjs",
+          "order": 1,
+          "chinese": "这是我的医院。",
+          "english": "This is my hospital",
+          "soundmark": "ðɪs ɪz maɪ ˈhɑːspɪt(ə)l",
+          "type": "sentence",
+          "sentenceId": "ns3c3x2t0eh92p8879mbq22j",
+          "image": null,
+          "startTime": 12.75,
+          "endTime": 16.46
+        },
+        {
+          "id": "bx0q5r3be09sro9ahgy22iri",
+          "order": 2,
+          "chinese": "我有一个秤。",
+          "english": "I have a scale",
+          "soundmark": "aɪ hæv; həv ə; eɪ skeɪl",
+          "type": "sentence",
+          "sentenceId": "sd5sccv5gmyfcx5cramofw3g",
+          "image": null,
+          "startTime": 23.13,
+          "endTime": 25.39
+        },
+        {
+          "id": "ambx505axfs9tyu7vfvydt85",
+          "order": 3,
+          "chinese": "这些是动物。",
+          "english": "These are animals",
+          "soundmark": "ðiːz ɑːr; ər ˈænɪmlz",
+          "type": "sentence",
+          "sentenceId": "zs17num09egejyoh7yr37xm0",
+          "image": null,
+          "startTime": 31.43,
+          "endTime": 33.67
+        },
+        {
+          "id": "zkdem7vy7h4s1rhk7via699o",
+          "order": 4,
+          "chinese": "我有牵引绳。",
+          "english": "I have leashes",
+          "soundmark": "aɪ hæv; həv ˈliːʃɪz",
+          "type": "sentence",
+          "sentenceId": "cnlm4iwuxxfi89656s59ixcs",
+          "image": null,
+          "startTime": 39.77,
+          "endTime": 41.94
+        },
+        {
+          "id": "frsb4cu0v50erxbirpzepx18",
+          "order": 5,
+          "chinese": "这是我的白大褂。",
+          "english": "This is my white coat",
+          "soundmark": "ðɪs ɪz maɪ waɪt koʊt",
+          "type": "sentence",
+          "sentenceId": "xb6xftrak2rk3weewdtypnyi",
+          "image": null,
+          "startTime": 48.1,
+          "endTime": 50.53
+        },
+        {
+          "id": "r2a0z61x50p97cgpry70ihf8",
+          "order": 6,
+          "chinese": "我有宠物零食。",
+          "english": "I have pet treats",
+          "soundmark": "aɪ hæv; həv pet triːts",
+          "type": "sentence",
+          "sentenceId": "df08sjdck572j46unfvo635f",
+          "image": null,
+          "startTime": 56.43,
+          "endTime": 58.88
+        },
+        {
+          "id": "hdaxotaldg2d8d182dgd3twl",
+          "order": 7,
+          "chinese": "这是药。",
+          "english": "This is medicine",
+          "soundmark": "ðɪs ɪz ˈmedɪs(ə)n",
+          "type": "sentence",
+          "sentenceId": "j8owouivlqhlrugo95s63jyx",
+          "image": null,
+          "startTime": 64.75,
+          "endTime": 66.91
+        },
+        {
+          "id": "rwwss51uppka8kttxixxs6z3",
+          "order": 8,
+          "chinese": "我是谁？",
+          "english": "Who am I ?",
+          "soundmark": "huː æm; əm aɪ",
+          "type": "sentence",
+          "sentenceId": "fo5spsxn5x8nigdbkamqm6v4",
+          "image": null,
+          "startTime": 72.52,
+          "endTime": 74.67
+        },
+        {
+          "id": "gonxahwyyt6ia4i7x54te2mm",
+          "order": 9,
+          "chinese": "我是一名兽医。",
+          "english": "I am a vet",
+          "soundmark": "aɪ æm; əm ə; eɪ vet",
+          "type": "sentence",
+          "sentenceId": "e2mol7ollnk07xzb8ejev34w",
+          "image": null,
+          "startTime": 81.42,
+          "endTime": 83.53
+        }
+      ]
+    },
+    {
+      "id": "r1mh0nuz9z50ujplklkzepug",
+      "order": 10,
+      "title": "010 我有一些钉子",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/d2b41b42-a0f4-4fb1-b946-7c1105a71069.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "hf3xrft17b01baegidzsfsgi",
+          "content": "I have some nails.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xpm7f4awqihtcpafypbfzhtb",
+          "content": "This is my hammer.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "th0z76pyq7hnlmwe6010l79l",
+          "content": "I have a saw.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "p21hur92rbvcpdvybjaclxkc",
+          "content": "This is my drill.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ibtamcin2yk7ewhcxoxgcoal",
+          "content": "I have a pencil.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "yga7iordplvnvvp97wdtmaex",
+          "content": "This is my ruler.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ppsr59yu8unqnykcw3tcrrg2",
+          "content": "I have wood.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "mr1zz7vpescqbot9re6r7zw6",
+          "content": "Who am I?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ttnisyn5kochy5y8efb0alkx",
+          "content": "I am a carpenter.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "iwphh1j6ndph0oxbjsm4rwhe",
+          "order": 1,
+          "chinese": "我有一些钉子。",
+          "english": "I have some nails",
+          "soundmark": "aɪ hæv; həv sʌm; səm neɪlz",
+          "type": "sentence",
+          "sentenceId": "hf3xrft17b01baegidzsfsgi",
+          "image": null,
+          "startTime": 12.47,
+          "endTime": 15.99
+        },
+        {
+          "id": "am0otrgueu9lbw8ehgph5cnr",
+          "order": 2,
+          "chinese": "这是我的锤子。",
+          "english": "This is my hammer",
+          "soundmark": "ðɪs ɪz maɪ ˈhæmər",
+          "type": "sentence",
+          "sentenceId": "xpm7f4awqihtcpafypbfzhtb",
+          "image": null,
+          "startTime": 22.82,
+          "endTime": 24.72
+        },
+        {
+          "id": "tq09qjhxl8wz2prr3xwkd2ta",
+          "order": 3,
+          "chinese": "我有一把锯。",
+          "english": "I have a saw",
+          "soundmark": "aɪ hæv; həv ə; eɪ sɔː",
+          "type": "sentence",
+          "sentenceId": "th0z76pyq7hnlmwe6010l79l",
+          "image": null,
+          "startTime": 31.17,
+          "endTime": 33.1
+        },
+        {
+          "id": "m0ywjr5tp5eqnl08543wqfvf",
+          "order": 4,
+          "chinese": "这是我的电钻。",
+          "english": "This is my drill",
+          "soundmark": "ðɪs ɪz maɪ drɪl",
+          "type": "sentence",
+          "sentenceId": "p21hur92rbvcpdvybjaclxkc",
+          "image": null,
+          "startTime": 39.49,
+          "endTime": 41.41
+        },
+        {
+          "id": "wy65140o7pbx5u5omucjq5vx",
+          "order": 5,
+          "chinese": "我有一支铅笔。",
+          "english": "I have a pencil",
+          "soundmark": "aɪ hæv; həv ə; eɪ ˈpens(ə)l",
+          "type": "sentence",
+          "sentenceId": "ibtamcin2yk7ewhcxoxgcoal",
+          "image": null,
+          "startTime": 47.82,
+          "endTime": 49.64
+        },
+        {
+          "id": "p9p56ehpa4rgsm8d0cem2rmq",
+          "order": 6,
+          "chinese": "这是我的尺子。",
+          "english": "This is my ruler",
+          "soundmark": "ðɪs ɪz maɪ ˈruːlər",
+          "type": "sentence",
+          "sentenceId": "yga7iordplvnvvp97wdtmaex",
+          "image": null,
+          "startTime": 56.15,
+          "endTime": 58.1
+        },
+        {
+          "id": "rndgd8g905ikiqu5jf9uhodh",
+          "order": 7,
+          "chinese": "我有木头。",
+          "english": "I have wood",
+          "soundmark": "aɪ hæv; həv wʊd",
+          "type": "sentence",
+          "sentenceId": "ppsr59yu8unqnykcw3tcrrg2",
+          "image": null,
+          "startTime": 64.47,
+          "endTime": 66.23
+        },
+        {
+          "id": "xkxr6mitweptomx5ay1b7bz9",
+          "order": 8,
+          "chinese": "我是谁？",
+          "english": "Who am I ?",
+          "soundmark": "huː æm; əm aɪ",
+          "type": "sentence",
+          "sentenceId": "mr1zz7vpescqbot9re6r7zw6",
+          "image": null,
+          "startTime": 72.26,
+          "endTime": 74.22
+        },
+        {
+          "id": "ygxyloq9r63m04q6y3ujqv55",
+          "order": 9,
+          "chinese": "我是一个木匠。",
+          "english": "I am a carpenter",
+          "soundmark": "aɪ æm; əm ə; eɪ ˈkɑːrpəntər",
+          "type": "sentence",
+          "sentenceId": "ttnisyn5kochy5y8efb0alkx",
+          "image": null,
+          "startTime": 79.83,
+          "endTime": 82.44
+        }
+      ]
+    },
+    {
+      "id": "mn6ahuiqksgzcduf3jai404k",
+      "order": 11,
+      "title": "011 这是我的画笔",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/161124d2-9735-41cf-b5fc-6895ae00b8cf.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "f4hw42x3jvhjnjyetg0lmxdb",
+          "content": "This is my paintbrush.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vyd3rgrijrovi2tm1c04g2qn",
+          "content": "I have some paint.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "p7a9z8oelgdhzcm052cafz0h",
+          "content": "This is my pencil.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "js99t7hv3z49xrhkyo6ay13s",
+          "content": "I have a sketchbook.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "z6mtx2y08wzqb2m2ebi8ksxm",
+          "content": "This is my red hat.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "auevof11caddv36p0w7181b3",
+          "content": "I have an easel.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "len5jrincdq353qz9e6t4dfo",
+          "content": "This is my beautiful painting.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "rcl4m1c3uy5kig266k01ricb",
+          "content": "Who am I?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "nac3nrsnqapjam4ua6q7pnqj",
+          "content": "I am an artist.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "vpvs3hpbwvnolbfc60pdhppl",
+          "order": 1,
+          "chinese": "这是我的画笔。",
+          "english": "This is my paintbrush",
+          "soundmark": "ðɪs ɪz maɪ ˈpeɪntbrʌʃ",
+          "type": "sentence",
+          "sentenceId": "f4hw42x3jvhjnjyetg0lmxdb",
+          "image": null,
+          "startTime": 11.67,
+          "endTime": 15.45
+        },
+        {
+          "id": "cnbompc0om16et7vnu3470rh",
+          "order": 2,
+          "chinese": "我有一些颜料。",
+          "english": "I have some paint",
+          "soundmark": "aɪ hæv; həv sʌm; səm peɪnt",
+          "type": "sentence",
+          "sentenceId": "vyd3rgrijrovi2tm1c04g2qn",
+          "image": null,
+          "startTime": 21.53,
+          "endTime": 23.63
+        },
+        {
+          "id": "qa0gwuidsh7p4cjijhkm93j6",
+          "order": 3,
+          "chinese": "这是我的铅笔。",
+          "english": "This is my pencil",
+          "soundmark": "ðɪs ɪz maɪ ˈpens(ə)l",
+          "type": "sentence",
+          "sentenceId": "p7a9z8oelgdhzcm052cafz0h",
+          "image": null,
+          "startTime": 29.88,
+          "endTime": 32.13
+        },
+        {
+          "id": "l50qs894zevjxmmx4xnxky7x",
+          "order": 4,
+          "chinese": "我有一个素描本。",
+          "english": "I have a sketchbook",
+          "soundmark": "aɪ hæv; həv ə; eɪ ˈsketʃbʊk",
+          "type": "sentence",
+          "sentenceId": "js99t7hv3z49xrhkyo6ay13s",
+          "image": null,
+          "startTime": 38.19,
+          "endTime": 40.51
+        },
+        {
+          "id": "vk7uimlyces1o956cm7cc2fi",
+          "order": 5,
+          "chinese": "这是我的红帽子。",
+          "english": "This is my red hat",
+          "soundmark": "ðɪs ɪz maɪ red hæt",
+          "type": "sentence",
+          "sentenceId": "z6mtx2y08wzqb2m2ebi8ksxm",
+          "image": null,
+          "startTime": 46.52,
+          "endTime": 49.04
+        },
+        {
+          "id": "mli1pwskfwlg42jfh35umm4f",
+          "order": 6,
+          "chinese": "我有一个画架。",
+          "english": "I have an easel",
+          "soundmark": "aɪ hæv; həv æn; ən ˈiːz(ə)l",
+          "type": "sentence",
+          "sentenceId": "auevof11caddv36p0w7181b3",
+          "image": null,
+          "startTime": 54.83,
+          "endTime": 56.86
+        },
+        {
+          "id": "nxungidywi6pgm3pag4av01z",
+          "order": 7,
+          "chinese": "这是我漂亮的画。",
+          "english": "This is my beautiful painting",
+          "soundmark": "ðɪs ɪz maɪ ˈbjuːtɪf(ə)l ˈpeɪntɪŋ",
+          "type": "sentence",
+          "sentenceId": "len5jrincdq353qz9e6t4dfo",
+          "image": null,
+          "startTime": 63.19,
+          "endTime": 65.91
+        },
+        {
+          "id": "vniymymololil6uoiyqwx5i5",
+          "order": 8,
+          "chinese": "我是谁？",
+          "english": "Who am I ?",
+          "soundmark": "huː æm; əm aɪ",
+          "type": "sentence",
+          "sentenceId": "rcl4m1c3uy5kig266k01ricb",
+          "image": null,
+          "startTime": 70.95,
+          "endTime": 73.03
+        },
+        {
+          "id": "ylr97a1phfr9ir7inhc2cttf",
+          "order": 9,
+          "chinese": "我是一名艺术家。",
+          "english": "I am an artist",
+          "soundmark": "aɪ æm; əm æn; ən ˈɑːrtɪst",
+          "type": "sentence",
+          "sentenceId": "nac3nrsnqapjam4ua6q7pnqj",
+          "image": null,
+          "startTime": 78.93,
+          "endTime": 81.65
+        }
+      ]
+    },
+    {
+      "id": "jkvzb6aaybt8unfbvg8p2c0n",
+      "order": 12,
+      "title": "012 我有一顶礼帽",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/cc239c32-eaf3-4a0e-a59a-121830c7020b.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "d2hqgl2qg707jk166fcls065",
+          "content": "I have a top hat.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "kwnfjqbx2pqcgpf0w8sqq484",
+          "content": "This is my wand.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "tvvlvu32bu6nvpypubsg6bcd",
+          "content": "I have a cape.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "rsos0ot0z8acxy4z8wykyuro",
+          "content": "This is my bow tie.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vk0r7tq6oiokig6rbhl4ax5f",
+          "content": "I have some cards.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "gjsdm3rhy2iidswghnz5bht1",
+          "content": "This is my white rabbit.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "wzsd1e3e9krrple5e5ke3fxi",
+          "content": "I have a table.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "naeacs3p6svny4h6qhj1l2tk",
+          "content": "Who am I?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "mzn92z1r2pswwd4fz51lla21",
+          "content": "I am a magician.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "nv00c1rm8jliuk572uwrftlv",
+          "order": 1,
+          "chinese": "我有一顶高顶礼帽。",
+          "english": "I have a top hat",
+          "soundmark": "aɪ hæv; həv ə; eɪ tɑːp hæt",
+          "type": "sentence",
+          "sentenceId": "d2hqgl2qg707jk166fcls065",
+          "image": null,
+          "startTime": 11.27,
+          "endTime": 14.66
+        },
+        {
+          "id": "cc34o9gbtly02syn38shpqdi",
+          "order": 2,
+          "chinese": "这是我的魔杖。",
+          "english": "This is my wand",
+          "soundmark": "ðɪs ɪz maɪ wɑːnd",
+          "type": "sentence",
+          "sentenceId": "kwnfjqbx2pqcgpf0w8sqq484",
+          "image": null,
+          "startTime": 21.14,
+          "endTime": 23.12
+        },
+        {
+          "id": "hamm80dmuzoaru3pdhq6e65b",
+          "order": 3,
+          "chinese": "我有一件斗篷。",
+          "english": "I have a cape",
+          "soundmark": "aɪ hæv; həv ə; eɪ keɪp",
+          "type": "sentence",
+          "sentenceId": "tvvlvu32bu6nvpypubsg6bcd",
+          "image": null,
+          "startTime": 29.49,
+          "endTime": 31.25
+        },
+        {
+          "id": "x5pchqy5ft9u8dowlnly9x75",
+          "order": 4,
+          "chinese": "这是我的领结。",
+          "english": "This is my bow tie",
+          "soundmark": "ðɪs ɪz maɪ baʊ; boʊ taɪ",
+          "type": "sentence",
+          "sentenceId": "rsos0ot0z8acxy4z8wykyuro",
+          "image": null,
+          "startTime": 37.78,
+          "endTime": 39.83
+        },
+        {
+          "id": "eebomx3yzgce7twulztq652s",
+          "order": 5,
+          "chinese": "我有一些纸牌。",
+          "english": "I have some cards",
+          "soundmark": "aɪ hæv; həv sʌm; səm kɑːrdz",
+          "type": "sentence",
+          "sentenceId": "vk0r7tq6oiokig6rbhl4ax5f",
+          "image": null,
+          "startTime": 46.13,
+          "endTime": 48.24
+        },
+        {
+          "id": "yuy6tqmkstm6d50on1r3us8b",
+          "order": 6,
+          "chinese": "这是我的白兔。",
+          "english": "This is my white rabbit",
+          "soundmark": "ðɪs ɪz maɪ waɪt ˈræbɪt",
+          "type": "sentence",
+          "sentenceId": "gjsdm3rhy2iidswghnz5bht1",
+          "image": null,
+          "startTime": 54.45,
+          "endTime": 56.59
+        },
+        {
+          "id": "olcz9dv7tga9hxxai4g32izr",
+          "order": 7,
+          "chinese": "我有一张桌子。",
+          "english": "I have a table",
+          "soundmark": "aɪ hæv; həv ə; eɪ ˈteɪbl",
+          "type": "sentence",
+          "sentenceId": "wzsd1e3e9krrple5e5ke3fxi",
+          "image": null,
+          "startTime": 62.78,
+          "endTime": 64.52
+        },
+        {
+          "id": "a6lor73rwq2o6uusqmbukwsb",
+          "order": 8,
+          "chinese": "我是谁？",
+          "english": "Who am I ?",
+          "soundmark": "huː æm; əm aɪ",
+          "type": "sentence",
+          "sentenceId": "naeacs3p6svny4h6qhj1l2tk",
+          "image": null,
+          "startTime": 70.56,
+          "endTime": 72.46
+        },
+        {
+          "id": "qfur9jl08sh5qdgz11e91rbc",
+          "order": 9,
+          "chinese": "我是一个魔术师。",
+          "english": "I am a magician",
+          "soundmark": "aɪ æm; əm ə; eɪ məˈdʒɪʃn",
+          "type": "sentence",
+          "sentenceId": "mzn92z1r2pswwd4fz51lla21",
+          "image": null,
+          "startTime": 78.58,
+          "endTime": 80.84
+        }
+      ]
+    },
+    {
+      "id": "qz713y4grfkbb3t7rfv4bkbi",
+      "order": 13,
+      "title": "013 这是我的赛车",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/e7b0a064-a517-412d-91e3-f382421e775a.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "l0x06hbxorfwxcmvfr62a9bi",
+          "content": "This is my fast car.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vuf5vm0yubb8qa0mlq33v7t5",
+          "content": "I have a jumpsuit.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "obey9yxtcse7vxjekovwqnmy",
+          "content": "This is my racetrack.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xkfu6yleq119bd1aak8pl23x",
+          "content": "I have a helmet.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "wz4239ivgk98i0s512ccg5pg",
+          "content": "This is a wheel.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "gcsvg9shkeuxl6guxdtyn42e",
+          "content": "This is a finish line.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "kx16dn8fdnxmoncsyvtkzfiz",
+          "content": "This is my big trophy.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ydrgpv21i3z1ecr7iczfiilo",
+          "content": "Who am I?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "c70ide3qw47qjww6s6rdxl2t",
+          "content": "I am a race car driver.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "gjsavrx8d1pzaumif0tmz175",
+          "order": 1,
+          "chinese": "这是我的快车。",
+          "english": "This is my fast car",
+          "soundmark": "ðɪs ɪz maɪ fæst kɑːr",
+          "type": "sentence",
+          "sentenceId": "l0x06hbxorfwxcmvfr62a9bi",
+          "image": null,
+          "startTime": 11.73,
+          "endTime": 15.86
+        },
+        {
+          "id": "m1c1rehqhtpljdc0ebj77e16",
+          "order": 2,
+          "chinese": "我有一件赛车服。",
+          "english": "I have a jumpsuit",
+          "soundmark": "aɪ hæv; həv ə; eɪ ˈdʒʌmpsuːt",
+          "type": "sentence",
+          "sentenceId": "vuf5vm0yubb8qa0mlq33v7t5",
+          "image": null,
+          "startTime": 21.63,
+          "endTime": 23.94
+        },
+        {
+          "id": "mtx3wqsx1yhqo0onwmayj5ax",
+          "order": 3,
+          "chinese": "这是我的赛道。",
+          "english": "This is my racetrack",
+          "soundmark": "ðɪs ɪz maɪ ˈreɪstræk",
+          "type": "sentence",
+          "sentenceId": "obey9yxtcse7vxjekovwqnmy",
+          "image": null,
+          "startTime": 29.96,
+          "endTime": 32.45
+        },
+        {
+          "id": "pq9u1cd56367wrns618u1vw9",
+          "order": 4,
+          "chinese": "我有一个头盔。",
+          "english": "I have a helmet",
+          "soundmark": "aɪ hæv; həv ə; eɪ ˈhelmɪt",
+          "type": "sentence",
+          "sentenceId": "xkfu6yleq119bd1aak8pl23x",
+          "image": null,
+          "startTime": 38.28,
+          "endTime": 40.24
+        },
+        {
+          "id": "yfk02h9honoke6b39xsnq8qt",
+          "order": 5,
+          "chinese": "这是一个车轮。",
+          "english": "This is a wheel",
+          "soundmark": "ðɪs ɪz ə; eɪ wiːl",
+          "type": "sentence",
+          "sentenceId": "wz4239ivgk98i0s512ccg5pg",
+          "image": null,
+          "startTime": 46.6,
+          "endTime": 48.64
+        },
+        {
+          "id": "xeahnutdgbqj3uqa0hsr5hmm",
+          "order": 6,
+          "chinese": "这是一条终点线。",
+          "english": "This is a finish line",
+          "soundmark": "ðɪs ɪz ə; eɪ ˈfɪnɪʃ laɪn",
+          "type": "sentence",
+          "sentenceId": "gcsvg9shkeuxl6guxdtyn42e",
+          "image": null,
+          "startTime": 54.91,
+          "endTime": 57.51
+        },
+        {
+          "id": "b06274wod11zcja9qolsax5v",
+          "order": 7,
+          "chinese": "这是我的大奖杯。",
+          "english": "This is my big trophy",
+          "soundmark": "ðɪs ɪz maɪ bɪɡ ˈtroʊfi",
+          "type": "sentence",
+          "sentenceId": "kx16dn8fdnxmoncsyvtkzfiz",
+          "image": null,
+          "startTime": 63.27,
+          "endTime": 65.97
+        },
+        {
+          "id": "h3506tardlmzwjxe6efsfizn",
+          "order": 8,
+          "chinese": "我是谁？",
+          "english": "Who am I ?",
+          "soundmark": "huː æm; əm aɪ",
+          "type": "sentence",
+          "sentenceId": "ydrgpv21i3z1ecr7iczfiilo",
+          "image": null,
+          "startTime": 71.03,
+          "endTime": 73.1
+        },
+        {
+          "id": "p4ixfwbh6yx64111ptyy5546",
+          "order": 9,
+          "chinese": "我是一名赛车手。",
+          "english": "I am a race car driver",
+          "soundmark": "aɪ æm; əm ə; eɪ reɪs kɑːr ˈdraɪvər",
+          "type": "sentence",
+          "sentenceId": "c70ide3qw47qjww6s6rdxl2t",
+          "image": null,
+          "startTime": 78.94,
+          "endTime": 82.05
+        }
+      ]
+    },
+    {
+      "id": "g1s8vtcoyoiufnaeya9d6h6f",
+      "order": 14,
+      "title": "014 我有一个哨子",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/81510fb2-0b0c-47bd-9600-b051ae2c397d.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "as67ncp3rksq2bjm2ttdsqxg",
+          "content": "I have a whistle.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "dy3278aoxh58bcrm16f3jltb",
+          "content": "This is a pool.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "w4hd77jl71xjo6b2aslvvztw",
+          "content": "I have a tall chair.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ne1gu19dgqyvbn3auhrsduba",
+          "content": "This is a float.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "pdhzx6863nhuqjnsf8l129z2",
+          "content": "I have an umbrella.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ou3ip0oggj6rp9yqcxl4vonf",
+          "content": "This is a first aid kit.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ttiw0wbkt3933y8kl3jksnst",
+          "content": "I have sunglasses.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "mmfqxdnbc0sbzhlw1ohplo4q",
+          "content": "Who am I?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "p0cr898goknfhl5cu6lrnqxp",
+          "content": "I am a lifeguard.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "hjcla4iyeb9941ikj2dlhkhp",
+          "order": 1,
+          "chinese": "我有一支哨子。",
+          "english": "I have a whistle",
+          "soundmark": "aɪ hæv; həv ə; eɪ ˈwɪs(ə)l",
+          "type": "sentence",
+          "sentenceId": "as67ncp3rksq2bjm2ttdsqxg",
+          "image": null,
+          "startTime": 11.73,
+          "endTime": 14.98
+        },
+        {
+          "id": "e87wrsbzvcb6288qk6zu779v",
+          "order": 2,
+          "chinese": "这是一个游泳池。",
+          "english": "This is a pool",
+          "soundmark": "ðɪs ɪz ə; eɪ puːl",
+          "type": "sentence",
+          "sentenceId": "dy3278aoxh58bcrm16f3jltb",
+          "image": null,
+          "startTime": 21.6,
+          "endTime": 23.52
+        },
+        {
+          "id": "rt3k8py0ymtzfrmvjyyb1xqs",
+          "order": 3,
+          "chinese": "我有一把高椅子。",
+          "english": "I have a tall chair",
+          "soundmark": "aɪ hæv; həv ə; eɪ tɔːl tʃer",
+          "type": "sentence",
+          "sentenceId": "w4hd77jl71xjo6b2aslvvztw",
+          "image": null,
+          "startTime": 29.95,
+          "endTime": 32.38
+        },
+        {
+          "id": "clujvdgdujcboh9fzsyfhvut",
+          "order": 4,
+          "chinese": "这是一个救生圈。",
+          "english": "This is a float",
+          "soundmark": "ðɪs ɪz ə; eɪ floʊt",
+          "type": "sentence",
+          "sentenceId": "ne1gu19dgqyvbn3auhrsduba",
+          "image": null,
+          "startTime": 38.27,
+          "endTime": 40.26
+        },
+        {
+          "id": "fyxl4mhxr1210hn2gw47nrgi",
+          "order": 5,
+          "chinese": "我有一把雨伞。",
+          "english": "I have an umbrella",
+          "soundmark": "aɪ hæv; həv æn; ən ʌmˈbrelə",
+          "type": "sentence",
+          "sentenceId": "pdhzx6863nhuqjnsf8l129z2",
+          "image": null,
+          "startTime": 46.57,
+          "endTime": 48.44
+        },
+        {
+          "id": "rysyd43bb3hzt59h8su1cndj",
+          "order": 6,
+          "chinese": "这是一个急救箱。",
+          "english": "This is a first aid kit",
+          "soundmark": "ðɪs ɪz ə; eɪ fɜːrst eɪd kɪt",
+          "type": "sentence",
+          "sentenceId": "ou3ip0oggj6rp9yqcxl4vonf",
+          "image": null,
+          "startTime": 54.91,
+          "endTime": 57.45
+        },
+        {
+          "id": "igasuavfh56noyt3ixisjugn",
+          "order": 7,
+          "chinese": "我有一副太阳镜。",
+          "english": "I have sunglasses",
+          "soundmark": "aɪ hæv; həv ˈsʌnɡlæsɪz",
+          "type": "sentence",
+          "sentenceId": "ttiw0wbkt3933y8kl3jksnst",
+          "image": null,
+          "startTime": 63.25,
+          "endTime": 65.49
+        },
+        {
+          "id": "yuc7g4f1a4yycx590gwx3xzn",
+          "order": 8,
+          "chinese": "我是谁？",
+          "english": "Who am I ?",
+          "soundmark": "huː æm; əm aɪ",
+          "type": "sentence",
+          "sentenceId": "mmfqxdnbc0sbzhlw1ohplo4q",
+          "image": null,
+          "startTime": 71.04,
+          "endTime": 73.06
+        },
+        {
+          "id": "zudf3n1ir92mchy2e5hqnz0x",
+          "order": 9,
+          "chinese": "我是一名救生员。",
+          "english": "I am a lifeguard",
+          "soundmark": "aɪ æm; əm ə; eɪ ˈlaɪfɡɑːrd",
+          "type": "sentence",
+          "sentenceId": "p0cr898goknfhl5cu6lrnqxp",
+          "image": null,
+          "startTime": 78.97,
+          "endTime": 81.38
+        }
+      ]
+    },
+    {
+      "id": "ixa6bfp1acbrm3oyaajbq043",
+      "order": 15,
+      "title": "015 这是我的书桌",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/d43fa60f-8ded-4115-b618-9a5f9a9510a0.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "i1o9yrnlc85sclje3qlz0j0r",
+          "content": "This is my desk.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "e26yaz8ex6zafxmhzdv63n43",
+          "content": "I have some pencils.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "giaslm8dzssfmdqoa3y1z606",
+          "content": "These are my books.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "uupkp5g4y4rknjh55fqq5ufc",
+          "content": "I have a whiteboard.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "v2kucy3cj89nhv6gd0lo9xeq",
+          "content": "This is my classroom.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xbofbstlm729uirettb325ds",
+          "content": "I have a tablet.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "c6qbvj9x69tn3k7w43evr7c4",
+          "content": "These are my students.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "c4tcioyfam7qzapamdrbzhf6",
+          "content": "Who am I?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "j4xofa0f2358als21zfzkkga",
+          "content": "I am a teacher.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "rd6bf8i37udf14usvfd49utx",
+          "order": 1,
+          "chinese": "这是我的书桌。",
+          "english": "This is my desk",
+          "soundmark": "ðɪs ɪz maɪ desk",
+          "type": "sentence",
+          "sentenceId": "i1o9yrnlc85sclje3qlz0j0r",
+          "image": null,
+          "startTime": 11.99,
+          "endTime": 15.74
+        },
+        {
+          "id": "k4lo3p10td3695gjkq182oge",
+          "order": 2,
+          "chinese": "我有一些铅笔。",
+          "english": "I have some pencils",
+          "soundmark": "aɪ hæv; həv sʌm; səm ˈpenslz",
+          "type": "sentence",
+          "sentenceId": "e26yaz8ex6zafxmhzdv63n43",
+          "image": null,
+          "startTime": 21.88,
+          "endTime": 24.23
+        },
+        {
+          "id": "y7dbg7vom97fnkvok06sa6f2",
+          "order": 3,
+          "chinese": "这些是我的书。",
+          "english": "These are my books",
+          "soundmark": "ðiːz ɑːr; ər maɪ bʊks",
+          "type": "sentence",
+          "sentenceId": "giaslm8dzssfmdqoa3y1z606",
+          "image": null,
+          "startTime": 30.22,
+          "endTime": 32.51
+        },
+        {
+          "id": "qqvor63l02ikw3cpebxjxq6d",
+          "order": 4,
+          "chinese": "我有一块白板。",
+          "english": "I have a whiteboard",
+          "soundmark": "aɪ hæv; həv ə; eɪ ˈwaɪtbɔːrd",
+          "type": "sentence",
+          "sentenceId": "uupkp5g4y4rknjh55fqq5ufc",
+          "image": null,
+          "startTime": 38.54,
+          "endTime": 40.76
+        },
+        {
+          "id": "s1em7d3jmazterszf330rgly",
+          "order": 5,
+          "chinese": "这是我的教室。",
+          "english": "This is my classroom",
+          "soundmark": "ðɪs ɪz maɪ ˈklæsruːm",
+          "type": "sentence",
+          "sentenceId": "v2kucy3cj89nhv6gd0lo9xeq",
+          "image": null,
+          "startTime": 46.86,
+          "endTime": 49.18
+        },
+        {
+          "id": "oplm7d89da69yfaqot15v766",
+          "order": 6,
+          "chinese": "我有一台平板电脑。",
+          "english": "I have a tablet",
+          "soundmark": "aɪ hæv; həv ə; eɪ ˈtæblət",
+          "type": "sentence",
+          "sentenceId": "xbofbstlm729uirettb325ds",
+          "image": null,
+          "startTime": 55.2,
+          "endTime": 57.36
+        },
+        {
+          "id": "quahuj5ffq1huxifcs08jfpc",
+          "order": 7,
+          "chinese": "这些是我的学生。",
+          "english": "These are my students",
+          "soundmark": "ðiːz ɑːr; ər maɪ ˈstjʊdnts",
+          "type": "sentence",
+          "sentenceId": "c6qbvj9x69tn3k7w43evr7c4",
+          "image": null,
+          "startTime": 63.53,
+          "endTime": 65.84
+        },
+        {
+          "id": "ppbcsfam42lz010hcenkqnjc",
+          "order": 8,
+          "chinese": "我是谁？",
+          "english": "Who am I ?",
+          "soundmark": "huː æm; əm aɪ",
+          "type": "sentence",
+          "sentenceId": "c4tcioyfam7qzapamdrbzhf6",
+          "image": null,
+          "startTime": 71.31,
+          "endTime": 73.53
+        },
+        {
+          "id": "cp5uvtnvfpurqc0fxyfzhbf8",
+          "order": 9,
+          "chinese": "我是一名老师。",
+          "english": "I am a teacher",
+          "soundmark": "aɪ æm; əm ə; eɪ ˈtiːtʃər",
+          "type": "sentence",
+          "sentenceId": "j4xofa0f2358als21zfzkkga",
+          "image": null,
+          "startTime": 79.09,
+          "endTime": 81.52
+        }
+      ]
+    },
+    {
+      "id": "zfoh40ygqspkgnz5vltnm4nv",
+      "order": 16,
+      "title": "016 我有一顶蓝帽子",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/9b1bec02-4101-44dd-84a0-46ea44000547.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "j43o4epu3lirfwli1bp9f54i",
+          "content": "I have a blue hat.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "jocdrgga69ofakun8mjhliem",
+          "content": "This is my car.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "pxksoqrjdhc2fbpqsacz5evz",
+          "content": "I have handcuffs.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "wtr72ydbr2ugblx4ib0r6n7o",
+          "content": "This is my station.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "jht9g2szeu1m42app8tx3egv",
+          "content": "I have a radio.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "sj5ofpycjbd0yvm0rvarzr9e",
+          "content": "This is my dog.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "tiq3un468qw0sk42hwry3eo5",
+          "content": "I have a badge.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "u0dx4uvthn90qxy3obdi2d77",
+          "content": "Who am I?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vi3r3aruisepbdl1pj0yipjm",
+          "content": "I am a police officer.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "mzkf13r44usxbkb71wghcqch",
+          "order": 1,
+          "chinese": "我有一顶蓝色的帽子。",
+          "english": "I have a blue hat",
+          "soundmark": "aɪ hæv; həv ə; eɪ bluː hæt",
+          "type": "sentence",
+          "sentenceId": "j43o4epu3lirfwli1bp9f54i",
+          "image": null,
+          "startTime": 11.78,
+          "endTime": 15.47
+        },
+        {
+          "id": "oo4l2pxjfaa6ctaixrlrazo5",
+          "order": 2,
+          "chinese": "这是我的警车。",
+          "english": "This is my car",
+          "soundmark": "ðɪs ɪz maɪ kɑːr",
+          "type": "sentence",
+          "sentenceId": "jocdrgga69ofakun8mjhliem",
+          "image": null,
+          "startTime": 21.68,
+          "endTime": 23.7
+        },
+        {
+          "id": "ipqwbwoqqnt3cj264x57ehrx",
+          "order": 3,
+          "chinese": "我有手铐。",
+          "english": "I have handcuffs",
+          "soundmark": "aɪ hæv; həv ˈhændkʌfs",
+          "type": "sentence",
+          "sentenceId": "pxksoqrjdhc2fbpqsacz5evz",
+          "image": null,
+          "startTime": 30.01,
+          "endTime": 32.11
+        },
+        {
+          "id": "mmfykz0vmgamhy0ajubbvuzu",
+          "order": 4,
+          "chinese": "这是我的警局。",
+          "english": "This is my station",
+          "soundmark": "ðɪs ɪz maɪ ˈsteɪʃ(ə)n",
+          "type": "sentence",
+          "sentenceId": "wtr72ydbr2ugblx4ib0r6n7o",
+          "image": null,
+          "startTime": 38.34,
+          "endTime": 40.5
+        },
+        {
+          "id": "hjai9dwmext4ddlb6vgubwli",
+          "order": 5,
+          "chinese": "我有一部对讲机。",
+          "english": "I have a radio",
+          "soundmark": "aɪ hæv; həv ə; eɪ ˈreɪdioʊ",
+          "type": "sentence",
+          "sentenceId": "jht9g2szeu1m42app8tx3egv",
+          "image": null,
+          "startTime": 46.65,
+          "endTime": 48.44
+        },
+        {
+          "id": "yg2fuo5t6wjj78u2og3r7mjf",
+          "order": 6,
+          "chinese": "这是我的警犬。",
+          "english": "This is my dog",
+          "soundmark": "ðɪs ɪz maɪ dɔːɡ",
+          "type": "sentence",
+          "sentenceId": "sj5ofpycjbd0yvm0rvarzr9e",
+          "image": null,
+          "startTime": 54.98,
+          "endTime": 56.96
+        },
+        {
+          "id": "uw592gizxjjdwa8tjcxg2n6f",
+          "order": 7,
+          "chinese": "我有一枚警徽。",
+          "english": "I have a badge",
+          "soundmark": "aɪ hæv; həv ə; eɪ bædʒ",
+          "type": "sentence",
+          "sentenceId": "tiq3un468qw0sk42hwry3eo5",
+          "image": null,
+          "startTime": 63.32,
+          "endTime": 65.21
+        },
+        {
+          "id": "wxqu396e9fj9zs7dg4r3a6gf",
+          "order": 8,
+          "chinese": "我是谁？",
+          "english": "Who am I ?",
+          "soundmark": "huː æm; əm aɪ",
+          "type": "sentence",
+          "sentenceId": "u0dx4uvthn90qxy3obdi2d77",
+          "image": null,
+          "startTime": 71.09,
+          "endTime": 73.1
+        },
+        {
+          "id": "m6qyghfxra5cjbog37qwi8o0",
+          "order": 9,
+          "chinese": "我是一名警察。",
+          "english": "I am a police officer",
+          "soundmark": "aɪ æm; əm ə; eɪ pəˈliːs ˈɑːfɪsər",
+          "type": "sentence",
+          "sentenceId": "vi3r3aruisepbdl1pj0yipjm",
+          "image": null,
+          "startTime": 79.44,
+          "endTime": 82.03
+        }
+      ]
+    },
+    {
+      "id": "fsre7vdzarb8ovrdaynlvtf3",
+      "order": 17,
+      "title": "017 我有一面小镜子",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/c9725ba3-e698-43db-917f-87f52f8f4ec5.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "ut4okuhubtm6pmgjfc97rzp3",
+          "content": "I have a tiny mirror.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "rjpf1laopjqt6gfunua4jby7",
+          "content": "This is my toothbrush.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "d3o5x7u82q0wnahake7sdwyz",
+          "content": "I have some floss.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "bvnydoi8c0qceyk9if0nj6op",
+          "content": "This is my big chair.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "p0see1cw5ypcfmer1216o92q",
+          "content": "I have patients.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "g13289idyvps9eci8i1ozbh2",
+          "content": "This is my waiting room.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ep1qd2j4xh58airdh9xhtai9",
+          "content": "I have a mask.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vw0um59c4q2a5a08om4f724v",
+          "content": "Who am I?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "gmstf3qilph1t0dqnu44hvdw",
+          "content": "I am a dentist.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "phvix6fz2i3law2oxlqrjwix",
+          "order": 1,
+          "chinese": "我有一面小镜子。",
+          "english": "I have a tiny mirror",
+          "soundmark": "aɪ hæv; həv ə; eɪ ˈtaɪni ˈmɪrər",
+          "type": "sentence",
+          "sentenceId": "ut4okuhubtm6pmgjfc97rzp3",
+          "image": null,
+          "startTime": 12.21,
+          "endTime": 16.18
+        },
+        {
+          "id": "o4hln322yn49kw8escm2eg48",
+          "order": 2,
+          "chinese": "这是我的牙刷。",
+          "english": "This is my toothbrush",
+          "soundmark": "ðɪs ɪz maɪ ˈtuːθbrʌʃ",
+          "type": "sentence",
+          "sentenceId": "rjpf1laopjqt6gfunua4jby7",
+          "image": null,
+          "startTime": 22.68,
+          "endTime": 25.26
+        },
+        {
+          "id": "aop3gq3oz85rbcvk29awzph6",
+          "order": 3,
+          "chinese": "我有一些牙线。",
+          "english": "I have some floss",
+          "soundmark": "aɪ hæv; həv sʌm; səm flɑːs",
+          "type": "sentence",
+          "sentenceId": "d3o5x7u82q0wnahake7sdwyz",
+          "image": null,
+          "startTime": 31.02,
+          "endTime": 33.43
+        },
+        {
+          "id": "clvlya1w8ffut8ygmrp16nww",
+          "order": 4,
+          "chinese": "这是我的大椅子。",
+          "english": "This is my big chair",
+          "soundmark": "ðɪs ɪz maɪ bɪɡ tʃer",
+          "type": "sentence",
+          "sentenceId": "bvnydoi8c0qceyk9if0nj6op",
+          "image": null,
+          "startTime": 39.33,
+          "endTime": 42.16
+        },
+        {
+          "id": "cblhkyuyy6ddzi2dfykm6n5x",
+          "order": 5,
+          "chinese": "我有病人。",
+          "english": "I have patients",
+          "soundmark": "aɪ hæv; həv ˈpeɪʃnts",
+          "type": "sentence",
+          "sentenceId": "p0see1cw5ypcfmer1216o92q",
+          "image": null,
+          "startTime": 47.7,
+          "endTime": 49.94
+        },
+        {
+          "id": "m42phui5q86j89d06fky2muf",
+          "order": 6,
+          "chinese": "这是我的候诊室。",
+          "english": "This is my waiting room",
+          "soundmark": "ðɪs ɪz maɪ ˈweɪtɪŋ ruːm",
+          "type": "sentence",
+          "sentenceId": "g13289idyvps9eci8i1ozbh2",
+          "image": null,
+          "startTime": 55.98,
+          "endTime": 58.57
+        },
+        {
+          "id": "n7xn24u8qgl1kf22vok2azw5",
+          "order": 7,
+          "chinese": "我有一个口罩。",
+          "english": "I have a mask",
+          "soundmark": "aɪ hæv; həv ə; eɪ mæsk",
+          "type": "sentence",
+          "sentenceId": "ep1qd2j4xh58airdh9xhtai9",
+          "image": null,
+          "startTime": 64.31,
+          "endTime": 66.42
+        },
+        {
+          "id": "h9oncjc7wh0g1vr7dvud07wj",
+          "order": 8,
+          "chinese": "我是谁？",
+          "english": "Who am I ?",
+          "soundmark": "huː æm; əm aɪ",
+          "type": "sentence",
+          "sentenceId": "vw0um59c4q2a5a08om4f724v",
+          "image": null,
+          "startTime": 72.13,
+          "endTime": 74.3
+        },
+        {
+          "id": "jppnnztavkp3bq7xj4lhx68a",
+          "order": 9,
+          "chinese": "我是牙医。",
+          "english": "I am a dentist",
+          "soundmark": "aɪ æm; əm ə; eɪ ˈdentɪst",
+          "type": "sentence",
+          "sentenceId": "gmstf3qilph1t0dqnu44hvdw",
+          "image": null,
+          "startTime": 80.22,
+          "endTime": 82.72
+        }
+      ]
+    },
+    {
+      "id": "qdazayf2rrtejd00ftg2ofkw",
+      "order": 18,
+      "title": "018 这是我的鸭舌帽",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/032df2f4-9e25-4187-9373-eab8ec2cef6a.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "dffmopt2fez0ic78zl6wqbd8",
+          "content": "This is my cap.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "jphne7vwb9m9je2peftihoiq",
+          "content": "I have a bat.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "c5fjhra1l2kcbm8tnhv5wby3",
+          "content": "This is my uniform.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "z9nzagqnbldl5xy8pvyr3bc2",
+          "content": "I have a base.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "k5chcu4wofw0s8adgj2ntngu",
+          "content": "This is my ball.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "mrgb0f666pvjfgb7qe9dcnw4",
+          "content": "I have a brown glove.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "bk3a5fop9vavdwdqqjwwzc3e",
+          "content": "This is a field.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "cdupkyek3sxjuz9n45wo35jm",
+          "content": "Who am I?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "twenqnuyhdafoloclfnfm4rw",
+          "content": "I am a baseball player.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "rp0d8hj73rxnrsnaodzxq2py",
+          "order": 1,
+          "chinese": "这是我的帽子。",
+          "english": "This is my cap",
+          "soundmark": "ðɪs ɪz maɪ kæp",
+          "type": "sentence",
+          "sentenceId": "dffmopt2fez0ic78zl6wqbd8",
+          "image": null,
+          "startTime": 11.39,
+          "endTime": 14.84
+        },
+        {
+          "id": "ps6y35akqp03rcsm9o7otgcw",
+          "order": 2,
+          "chinese": "我有一根球棒。",
+          "english": "I have a bat",
+          "soundmark": "aɪ hæv; həv ə; eɪ bæt",
+          "type": "sentence",
+          "sentenceId": "jphne7vwb9m9je2peftihoiq",
+          "image": null,
+          "startTime": 21.7,
+          "endTime": 23.51
+        },
+        {
+          "id": "gfh4jhmda6rs4dpzhp7xa4sp",
+          "order": 3,
+          "chinese": "这是我的队服。",
+          "english": "This is my uniform",
+          "soundmark": "ðɪs ɪz maɪ ˈjuːnɪfɔːrm",
+          "type": "sentence",
+          "sentenceId": "c5fjhra1l2kcbm8tnhv5wby3",
+          "image": null,
+          "startTime": 30.02,
+          "endTime": 32.32
+        },
+        {
+          "id": "vedbur6wbf2u1212khyufssf",
+          "order": 4,
+          "chinese": "我有一个垒包。",
+          "english": "I have a base",
+          "soundmark": "aɪ hæv; həv ə; eɪ beɪs",
+          "type": "sentence",
+          "sentenceId": "z9nzagqnbldl5xy8pvyr3bc2",
+          "image": null,
+          "startTime": 38.36,
+          "endTime": 40.4
+        },
+        {
+          "id": "gqa6mhx9d61oxzo5jykjympj",
+          "order": 5,
+          "chinese": "这是我的棒球。",
+          "english": "This is my ball",
+          "soundmark": "ðɪs ɪz maɪ bɔːl",
+          "type": "sentence",
+          "sentenceId": "k5chcu4wofw0s8adgj2ntngu",
+          "image": null,
+          "startTime": 46.67,
+          "endTime": 48.7
+        },
+        {
+          "id": "pdwvsy1ybyxwdteil7s37rm7",
+          "order": 6,
+          "chinese": "我有一只棕色的手套。",
+          "english": "I have a brown glove",
+          "soundmark": "aɪ hæv; həv ə; eɪ braʊn ɡlʌv",
+          "type": "sentence",
+          "sentenceId": "mrgb0f666pvjfgb7qe9dcnw4",
+          "image": null,
+          "startTime": 55.02,
+          "endTime": 57.58
+        },
+        {
+          "id": "o2al3nkyckxn1vlbotdspybw",
+          "order": 7,
+          "chinese": "这是一个球场。",
+          "english": "This is a field",
+          "soundmark": "ðɪs ɪz ə; eɪ fiːld",
+          "type": "sentence",
+          "sentenceId": "bk3a5fop9vavdwdqqjwwzc3e",
+          "image": null,
+          "startTime": 63.34,
+          "endTime": 65.43
+        },
+        {
+          "id": "vc27lz35t1039hq9itk14mi0",
+          "order": 8,
+          "chinese": "我是谁？",
+          "english": "Who am I ?",
+          "soundmark": "huː æm; əm aɪ",
+          "type": "sentence",
+          "sentenceId": "cdupkyek3sxjuz9n45wo35jm",
+          "image": null,
+          "startTime": 71.04,
+          "endTime": 73.17
+        },
+        {
+          "id": "ta2kck3vldov0r0dzncmp91d",
+          "order": 9,
+          "chinese": "我是一名棒球运动员。",
+          "english": "I am a baseball player",
+          "soundmark": "aɪ æm; əm ə; eɪ ˈbeɪsbɔːl ˈpleɪər",
+          "type": "sentence",
+          "sentenceId": "twenqnuyhdafoloclfnfm4rw",
+          "image": null,
+          "startTime": 79.21,
+          "endTime": 82.08
+        }
+      ]
+    },
+    {
+      "id": "bloyh86whrwj8ho9xntm6dxn",
+      "order": 19,
+      "title": "019 我有一把耙子",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/1f12d06e-b6cd-41e6-8f91-fc6322541f6a.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "fmhrewu14gt1o799txqky4an",
+          "content": "I have a rake.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "brl5rds4ixop61ke6d8b8pgq",
+          "content": "This is soil.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "he56e05fs2wq2nquqb6q3gje",
+          "content": "I have some vegetables.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "g8lqlh2rzgsto94xnz1thjqv",
+          "content": "These are my seeds.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "lpt5oz53xhyhrylvkbd8g0qo",
+          "content": "I have gloves.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ypqirojpqyfmmyyc9s8dcffa",
+          "content": "These are flowers.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "eyqgfhv1ivu2rut5jgbizva3",
+          "content": "I have a watering can.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ywv5r7aad73yaehvgs5uw7py",
+          "content": "Who am I?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "j1cl5ssejyleg7rsohil6y6h",
+          "content": "I am a gardener.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "jiefy9db6k1xj57j1siqv2ev",
+          "order": 1,
+          "chinese": "我有一把耙子。",
+          "english": "I have a rake",
+          "soundmark": "aɪ hæv; həv ə; eɪ reɪk",
+          "type": "sentence",
+          "sentenceId": "fmhrewu14gt1o799txqky4an",
+          "image": null,
+          "startTime": 11.68,
+          "endTime": 15.19
+        },
+        {
+          "id": "yyt5kmmroqaurxhql38qkdyn",
+          "order": 2,
+          "chinese": "这是土壤。",
+          "english": "This is soil",
+          "soundmark": "ðɪs ɪz sɔɪl",
+          "type": "sentence",
+          "sentenceId": "brl5rds4ixop61ke6d8b8pgq",
+          "image": null,
+          "startTime": 21.98,
+          "endTime": 23.97
+        },
+        {
+          "id": "wl7a80klyp9oi5jw8e7rtojt",
+          "order": 3,
+          "chinese": "我有一些蔬菜。",
+          "english": "I have some vegetables",
+          "soundmark": "aɪ hæv; həv sʌm; səm ˈvedʒtəb(ə)lz",
+          "type": "sentence",
+          "sentenceId": "he56e05fs2wq2nquqb6q3gje",
+          "image": null,
+          "startTime": 30.29,
+          "endTime": 32.73
+        },
+        {
+          "id": "tm77qhkp8l840srd0hlxio2b",
+          "order": 4,
+          "chinese": "这些是我的种子。",
+          "english": "These are my seeds",
+          "soundmark": "ðiːz ɑːr; ər maɪ siːdz",
+          "type": "sentence",
+          "sentenceId": "g8lqlh2rzgsto94xnz1thjqv",
+          "image": null,
+          "startTime": 38.65,
+          "endTime": 40.94
+        },
+        {
+          "id": "fcl8li4u56bqu3dk3e23emp8",
+          "order": 5,
+          "chinese": "我有手套。",
+          "english": "I have gloves",
+          "soundmark": "aɪ hæv; həv ɡlʌvz",
+          "type": "sentence",
+          "sentenceId": "lpt5oz53xhyhrylvkbd8g0qo",
+          "image": null,
+          "startTime": 46.96,
+          "endTime": 49.12
+        },
+        {
+          "id": "vmnywt4ctjnkgl1uh8r34io6",
+          "order": 6,
+          "chinese": "这些是花。",
+          "english": "These are flowers",
+          "soundmark": "ðiːz ɑːr; ər ˈflaʊərz",
+          "type": "sentence",
+          "sentenceId": "ypqirojpqyfmmyyc9s8dcffa",
+          "image": null,
+          "startTime": 55.28,
+          "endTime": 57.44
+        },
+        {
+          "id": "txgkkofsdozckswm8hw4kqrj",
+          "order": 7,
+          "chinese": "我有一个喷壶。",
+          "english": "I have a watering can",
+          "soundmark": "aɪ hæv; həv ə; eɪ ˈwɔːtərɪŋ kæn; kən",
+          "type": "sentence",
+          "sentenceId": "eyqgfhv1ivu2rut5jgbizva3",
+          "image": null,
+          "startTime": 63.62,
+          "endTime": 66.18
+        },
+        {
+          "id": "kjd0ln3poz76gfw15zmnraxw",
+          "order": 8,
+          "chinese": "我是谁？",
+          "english": "Who am I ?",
+          "soundmark": "huː æm; əm aɪ",
+          "type": "sentence",
+          "sentenceId": "ywv5r7aad73yaehvgs5uw7py",
+          "image": null,
+          "startTime": 71.39,
+          "endTime": 73.46
+        },
+        {
+          "id": "qc0q4qykwv6fnn6dreyvtzcy",
+          "order": 9,
+          "chinese": "我是园丁。",
+          "english": "I am a gardener",
+          "soundmark": "aɪ æm; əm ə; eɪ ˈɡɑːrdnər",
+          "type": "sentence",
+          "sentenceId": "j1cl5ssejyleg7rsohil6y6h",
+          "image": null,
+          "startTime": 79.69,
+          "endTime": 81.92
+        }
+      ]
+    },
+    {
+      "id": "n7rgpcmwsnzok7d737fshb92",
+      "order": 20,
+      "title": "020 这是我的帽子",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/85bb4139-cdfa-40e8-9386-a9479d0943df.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "q7rnoe1ux31b7ma48mqvwgfa",
+          "content": "This is my hat.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "c4gagf096ymehe4bwii9cbyb",
+          "content": "This is my jacket.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "atrrudjgwx8tdj8j895w56kb",
+          "content": "This is my ax.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "l5aak1r46ccfzpwveqban78y",
+          "content": "This is my long hose.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "s2xwdipun9j5cyli3lvvwbmw",
+          "content": "This is my tall ladder.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vbmsxiobnlur4hmrquia0zwj",
+          "content": "This is my mask.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "zq6m9ss89ox4yz51a9hv7nct",
+          "content": "This is my red truck.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "fxns7l94p19xqbuc3tvyk7e8",
+          "content": "Who am I?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "u8ebiv00zj3bg53nz7v8yz52",
+          "content": "I am a firefighter.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "tyrb00yt3c243h9995rzn1jl",
+          "order": 1,
+          "chinese": "这是我的帽子。",
+          "english": "This is my hat",
+          "soundmark": "ðɪs ɪz maɪ hæt",
+          "type": "sentence",
+          "sentenceId": "q7rnoe1ux31b7ma48mqvwgfa",
+          "image": null,
+          "startTime": 12.12,
+          "endTime": 15.56
+        },
+        {
+          "id": "ub87k7fwws95yufm5mn4uexi",
+          "order": 2,
+          "chinese": "这是我的夹克。",
+          "english": "This is my jacket",
+          "soundmark": "ðɪs ɪz maɪ ˈdʒækɪt",
+          "type": "sentence",
+          "sentenceId": "c4gagf096ymehe4bwii9cbyb",
+          "image": null,
+          "startTime": 22.42,
+          "endTime": 24.62
+        },
+        {
+          "id": "e0ytq4alwcw1ovi44jize0fn",
+          "order": 3,
+          "chinese": "这是我的斧头。",
+          "english": "This is my ax",
+          "soundmark": "ðɪs ɪz maɪ æks",
+          "type": "sentence",
+          "sentenceId": "atrrudjgwx8tdj8j895w56kb",
+          "image": null,
+          "startTime": 30.75,
+          "endTime": 32.98
+        },
+        {
+          "id": "mqesg5cutcs7ue7l1buuj2m0",
+          "order": 4,
+          "chinese": "这是我的长水管。",
+          "english": "This is my long hose",
+          "soundmark": "ðɪs ɪz maɪ lɔːŋ hoʊz",
+          "type": "sentence",
+          "sentenceId": "l5aak1r46ccfzpwveqban78y",
+          "image": null,
+          "startTime": 39.08,
+          "endTime": 41.77
+        },
+        {
+          "id": "g27j6sjr04kma91v3igx5trf",
+          "order": 5,
+          "chinese": "这是我的高梯子。",
+          "english": "This is my tall ladder",
+          "soundmark": "ðɪs ɪz maɪ tɔːl ˈlædər",
+          "type": "sentence",
+          "sentenceId": "s2xwdipun9j5cyli3lvvwbmw",
+          "image": null,
+          "startTime": 47.41,
+          "endTime": 50.04
+        },
+        {
+          "id": "alorrpwqmcgtra6z3im7dhag",
+          "order": 6,
+          "chinese": "这是我的面罩。",
+          "english": "This is my mask",
+          "soundmark": "ðɪs ɪz maɪ mæsk",
+          "type": "sentence",
+          "sentenceId": "vbmsxiobnlur4hmrquia0zwj",
+          "image": null,
+          "startTime": 55.72,
+          "endTime": 57.85
+        },
+        {
+          "id": "fs48zcdqdrnjzv0tjc55pd5v",
+          "order": 7,
+          "chinese": "这是我的红色卡车。",
+          "english": "This is my red truck",
+          "soundmark": "ðɪs ɪz maɪ red trʌk",
+          "type": "sentence",
+          "sentenceId": "zq6m9ss89ox4yz51a9hv7nct",
+          "image": null,
+          "startTime": 64.11,
+          "endTime": 66.5
+        },
+        {
+          "id": "rptkq544f8p50fq1emptulyt",
+          "order": 8,
+          "chinese": "我是谁？",
+          "english": "Who am I ?",
+          "soundmark": "huː æm; əm aɪ",
+          "type": "sentence",
+          "sentenceId": "fxns7l94p19xqbuc3tvyk7e8",
+          "image": null,
+          "startTime": 71.88,
+          "endTime": 73.77
+        },
+        {
+          "id": "hasoftnjhdvqon5kimr4wich",
+          "order": 9,
+          "chinese": "我是一名消防员。",
+          "english": "I am a firefighter",
+          "soundmark": "aɪ æm; əm ə; eɪ ˈfaɪərfaɪtər",
+          "type": "sentence",
+          "sentenceId": "u8ebiv00zj3bg53nz7v8yz52",
+          "image": null,
+          "startTime": 79.78,
+          "endTime": 82.19
+        }
+      ]
+    }
+  ]
+}

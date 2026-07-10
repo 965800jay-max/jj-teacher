@@ -1,0 +1,6226 @@
+{
+  "capturedAt": "2026-07-08T06:00:09.410Z",
+  "source": "https://julebu.ai",
+  "coursePack": {
+    "id": "dvtxqyf2mo6v0f0db5mt3lvb",
+    "title": "Level 1 06. The Big Green Forest",
+    "description": "Little Fox 启蒙动画：森林里的小动物们蹦蹦跳跳，用 I can… / I want… / Let's… 等基础句型讲述日常小故事。24 集短视频，每集约 3 分钟。",
+    "cover": "https://assets.julebu.ai/images/course-packs/tpwh0upvna1fwu4y052e93ci/ab2eef1bef09f89b5a4c59e0a2a1db26daa5db6b4d789c147159cf518e00f8bd.jpg",
+    "author": {
+      "type": "user",
+      "name": "未知用户",
+      "username": "user_o1ijbs",
+      "id": "v2ezhz5sthzi",
+      "avatar": "https://assets.julebu.ai/avatars/0d4a1e4623a65da2be92b887c84f377257cef72ded09e88a816fa28a93171e1c.jpeg"
+    },
+    "usageCount": 3,
+    "freeTrialCourseCount": 4,
+    "courseCount": 24,
+    "mode": "chinese_to_english",
+    "presetKey": "advanced"
+  },
+  "courses": [
+    {
+      "id": "y6tcqop8jxda5a0fcd1c0jwt",
+      "order": 1,
+      "title": "001 我会蹦跳",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/6504439c-56b7-42ea-9bfe-7c168718474f.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 16,
+      "sentenceCount": 16,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "ogvynjpo07m1cnd389ugw6i6",
+          "content": "I can hop.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "mde9625vxo5nfjuh76t2l6d9",
+          "content": "I can hop too.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ouktji2i0b77zw32tkh27dm0",
+          "content": "Watch me hop!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vzo3zio13xlj4ibnopqto6jt",
+          "content": "I can't hop.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "oenox2x3d0800hexumv7rfio",
+          "content": "I can hop over the log.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ziehtkrph0mvd044kl6ozr8h",
+          "content": "I can hop over the log too.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vugj9kmbq5k54d53nznilx03",
+          "content": "So can I!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "pzbli6dasr3eruwtvrat8ek9",
+          "content": "I can hop onto the rock.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "docax9qdspojh42ffph1vzjf",
+          "content": "I can hop onto the rock too.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "kaopz0cichx51xz0wilz26ri",
+          "content": "Uh-oh. Ouch!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "v149se0j7m88mb5ynbmbdfta",
+          "content": "Oof!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "qb5r10ybrzkykq8hs11senis",
+          "content": "I can't hop onto the rock.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "w94m4uukg9hikpsb4hc4xs98",
+          "content": "I can't hop onto the rock.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "cpfouf4clh1corbp2y0fua7z",
+          "content": "Hello.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "paiskpm5tm4di8emexfbadyy",
+          "content": "You hopped?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "dlmef6cr5xkirlchgq79n3gs",
+          "content": "No, I walked.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "jdo13z912bwgmutends0cqe4",
+          "order": 1,
+          "chinese": "我会跳。",
+          "english": "I can hop",
+          "soundmark": "aɪ kæn; kən hɑːp",
+          "type": "sentence",
+          "sentenceId": "ogvynjpo07m1cnd389ugw6i6",
+          "image": null,
+          "startTime": 9.87,
+          "endTime": 19.45
+        },
+        {
+          "id": "fbbkd53qnutu7ddpvkip1t4z",
+          "order": 2,
+          "chinese": "我也会跳。",
+          "english": "I can hop too",
+          "soundmark": "aɪ kæn; kən hɑːp tuː",
+          "type": "sentence",
+          "sentenceId": "mde9625vxo5nfjuh76t2l6d9",
+          "image": null,
+          "startTime": 24.49,
+          "endTime": 26.6
+        },
+        {
+          "id": "x73iqpsng6lw1585ywekdm35",
+          "order": 3,
+          "chinese": "看我跳！",
+          "english": "Watch me hop !",
+          "soundmark": "wɑːtʃ miː; mi hɑːp",
+          "type": "sentence",
+          "sentenceId": "ouktji2i0b77zw32tkh27dm0",
+          "image": null,
+          "startTime": 32.81,
+          "endTime": 34.19
+        },
+        {
+          "id": "qi635podvw7bm8lubp2ixvmd",
+          "order": 4,
+          "chinese": "我不会跳。",
+          "english": "I can't hop",
+          "soundmark": "aɪ kænt hɑːp",
+          "type": "sentence",
+          "sentenceId": "vzo3zio13xlj4ibnopqto6jt",
+          "image": null,
+          "startTime": 40.54,
+          "endTime": 42.91
+        },
+        {
+          "id": "rjhfypzs7eyiobyxa5p0v5c4",
+          "order": 5,
+          "chinese": "我能跳过那根木头。",
+          "english": "I can hop over the log",
+          "soundmark": "aɪ kæn; kən hɑːp ˈoʊvər ðə; ði lɔːɡ",
+          "type": "sentence",
+          "sentenceId": "oenox2x3d0800hexumv7rfio",
+          "image": null,
+          "startTime": 50.34,
+          "endTime": 53.25
+        },
+        {
+          "id": "jyh945qd7zcv16poeafr8tuo",
+          "order": 6,
+          "chinese": "我也能跳过那根木头。",
+          "english": "I can hop over the log too",
+          "soundmark": "aɪ kæn; kən hɑːp ˈoʊvər ðə; ði lɔːɡ tuː",
+          "type": "sentence",
+          "sentenceId": "ziehtkrph0mvd044kl6ozr8h",
+          "image": null,
+          "startTime": 60.99,
+          "endTime": 64
+        },
+        {
+          "id": "rkcl9d5d1cph9no1riorqiiy",
+          "order": 7,
+          "chinese": "我也可以！",
+          "english": "So can I !",
+          "soundmark": "soʊ kæn; kən aɪ",
+          "type": "sentence",
+          "sentenceId": "vugj9kmbq5k54d53nznilx03",
+          "image": null,
+          "startTime": 71.14,
+          "endTime": 72.6
+        },
+        {
+          "id": "jjyd7ub0qrc1fts0zds7l07v",
+          "order": 8,
+          "chinese": "我能跳上那块石头。",
+          "english": "I can hop onto the rock",
+          "soundmark": "aɪ kæn; kən hɑːp ˈɑːntə ðə; ði rɑːk",
+          "type": "sentence",
+          "sentenceId": "pzbli6dasr3eruwtvrat8ek9",
+          "image": null,
+          "startTime": 85.81,
+          "endTime": 88.72
+        },
+        {
+          "id": "nq9x3nirljn0t6rsxkvgkiqs",
+          "order": 9,
+          "chinese": "我也能跳上那块石头。",
+          "english": "I can hop onto the rock too",
+          "soundmark": "aɪ kæn; kən hɑːp ˈɑːntə ðə; ði rɑːk tuː",
+          "type": "sentence",
+          "sentenceId": "docax9qdspojh42ffph1vzjf",
+          "image": null,
+          "startTime": 99.86,
+          "endTime": 102.87
+        },
+        {
+          "id": "fhkodk6ohx1rk3u3vzfogsnl",
+          "order": 10,
+          "chinese": "哎呀。好痛！",
+          "english": "Uh-oh . Ouch !",
+          "soundmark": "ˈʌ oʊ aʊtʃ",
+          "type": "sentence",
+          "sentenceId": "kaopz0cichx51xz0wilz26ri",
+          "image": null,
+          "startTime": 107.3,
+          "endTime": 110.63
+        },
+        {
+          "id": "a95rzuy7oeb6ydgoem1l4q6x",
+          "order": 11,
+          "chinese": "哎哟！",
+          "english": "Oof !",
+          "soundmark": "uːf",
+          "type": "sentence",
+          "sentenceId": "v149se0j7m88mb5ynbmbdfta",
+          "image": null,
+          "startTime": 117.44,
+          "endTime": 118.68
+        },
+        {
+          "id": "kz8sub7o6vkx6kc58u90ynfm",
+          "order": 12,
+          "chinese": "我跳不上那块石头。",
+          "english": "I can't hop onto the rock",
+          "soundmark": "aɪ kænt hɑːp ˈɑːntə ðə; ði rɑːk",
+          "type": "sentence",
+          "sentenceId": "qb5r10ybrzkykq8hs11senis",
+          "image": null,
+          "startTime": 120.81,
+          "endTime": 123.76
+        },
+        {
+          "id": "coa9m7a6vk3eww72n7ua9pvh",
+          "order": 13,
+          "chinese": "我跳不上那块石头。",
+          "english": "I can't hop onto the rock",
+          "soundmark": "aɪ kænt hɑːp ˈɑːntə ðə; ði rɑːk",
+          "type": "sentence",
+          "sentenceId": "w94m4uukg9hikpsb4hc4xs98",
+          "image": null,
+          "startTime": 125.82,
+          "endTime": 128.03
+        },
+        {
+          "id": "zdqg09i96w6e0xinlnvi1vpu",
+          "order": 14,
+          "chinese": "你好。",
+          "english": "Hello",
+          "soundmark": "həˈloʊ",
+          "type": "sentence",
+          "sentenceId": "cpfouf4clh1corbp2y0fua7z",
+          "image": null,
+          "startTime": 133.17,
+          "endTime": 134.94
+        },
+        {
+          "id": "wqfaoq8ycs6ft96zz8y4wwwj",
+          "order": 15,
+          "chinese": "你跳过来的？",
+          "english": "You hopped ?",
+          "soundmark": "juː; jʊ hɑːpt",
+          "type": "sentence",
+          "sentenceId": "paiskpm5tm4di8emexfbadyy",
+          "image": null,
+          "startTime": 138.55,
+          "endTime": 140.53
+        },
+        {
+          "id": "vx9z5tt1oqneggguff7791ub",
+          "order": 16,
+          "chinese": "不，我走过来的。",
+          "english": "No , I walked",
+          "soundmark": "noʊ aɪ wɔːkt",
+          "type": "sentence",
+          "sentenceId": "dlmef6cr5xkirlchgq79n3gs",
+          "image": null,
+          "startTime": 141.16,
+          "endTime": 143.71
+        }
+      ]
+    },
+    {
+      "id": "zx7z4746f7nj3vd4r9d6sp54",
+      "order": 2,
+      "title": "002 快看！",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/9c0159a5-557d-45f5-a7c7-5925b5952a34.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 14,
+      "sentenceCount": 14,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "cgzm17dct4mmlifbmvtupvy7",
+          "content": "Look over there.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "darg109ijlatd0rremz2i037",
+          "content": "Look at that butterfly!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "veedk6ljbtrw3eg3vy5ndv3m",
+          "content": "Look over here.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ppjw052uhx1nxdntwvmbz8cl",
+          "content": "Look at this caterpillar.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "iiowspvtejhbkp0osponje1y",
+          "content": "Look up there.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "rdtosezb6dgzru3z8sb2ubd1",
+          "content": "Look at the birds.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "i9u1l7rehywrg5r8r4jni3mj",
+          "content": "Uh-oh! Look at the sky!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "qx4oejslfvcmws5woqib0lkz",
+          "content": "Look at the clouds.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "pbj26jeyyiih7ogl7emf8fho",
+          "content": "Look at that dry cave!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "l1eb92rq99tfd2dvho5f1dne",
+          "content": "Let's go in it!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "g34125adl8lpwtkt54jpc9zh",
+          "content": "Look at all the rain.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "eiq9ghb0cs3zvvtcquu89upb",
+          "content": "Look at all the mud.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "t7oxw2xo71ebrzglastg0h5o",
+          "content": "But look at us.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vpjhynfpbds6us3zewc0wefa",
+          "content": "We are nice and dry!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "v9uy56ph2m2yt5oktpvwxyru",
+          "order": 1,
+          "chinese": "看那边。",
+          "english": "Look over there",
+          "soundmark": "lʊk ˈoʊvər ðer; ðər",
+          "type": "sentence",
+          "sentenceId": "cgzm17dct4mmlifbmvtupvy7",
+          "image": null,
+          "startTime": 9.94,
+          "endTime": 25
+        },
+        {
+          "id": "t2tg7m7t1fpokp7m0i2iy784",
+          "order": 2,
+          "chinese": "看那只蝴蝶！",
+          "english": "Look at that butterfly !",
+          "soundmark": "lʊk æt; ət ðæt ˈbʌtərflaɪ",
+          "type": "sentence",
+          "sentenceId": "darg109ijlatd0rremz2i037",
+          "image": null,
+          "startTime": 26.61,
+          "endTime": 28.57
+        },
+        {
+          "id": "vm9pag4dm5zvi59feqoqyl8p",
+          "order": 3,
+          "chinese": "看这边。",
+          "english": "Look over here",
+          "soundmark": "lʊk ˈoʊvər hɪr",
+          "type": "sentence",
+          "sentenceId": "veedk6ljbtrw3eg3vy5ndv3m",
+          "image": null,
+          "startTime": 41.8,
+          "endTime": 43.62
+        },
+        {
+          "id": "x3mwrbvgnmf985xo302m51nj",
+          "order": 4,
+          "chinese": "看这只毛毛虫。",
+          "english": "Look at this caterpillar",
+          "soundmark": "lʊk æt; ət ðɪs ˈkætərpɪlər",
+          "type": "sentence",
+          "sentenceId": "ppjw052uhx1nxdntwvmbz8cl",
+          "image": null,
+          "startTime": 46.74,
+          "endTime": 48.88
+        },
+        {
+          "id": "fb4v8qt2hyiyna75iprc8dke",
+          "order": 5,
+          "chinese": "看上面。",
+          "english": "Look up there",
+          "soundmark": "lʊk ʌp ðer; ðər",
+          "type": "sentence",
+          "sentenceId": "iiowspvtejhbkp0osponje1y",
+          "image": null,
+          "startTime": 55.98,
+          "endTime": 57.6
+        },
+        {
+          "id": "co43t839ljp84aeguq286wqh",
+          "order": 6,
+          "chinese": "看那些鸟儿。",
+          "english": "Look at the birds",
+          "soundmark": "lʊk æt; ət ðə; ði bɜːrdz",
+          "type": "sentence",
+          "sentenceId": "rdtosezb6dgzru3z8sb2ubd1",
+          "image": null,
+          "startTime": 60.1,
+          "endTime": 62.09
+        },
+        {
+          "id": "bzs3ayycqd33ybld7qe2tuab",
+          "order": 7,
+          "chinese": "哎呀！看天空！",
+          "english": "Uh-oh ! Look at the sky !",
+          "soundmark": "ˈʌ oʊ lʊk æt; ət ðə; ði skaɪ",
+          "type": "sentence",
+          "sentenceId": "i9u1l7rehywrg5r8r4jni3mj",
+          "image": null,
+          "startTime": 73.12,
+          "endTime": 77.64
+        },
+        {
+          "id": "r4tgeopp2cyxgqtydoxgsuer",
+          "order": 8,
+          "chinese": "看那些云。",
+          "english": "Look at the clouds",
+          "soundmark": "lʊk æt; ət ðə; ði klaʊdz",
+          "type": "sentence",
+          "sentenceId": "qx4oejslfvcmws5woqib0lkz",
+          "image": null,
+          "startTime": 81.56,
+          "endTime": 83.91
+        },
+        {
+          "id": "l3b0zh58qhfbqf342e71ifwz",
+          "order": 9,
+          "chinese": "看那个干燥的洞穴！",
+          "english": "Look at that dry cave !",
+          "soundmark": "lʊk æt; ət ðæt draɪ keɪv",
+          "type": "sentence",
+          "sentenceId": "pbj26jeyyiih7ogl7emf8fho",
+          "image": null,
+          "startTime": 93.64,
+          "endTime": 96.09
+        },
+        {
+          "id": "pprfjcuuo5t25em86hfabflt",
+          "order": 10,
+          "chinese": "我们进去吧！",
+          "english": "Let's go in it !",
+          "soundmark": "lets ɡoʊ ɪn ɪt",
+          "type": "sentence",
+          "sentenceId": "l1eb92rq99tfd2dvho5f1dne",
+          "image": null,
+          "startTime": 96.75,
+          "endTime": 98.15
+        },
+        {
+          "id": "f6k9c2dirgt2t3uv7n9vrt3m",
+          "order": 11,
+          "chinese": "看这大雨。",
+          "english": "Look at all the rain",
+          "soundmark": "lʊk æt; ət ɔːl ðə; ði reɪn",
+          "type": "sentence",
+          "sentenceId": "g34125adl8lpwtkt54jpc9zh",
+          "image": null,
+          "startTime": 109.58,
+          "endTime": 111.38
+        },
+        {
+          "id": "wktzlu6on3i54iwi4u1137v1",
+          "order": 12,
+          "chinese": "看这些泥巴。",
+          "english": "Look at all the mud",
+          "soundmark": "lʊk æt; ət ɔːl ðə; ði mʌd",
+          "type": "sentence",
+          "sentenceId": "eiq9ghb0cs3zvvtcquu89upb",
+          "image": null,
+          "startTime": 114.61,
+          "endTime": 116.67
+        },
+        {
+          "id": "w0lsi4tvzlixr50hypdwyx22",
+          "order": 13,
+          "chinese": "不过看看我们。",
+          "english": "But look at us",
+          "soundmark": "bʌt; bət lʊk æt; ət ʌs; əs",
+          "type": "sentence",
+          "sentenceId": "t7oxw2xo71ebrzglastg0h5o",
+          "image": null,
+          "startTime": 120.27,
+          "endTime": 122.22
+        },
+        {
+          "id": "j5143unlyf7128zzpgakvpcb",
+          "order": 14,
+          "chinese": "我们又干爽又舒服！",
+          "english": "We are nice and dry !",
+          "soundmark": "wiː; wi ɑːr; ər naɪs ænd; ənd draɪ",
+          "type": "sentence",
+          "sentenceId": "vpjhynfpbds6us3zewc0wefa",
+          "image": null,
+          "startTime": 123.12,
+          "endTime": 125.28
+        }
+      ]
+    },
+    {
+      "id": "lzciymugo0ea71ibbzh49lje",
+      "order": 3,
+      "title": "003 我要飞",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/34904be2-426a-4e4f-b749-5dc827915dfb.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 16,
+      "sentenceCount": 16,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "i9o8c8e6mq5ic3panwspsw0w",
+          "content": "I will fly.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "tohub13ahe4u9ea1wmckekib",
+          "content": "I will fly to that tree!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "aq81d36lrcz37abthzq0f163",
+          "content": "You can't fly.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "bx0u94m9tt12ujn1903x7qhj",
+          "content": "You do not have wings.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "d2101rf9ptln079ekwy77323",
+          "content": "I have wings.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "gyz0qqny5hkpt4ds9ggnxuu9",
+          "content": "So I can fly.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "plkx32mlm82ls19fn3ttlfxh",
+          "content": "Now I have wings.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "t6gzjcn0jvru0kq6dzpiklcr",
+          "content": "I will fly now.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "gsmoehdky6gvhjuyts28wpj1",
+          "content": "You can't fly.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ovdxre86ke6lw84hfmmv2gha",
+          "content": "Do not try to fly.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "x0jm6gio9j9qch5s3qwxtcac",
+          "content": "I will fly now.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ex2qzsk8jsj2j83qa8ttyeoz",
+          "content": "I will fly to that tree.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "rz7a3ktfbgov4kj8cc5ytswo",
+          "content": "Oof!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "q52pnwrrb0qal7j3jl35u3n1",
+          "content": "You did not fly.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "l69k03jpuahoeb2igiv6pmxk",
+          "content": "No, I did not fly.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "trw739bkb5ayf4tdbqjioi1z",
+          "content": "I fell.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "huhs6zhwd5a1qwwuouuk42tp",
+          "order": 1,
+          "chinese": "我要飞。",
+          "english": "I will fly",
+          "soundmark": "aɪ wɪl flaɪ",
+          "type": "sentence",
+          "sentenceId": "i9o8c8e6mq5ic3panwspsw0w",
+          "image": null,
+          "startTime": 10,
+          "endTime": 25.49
+        },
+        {
+          "id": "dkbm1j87rxecavx72nlx1rxl",
+          "order": 2,
+          "chinese": "我要飞到那棵树上去！",
+          "english": "I will fly to that tree !",
+          "soundmark": "aɪ wɪl flaɪ tuː; tə ðæt triː",
+          "type": "sentence",
+          "sentenceId": "tohub13ahe4u9ea1wmckekib",
+          "image": null,
+          "startTime": 26.74,
+          "endTime": 29.01
+        },
+        {
+          "id": "rzpq07hpu18s9wja8dtpjuec",
+          "order": 3,
+          "chinese": "你飞不起来。",
+          "english": "You can't fly",
+          "soundmark": "juː; jʊ kænt flaɪ",
+          "type": "sentence",
+          "sentenceId": "aq81d36lrcz37abthzq0f163",
+          "image": null,
+          "startTime": 32.5,
+          "endTime": 34.44
+        },
+        {
+          "id": "pkqli34t90haryd5evujxrpo",
+          "order": 4,
+          "chinese": "你没有翅膀。",
+          "english": "You do not have wings",
+          "soundmark": "juː; jʊ duː; də nɑːt hæv; həv wɪŋz",
+          "type": "sentence",
+          "sentenceId": "bx0u94m9tt12ujn1903x7qhj",
+          "image": null,
+          "startTime": 35.89,
+          "endTime": 38.28
+        },
+        {
+          "id": "objfxqncj14ch6jh0vt6g9fl",
+          "order": 5,
+          "chinese": "我有翅膀。",
+          "english": "I have wings",
+          "soundmark": "aɪ hæv; həv wɪŋz",
+          "type": "sentence",
+          "sentenceId": "d2101rf9ptln079ekwy77323",
+          "image": null,
+          "startTime": 44.41,
+          "endTime": 46.22
+        },
+        {
+          "id": "q71auoq0qq8m7iyjqmmkyy3j",
+          "order": 6,
+          "chinese": "所以我能飞。",
+          "english": "So I can fly",
+          "soundmark": "soʊ aɪ kæn; kən flaɪ",
+          "type": "sentence",
+          "sentenceId": "gyz0qqny5hkpt4ds9ggnxuu9",
+          "image": null,
+          "startTime": 47.21,
+          "endTime": 49.5
+        },
+        {
+          "id": "fxi46zl9tmeqvxubyb0id4nr",
+          "order": 7,
+          "chinese": "现在我有翅膀了。",
+          "english": "Now I have wings",
+          "soundmark": "naʊ aɪ hæv; həv wɪŋz",
+          "type": "sentence",
+          "sentenceId": "plkx32mlm82ls19fn3ttlfxh",
+          "image": null,
+          "startTime": 85.07,
+          "endTime": 87.4
+        },
+        {
+          "id": "wq0tvv3d0wbwfamvcjvl59cr",
+          "order": 8,
+          "chinese": "我现在要飞了。",
+          "english": "I will fly now",
+          "soundmark": "aɪ wɪl flaɪ naʊ",
+          "type": "sentence",
+          "sentenceId": "t6gzjcn0jvru0kq6dzpiklcr",
+          "image": null,
+          "startTime": 90.81,
+          "endTime": 92.7
+        },
+        {
+          "id": "t3chud2m6d4bnvmjel2vrzwh",
+          "order": 9,
+          "chinese": "你飞不起来。",
+          "english": "You can't fly",
+          "soundmark": "juː; jʊ kænt flaɪ",
+          "type": "sentence",
+          "sentenceId": "gsmoehdky6gvhjuyts28wpj1",
+          "image": null,
+          "startTime": 94.07,
+          "endTime": 96.3
+        },
+        {
+          "id": "jlbg3k7pte7e20fjzz6plk2n",
+          "order": 10,
+          "chinese": "别试试飞。",
+          "english": "Do not try to fly",
+          "soundmark": "duː; də nɑːt traɪ tuː; tə flaɪ",
+          "type": "sentence",
+          "sentenceId": "ovdxre86ke6lw84hfmmv2gha",
+          "image": null,
+          "startTime": 98.63,
+          "endTime": 100.69
+        },
+        {
+          "id": "sc5hut1r7tyhgydo4ms9crpq",
+          "order": 11,
+          "chinese": "我现在要飞了。",
+          "english": "I will fly now",
+          "soundmark": "aɪ wɪl flaɪ naʊ",
+          "type": "sentence",
+          "sentenceId": "x0jm6gio9j9qch5s3qwxtcac",
+          "image": null,
+          "startTime": 105.62,
+          "endTime": 108.04
+        },
+        {
+          "id": "g9qbftzviq7xkwtcb1byibrf",
+          "order": 12,
+          "chinese": "我要飞到那棵树上去。",
+          "english": "I will fly to that tree",
+          "soundmark": "aɪ wɪl flaɪ tuː; tə ðæt triː",
+          "type": "sentence",
+          "sentenceId": "ex2qzsk8jsj2j83qa8ttyeoz",
+          "image": null,
+          "startTime": 108.52,
+          "endTime": 110.84
+        },
+        {
+          "id": "m4f96fggfkz0vn7v8t79scej",
+          "order": 13,
+          "chinese": "哎哟！",
+          "english": "Oof !",
+          "soundmark": "uːf",
+          "type": "sentence",
+          "sentenceId": "rz7a3ktfbgov4kj8cc5ytswo",
+          "image": null,
+          "startTime": 126.96,
+          "endTime": 128.09
+        },
+        {
+          "id": "mecxczq6cf2g10uxw8duu4sy",
+          "order": 14,
+          "chinese": "你没飞起来。",
+          "english": "You did not fly",
+          "soundmark": "juː; jʊ dɪd nɑːt flaɪ",
+          "type": "sentence",
+          "sentenceId": "q52pnwrrb0qal7j3jl35u3n1",
+          "image": null,
+          "startTime": 132.74,
+          "endTime": 134.81
+        },
+        {
+          "id": "y8ogcclrswuovux8rnzohtkg",
+          "order": 15,
+          "chinese": "不，我没飞起来。",
+          "english": "No , I did not fly",
+          "soundmark": "noʊ aɪ dɪd nɑːt flaɪ",
+          "type": "sentence",
+          "sentenceId": "l69k03jpuahoeb2igiv6pmxk",
+          "image": null,
+          "startTime": 136.01,
+          "endTime": 139.13
+        },
+        {
+          "id": "obv2rbhkk2n4c8sqt9pfw2a4",
+          "order": 16,
+          "chinese": "我摔下来了。",
+          "english": "I fell",
+          "soundmark": "aɪ fel",
+          "type": "sentence",
+          "sentenceId": "trw739bkb5ayf4tdbqjioi1z",
+          "image": null,
+          "startTime": 139.67,
+          "endTime": 141.22
+        }
+      ]
+    },
+    {
+      "id": "k89458uz0er71en3dyxzl2v0",
+      "order": 4,
+      "title": "004 我们能在哪里玩",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/33e4341d-dbd6-40e4-b425-d1cc596d42f1.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 13,
+      "sentenceCount": 13,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "xw29m27rd7pof2n8j376xszt",
+          "content": "Where can we play?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "bm11b3ekqlxmwte5ise4hfvy",
+          "content": "We can play in the trees.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "q3bfer5i9jaiby68o2zlg2bo",
+          "content": "I can play in the trees!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "zeuubx53bjqlvl7d9dzmxxae",
+          "content": "Me too.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "c425p1zzzf6gvt8lc2es4ud5",
+          "content": "I can't play in the trees.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xksjy9t8lkngh52ex1wrelul",
+          "content": "We can play on the rocks.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "w4e6swops89ae48dgijtcj6z",
+          "content": "I can play on the rocks!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ihgem2r5cqd9mb82bddl3cp8",
+          "content": "I can't play on the rocks.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "mi7vqr25sonsda9bfyj1ju9x",
+          "content": "Where can we play?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "odc8odtilyrwhbwq4idew6oc",
+          "content": "We can play in the stream.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "rbxc98l2u1cqr0jxs6wshez7",
+          "content": "I can play in the stream.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "jy4yxjaixx4lcqg6cs5tico6",
+          "content": "Me too.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "b5zbm70v39yx2igamh9biilt",
+          "content": "Let's all play in the stream!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "hg4lswlht3r2bb6v7fzn7d17",
+          "order": 1,
+          "chinese": "我们在哪里玩呢？",
+          "english": "Where can we play ?",
+          "soundmark": "wer kæn; kən wiː; wi pleɪ",
+          "type": "sentence",
+          "sentenceId": "xw29m27rd7pof2n8j376xszt",
+          "image": null,
+          "startTime": 9.94,
+          "endTime": 15.28
+        },
+        {
+          "id": "ol8qfga3u3lzsfmzy1n2t6i7",
+          "order": 2,
+          "chinese": "我们可以在树上玩。",
+          "english": "We can play in the trees",
+          "soundmark": "wiː; wi kæn; kən pleɪ ɪn ðə; ði triːz",
+          "type": "sentence",
+          "sentenceId": "bm11b3ekqlxmwte5ise4hfvy",
+          "image": null,
+          "startTime": 21.74,
+          "endTime": 24.75
+        },
+        {
+          "id": "lybuoemieinslnz14j5r7lez",
+          "order": 3,
+          "chinese": "我能在树上玩！",
+          "english": "I can play in the trees !",
+          "soundmark": "aɪ kæn; kən pleɪ ɪn ðə; ði triːz",
+          "type": "sentence",
+          "sentenceId": "q3bfer5i9jaiby68o2zlg2bo",
+          "image": null,
+          "startTime": 28.34,
+          "endTime": 30.72
+        },
+        {
+          "id": "zer28ipowmkylxrhmcap6gfy",
+          "order": 4,
+          "chinese": "我也是。",
+          "english": "Me too",
+          "soundmark": "miː; mi tuː",
+          "type": "sentence",
+          "sentenceId": "zeuubx53bjqlvl7d9dzmxxae",
+          "image": null,
+          "startTime": 34.48,
+          "endTime": 36.5
+        },
+        {
+          "id": "wqki9znjyfz5rjy3rh1uc1xd",
+          "order": 5,
+          "chinese": "我不能在树上玩。",
+          "english": "I can't play in the trees",
+          "soundmark": "aɪ kænt pleɪ ɪn ðə; ði triːz",
+          "type": "sentence",
+          "sentenceId": "c425p1zzzf6gvt8lc2es4ud5",
+          "image": null,
+          "startTime": 45.29,
+          "endTime": 48.27
+        },
+        {
+          "id": "zogfvmzqpg94ief2aad0ud34",
+          "order": 6,
+          "chinese": "我们可以在岩石上玩。",
+          "english": "We can play on the rocks",
+          "soundmark": "wiː; wi kæn; kən pleɪ ɑːn ðə; ði rɒks",
+          "type": "sentence",
+          "sentenceId": "xksjy9t8lkngh52ex1wrelul",
+          "image": null,
+          "startTime": 71.89,
+          "endTime": 74.05
+        },
+        {
+          "id": "n1a8425wnbhha9zkdns4xv5y",
+          "order": 7,
+          "chinese": "我能在岩石上玩！",
+          "english": "I can play on the rocks !",
+          "soundmark": "aɪ kæn; kən pleɪ ɑːn ðə; ði rɒks",
+          "type": "sentence",
+          "sentenceId": "w4e6swops89ae48dgijtcj6z",
+          "image": null,
+          "startTime": 76.81,
+          "endTime": 79.92
+        },
+        {
+          "id": "as60uppccmyhvuf8z05jl781",
+          "order": 8,
+          "chinese": "我不能在岩石上玩。",
+          "english": "I can't play on the rocks",
+          "soundmark": "aɪ kænt pleɪ ɑːn ðə; ði rɒks",
+          "type": "sentence",
+          "sentenceId": "ihgem2r5cqd9mb82bddl3cp8",
+          "image": null,
+          "startTime": 96.31,
+          "endTime": 99.34
+        },
+        {
+          "id": "g4mkc1dkxezh6bx3413soqg6",
+          "order": 9,
+          "chinese": "我们在哪里玩呢？",
+          "english": "Where can we play ?",
+          "soundmark": "wer kæn; kən wiː; wi pleɪ",
+          "type": "sentence",
+          "sentenceId": "mi7vqr25sonsda9bfyj1ju9x",
+          "image": null,
+          "startTime": 102.97,
+          "endTime": 104.66
+        },
+        {
+          "id": "uq8ymzh2gyl79jotcvpv3s45",
+          "order": 10,
+          "chinese": "我们可以在小溪里玩。",
+          "english": "We can play in the stream",
+          "soundmark": "wiː; wi kæn; kən pleɪ ɪn ðə; ði striːm",
+          "type": "sentence",
+          "sentenceId": "odc8odtilyrwhbwq4idew6oc",
+          "image": null,
+          "startTime": 108.68,
+          "endTime": 111.36
+        },
+        {
+          "id": "u8dvzg1iprlti0c3j0bqsvet",
+          "order": 11,
+          "chinese": "我能在小溪里玩。",
+          "english": "I can play in the stream",
+          "soundmark": "aɪ kæn; kən pleɪ ɪn ðə; ði striːm",
+          "type": "sentence",
+          "sentenceId": "rbxc98l2u1cqr0jxs6wshez7",
+          "image": null,
+          "startTime": 114.13,
+          "endTime": 116.97
+        },
+        {
+          "id": "e4huizb84zlv3ua9to5qemnp",
+          "order": 12,
+          "chinese": "我也是。",
+          "english": "Me too",
+          "soundmark": "miː; mi tuː",
+          "type": "sentence",
+          "sentenceId": "jy4yxjaixx4lcqg6cs5tico6",
+          "image": null,
+          "startTime": 117.91,
+          "endTime": 119.91
+        },
+        {
+          "id": "pagv2ebxpopkify9mbc0fvcn",
+          "order": 13,
+          "chinese": "我们都在小溪里玩吧！",
+          "english": "Let's all play in the stream !",
+          "soundmark": "lets ɔːl pleɪ ɪn ðə; ði striːm",
+          "type": "sentence",
+          "sentenceId": "b5zbm70v39yx2igamh9biilt",
+          "image": null,
+          "startTime": 121.24,
+          "endTime": 124.2
+        }
+      ]
+    },
+    {
+      "id": "rt9ga7c8gd1kg0hwt04537hq",
+      "order": 5,
+      "title": "005 我找不到我的叶子",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/6e780a4f-f6e4-4ca4-9f2c-eeff35a690c1.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 14,
+      "sentenceCount": 14,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "sft398ptbyp03ji0jo2zepac",
+          "content": "I found a big leaf!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "dhuskg6ii8qjnfpdt7719fbr",
+          "content": "Uh-oh!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "kgksqtnpxw84tlicjzvvb3he",
+          "content": "I can't find my leaf.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "y7qh5dtrh1fvfkk8kpw2nhyh",
+          "content": "Can you find my leaf?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "rglmb9s7sl3w4mgrcw78jk46",
+          "content": "I will find your leaf.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ciip0udhe0w212382tdv41zb",
+          "content": "I will find your leaf.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "dasponasb7jvcb2145xo4v0s",
+          "content": "I found a stick.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "t2vwa9zwqvrdws5oordp832e",
+          "content": "I found a rock.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "mp920s97dxv5jqjyl8l8ghbp",
+          "content": "We did not find your leaf.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "psm63vy9zhzrd7mn9selcmo4",
+          "content": "I found something!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "h3w1jl08lje024eagig19t6b",
+          "content": "Did you find your leaf?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "pabvgqvvw6bi3umfpju2ooa4",
+          "content": "No, I did not find my leaf.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "tz8pgmav3gj0mepe0dpqn4px",
+          "content": "What did you find?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "uxqoobip6esv57y4tzu2rza2",
+          "content": "I found a new leaf!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "rydedag6ddonhco073gwva4v",
+          "order": 1,
+          "chinese": "我找到了一片大叶子！",
+          "english": "I found a big leaf !",
+          "soundmark": "aɪ faʊnd ə; eɪ bɪɡ liːf",
+          "type": "sentence",
+          "sentenceId": "sft398ptbyp03ji0jo2zepac",
+          "image": null,
+          "startTime": 9.87,
+          "endTime": 22.96
+        },
+        {
+          "id": "jsni4l6qlm833o4vn5teoouq",
+          "order": 2,
+          "chinese": "哎呀！",
+          "english": "Uh-oh !",
+          "soundmark": "ˈʌ oʊ",
+          "type": "sentence",
+          "sentenceId": "dhuskg6ii8qjnfpdt7719fbr",
+          "image": null,
+          "startTime": 45.88,
+          "endTime": 47.31
+        },
+        {
+          "id": "k6n1ztpwmq1lcdueb9kzyw0r",
+          "order": 3,
+          "chinese": "我找不到我的叶子了。",
+          "english": "I can't find my leaf",
+          "soundmark": "aɪ kænt faɪnd maɪ liːf",
+          "type": "sentence",
+          "sentenceId": "kgksqtnpxw84tlicjzvvb3he",
+          "image": null,
+          "startTime": 64.13,
+          "endTime": 66.05
+        },
+        {
+          "id": "bez0ael7be4xodutmhrqr4l1",
+          "order": 4,
+          "chinese": "你能帮我找到我的叶子吗？",
+          "english": "Can you find my leaf ?",
+          "soundmark": "kæn; kən juː; jʊ faɪnd maɪ liːf",
+          "type": "sentence",
+          "sentenceId": "y7qh5dtrh1fvfkk8kpw2nhyh",
+          "image": null,
+          "startTime": 68.31,
+          "endTime": 70.01
+        },
+        {
+          "id": "a2lu6azwp2qy5nrjde8sm2zk",
+          "order": 5,
+          "chinese": "我会找到你的叶子的。",
+          "english": "I will find your leaf",
+          "soundmark": "aɪ wɪl faɪnd jʊr; jər liːf",
+          "type": "sentence",
+          "sentenceId": "rglmb9s7sl3w4mgrcw78jk46",
+          "image": null,
+          "startTime": 79.67,
+          "endTime": 81.82
+        },
+        {
+          "id": "re1pydu5fn81q2m17vtl6py7",
+          "order": 6,
+          "chinese": "我会找到你的叶子的。",
+          "english": "I will find your leaf",
+          "soundmark": "aɪ wɪl faɪnd jʊr; jər liːf",
+          "type": "sentence",
+          "sentenceId": "ciip0udhe0w212382tdv41zb",
+          "image": null,
+          "startTime": 85.66,
+          "endTime": 88.21
+        },
+        {
+          "id": "wrwwnzles7vkcxf6otnkxsfd",
+          "order": 7,
+          "chinese": "我找到了一根棍子。",
+          "english": "I found a stick",
+          "soundmark": "aɪ faʊnd ə; eɪ stɪk",
+          "type": "sentence",
+          "sentenceId": "dasponasb7jvcb2145xo4v0s",
+          "image": null,
+          "startTime": 140.78,
+          "endTime": 142.58
+        },
+        {
+          "id": "wka657ch80ro6r6h549o9zi1",
+          "order": 8,
+          "chinese": "我找到了一块石头。",
+          "english": "I found a rock",
+          "soundmark": "aɪ faʊnd ə; eɪ rɑːk",
+          "type": "sentence",
+          "sentenceId": "t2vwa9zwqvrdws5oordp832e",
+          "image": null,
+          "startTime": 144.81,
+          "endTime": 146.65
+        },
+        {
+          "id": "aglfs5vpk1ibehryni4nw1oc",
+          "order": 9,
+          "chinese": "我们没有找到你的叶子。",
+          "english": "We did not find your leaf",
+          "soundmark": "wiː; wi dɪd nɑːt faɪnd jʊr; jər liːf",
+          "type": "sentence",
+          "sentenceId": "mp920s97dxv5jqjyl8l8ghbp",
+          "image": null,
+          "startTime": 153.99,
+          "endTime": 156.99
+        },
+        {
+          "id": "cppdror9850gn0yq0k62rdgn",
+          "order": 10,
+          "chinese": "我找到了一样东西！",
+          "english": "I found something !",
+          "soundmark": "aɪ faʊnd ˈsʌmθɪŋ",
+          "type": "sentence",
+          "sentenceId": "psm63vy9zhzrd7mn9selcmo4",
+          "image": null,
+          "startTime": 160.73,
+          "endTime": 162.69
+        },
+        {
+          "id": "u5ugb2wwtyaoxxlquctgxbh7",
+          "order": 11,
+          "chinese": "你找到你的叶子了吗？",
+          "english": "Did you find your leaf ?",
+          "soundmark": "dɪd juː; jʊ faɪnd jʊr; jər liːf",
+          "type": "sentence",
+          "sentenceId": "h3w1jl08lje024eagig19t6b",
+          "image": null,
+          "startTime": 163.18,
+          "endTime": 165.58
+        },
+        {
+          "id": "wp76xgrw8bx3xt0qkhwb5vz6",
+          "order": 12,
+          "chinese": "没有，我没有找到我的叶子。",
+          "english": "No , I did not find my leaf",
+          "soundmark": "noʊ aɪ dɪd nɑːt faɪnd maɪ liːf",
+          "type": "sentence",
+          "sentenceId": "pabvgqvvw6bi3umfpju2ooa4",
+          "image": null,
+          "startTime": 166.99,
+          "endTime": 170.7
+        },
+        {
+          "id": "q7mzc71vi1ljv9p120tkbcsx",
+          "order": 13,
+          "chinese": "你找到了什么？",
+          "english": "What did you find ?",
+          "soundmark": "wʌt dɪd juː; jʊ faɪnd",
+          "type": "sentence",
+          "sentenceId": "tz8pgmav3gj0mepe0dpqn4px",
+          "image": null,
+          "startTime": 172.01,
+          "endTime": 174.02
+        },
+        {
+          "id": "j148midtcxj2fai8op0qo9lq",
+          "order": 14,
+          "chinese": "我找到了一片新叶子！",
+          "english": "I found a new leaf !",
+          "soundmark": "aɪ faʊnd ə; eɪ nuː liːf",
+          "type": "sentence",
+          "sentenceId": "uxqoobip6esv57y4tzu2rza2",
+          "image": null,
+          "startTime": 175.1,
+          "endTime": 177.02
+        }
+      ]
+    },
+    {
+      "id": "c4wi22u6yr63cp6tq92s207j",
+      "order": 6,
+      "title": "006 我想唱歌",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/bbd68528-6ed2-4d72-96d1-193d7feae3d4.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 12,
+      "sentenceCount": 12,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "ln4you9z19agj6z2ah0jxw0e",
+          "content": "I want to . . .",
+          "hasLearningContent": false
+        },
+        {
+          "id": "iicg6wfgdq9qeqdkci8dx4k2",
+          "content": "Do you want to sing?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ont6zqrldm55y2gsdc1mzf59",
+          "content": "I want to sing!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "u6u66jbh59ahcwtb3mavvwot",
+          "content": "I want to sing too!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ftanp5ontmqop368pyr3j9ce",
+          "content": "I do not want to sing.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "jmgaz1fnzqjc8ap72rwm4v8u",
+          "content": "I want to . . .",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ctgkg48t69dvbmkmqkcxjxgk",
+          "content": "Do you want to dance?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ua562c495zzbpbiqueaco5qs",
+          "content": "I want to dance.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "y2h56ox641ol10p8ulz0f8r4",
+          "content": "So do I!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "uxrkd1euszrvvlr2nwxp0450",
+          "content": "I do not want to dance.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "oy86h9o4z0m0fouprt8x4p7y",
+          "content": "What do you want to do?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "p3o3uqs7b0uozj6lpczk0eb4",
+          "content": "I want to sleep!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "tzvep1n7lwh7apzcb56sqcdu",
+          "order": 1,
+          "chinese": "我想……",
+          "english": "I want to ..",
+          "soundmark": "aɪ wɑːnt tuː; tə",
+          "type": "sentence",
+          "sentenceId": "ln4you9z19agj6z2ah0jxw0e",
+          "image": null,
+          "startTime": 9.94,
+          "endTime": 34.11
+        },
+        {
+          "id": "gkpdshbr1c05708yrmmuqeph",
+          "order": 2,
+          "chinese": "你想唱歌吗？",
+          "english": "Do you want to sing ?",
+          "soundmark": "duː; də juː; jʊ wɑːnt tuː; tə sɪŋ",
+          "type": "sentence",
+          "sentenceId": "iicg6wfgdq9qeqdkci8dx4k2",
+          "image": null,
+          "startTime": 35.49,
+          "endTime": 37.71
+        },
+        {
+          "id": "ljyvpk1vyn7g5f9zqhj5nava",
+          "order": 3,
+          "chinese": "我想唱歌！",
+          "english": "I want to sing !",
+          "soundmark": "aɪ wɑːnt tuː; tə sɪŋ",
+          "type": "sentence",
+          "sentenceId": "ont6zqrldm55y2gsdc1mzf59",
+          "image": null,
+          "startTime": 38.74,
+          "endTime": 40.56
+        },
+        {
+          "id": "sqpvnplvb01e29go4zlnlrs5",
+          "order": 4,
+          "chinese": "我也想唱歌！",
+          "english": "I want to sing too !",
+          "soundmark": "aɪ wɑːnt tuː; tə sɪŋ tuː",
+          "type": "sentence",
+          "sentenceId": "u6u66jbh59ahcwtb3mavvwot",
+          "image": null,
+          "startTime": 50.55,
+          "endTime": 53.27
+        },
+        {
+          "id": "ja04olkc5jpfs2vjra6sgqwv",
+          "order": 5,
+          "chinese": "我不想唱歌。",
+          "english": "I do not want to sing",
+          "soundmark": "aɪ duː; də nɑːt wɑːnt tuː; tə sɪŋ",
+          "type": "sentence",
+          "sentenceId": "ftanp5ontmqop368pyr3j9ce",
+          "image": null,
+          "startTime": 77.16,
+          "endTime": 79.93
+        },
+        {
+          "id": "t7jf6p7me23636nmi3pmemsu",
+          "order": 6,
+          "chinese": "我想……",
+          "english": "I want to ..",
+          "soundmark": "aɪ wɑːnt tuː; tə",
+          "type": "sentence",
+          "sentenceId": "jmgaz1fnzqjc8ap72rwm4v8u",
+          "image": null,
+          "startTime": 80.97,
+          "endTime": 82.95
+        },
+        {
+          "id": "h2a92bhhu6jw7myultlsbv1t",
+          "order": 7,
+          "chinese": "你想跳舞吗？",
+          "english": "Do you want to dance ?",
+          "soundmark": "duː; də juː; jʊ wɑːnt tuː; tə dæns",
+          "type": "sentence",
+          "sentenceId": "ctgkg48t69dvbmkmqkcxjxgk",
+          "image": null,
+          "startTime": 84.89,
+          "endTime": 86.99
+        },
+        {
+          "id": "g7v4ao9jbn0so9533lxf7d18",
+          "order": 8,
+          "chinese": "我想跳舞。",
+          "english": "I want to dance",
+          "soundmark": "aɪ wɑːnt tuː; tə dæns",
+          "type": "sentence",
+          "sentenceId": "ua562c495zzbpbiqueaco5qs",
+          "image": null,
+          "startTime": 99.07,
+          "endTime": 101.24
+        },
+        {
+          "id": "ezh948snnzvdaiin0uuu3o26",
+          "order": 9,
+          "chinese": "我也是！",
+          "english": "So do I !",
+          "soundmark": "soʊ duː; də aɪ",
+          "type": "sentence",
+          "sentenceId": "y2h56ox641ol10p8ulz0f8r4",
+          "image": null,
+          "startTime": 106.85,
+          "endTime": 107.99
+        },
+        {
+          "id": "oq6np67cwoi8mrie7nx4wee6",
+          "order": 10,
+          "chinese": "我不想跳舞。",
+          "english": "I do not want to dance",
+          "soundmark": "aɪ duː; də nɑːt wɑːnt tuː; tə dæns",
+          "type": "sentence",
+          "sentenceId": "uxrkd1euszrvvlr2nwxp0450",
+          "image": null,
+          "startTime": 115.21,
+          "endTime": 117.85
+        },
+        {
+          "id": "i31xh5of743i3hlnbymk4fdz",
+          "order": 11,
+          "chinese": "你想做什么？",
+          "english": "What do you want to do ?",
+          "soundmark": "wʌt duː; də juː; jʊ wɑːnt tuː; tə duː; də",
+          "type": "sentence",
+          "sentenceId": "oy86h9o4z0m0fouprt8x4p7y",
+          "image": null,
+          "startTime": 125.81,
+          "endTime": 128.09
+        },
+        {
+          "id": "ta5dh1ov9lbgc3gmmi8aap39",
+          "order": 12,
+          "chinese": "我想睡觉！",
+          "english": "I want to sleep !",
+          "soundmark": "aɪ wɑːnt tuː; tə sliːp",
+          "type": "sentence",
+          "sentenceId": "p3o3uqs7b0uozj6lpczk0eb4",
+          "image": null,
+          "startTime": 129.74,
+          "endTime": 132.62
+        }
+      ]
+    },
+    {
+      "id": "rc5qtofhwm7vsqa8k8kwa3xx",
+      "order": 7,
+      "title": "007 我在夜里睡觉",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/5439cb11-19f6-4025-b3ea-26bea931a91a.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 16,
+      "sentenceCount": 16,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "jiu9ex0un6tfhm9rigo3q8yf",
+          "content": "I sleep at night.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "frvsejy4ro61cvkffez0iyyv",
+          "content": "I sleep in a tree.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "jos7xr95wrzvjhbzbhvu1c3h",
+          "content": "I sleep at night.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "q8nykngflehtiuvvahiqtbst",
+          "content": "I sleep in a hole.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "kbpy6kj54od8n9tqui1qyr7y",
+          "content": "I sleep at night.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "khifan2mbil77dzg1nq1w8iy",
+          "content": "I sleep on a lily pad.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ic26ho78s2qqtou6e3ncedkb",
+          "content": "I sleep at night.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "nteead7rhodinzls511ti2rb",
+          "content": "I sleep underwater.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "cvvx8s0o8q51m9pskymip2oz",
+          "content": "I do not sleep at night.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "uemqxm9stehfmyr23jwrlvth",
+          "content": "You don't sleep at night?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "jopxllix6xh8fb7pxxtbnzvm",
+          "content": "No.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "tyxk6ryrzfm9gyqher6s8mfx",
+          "content": "What do you do at night?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "muve8jev7gyevmltliumjegd",
+          "content": "I wake up.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ajxcxwu9509g53hlndp80prm",
+          "content": "And I fly!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "sw2g87qqvv2dzz9e98k5kx78",
+          "content": "Please fly somewhere else.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "qoesnztz49h2oo1rb07qgt5n",
+          "content": "Because we sleep at night!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "lveynvuvs20bjkgc0w6l00rm",
+          "order": 1,
+          "chinese": "我晚上睡觉。",
+          "english": "I sleep at night",
+          "soundmark": "aɪ sliːp æt; ət naɪt",
+          "type": "sentence",
+          "sentenceId": "jiu9ex0un6tfhm9rigo3q8yf",
+          "image": null,
+          "startTime": 9.87,
+          "endTime": 24.09
+        },
+        {
+          "id": "r9ofx7mc6kwt7225eocpox38",
+          "order": 2,
+          "chinese": "我睡在树上。",
+          "english": "I sleep in a tree",
+          "soundmark": "aɪ sliːp ɪn ə; eɪ triː",
+          "type": "sentence",
+          "sentenceId": "frvsejy4ro61cvkffez0iyyv",
+          "image": null,
+          "startTime": 31.14,
+          "endTime": 33.38
+        },
+        {
+          "id": "ammkwd59z3b3l23b6sv4wpww",
+          "order": 3,
+          "chinese": "我晚上睡觉。",
+          "english": "I sleep at night",
+          "soundmark": "aɪ sliːp æt; ət naɪt",
+          "type": "sentence",
+          "sentenceId": "jos7xr95wrzvjhbzbhvu1c3h",
+          "image": null,
+          "startTime": 52.28,
+          "endTime": 54.27
+        },
+        {
+          "id": "ajhunaja0f5m8j2c6uj9qwzi",
+          "order": 4,
+          "chinese": "我睡在洞里。",
+          "english": "I sleep in a hole",
+          "soundmark": "aɪ sliːp ɪn ə; eɪ hoʊl",
+          "type": "sentence",
+          "sentenceId": "q8nykngflehtiuvvahiqtbst",
+          "image": null,
+          "startTime": 62.6,
+          "endTime": 64.86
+        },
+        {
+          "id": "wic67qsozl5txp3se2mj865b",
+          "order": 5,
+          "chinese": "我晚上睡觉。",
+          "english": "I sleep at night",
+          "soundmark": "aɪ sliːp æt; ət naɪt",
+          "type": "sentence",
+          "sentenceId": "kbpy6kj54od8n9tqui1qyr7y",
+          "image": null,
+          "startTime": 73.94,
+          "endTime": 76.48
+        },
+        {
+          "id": "muoduazu96xeceiuk07wall1",
+          "order": 6,
+          "chinese": "我睡在睡莲叶上。",
+          "english": "I sleep on a lily pad",
+          "soundmark": "aɪ sliːp ɑːn ə; eɪ ˈlɪli pæd",
+          "type": "sentence",
+          "sentenceId": "khifan2mbil77dzg1nq1w8iy",
+          "image": null,
+          "startTime": 84.31,
+          "endTime": 87.39
+        },
+        {
+          "id": "iub27wjk61n0d1ssrm3tobh8",
+          "order": 7,
+          "chinese": "我晚上睡觉。",
+          "english": "I sleep at night",
+          "soundmark": "aɪ sliːp æt; ət naɪt",
+          "type": "sentence",
+          "sentenceId": "ic26ho78s2qqtou6e3ncedkb",
+          "image": null,
+          "startTime": 97.11,
+          "endTime": 99.5
+        },
+        {
+          "id": "wnjanpbp92euc5tqazu4lbrt",
+          "order": 8,
+          "chinese": "我睡在水下。",
+          "english": "I sleep underwater",
+          "soundmark": "aɪ sliːp ˌʌndərˈwɔːtər",
+          "type": "sentence",
+          "sentenceId": "nteead7rhodinzls511ti2rb",
+          "image": null,
+          "startTime": 107.61,
+          "endTime": 110.32
+        },
+        {
+          "id": "mdkotyctenty0dk7c4z0fjko",
+          "order": 9,
+          "chinese": "我晚上不睡觉。",
+          "english": "I do not sleep at night",
+          "soundmark": "aɪ duː; də nɑːt sliːp æt; ət naɪt",
+          "type": "sentence",
+          "sentenceId": "cvvx8s0o8q51m9pskymip2oz",
+          "image": null,
+          "startTime": 123.49,
+          "endTime": 126.52
+        },
+        {
+          "id": "shrnhwnj5b88yozhqeb2fzr6",
+          "order": 10,
+          "chinese": "你晚上不睡觉？",
+          "english": "You don't sleep at night ?",
+          "soundmark": "juː; jʊ doʊnt sliːp æt; ət naɪt",
+          "type": "sentence",
+          "sentenceId": "uemqxm9stehfmyr23jwrlvth",
+          "image": null,
+          "startTime": 129.07,
+          "endTime": 131.3
+        },
+        {
+          "id": "ydvvwfxpzo7gewe6g3t0xts9",
+          "order": 11,
+          "chinese": "不。",
+          "english": "No",
+          "soundmark": "noʊ",
+          "type": "sentence",
+          "sentenceId": "jopxllix6xh8fb7pxxtbnzvm",
+          "image": null,
+          "startTime": 132.61,
+          "endTime": 133.99
+        },
+        {
+          "id": "vhgp2kjc7b4sza7auke77113",
+          "order": 12,
+          "chinese": "你晚上做什么？",
+          "english": "What do you do at night ?",
+          "soundmark": "wʌt duː; də juː; jʊ duː; də æt; ət naɪt",
+          "type": "sentence",
+          "sentenceId": "tyxk6ryrzfm9gyqher6s8mfx",
+          "image": null,
+          "startTime": 135.2,
+          "endTime": 137.43
+        },
+        {
+          "id": "w8g0h1zaod7agee6cdv5tzd5",
+          "order": 13,
+          "chinese": "我醒来。",
+          "english": "I wake up",
+          "soundmark": "aɪ weɪk ʌp",
+          "type": "sentence",
+          "sentenceId": "muve8jev7gyevmltliumjegd",
+          "image": null,
+          "startTime": 139.3,
+          "endTime": 141.1
+        },
+        {
+          "id": "rspwoxlx16d1waf6sekunyg6",
+          "order": 14,
+          "chinese": "然后我飞！",
+          "english": "And I fly !",
+          "soundmark": "ænd; ənd aɪ flaɪ",
+          "type": "sentence",
+          "sentenceId": "ajxcxwu9509g53hlndp80prm",
+          "image": null,
+          "startTime": 143.34,
+          "endTime": 145.68
+        },
+        {
+          "id": "imx3rfsqk0scz8aquk6l2xxz",
+          "order": 15,
+          "chinese": "请飞到别的地方去。",
+          "english": "Please fly somewhere else",
+          "soundmark": "pliːz flaɪ ˈsʌmwer els",
+          "type": "sentence",
+          "sentenceId": "sw2g87qqvv2dzz9e98k5kx78",
+          "image": null,
+          "startTime": 163.4,
+          "endTime": 166.49
+        },
+        {
+          "id": "j4j0yng3cxdjfauqqvmej7jj",
+          "order": 16,
+          "chinese": "因为我们晚上要睡觉！",
+          "english": "Because we sleep at night !",
+          "soundmark": "bɪˈkəz, bɪˈkɔːz wiː; wi sliːp æt; ət naɪt",
+          "type": "sentence",
+          "sentenceId": "qoesnztz49h2oo1rb07qgt5n",
+          "image": null,
+          "startTime": 167,
+          "endTime": 170.85
+        }
+      ]
+    },
+    {
+      "id": "ibdif7meppgtmusz9h8q753h",
+      "order": 8,
+      "title": "008 我看到了什么东西",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/e25e6290-7382-4e04-acb6-87316b955bb4.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 14,
+      "sentenceCount": 14,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "bebig7628zhlcwf696p6vdo1",
+          "content": "I see something.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "pwe58f8qbhvmozbifl2c0lim",
+          "content": "What do you see?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "dg63mntsdtn68fm7hjjyanev",
+          "content": "I see the stream.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xa4kja8ctxgd9jrgg2xvfi0e",
+          "content": "I see the stream too.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "lcds8jk30ft74kt4wh0g3j8k",
+          "content": "I see rocks in the stream.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "z1olx6ho1on8oioco73gc7f6",
+          "content": "I see fish in the stream.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "iy2ret5rfwgzhrde7cabzdhc",
+          "content": "I see us in the stream.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "walukb9q0r1qnspc1z4e9afv",
+          "content": "I see trees in the stream.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xawkj9oiuwjc8jk5iw91p44r",
+          "content": "Wow! I see something in the trees.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "hmrb8bjmov75ki7i63cwvxpe",
+          "content": "What do you see?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "nu3gi8mr4uqhwtgu2dmsqgjm",
+          "content": "I see . . . nuts!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "m6o1zx3u35sln8na4pi8ikv8",
+          "content": "I got a lot of nuts!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "fhktlpb78rr4txgr34p6bzfn",
+          "content": "Yes, you did.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ci4pf3cka3375pptnnzzoeia",
+          "content": "Oof! I did not see that stick!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "qki90x7z1vy5hc8qrcl4kv58",
+          "order": 1,
+          "chinese": "我看到了一样东西。",
+          "english": "I see something",
+          "soundmark": "aɪ siː ˈsʌmθɪŋ",
+          "type": "sentence",
+          "sentenceId": "bebig7628zhlcwf696p6vdo1",
+          "image": null,
+          "startTime": 9.94,
+          "endTime": 22.48
+        },
+        {
+          "id": "etgere7lvp8hwn99qqjzh71t",
+          "order": 2,
+          "chinese": "你看到了什么？",
+          "english": "What do you see ?",
+          "soundmark": "wʌt duː; də juː; jʊ siː",
+          "type": "sentence",
+          "sentenceId": "pwe58f8qbhvmozbifl2c0lim",
+          "image": null,
+          "startTime": 24.11,
+          "endTime": 26.41
+        },
+        {
+          "id": "oyxulyti66d5frooxu90wky3",
+          "order": 3,
+          "chinese": "我看到了小溪。",
+          "english": "I see the stream",
+          "soundmark": "aɪ siː ðə; ði striːm",
+          "type": "sentence",
+          "sentenceId": "dg63mntsdtn68fm7hjjyanev",
+          "image": null,
+          "startTime": 37.3,
+          "endTime": 39.93
+        },
+        {
+          "id": "cpkb6f7feddn0q64ynnicwsz",
+          "order": 4,
+          "chinese": "我也看到了小溪。",
+          "english": "I see the stream too",
+          "soundmark": "aɪ siː ðə; ði striːm tuː",
+          "type": "sentence",
+          "sentenceId": "xa4kja8ctxgd9jrgg2xvfi0e",
+          "image": null,
+          "startTime": 41.98,
+          "endTime": 45.02
+        },
+        {
+          "id": "fq8tjm3udle45b2sq61w6c6m",
+          "order": 5,
+          "chinese": "我看到小溪里有石头。",
+          "english": "I see rocks in the stream",
+          "soundmark": "aɪ siː rɒks ɪn ðə; ði striːm",
+          "type": "sentence",
+          "sentenceId": "lcds8jk30ft74kt4wh0g3j8k",
+          "image": null,
+          "startTime": 50.37,
+          "endTime": 53.4
+        },
+        {
+          "id": "q9uml3t5cbhkebvw2k9f7l3l",
+          "order": 6,
+          "chinese": "我看到小溪里有鱼。",
+          "english": "I see fish in the stream",
+          "soundmark": "aɪ siː fɪʃ ɪn ðə; ði striːm",
+          "type": "sentence",
+          "sentenceId": "z1olx6ho1on8oioco73gc7f6",
+          "image": null,
+          "startTime": 60.78,
+          "endTime": 64.11
+        },
+        {
+          "id": "nn8vphfzyo2kbt8jfb2vfsfl",
+          "order": 7,
+          "chinese": "我看到小溪里有我们。",
+          "english": "I see us in the stream",
+          "soundmark": "aɪ siː ʌs; əs ɪn ðə; ði striːm",
+          "type": "sentence",
+          "sentenceId": "iy2ret5rfwgzhrde7cabzdhc",
+          "image": null,
+          "startTime": 70.36,
+          "endTime": 73.31
+        },
+        {
+          "id": "zcipisu4015w98o5vlep8e3m",
+          "order": 8,
+          "chinese": "我看到小溪里有树。",
+          "english": "I see trees in the stream",
+          "soundmark": "aɪ siː triːz ɪn ðə; ði striːm",
+          "type": "sentence",
+          "sentenceId": "walukb9q0r1qnspc1z4e9afv",
+          "image": null,
+          "startTime": 78.2,
+          "endTime": 82.01
+        },
+        {
+          "id": "v9rv2k21280bnsf4i25btig3",
+          "order": 9,
+          "chinese": "哇！我看到树上有东西。",
+          "english": "Wow ! I see something in the trees",
+          "soundmark": "waʊ aɪ siː ˈsʌmθɪŋ ɪn ðə; ði triːz",
+          "type": "sentence",
+          "sentenceId": "xawkj9oiuwjc8jk5iw91p44r",
+          "image": null,
+          "startTime": 97.35,
+          "endTime": 101.82
+        },
+        {
+          "id": "o67v9eq1ljvcgso573ejffpq",
+          "order": 10,
+          "chinese": "你看到了什么？",
+          "english": "What do you see ?",
+          "soundmark": "wʌt duː; də juː; jʊ siː",
+          "type": "sentence",
+          "sentenceId": "hmrb8bjmov75ki7i63cwvxpe",
+          "image": null,
+          "startTime": 102.61,
+          "endTime": 105.48
+        },
+        {
+          "id": "m71du5fqo9c9cq6i1rftzdn5",
+          "order": 11,
+          "chinese": "我看到……坚果！",
+          "english": "I see .. . nuts !",
+          "soundmark": "aɪ siː nʌts",
+          "type": "sentence",
+          "sentenceId": "nu3gi8mr4uqhwtgu2dmsqgjm",
+          "image": null,
+          "startTime": 106.54,
+          "endTime": 109.27
+        },
+        {
+          "id": "lspq2ve7v2erwxf7wcjpz8eq",
+          "order": 12,
+          "chinese": "我摘了好多坚果！",
+          "english": "I got a lot of nuts !",
+          "soundmark": "aɪ ɡɑːt ə; eɪ lɑːt ʌv; əv nʌts",
+          "type": "sentence",
+          "sentenceId": "m6o1zx3u35sln8na4pi8ikv8",
+          "image": null,
+          "startTime": 129.42,
+          "endTime": 136.46
+        },
+        {
+          "id": "to2aockyjiu1y5e8o5m0dxv3",
+          "order": 13,
+          "chinese": "没错，你摘了好多。",
+          "english": "Yes , you did",
+          "soundmark": "jes juː; jʊ dɪd",
+          "type": "sentence",
+          "sentenceId": "fhktlpb78rr4txgr34p6bzfn",
+          "image": null,
+          "startTime": 137.3,
+          "endTime": 139.43
+        },
+        {
+          "id": "xrc6spa94q7ha8vgaeaxemw6",
+          "order": 14,
+          "chinese": "哎哟！我没看到那根棍子！",
+          "english": "Oof ! I did not see that stick !",
+          "soundmark": "uːf aɪ dɪd nɑːt siː ðæt stɪk",
+          "type": "sentence",
+          "sentenceId": "ci4pf3cka3375pptnnzzoeia",
+          "image": null,
+          "startTime": 142.21,
+          "endTime": 152.45
+        }
+      ]
+    },
+    {
+      "id": "xlebk9v42x8nohvnooheegj0",
+      "order": 9,
+      "title": "009 走开，虫子！",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/17998aba-2baa-4193-a63a-257c9bcbb384.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 13,
+      "sentenceCount": 13,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "nscv74sjokjbya3e4vc6nh8f",
+          "content": "Go away, bugs! Go!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "z0dm2m5rdg62aewtxpbs3lm2",
+          "content": "The bugs won't go away.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ba2u0hv08j0uhmacs9rys3gq",
+          "content": "I will go away.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "uh44fxsx4iw2xdmtuu6wdrn4",
+          "content": "I will go up the tree.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "tlv07un90xc6ygd1qjs0ej4e",
+          "content": "The bugs won't go there.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "k73ifwmyxkyzbvvljrqr2uxd",
+          "content": "Ugh! Go away, bugs!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "a2a2sguvxldwmuxf0v5tp1v2",
+          "content": "I will go under the log.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "h1uz07qlgjmnrkp592iw0jqc",
+          "content": "The bugs won't go there.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "amhzz52i4mm33sllx6xdicql",
+          "content": "Ugh! Where can I go?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "q40yc7d57shp7940s3y0568a",
+          "content": "I will go in the water.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "d3vof03b891jkgigsnqgrut4",
+          "content": "The bugs won't go there.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "rg8lv6ka71ml2l26yuj11u9y",
+          "content": "Ha-ha! Go find someone else, bugs!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "kpqhvc2ikrgngq256pb79j5b",
+          "content": "Agh! Go away, bugs!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "ff3sjgu0e71jxwh0ura0x0w1",
+          "order": 1,
+          "chinese": "走开，虫子们！快走开！",
+          "english": "Go away , bugs ! Go !",
+          "soundmark": "ɡoʊ əˈweɪ bʌɡz ɡoʊ",
+          "type": "sentence",
+          "sentenceId": "nscv74sjokjbya3e4vc6nh8f",
+          "image": null,
+          "startTime": 9.87,
+          "endTime": 47.47
+        },
+        {
+          "id": "ccxq8h8falg7o1i7vk4i5dln",
+          "order": 2,
+          "chinese": "虫子们就是不走开。",
+          "english": "The bugs won't go away",
+          "soundmark": "ðə; ði bʌɡz woʊnt ɡoʊ əˈweɪ",
+          "type": "sentence",
+          "sentenceId": "z0dm2m5rdg62aewtxpbs3lm2",
+          "image": null,
+          "startTime": 49.05,
+          "endTime": 51.64
+        },
+        {
+          "id": "n9fw0svcje24s3v6ja59gbsb",
+          "order": 3,
+          "chinese": "那我就走开。",
+          "english": "I will go away",
+          "soundmark": "aɪ wɪl ɡoʊ əˈweɪ",
+          "type": "sentence",
+          "sentenceId": "ba2u0hv08j0uhmacs9rys3gq",
+          "image": null,
+          "startTime": 53.1,
+          "endTime": 55.32
+        },
+        {
+          "id": "r3e5s6aumwla8ko3w5c7x36k",
+          "order": 4,
+          "chinese": "我爬到树上去。",
+          "english": "I will go up the tree",
+          "soundmark": "aɪ wɪl ɡoʊ ʌp ðə; ði triː",
+          "type": "sentence",
+          "sentenceId": "uh44fxsx4iw2xdmtuu6wdrn4",
+          "image": null,
+          "startTime": 64.37,
+          "endTime": 66.95
+        },
+        {
+          "id": "vicd6e2d1aunud1w0y7jm71e",
+          "order": 5,
+          "chinese": "虫子们不会去那儿吧。",
+          "english": "The bugs won't go there",
+          "soundmark": "ðə; ði bʌɡz woʊnt ɡoʊ ðer; ðər",
+          "type": "sentence",
+          "sentenceId": "tlv07un90xc6ygd1qjs0ej4e",
+          "image": null,
+          "startTime": 68.53,
+          "endTime": 70.72
+        },
+        {
+          "id": "r2kdantd6433u4iuqp3b68kt",
+          "order": 6,
+          "chinese": "呃啊！走开，虫子们！",
+          "english": "Ugh ! Go away , bugs !",
+          "soundmark": "ʊx；ɜː ɡoʊ əˈweɪ bʌɡz",
+          "type": "sentence",
+          "sentenceId": "k73ifwmyxkyzbvvljrqr2uxd",
+          "image": null,
+          "startTime": 105.79,
+          "endTime": 110.61
+        },
+        {
+          "id": "ivbzeht29dr6cntpnp0m8goj",
+          "order": 7,
+          "chinese": "我躲到木头底下去。",
+          "english": "I will go under the log",
+          "soundmark": "aɪ wɪl ɡoʊ ˈʌndər ðə; ði lɔːɡ",
+          "type": "sentence",
+          "sentenceId": "a2a2sguvxldwmuxf0v5tp1v2",
+          "image": null,
+          "startTime": 121.12,
+          "endTime": 123.47
+        },
+        {
+          "id": "javykzsz46qpxnxvx03dqrkp",
+          "order": 8,
+          "chinese": "虫子们不会去那儿吧。",
+          "english": "The bugs won't go there",
+          "soundmark": "ðə; ði bʌɡz woʊnt ɡoʊ ðer; ðər",
+          "type": "sentence",
+          "sentenceId": "h1uz07qlgjmnrkp592iw0jqc",
+          "image": null,
+          "startTime": 124.2,
+          "endTime": 126.45
+        },
+        {
+          "id": "r2h46mwvuw7rxu3zj0f6hyzt",
+          "order": 9,
+          "chinese": "呃啊！我到底能去哪儿呢？",
+          "english": "Ugh ! Where can I go ?",
+          "soundmark": "ʊx；ɜː wer kæn; kən aɪ ɡoʊ",
+          "type": "sentence",
+          "sentenceId": "amhzz52i4mm33sllx6xdicql",
+          "image": null,
+          "startTime": 156.48,
+          "endTime": 167.38
+        },
+        {
+          "id": "nenq6uovxatmif3oewo6h4p1",
+          "order": 10,
+          "chinese": "那就到水里去。",
+          "english": "I will go in the water",
+          "soundmark": "aɪ wɪl ɡoʊ ɪn ðə; ði ˈwɔːtər",
+          "type": "sentence",
+          "sentenceId": "q40yc7d57shp7940s3y0568a",
+          "image": null,
+          "startTime": 171.92,
+          "endTime": 174.61
+        },
+        {
+          "id": "o2ep3sjhpn3owo8fpiyez3t9",
+          "order": 11,
+          "chinese": "虫子们不会去那儿吧。",
+          "english": "The bugs won't go there",
+          "soundmark": "ðə; ði bʌɡz woʊnt ɡoʊ ðer; ðər",
+          "type": "sentence",
+          "sentenceId": "d3vof03b891jkgigsnqgrut4",
+          "image": null,
+          "startTime": 176.66,
+          "endTime": 179.39
+        },
+        {
+          "id": "k7lb2p6upnocmccuwjvowmtj",
+          "order": 12,
+          "chinese": "哈哈！去找别人吧，虫子们！",
+          "english": "Ha-ha ! Go find someone else , bugs !",
+          "soundmark": "hɑː hɑː ɡoʊ faɪnd ˈsʌmwʌn els bʌɡz",
+          "type": "sentence",
+          "sentenceId": "rg8lv6ka71ml2l26yuj11u9y",
+          "image": null,
+          "startTime": 194.54,
+          "endTime": 200.31
+        },
+        {
+          "id": "lf7i3w4tsx1tw2skb79yro9t",
+          "order": 13,
+          "chinese": "啊！走开，虫子们！",
+          "english": "Agh ! Go away , bugs !",
+          "soundmark": "ɑː ɡoʊ əˈweɪ bʌɡz",
+          "type": "sentence",
+          "sentenceId": "kpqhvc2ikrgngq256pb79j5b",
+          "image": null,
+          "startTime": 222.29,
+          "endTime": 230.98
+        }
+      ]
+    },
+    {
+      "id": "ni12e3of7vsjzfk0v6rbplm4",
+      "order": 10,
+      "title": "010 你能帮忙吗",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/d55f3c87-aa73-4c40-808c-07639953b9a0.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 15,
+      "sentenceCount": 15,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "ddhhglmvju3n3843sl4cwjpl",
+          "content": "Can you help me?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "gyoml5i1hxfynqf0vqzrb7ov",
+          "content": "Yes, I can help you.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "nd9z23h2vru1zj5e5agm1fw0",
+          "content": "Help me dig the dirt.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "tbykihihpwi9bl9809hqjxfn",
+          "content": "Help me move this rock.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "o1crytarhv9pqfxd159ymxp9",
+          "content": "Help me put it here.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "o6zfsh5m1qe0606zo81o0yd6",
+          "content": "Help me move this log.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ls4socdv07owkjojvsd375xb",
+          "content": "Help me put it here.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "b69lsuzzpw0qad1z7ru2h26g",
+          "content": "Help me move these sticks.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "fmg8boyr2sqly4kjp309vi21",
+          "content": "Help me make a wall.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "p0szpdsq3hmxwmc2poz6qoh2",
+          "content": "You helped me make a fort!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "g1r1ed5udcupcwbdbthw8ioh",
+          "content": "Thank you!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xfp8zi9b3mt8fbw0jh7ypgm5",
+          "content": "You're welcome.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "swx431ejbgztuqjt0d8kn0i3",
+          "content": "Do you want to play now?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ja3odnzna3emahiflr43f87o",
+          "content": "No, I want to rest now!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "j0cv8prxx7txqiszgak2kj7a",
+          "content": "Help me walk home.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "z7m8njzkb6dk97sknq4o4wgp",
+          "order": 1,
+          "chinese": "你能帮帮我吗？",
+          "english": "Can you help me ?",
+          "soundmark": "kæn; kən juː; jʊ help miː; mi",
+          "type": "sentence",
+          "sentenceId": "ddhhglmvju3n3843sl4cwjpl",
+          "image": null,
+          "startTime": 9.87,
+          "endTime": 28.52
+        },
+        {
+          "id": "c9ordqgw79o0w5zwyx1uwfc8",
+          "order": 2,
+          "chinese": "嗯，我可以帮你！",
+          "english": "Yes , I can help you",
+          "soundmark": "jes aɪ kæn; kən help juː; jʊ",
+          "type": "sentence",
+          "sentenceId": "gyoml5i1hxfynqf0vqzrb7ov",
+          "image": null,
+          "startTime": 33.26,
+          "endTime": 36.33
+        },
+        {
+          "id": "bnpmvk13roi3zvz7408hn9oz",
+          "order": 3,
+          "chinese": "帮我挖土。",
+          "english": "Help me dig the dirt",
+          "soundmark": "help miː; mi dɪɡ ðə; ði dɜːrt",
+          "type": "sentence",
+          "sentenceId": "nd9z23h2vru1zj5e5agm1fw0",
+          "image": null,
+          "startTime": 45.65,
+          "endTime": 47.45
+        },
+        {
+          "id": "nfbyvnb9s6ixv1m0gjl2zsbz",
+          "order": 4,
+          "chinese": "帮我搬走这块石头。",
+          "english": "Help me move this rock",
+          "soundmark": "help miː; mi muːv ðɪs rɑːk",
+          "type": "sentence",
+          "sentenceId": "tbykihihpwi9bl9809hqjxfn",
+          "image": null,
+          "startTime": 75.91,
+          "endTime": 77.63
+        },
+        {
+          "id": "x7rj3utp4b82sybxuqlvppjr",
+          "order": 5,
+          "chinese": "帮我把它放这儿。",
+          "english": "Help me put it here",
+          "soundmark": "help miː; mi pʊt ɪt hɪr",
+          "type": "sentence",
+          "sentenceId": "o1crytarhv9pqfxd159ymxp9",
+          "image": null,
+          "startTime": 80.73,
+          "endTime": 82.56
+        },
+        {
+          "id": "codwer7bwnu137g61ng0oiif",
+          "order": 6,
+          "chinese": "帮我搬这块木头。",
+          "english": "Help me move this log",
+          "soundmark": "help miː; mi muːv ðɪs lɔːɡ",
+          "type": "sentence",
+          "sentenceId": "o6zfsh5m1qe0606zo81o0yd6",
+          "image": null,
+          "startTime": 113.12,
+          "endTime": 115.06
+        },
+        {
+          "id": "bbn21v0k4vsfeaxy6cqt1ncl",
+          "order": 7,
+          "chinese": "帮我把它放这儿。",
+          "english": "Help me put it here",
+          "soundmark": "help miː; mi pʊt ɪt hɪr",
+          "type": "sentence",
+          "sentenceId": "ls4socdv07owkjojvsd375xb",
+          "image": null,
+          "startTime": 117.56,
+          "endTime": 119.55
+        },
+        {
+          "id": "n53hv6jrru31r2blo2ytw12p",
+          "order": 8,
+          "chinese": "帮我搬这些棍子。",
+          "english": "Help me move these sticks",
+          "soundmark": "help miː; mi muːv ðiːz stɪks",
+          "type": "sentence",
+          "sentenceId": "b69lsuzzpw0qad1z7ru2h26g",
+          "image": null,
+          "startTime": 150.23,
+          "endTime": 152.85
+        },
+        {
+          "id": "sggxq97z6x24begd8rhj0mmi",
+          "order": 9,
+          "chinese": "帮我建一堵墙。",
+          "english": "Help me make a wall",
+          "soundmark": "help miː; mi meɪk ə; eɪ wɔːl",
+          "type": "sentence",
+          "sentenceId": "fmg8boyr2sqly4kjp309vi21",
+          "image": null,
+          "startTime": 166.87,
+          "endTime": 169.21
+        },
+        {
+          "id": "q4vwb17zrb1epba40z9gjb0k",
+          "order": 10,
+          "chinese": "你们帮我搭了个秘密基地！",
+          "english": "You helped me make a fort !",
+          "soundmark": "juː; jʊ helpt miː; mi meɪk ə; eɪ fɔːrt",
+          "type": "sentence",
+          "sentenceId": "p0szpdsq3hmxwmc2poz6qoh2",
+          "image": null,
+          "startTime": 183.35,
+          "endTime": 185.54
+        },
+        {
+          "id": "bnuqcblaeia8sces58boi3oc",
+          "order": 11,
+          "chinese": "谢谢你们！",
+          "english": "Thank you !",
+          "soundmark": "θæŋk juː; jʊ",
+          "type": "sentence",
+          "sentenceId": "g1r1ed5udcupcwbdbthw8ioh",
+          "image": null,
+          "startTime": 185.96,
+          "endTime": 186.82
+        },
+        {
+          "id": "q3wxf1bxkkyf8x8p2w6bwh5k",
+          "order": 12,
+          "chinese": "不客气。",
+          "english": "You're welcome",
+          "soundmark": "jʊr; jər ˈwelkəm",
+          "type": "sentence",
+          "sentenceId": "xfp8zi9b3mt8fbw0jh7ypgm5",
+          "image": null,
+          "startTime": 188.72,
+          "endTime": 191.25
+        },
+        {
+          "id": "qkpkp3dtto5ng57sbzdu2olv",
+          "order": 13,
+          "chinese": "现在想一起玩吗？",
+          "english": "Do you want to play now ?",
+          "soundmark": "duː; də juː; jʊ wɑːnt tuː; tə pleɪ naʊ",
+          "type": "sentence",
+          "sentenceId": "swx431ejbgztuqjt0d8kn0i3",
+          "image": null,
+          "startTime": 200.34,
+          "endTime": 202.85
+        },
+        {
+          "id": "xopbsxxagd59ioiy4hblrs9x",
+          "order": 14,
+          "chinese": "不了，我想歇会儿了！",
+          "english": "No , I want to rest now !",
+          "soundmark": "noʊ aɪ wɑːnt tuː; tə rest naʊ",
+          "type": "sentence",
+          "sentenceId": "ja3odnzna3emahiflr43f87o",
+          "image": null,
+          "startTime": 204.28,
+          "endTime": 207.94
+        },
+        {
+          "id": "ad9qwux9ndaw1p5l7s2hpp94",
+          "order": 15,
+          "chinese": "扶我回家吧。",
+          "english": "Help me walk home",
+          "soundmark": "help miː; mi wɔːk hoʊm",
+          "type": "sentence",
+          "sentenceId": "j0cv8prxx7txqiszgak2kj7a",
+          "image": null,
+          "startTime": 209.45,
+          "endTime": 211.46
+        }
+      ]
+    },
+    {
+      "id": "h5itjfnxe7uyuipfk9ywb85o",
+      "order": 11,
+      "title": "011 看我跑",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/25fe129b-be86-4d79-a0fd-6a2c299a3153.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 13,
+      "sentenceCount": 13,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "dcw3ahfbrq8yp1iuzvg5g19z",
+          "content": "Watch me run.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "l3ijdq34k5iap2b6vqjjhoc8",
+          "content": "Can you run around the rock?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "aswim8kmnl9rjahocrmjr00l",
+          "content": "I can run around the rock.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "qa8hqsqb1sckot6ti3n952g7",
+          "content": "Watch me run around the rock.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "bwymgcr5e01x4p43shcklyzb",
+          "content": "Can you run up the hill?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "wljzc0p57d5zynzrvdm72elx",
+          "content": "I can run up the hill.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xwrb8ke4xsnoi4i4mlnisar0",
+          "content": "Watch me run up the hill.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "jz7ive1k5b608qnwjd6u0w5r",
+          "content": "Can you run across the log?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "odeh30yrbusewcce2xnr6ukf",
+          "content": "I can run across the log.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "im2d22qketpgxfh9mfgugpcq",
+          "content": "Watch me run across the log.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "m27jqocfu6u4jusjdr8tj9no",
+          "content": "Whoa!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "whj99qc0cl3v01tnf79jaxbl",
+          "content": "Can you swim?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ax89vl40ji9r1r4k00feqpga",
+          "content": "Yes, I can swim.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "xeisugf00opyof5580jvg667",
+          "order": 1,
+          "chinese": "看我跑。",
+          "english": "Watch me run",
+          "soundmark": "wɑːtʃ miː; mi rʌn",
+          "type": "sentence",
+          "sentenceId": "dcw3ahfbrq8yp1iuzvg5g19z",
+          "image": null,
+          "startTime": 9.94,
+          "endTime": 16.83
+        },
+        {
+          "id": "lzpnhhm22ux0qjge1je7blsq",
+          "order": 2,
+          "chinese": "你能绕着石头跑吗？",
+          "english": "Can you run around the rock ?",
+          "soundmark": "kæn; kən juː; jʊ rʌn əˈraʊnd ðə; ði rɑːk",
+          "type": "sentence",
+          "sentenceId": "l3ijdq34k5iap2b6vqjjhoc8",
+          "image": null,
+          "startTime": 29.78,
+          "endTime": 32.71
+        },
+        {
+          "id": "s3mafzf7f1g6dfot2ahl4p51",
+          "order": 3,
+          "chinese": "我能绕着石头跑。",
+          "english": "I can run around the rock",
+          "soundmark": "aɪ kæn; kən rʌn əˈraʊnd ðə; ði rɑːk",
+          "type": "sentence",
+          "sentenceId": "aswim8kmnl9rjahocrmjr00l",
+          "image": null,
+          "startTime": 33.49,
+          "endTime": 36
+        },
+        {
+          "id": "b7bxf6m8hiy38hza4jltq76q",
+          "order": 4,
+          "chinese": "看我绕着石头跑。",
+          "english": "Watch me run around the rock",
+          "soundmark": "wɑːtʃ miː; mi rʌn əˈraʊnd ðə; ði rɑːk",
+          "type": "sentence",
+          "sentenceId": "qa8hqsqb1sckot6ti3n952g7",
+          "image": null,
+          "startTime": 37.04,
+          "endTime": 39.63
+        },
+        {
+          "id": "dqcmxwl80c9nzoqpaeh4f7in",
+          "order": 5,
+          "chinese": "你能跑上山坡吗？",
+          "english": "Can you run up the hill ?",
+          "soundmark": "kæn; kən juː; jʊ rʌn ʌp ðə; ði hɪl",
+          "type": "sentence",
+          "sentenceId": "bwymgcr5e01x4p43shcklyzb",
+          "image": null,
+          "startTime": 57.38,
+          "endTime": 60.44
+        },
+        {
+          "id": "x3kpfhzo5wssdq066r1egz7y",
+          "order": 6,
+          "chinese": "我能跑上山坡。",
+          "english": "I can run up the hill",
+          "soundmark": "aɪ kæn; kən rʌn ʌp ðə; ði hɪl",
+          "type": "sentence",
+          "sentenceId": "wljzc0p57d5zynzrvdm72elx",
+          "image": null,
+          "startTime": 61.2,
+          "endTime": 63.64
+        },
+        {
+          "id": "ry49oq88afz83iq2n0zmmxh3",
+          "order": 7,
+          "chinese": "看我跑上山坡。",
+          "english": "Watch me run up the hill",
+          "soundmark": "wɑːtʃ miː; mi rʌn ʌp ðə; ði hɪl",
+          "type": "sentence",
+          "sentenceId": "xwrb8ke4xsnoi4i4mlnisar0",
+          "image": null,
+          "startTime": 65,
+          "endTime": 67.5
+        },
+        {
+          "id": "ximcmn6918r5i1a3ct56hihc",
+          "order": 8,
+          "chinese": "你能跑过圆木吗？",
+          "english": "Can you run across the log ?",
+          "soundmark": "kæn; kən juː; jʊ rʌn əˈkrɔːs ðə; ði lɔːɡ",
+          "type": "sentence",
+          "sentenceId": "jz7ive1k5b608qnwjd6u0w5r",
+          "image": null,
+          "startTime": 86.06,
+          "endTime": 89.71
+        },
+        {
+          "id": "qp85jb7i96861pansey4hnrb",
+          "order": 9,
+          "chinese": "我能跑过圆木。",
+          "english": "I can run across the log",
+          "soundmark": "aɪ kæn; kən rʌn əˈkrɔːs ðə; ði lɔːɡ",
+          "type": "sentence",
+          "sentenceId": "odeh30yrbusewcce2xnr6ukf",
+          "image": null,
+          "startTime": 93.88,
+          "endTime": 96.53
+        },
+        {
+          "id": "alj6kd90aloq290hj0f3t0ac",
+          "order": 10,
+          "chinese": "看我跑过圆木。",
+          "english": "Watch me run across the log",
+          "soundmark": "wɑːtʃ miː; mi rʌn əˈkrɔːs ðə; ði lɔːɡ",
+          "type": "sentence",
+          "sentenceId": "im2d22qketpgxfh9mfgugpcq",
+          "image": null,
+          "startTime": 96.93,
+          "endTime": 99.92
+        },
+        {
+          "id": "xzod1nvk8jj7418rerii29ac",
+          "order": 11,
+          "chinese": "哇！",
+          "english": "Whoa !",
+          "soundmark": "woʊ",
+          "type": "sentence",
+          "sentenceId": "m27jqocfu6u4jusjdr8tj9no",
+          "image": null,
+          "startTime": 108.04,
+          "endTime": 109.4
+        },
+        {
+          "id": "sgmdvhoz9gu1vedekd35bp7e",
+          "order": 12,
+          "chinese": "你会游泳吗？",
+          "english": "Can you swim ?",
+          "soundmark": "kæn; kən juː; jʊ swɪm",
+          "type": "sentence",
+          "sentenceId": "whj99qc0cl3v01tnf79jaxbl",
+          "image": null,
+          "startTime": 112.13,
+          "endTime": 114.09
+        },
+        {
+          "id": "oq4b0ntu4d27p8y9tm8ae3fu",
+          "order": 13,
+          "chinese": "是的，我会游泳。",
+          "english": "Yes , I can swim",
+          "soundmark": "jes aɪ kæn; kən swɪm",
+          "type": "sentence",
+          "sentenceId": "ax89vl40ji9r1r4k00feqpga",
+          "image": null,
+          "startTime": 115.28,
+          "endTime": 118.45
+        }
+      ]
+    },
+    {
+      "id": "fdwn81287ffr6ce0pitehw1a",
+      "order": 12,
+      "title": "012 请停下",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/847eace1-b84c-430e-a2d1-074b4d2a50a6.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 16,
+      "sentenceCount": 16,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "qy4p1h8tcd00hki15vl7bvcv",
+          "content": "Please stop running.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ia27g2j5yvijhuhgxfpesxvu",
+          "content": "Okay, I will stop running.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "wvgfpd9mfnzktutp0q52vai0",
+          "content": "Please stop flying.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "hcts3wefrbb738eh25bhz6xe",
+          "content": "Okay, I will stop flying.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "mfp7l0jyap4a8r72ciw3d3bb",
+          "content": "Please stop hopping.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "gzkae71e4nz3yel2bn01e0ga",
+          "content": "Okay, I will stop hopping.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "gblw0l9nqso9bzsju36qtrtn",
+          "content": "Please stop swimming.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "l3zx1q8fvvbelhkcw5iyc3ow",
+          "content": "Okay, I will stop swimming.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "s7volum93p9jgc4gzecblqao",
+          "content": "Please stop talking.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ok0jw4vtxa2pfdjbuy5kyn4m",
+          "content": "Okay, we will stop talking.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ebyf5g6ckigk0l7son73rr8q",
+          "content": "Hey! Why must we stop?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "f9ujzmyshuparpyv124cd2fm",
+          "content": "I'm going to sing for you!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "gkx5r70nr6moxnvdg97pw43f",
+          "content": "La, la, la, la!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "gxhcjf9sqnib1l4xwrmeo50k",
+          "content": "La, la, la, la!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "hdccbl58pb12mioptnujbuer",
+          "content": "La, la, la, la!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "uc35chlxaegw1pjloqa58qu4",
+          "content": "Agh! Please stop singing!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "t53gmqk3x00mkwqul7dp5xnz",
+          "order": 1,
+          "chinese": "请别再跑了。",
+          "english": "Please stop running",
+          "soundmark": "pliːz stɑːp ˈrʌnɪŋ",
+          "type": "sentence",
+          "sentenceId": "qy4p1h8tcd00hki15vl7bvcv",
+          "image": null,
+          "startTime": 10,
+          "endTime": 40.25
+        },
+        {
+          "id": "ug1lgh66fvqsv7ycwa9xhrrv",
+          "order": 2,
+          "chinese": "好的，我不跑了。",
+          "english": "Okay , I will stop running",
+          "soundmark": "oʊˈkeɪ aɪ wɪl stɑːp ˈrʌnɪŋ",
+          "type": "sentence",
+          "sentenceId": "ia27g2j5yvijhuhgxfpesxvu",
+          "image": null,
+          "startTime": 43.68,
+          "endTime": 48.84
+        },
+        {
+          "id": "p8u2d9g0ius2uw3urp1vjb6i",
+          "order": 3,
+          "chinese": "请别再飞了。",
+          "english": "Please stop flying",
+          "soundmark": "pliːz stɑːp ˈflaɪɪŋ",
+          "type": "sentence",
+          "sentenceId": "wvgfpd9mfnzktutp0q52vai0",
+          "image": null,
+          "startTime": 56.42,
+          "endTime": 58.52
+        },
+        {
+          "id": "cioyf2qti0bkltq14il3z9dn",
+          "order": 4,
+          "chinese": "好的，我不飞了。",
+          "english": "Okay , I will stop flying",
+          "soundmark": "oʊˈkeɪ aɪ wɪl stɑːp ˈflaɪɪŋ",
+          "type": "sentence",
+          "sentenceId": "hcts3wefrbb738eh25bhz6xe",
+          "image": null,
+          "startTime": 65.72,
+          "endTime": 70.35
+        },
+        {
+          "id": "m30uq00hp20a3w4vsv732zhx",
+          "order": 5,
+          "chinese": "请别再跳了。",
+          "english": "Please stop hopping",
+          "soundmark": "pliːz stɑːp ˈhɑːpɪŋ",
+          "type": "sentence",
+          "sentenceId": "mfp7l0jyap4a8r72ciw3d3bb",
+          "image": null,
+          "startTime": 78.21,
+          "endTime": 80.45
+        },
+        {
+          "id": "hhqm20tpi8rk8mhpizod9tr5",
+          "order": 6,
+          "chinese": "好的，我不跳了。",
+          "english": "Okay , I will stop hopping",
+          "soundmark": "oʊˈkeɪ aɪ wɪl stɑːp ˈhɑːpɪŋ",
+          "type": "sentence",
+          "sentenceId": "gzkae71e4nz3yel2bn01e0ga",
+          "image": null,
+          "startTime": 84.81,
+          "endTime": 88.89
+        },
+        {
+          "id": "cumq5p22i240genwbwxjqmke",
+          "order": 7,
+          "chinese": "请别再游了。",
+          "english": "Please stop swimming",
+          "soundmark": "pliːz stɑːp ˈswɪmɪŋ",
+          "type": "sentence",
+          "sentenceId": "gblw0l9nqso9bzsju36qtrtn",
+          "image": null,
+          "startTime": 96.97,
+          "endTime": 99.2
+        },
+        {
+          "id": "g4kz8da1g9mwgdd5yqcuasrb",
+          "order": 8,
+          "chinese": "好的，我不游了。",
+          "english": "Okay , I will stop swimming",
+          "soundmark": "oʊˈkeɪ aɪ wɪl stɑːp ˈswɪmɪŋ",
+          "type": "sentence",
+          "sentenceId": "l3zx1q8fvvbelhkcw5iyc3ow",
+          "image": null,
+          "startTime": 102.41,
+          "endTime": 105.94
+        },
+        {
+          "id": "p3oyhwap1t7bzkc0yzyqm4l4",
+          "order": 9,
+          "chinese": "请别再说话了。",
+          "english": "Please stop talking",
+          "soundmark": "pliːz stɑːp ˈtɔːkɪŋ",
+          "type": "sentence",
+          "sentenceId": "s7volum93p9jgc4gzecblqao",
+          "image": null,
+          "startTime": 125.64,
+          "endTime": 127.45
+        },
+        {
+          "id": "mk0ede0lgn22a45l6tdx2tvl",
+          "order": 10,
+          "chinese": "好的，我们不说话了。",
+          "english": "Okay , we will stop talking",
+          "soundmark": "oʊˈkeɪ wiː; wi wɪl stɑːp ˈtɔːkɪŋ",
+          "type": "sentence",
+          "sentenceId": "ok0jw4vtxa2pfdjbuy5kyn4m",
+          "image": null,
+          "startTime": 129.27,
+          "endTime": 133.29
+        },
+        {
+          "id": "o7wq51yvxriou843sojnw0lp",
+          "order": 11,
+          "chinese": "嘿！我们为什么非得停下？",
+          "english": "Hey ! Why must we stop ?",
+          "soundmark": "heɪ waɪ mʌst; məst wiː; wi stɑːp",
+          "type": "sentence",
+          "sentenceId": "ebyf5g6ckigk0l7son73rr8q",
+          "image": null,
+          "startTime": 135.49,
+          "endTime": 139.53
+        },
+        {
+          "id": "ssl5vw3t0q62lin2ijre15wy",
+          "order": 12,
+          "chinese": "我来给你们唱首歌！",
+          "english": "I'm going to sing for you !",
+          "soundmark": "aɪm ˈɡoʊɪŋ tuː; tə sɪŋ fɔːr; fər juː; jʊ",
+          "type": "sentence",
+          "sentenceId": "f9ujzmyshuparpyv124cd2fm",
+          "image": null,
+          "startTime": 143.96,
+          "endTime": 147.08
+        },
+        {
+          "id": "irod1borypiu2hxcz1ure7fn",
+          "order": 13,
+          "chinese": "啦，啦，啦，啦！",
+          "english": "La , la , la , la !",
+          "soundmark": "lɑː lɑː lɑː lɑː",
+          "type": "sentence",
+          "sentenceId": "gkx5r70nr6moxnvdg97pw43f",
+          "image": null,
+          "startTime": 148.83,
+          "endTime": 152.59
+        },
+        {
+          "id": "x51u1qv52nsulb2or7zf5vhc",
+          "order": 14,
+          "chinese": "啦，啦，啦，啦！",
+          "english": "La , la , la , la !",
+          "soundmark": "lɑː lɑː lɑː lɑː",
+          "type": "sentence",
+          "sentenceId": "gxhcjf9sqnib1l4xwrmeo50k",
+          "image": null,
+          "startTime": 152.59,
+          "endTime": 155.71
+        },
+        {
+          "id": "qv7qmicxdpp0kn1whje7pd4c",
+          "order": 15,
+          "chinese": "啦，啦，啦，啦！",
+          "english": "La , la , la , la !",
+          "soundmark": "lɑː lɑː lɑː lɑː",
+          "type": "sentence",
+          "sentenceId": "hdccbl58pb12mioptnujbuer",
+          "image": null,
+          "startTime": 155.71,
+          "endTime": 159.04
+        },
+        {
+          "id": "gm8ilw98ffft6bo3roavpqwt",
+          "order": 16,
+          "chinese": "啊！请别再唱了！",
+          "english": "Agh ! Please stop singing !",
+          "soundmark": "ɑː pliːz stɑːp ˈsɪŋɪŋ",
+          "type": "sentence",
+          "sentenceId": "uc35chlxaegw1pjloqa58qu4",
+          "image": null,
+          "startTime": 159.33,
+          "endTime": 165.24
+        }
+      ]
+    },
+    {
+      "id": "zxbwfs8e0ra4wzd7ac8ei5vr",
+      "order": 13,
+      "title": "013 我喜欢爬",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/c5c932f3-e8d8-4f3f-bae9-db0955943e51.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 14,
+      "sentenceCount": 14,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "tjj3lddgdpctmpkpopdehe0x",
+          "content": "Do you like to climb trees?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "yldc5ld5pxzhw352xzvnpc1u",
+          "content": "Yes, I like to climb—",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ttcoeimrjwxvkxpuznov020y",
+          "content": "I like to climb trees too!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xchdau0n6zm9jdc3f7hbvf9o",
+          "content": "Do you like to swim?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "czpa38m3hcgan8vqk309pnb2",
+          "content": "Yes, I like to—",
+          "hasLearningContent": false
+        },
+        {
+          "id": "au86s9fdihme915p9wmm2g8v",
+          "content": "I like to swim too!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "btaqgegw4226a61c3eteaadr",
+          "content": "Do you like to jump?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "r3y0atb4dtadyjydpe73ajq9",
+          "content": "Uh, yes, I like—",
+          "hasLearningContent": false
+        },
+        {
+          "id": "c0feof7rilw9j89g4xjq0jqk",
+          "content": "I like to jump too!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "mwku3gao20xvevbl933bwqtb",
+          "content": "Do you like to hop?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "x3ukc7pmkx1xpchby0mdee7l",
+          "content": "I like to hop!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "zf1vpk88zuwxx2l2felh8v0e",
+          "content": "Do you like to dance?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "fug46g488tous5njjqqa5hvy",
+          "content": "I like to—",
+          "hasLearningContent": false
+        },
+        {
+          "id": "kh5772gk9h3xy1y3gkgx5dis",
+          "content": "Ugh! You like to talk!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "blqay7g2v1gm4ekemugtd31n",
+          "order": 1,
+          "chinese": "你喜欢爬树吗？",
+          "english": "Do you like to climb trees ?",
+          "soundmark": "duː; də juː; jʊ laɪk tuː; tə klaɪm triːz",
+          "type": "sentence",
+          "sentenceId": "tjj3lddgdpctmpkpopdehe0x",
+          "image": null,
+          "startTime": 9.87,
+          "endTime": 29.76
+        },
+        {
+          "id": "potn2bz9kxz2106mbz98h8bs",
+          "order": 2,
+          "chinese": "是的，我喜欢爬——",
+          "english": "Yes , I like to climb —",
+          "soundmark": "jes aɪ laɪk tuː; tə klaɪm",
+          "type": "sentence",
+          "sentenceId": "yldc5ld5pxzhw352xzvnpc1u",
+          "image": null,
+          "startTime": 30.75,
+          "endTime": 33.6
+        },
+        {
+          "id": "uwrf44jfe5xqd4e610dhza5a",
+          "order": 3,
+          "chinese": "我也喜欢爬树！",
+          "english": "I like to climb trees too !",
+          "soundmark": "aɪ laɪk tuː; tə klaɪm triːz tuː",
+          "type": "sentence",
+          "sentenceId": "ttcoeimrjwxvkxpuznov020y",
+          "image": null,
+          "startTime": 33.72,
+          "endTime": 35.32
+        },
+        {
+          "id": "ti5txgk8lnpt6udqcqphq0fs",
+          "order": 4,
+          "chinese": "你喜欢游泳吗？",
+          "english": "Do you like to swim ?",
+          "soundmark": "duː; də juː; jʊ laɪk tuː; tə swɪm",
+          "type": "sentence",
+          "sentenceId": "xchdau0n6zm9jdc3f7hbvf9o",
+          "image": null,
+          "startTime": 68.84,
+          "endTime": 70.86
+        },
+        {
+          "id": "egk4yazxsjxtygkyvb0ze5ju",
+          "order": 5,
+          "chinese": "是的，我喜欢——",
+          "english": "Yes , I like to —",
+          "soundmark": "jes aɪ laɪk tuː; tə",
+          "type": "sentence",
+          "sentenceId": "czpa38m3hcgan8vqk309pnb2",
+          "image": null,
+          "startTime": 71.78,
+          "endTime": 74.5
+        },
+        {
+          "id": "o6f9py0esob49w4k9jwh79aj",
+          "order": 6,
+          "chinese": "我也喜欢游泳！",
+          "english": "I like to swim too !",
+          "soundmark": "aɪ laɪk tuː; tə swɪm tuː",
+          "type": "sentence",
+          "sentenceId": "au86s9fdihme915p9wmm2g8v",
+          "image": null,
+          "startTime": 74.65,
+          "endTime": 76.05
+        },
+        {
+          "id": "j3khhwfc5iwenww7q3tpiaga",
+          "order": 7,
+          "chinese": "你喜欢跳吗？",
+          "english": "Do you like to jump ?",
+          "soundmark": "duː; də juː; jʊ laɪk tuː; tə dʒʌmp",
+          "type": "sentence",
+          "sentenceId": "btaqgegw4226a61c3eteaadr",
+          "image": null,
+          "startTime": 109.08,
+          "endTime": 110.97
+        },
+        {
+          "id": "mrlo4qg3ahv9f1i4qjcqy09e",
+          "order": 8,
+          "chinese": "呃，是的，我喜欢——",
+          "english": "Uh , yes , I like —",
+          "soundmark": "ʌ; ɜː jes aɪ laɪk",
+          "type": "sentence",
+          "sentenceId": "r3y0atb4dtadyjydpe73ajq9",
+          "image": null,
+          "startTime": 113.61,
+          "endTime": 116.66
+        },
+        {
+          "id": "vjysehjmom7xwykny1rfszsg",
+          "order": 9,
+          "chinese": "我也喜欢跳！",
+          "english": "I like to jump too !",
+          "soundmark": "aɪ laɪk tuː; tə dʒʌmp tuː",
+          "type": "sentence",
+          "sentenceId": "c0feof7rilw9j89g4xjq0jqk",
+          "image": null,
+          "startTime": 116.84,
+          "endTime": 118.3
+        },
+        {
+          "id": "lhie89s7x2n97nk0gwbibbfk",
+          "order": 10,
+          "chinese": "你喜欢单脚跳吗？",
+          "english": "Do you like to hop ?",
+          "soundmark": "duː; də juː; jʊ laɪk tuː; tə hɑːp",
+          "type": "sentence",
+          "sentenceId": "mwku3gao20xvevbl933bwqtb",
+          "image": null,
+          "startTime": 130.65,
+          "endTime": 132.45
+        },
+        {
+          "id": "sim2mwa33qfoen0pe36y22fn",
+          "order": 11,
+          "chinese": "我喜欢单脚跳！",
+          "english": "I like to hop !",
+          "soundmark": "aɪ laɪk tuː; tə hɑːp",
+          "type": "sentence",
+          "sentenceId": "x3ukc7pmkx1xpchby0mdee7l",
+          "image": null,
+          "startTime": 132.59,
+          "endTime": 133.87
+        },
+        {
+          "id": "pslfcvnnqg7mg0qdwkecxis8",
+          "order": 12,
+          "chinese": "你喜欢跳舞吗？",
+          "english": "Do you like to dance ?",
+          "soundmark": "duː; də juː; jʊ laɪk tuː; tə dæns",
+          "type": "sentence",
+          "sentenceId": "zf1vpk88zuwxx2l2felh8v0e",
+          "image": null,
+          "startTime": 146.37,
+          "endTime": 148.54
+        },
+        {
+          "id": "zcuo5woek2ixt7kcslep7yjz",
+          "order": 13,
+          "chinese": "我喜欢——",
+          "english": "I like to —",
+          "soundmark": "aɪ laɪk tuː; tə",
+          "type": "sentence",
+          "sentenceId": "fug46g488tous5njjqqa5hvy",
+          "image": null,
+          "startTime": 152.14,
+          "endTime": 154.24
+        },
+        {
+          "id": "osyb0q0rklw9ijr2op752zqu",
+          "order": 14,
+          "chinese": "天哪！你真是话多！",
+          "english": "Ugh ! You like to talk !",
+          "soundmark": "ʊx；ɜː juː; jʊ laɪk tuː; tə tɔːk",
+          "type": "sentence",
+          "sentenceId": "kh5772gk9h3xy1y3gkgx5dis",
+          "image": null,
+          "startTime": 155.21,
+          "endTime": 161.04
+        }
+      ]
+    },
+    {
+      "id": "t48qhhxzymk9x6q95rbmrkzf",
+      "order": 14,
+      "title": "014 我想吃东西",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/a3c35333-6b66-4804-9f1c-381a377a4c95.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 15,
+      "sentenceCount": 15,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "jhsgw60zzn29msrfuk0si1xq",
+          "content": "I want to eat.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ra4rpbgimk05zngjxdsanfad",
+          "content": "What do you want to eat?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "x678v6mg9gu2omfvli0tpzgd",
+          "content": "I don't know.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "nzcegz3iz8avrazm347nb7cn",
+          "content": "Do you eat leaves?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "b9ncgcahzwzyrkv0ww8igw8y",
+          "content": "No, I don't eat leaves.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "edavex7w6d2k9rxzadn0uzpm",
+          "content": "Do you eat grass?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "o7fdlec5i9nu80ant4evjemc",
+          "content": "No, I don't eat grass.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "f4tmqsecm9vxqucxyouquq9k",
+          "content": "Do you eat bugs?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "mneet1nwb4l0eahf9g37jbz1",
+          "content": "No, I don't eat bugs.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ibk8k8rq0x7hhhwufwqukvqb",
+          "content": "Would you like some dirt?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "gtdvrhtf2qhvh2y8lzg42tn4",
+          "content": "No, I don't eat dirt.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "g72ulhgk8typ6j3dk2819aqq",
+          "content": "Aha!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "e0d6liuxh4yroa1a2yo8ihcx",
+          "content": "I will eat berries!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "yj2rptl3vjq1gyfh8902wuzx",
+          "content": "Don't eat all of them.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "rel3ba33pae2p4tzdh0m0i0f",
+          "content": "I want to eat some too!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "ivfhuttv515zafvimpp8rui4",
+          "order": 1,
+          "chinese": "我想吃东西。",
+          "english": "I want to eat",
+          "soundmark": "aɪ wɑːnt tuː; tə iːt",
+          "type": "sentence",
+          "sentenceId": "jhsgw60zzn29msrfuk0si1xq",
+          "image": null,
+          "startTime": 9.94,
+          "endTime": 33.26
+        },
+        {
+          "id": "zao0ilhyta8h851ti7d4xgay",
+          "order": 2,
+          "chinese": "你想吃什么？",
+          "english": "What do you want to eat ?",
+          "soundmark": "wʌt duː; də juː; jʊ wɑːnt tuː; tə iːt",
+          "type": "sentence",
+          "sentenceId": "ra4rpbgimk05zngjxdsanfad",
+          "image": null,
+          "startTime": 39.57,
+          "endTime": 42.06
+        },
+        {
+          "id": "k3la4tszmd8ct81vkrbeqngy",
+          "order": 3,
+          "chinese": "我不知道。",
+          "english": "I don't know",
+          "soundmark": "aɪ doʊnt noʊ",
+          "type": "sentence",
+          "sentenceId": "x678v6mg9gu2omfvli0tpzgd",
+          "image": null,
+          "startTime": 45.87,
+          "endTime": 47.84
+        },
+        {
+          "id": "cju98fjsqqt2id2j8t6osqeq",
+          "order": 4,
+          "chinese": "你吃树叶吗？",
+          "english": "Do you eat leaves ?",
+          "soundmark": "duː; də juː; jʊ iːt liːvz",
+          "type": "sentence",
+          "sentenceId": "nzcegz3iz8avrazm347nb7cn",
+          "image": null,
+          "startTime": 67.98,
+          "endTime": 70.79
+        },
+        {
+          "id": "ad0fsar6zmm893r8kymvf5ng",
+          "order": 5,
+          "chinese": "不，我不吃树叶。",
+          "english": "No , I don't eat leaves",
+          "soundmark": "noʊ aɪ doʊnt iːt liːvz",
+          "type": "sentence",
+          "sentenceId": "b9ncgcahzwzyrkv0ww8igw8y",
+          "image": null,
+          "startTime": 71.63,
+          "endTime": 74.11
+        },
+        {
+          "id": "u5npwet99boii1u6ssajsy14",
+          "order": 6,
+          "chinese": "你吃草吗？",
+          "english": "Do you eat grass ?",
+          "soundmark": "duː; də juː; jʊ iːt ɡræs",
+          "type": "sentence",
+          "sentenceId": "edavex7w6d2k9rxzadn0uzpm",
+          "image": null,
+          "startTime": 99.55,
+          "endTime": 101.92
+        },
+        {
+          "id": "t1gawe9dwwvth8yfsn3m1tpg",
+          "order": 7,
+          "chinese": "不，我不吃草。",
+          "english": "No , I don't eat grass",
+          "soundmark": "noʊ aɪ doʊnt iːt ɡræs",
+          "type": "sentence",
+          "sentenceId": "o7fdlec5i9nu80ant4evjemc",
+          "image": null,
+          "startTime": 102.73,
+          "endTime": 105.33
+        },
+        {
+          "id": "y03ndwevnsiovyth38plqht0",
+          "order": 8,
+          "chinese": "你吃虫子吗？",
+          "english": "Do you eat bugs ?",
+          "soundmark": "duː; də juː; jʊ iːt bʌɡz",
+          "type": "sentence",
+          "sentenceId": "f4tmqsecm9vxqucxyouquq9k",
+          "image": null,
+          "startTime": 127.39,
+          "endTime": 130.18
+        },
+        {
+          "id": "tg04zz9c2rda2z21zvxq418a",
+          "order": 9,
+          "chinese": "不，我不吃虫子。",
+          "english": "No , I don't eat bugs",
+          "soundmark": "noʊ aɪ doʊnt iːt bʌɡz",
+          "type": "sentence",
+          "sentenceId": "mneet1nwb4l0eahf9g37jbz1",
+          "image": null,
+          "startTime": 139.99,
+          "endTime": 142.55
+        },
+        {
+          "id": "ibdp8mue6xnaejaciokxfh1q",
+          "order": 10,
+          "chinese": "你想吃些土吗？",
+          "english": "Would you like some dirt ?",
+          "soundmark": "wʊd juː; jʊ laɪk sʌm; səm dɜːrt",
+          "type": "sentence",
+          "sentenceId": "ibk8k8rq0x7hhhwufwqukvqb",
+          "image": null,
+          "startTime": 162.02,
+          "endTime": 165.06
+        },
+        {
+          "id": "urmgefvsgdkd0n4ox1o6awxs",
+          "order": 11,
+          "chinese": "不，我不吃土。",
+          "english": "No , I don't eat dirt",
+          "soundmark": "noʊ aɪ doʊnt iːt dɜːrt",
+          "type": "sentence",
+          "sentenceId": "gtdvrhtf2qhvh2y8lzg42tn4",
+          "image": null,
+          "startTime": 165.72,
+          "endTime": 168.11
+        },
+        {
+          "id": "qcyhyo5ztbqiqpjzt1ndiil7",
+          "order": 12,
+          "chinese": "啊哈！",
+          "english": "Aha !",
+          "soundmark": "ɑːˈhɑː",
+          "type": "sentence",
+          "sentenceId": "g72ulhgk8typ6j3dk2819aqq",
+          "image": null,
+          "startTime": 172.74,
+          "endTime": 174.32
+        },
+        {
+          "id": "znqi1ud81f25ecy5futaatg4",
+          "order": 13,
+          "chinese": "我要吃浆果！",
+          "english": "I will eat berries !",
+          "soundmark": "aɪ wɪl iːt ˈberiz",
+          "type": "sentence",
+          "sentenceId": "e0d6liuxh4yroa1a2yo8ihcx",
+          "image": null,
+          "startTime": 175.28,
+          "endTime": 177.41
+        },
+        {
+          "id": "ugwn4ul7otg58fxdg8o0iwl2",
+          "order": 14,
+          "chinese": "别全吃光了。",
+          "english": "Don't eat all of them",
+          "soundmark": "doʊnt iːt ɔːl ʌv; əv ðem; ðəm",
+          "type": "sentence",
+          "sentenceId": "yj2rptl3vjq1gyfh8902wuzx",
+          "image": null,
+          "startTime": 191.39,
+          "endTime": 193.88
+        },
+        {
+          "id": "geyqh8jyjwartrjdwt17qsan",
+          "order": 15,
+          "chinese": "我也想吃一些！",
+          "english": "I want to eat some too !",
+          "soundmark": "aɪ wɑːnt tuː; tə iːt sʌm; səm tuː",
+          "type": "sentence",
+          "sentenceId": "rel3ba33pae2p4tzdh0m0i0f",
+          "image": null,
+          "startTime": 195.15,
+          "endTime": 197.93
+        }
+      ]
+    },
+    {
+      "id": "ozfy63z9gqz2pnjeriz1j54t",
+      "order": 15,
+      "title": "015 一起散步吧",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/e52ab56f-7977-4a7e-bfa6-7f523856eaaa.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 16,
+      "sentenceCount": 16,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "xn1fpnnjx5s3swahkb2e4ny9",
+          "content": "Let's walk together.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "popgzyystluz54o0lwgytqke",
+          "content": "Let's walk on the path.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "jmkoj610tl55cs607qmco6zd",
+          "content": "Here's a stream.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "r7jcejwx1znpdw132hrxo8c9",
+          "content": "Let's walk in it!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "hxe99h357t3cyq9nsy5cokmg",
+          "content": "Here's a log.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "orv8tdovhrastwk3cxw5mydf",
+          "content": "Let's walk over it.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "hwfmg96ytzj0429zaks1zmvh",
+          "content": "There's a mountain!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "bktr5lpb4vawngs81my5hog8",
+          "content": "Let's walk up it!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "gjvz8w6z6hi1qdshbaatvmhq",
+          "content": "We're walking up, up, up!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "bro3oerg17fgllp8xh2ajos7",
+          "content": "Keep walking!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "odebut0vbzyxeaukg50i2f10",
+          "content": "We did it!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "mamgd5qym3cnbivd4smdp0tx",
+          "content": "We walked up the mountain.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "lk0rg5l0vhosgxea7ch8fpl4",
+          "content": "Should we walk down now?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ys8a6y5so9us30g0vymt7s4h",
+          "content": "I'm not walking anymore.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "oa1dtpw2qa4ikqndsaoildmm",
+          "content": "You're not walking?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "s65mu8cuaxj2dxmhxzlqtj3c",
+          "content": "No. I'm rolling!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "cgazdj7pxt6ugq817ca4efcq",
+          "order": 1,
+          "chinese": "我们一起走走吧。",
+          "english": "Let's walk together",
+          "soundmark": "lets wɔːk təˈɡeðər",
+          "type": "sentence",
+          "sentenceId": "xn1fpnnjx5s3swahkb2e4ny9",
+          "image": null,
+          "startTime": 9.87,
+          "endTime": 38.32
+        },
+        {
+          "id": "y3r9ilh3h5nmbr3ywj87ba4f",
+          "order": 2,
+          "chinese": "我们沿着小路走吧。",
+          "english": "Let's walk on the path",
+          "soundmark": "lets wɔːk ɑːn ðə; ði pæθ",
+          "type": "sentence",
+          "sentenceId": "popgzyystluz54o0lwgytqke",
+          "image": null,
+          "startTime": 41.81,
+          "endTime": 44.72
+        },
+        {
+          "id": "z18gdm1ud7qab3l777xdcsl4",
+          "order": 3,
+          "chinese": "这里有一条小溪。",
+          "english": "Here's a stream",
+          "soundmark": "hɪrz ə; eɪ striːm",
+          "type": "sentence",
+          "sentenceId": "jmkoj610tl55cs607qmco6zd",
+          "image": null,
+          "startTime": 62.14,
+          "endTime": 64.25
+        },
+        {
+          "id": "bs2hcrx0c7kx6lc2l075asj3",
+          "order": 4,
+          "chinese": "我们到小溪里走吧！",
+          "english": "Let's walk in it !",
+          "soundmark": "lets wɔːk ɪn ɪt",
+          "type": "sentence",
+          "sentenceId": "r7jcejwx1znpdw132hrxo8c9",
+          "image": null,
+          "startTime": 66.5,
+          "endTime": 68.57
+        },
+        {
+          "id": "ithvbyj4wf7h9x2z2x8iizw3",
+          "order": 5,
+          "chinese": "这里有一根木头。",
+          "english": "Here's a log",
+          "soundmark": "hɪrz ə; eɪ lɔːɡ",
+          "type": "sentence",
+          "sentenceId": "hxe99h357t3cyq9nsy5cokmg",
+          "image": null,
+          "startTime": 106.77,
+          "endTime": 108.71
+        },
+        {
+          "id": "ui35izqpkc2g49zbp2jpfw6w",
+          "order": 6,
+          "chinese": "我们从上面走过去吧。",
+          "english": "Let's walk over it",
+          "soundmark": "lets wɔːk ˈoʊvər ɪt",
+          "type": "sentence",
+          "sentenceId": "orv8tdovhrastwk3cxw5mydf",
+          "image": null,
+          "startTime": 112.47,
+          "endTime": 115.03
+        },
+        {
+          "id": "c7kf8n2jdakge0fdwp44alfl",
+          "order": 7,
+          "chinese": "那里有一座山！",
+          "english": "There's a mountain !",
+          "soundmark": "ðerz ə; eɪ ˈmaʊnt(ə)n",
+          "type": "sentence",
+          "sentenceId": "hwfmg96ytzj0429zaks1zmvh",
+          "image": null,
+          "startTime": 152.96,
+          "endTime": 154.96
+        },
+        {
+          "id": "f6pxkj0oa4l3e7bt47psx4lg",
+          "order": 8,
+          "chinese": "我们爬上去吧！",
+          "english": "Let's walk up it !",
+          "soundmark": "lets wɔːk ʌp ɪt",
+          "type": "sentence",
+          "sentenceId": "bktr5lpb4vawngs81my5hog8",
+          "image": null,
+          "startTime": 157.48,
+          "endTime": 159.57
+        },
+        {
+          "id": "ss8pp13p42vwrv647xcsbkeu",
+          "order": 9,
+          "chinese": "我们往上走啊走，往上走！",
+          "english": "We're walking up , up , up !",
+          "soundmark": "wɪr ˈwɔːkɪŋ ʌp ʌp ʌp",
+          "type": "sentence",
+          "sentenceId": "gjvz8w6z6hi1qdshbaatvmhq",
+          "image": null,
+          "startTime": 175.82,
+          "endTime": 181.63
+        },
+        {
+          "id": "c1x6cg7s75upu6ee1qnbaa3j",
+          "order": 10,
+          "chinese": "继续走！",
+          "english": "Keep walking !",
+          "soundmark": "kiːp ˈwɔːkɪŋ",
+          "type": "sentence",
+          "sentenceId": "bro3oerg17fgllp8xh2ajos7",
+          "image": null,
+          "startTime": 182.81,
+          "endTime": 184.44
+        },
+        {
+          "id": "e20bvz2ddm2j3ca0e3yznqd5",
+          "order": 11,
+          "chinese": "我们做到了！",
+          "english": "We did it !",
+          "soundmark": "wiː; wi dɪd ɪt",
+          "type": "sentence",
+          "sentenceId": "odebut0vbzyxeaukg50i2f10",
+          "image": null,
+          "startTime": 202.71,
+          "endTime": 204.42
+        },
+        {
+          "id": "ys20kj39795mnbn8xsetjxou",
+          "order": 12,
+          "chinese": "我们爬上了山。",
+          "english": "We walked up the mountain",
+          "soundmark": "wiː; wi wɔːkt ʌp ðə; ði ˈmaʊnt(ə)n",
+          "type": "sentence",
+          "sentenceId": "mamgd5qym3cnbivd4smdp0tx",
+          "image": null,
+          "startTime": 205.81,
+          "endTime": 208.41
+        },
+        {
+          "id": "x75g1j5oifo3w31o2omgx0ww",
+          "order": 13,
+          "chinese": "现在要下山吗？",
+          "english": "Should we walk down now ?",
+          "soundmark": "ʃʊd; ʃəd wiː; wi wɔːk daʊn naʊ",
+          "type": "sentence",
+          "sentenceId": "lk0rg5l0vhosgxea7ch8fpl4",
+          "image": null,
+          "startTime": 211.54,
+          "endTime": 214.24
+        },
+        {
+          "id": "z0r7c9s434rdq9f9jhu6dscx",
+          "order": 14,
+          "chinese": "我不走了。",
+          "english": "I'm not walking anymore",
+          "soundmark": "aɪm nɑːt ˈwɔːkɪŋ ˌeniˈmɔːr",
+          "type": "sentence",
+          "sentenceId": "ys8a6y5so9us30g0vymt7s4h",
+          "image": null,
+          "startTime": 214.94,
+          "endTime": 218.61
+        },
+        {
+          "id": "rwmxwx6jhsp6i464rir1ks9a",
+          "order": 15,
+          "chinese": "你不走了吗？",
+          "english": "You're not walking ?",
+          "soundmark": "jʊr; jər nɑːt ˈwɔːkɪŋ",
+          "type": "sentence",
+          "sentenceId": "oa1dtpw2qa4ikqndsaoildmm",
+          "image": null,
+          "startTime": 221.53,
+          "endTime": 223.51
+        },
+        {
+          "id": "hqgl4yjvt1yanle0hi2qylbz",
+          "order": 16,
+          "chinese": "不，我滚下去！",
+          "english": "No . I'm rolling !",
+          "soundmark": "noʊ aɪm ˈroʊlɪŋ",
+          "type": "sentence",
+          "sentenceId": "s65mu8cuaxj2dxmhxzlqtj3c",
+          "image": null,
+          "startTime": 225.01,
+          "endTime": 229.24
+        }
+      ]
+    },
+    {
+      "id": "vwz3mbs672nmjirrc85wac5e",
+      "order": 16,
+      "title": "016 我要坐下",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/6fb15a21-123d-4190-9c71-793926ea3c1d.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 13,
+      "sentenceCount": 13,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "sg3xonae0mxt3qy7l5w8s1gz",
+          "content": "I need to sit.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ozs9fcffiz7in6ho1xhufaqg",
+          "content": "I will sit on this log.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "i0vfzivx4kx6u154zl0rh1al",
+          "content": "I need to sit too.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "fzxalg9ad2s0v803li17ndbk",
+          "content": "Sit next to me.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "k70mfgm7wgxv6bw79c428j5z",
+          "content": "I need to sit.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "dimijdjc7jz5g7p8i54mk11j",
+          "content": "Sit with us!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "oyvb1910i61484phiuepo33o",
+          "content": "Sit with us on the log.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "lq8fe4rmafvc5t7qb6prq83s",
+          "content": "We are all sitting.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "qcnpq46x65znct5fqeumu7ic",
+          "content": "Uh-oh! I can't sit on the log.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "dgbgl6046guhepuljp6ttz55",
+          "content": "Sit where I sat.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "bl0fwax1cyrpf2etj01pg4zm",
+          "content": "I'll sit on that log.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "zek90ozb9389k1rfyhllkiw5",
+          "content": "Don't sit on that!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "okshjkbrj4m8jjh0wpx825et",
+          "content": "Whoa!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "qzsqr8dufl9wz5c3qac99wk5",
+          "order": 1,
+          "chinese": "我需要坐下。",
+          "english": "I need to sit",
+          "soundmark": "aɪ niːd tuː; tə sɪt",
+          "type": "sentence",
+          "sentenceId": "sg3xonae0mxt3qy7l5w8s1gz",
+          "image": null,
+          "startTime": 9.94,
+          "endTime": 54.37
+        },
+        {
+          "id": "q46l105heiimf6bs2ycjgly1",
+          "order": 2,
+          "chinese": "我要坐在这根木头上。",
+          "english": "I will sit on this log",
+          "soundmark": "aɪ wɪl sɪt ɑːn ðɪs lɔːɡ",
+          "type": "sentence",
+          "sentenceId": "ozs9fcffiz7in6ho1xhufaqg",
+          "image": null,
+          "startTime": 76.69,
+          "endTime": 79.05
+        },
+        {
+          "id": "vfxrdn58xe1twy1aepudpf6r",
+          "order": 3,
+          "chinese": "我也需要坐下。",
+          "english": "I need to sit too",
+          "soundmark": "aɪ niːd tuː; tə sɪt tuː",
+          "type": "sentence",
+          "sentenceId": "i0vfzivx4kx6u154zl0rh1al",
+          "image": null,
+          "startTime": 80.15,
+          "endTime": 82.33
+        },
+        {
+          "id": "it0x9egpidje7myfmo9qwwkf",
+          "order": 4,
+          "chinese": "坐到我旁边。",
+          "english": "Sit next to me",
+          "soundmark": "sɪt nekst tuː; tə miː; mi",
+          "type": "sentence",
+          "sentenceId": "fzxalg9ad2s0v803li17ndbk",
+          "image": null,
+          "startTime": 99.31,
+          "endTime": 101.39
+        },
+        {
+          "id": "tgw4haybyl60hvg0pa0qloas",
+          "order": 5,
+          "chinese": "我需要坐下。",
+          "english": "I need to sit",
+          "soundmark": "aɪ niːd tuː; tə sɪt",
+          "type": "sentence",
+          "sentenceId": "k70mfgm7wgxv6bw79c428j5z",
+          "image": null,
+          "startTime": 110.63,
+          "endTime": 113.11
+        },
+        {
+          "id": "xkq4dxs2z38p59545upfg8x5",
+          "order": 6,
+          "chinese": "和我们一起坐！",
+          "english": "Sit with us !",
+          "soundmark": "sɪt wɪð; wɪθ ʌs; əs",
+          "type": "sentence",
+          "sentenceId": "dimijdjc7jz5g7p8i54mk11j",
+          "image": null,
+          "startTime": 146.05,
+          "endTime": 147.7
+        },
+        {
+          "id": "qvr9gv4ngn211vvpjvidhvv7",
+          "order": 7,
+          "chinese": "和我们一起坐在木头上。",
+          "english": "Sit with us on the log",
+          "soundmark": "sɪt wɪð; wɪθ ʌs; əs ɑːn ðə; ði lɔːɡ",
+          "type": "sentence",
+          "sentenceId": "oyvb1910i61484phiuepo33o",
+          "image": null,
+          "startTime": 151.66,
+          "endTime": 154.14
+        },
+        {
+          "id": "ymd67q203hh4c6zxdv622j2v",
+          "order": 8,
+          "chinese": "我们都坐下了。",
+          "english": "We are all sitting",
+          "soundmark": "wiː; wi ɑːr; ər ɔːl ˈsɪtɪŋ",
+          "type": "sentence",
+          "sentenceId": "lq8fe4rmafvc5t7qb6prq83s",
+          "image": null,
+          "startTime": 157.07,
+          "endTime": 159.91
+        },
+        {
+          "id": "qliflnua66dx1ba2pryu1d37",
+          "order": 9,
+          "chinese": "哦噢！我没法坐到木头上。",
+          "english": "Uh-oh ! I can't sit on the log",
+          "soundmark": "ˈʌ oʊ aɪ kænt sɪt ɑːn ðə; ði lɔːɡ",
+          "type": "sentence",
+          "sentenceId": "qcnpq46x65znct5fqeumu7ic",
+          "image": null,
+          "startTime": 176.01,
+          "endTime": 181.13
+        },
+        {
+          "id": "grpfzurqoi66exh84r0z7w24",
+          "order": 10,
+          "chinese": "坐我坐过的地方。",
+          "english": "Sit where I sat",
+          "soundmark": "sɪt wer aɪ sæt",
+          "type": "sentence",
+          "sentenceId": "dgbgl6046guhepuljp6ttz55",
+          "image": null,
+          "startTime": 193.84,
+          "endTime": 195.85
+        },
+        {
+          "id": "argmdudyhpk4jqjrnd9lwp53",
+          "order": 11,
+          "chinese": "我要坐那根木头。",
+          "english": "I'll sit on that log",
+          "soundmark": "aɪl sɪt ɑːn ðæt lɔːɡ",
+          "type": "sentence",
+          "sentenceId": "bl0fwax1cyrpf2etj01pg4zm",
+          "image": null,
+          "startTime": 203.27,
+          "endTime": 205.6
+        },
+        {
+          "id": "kb1ez0o3s6zqo1699dskkqmu",
+          "order": 12,
+          "chinese": "别坐在那上面！",
+          "english": "Don't sit on that !",
+          "soundmark": "doʊnt sɪt ɑːn ðæt",
+          "type": "sentence",
+          "sentenceId": "zek90ozb9389k1rfyhllkiw5",
+          "image": null,
+          "startTime": 212.84,
+          "endTime": 215.38
+        },
+        {
+          "id": "thhl9435abrpvxsvj8c70ktq",
+          "order": 13,
+          "chinese": "哇！",
+          "english": "Whoa !",
+          "soundmark": "woʊ",
+          "type": "sentence",
+          "sentenceId": "okshjkbrj4m8jjh0wpx825et",
+          "image": null,
+          "startTime": 216.27,
+          "endTime": 218.72
+        }
+      ]
+    },
+    {
+      "id": "nzuippkgbkkama8yp4j8josw",
+      "order": 17,
+      "title": "017 是的，我可以",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/b7972f59-856e-4f5b-bb82-96085d330e4d.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 15,
+      "sentenceCount": 15,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "oegnik82y21htdmdg1bexsxh",
+          "content": "Can you dance?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "otd0ktxmm6hol50vce76yduf",
+          "content": "No, I can't dance.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vh21h70ddt5gc21ieorfhje2",
+          "content": "I think you can.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "u7d9otaux0ridus7uemxfvuz",
+          "content": "Can you do this?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ln1v1c0fm6472d5834kdw4nb",
+          "content": "Yes, I can.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "yjaf5feinv9fqs5yst0im7cj",
+          "content": "I can do that.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "gpntoa64badc6jv6o9gwj6om",
+          "content": "Can you clap?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "w6qmtex3xn1wcy2heed6cxfu",
+          "content": "Yes, I can clap.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "zsuz7fjaoog9ar6efkve4uu7",
+          "content": "Can you hop three times?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vpsyv6xjsm9iiil4rbrls35l",
+          "content": "Yes, I can hop three times.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "e570tszsw7s8b30mxo5np5hs",
+          "content": "Can you move like this?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "sd4xy9yvc435f9vczsl8nhay",
+          "content": "Yes, I can move like that.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "bfbi6s39vjazsxbxyy3dhbqz",
+          "content": "You can do all of that?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vv94hotuymzpqih4blcmnckg",
+          "content": "Yes, I can do all of it.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "hw1ks68ige4zrp7nxnlxi5r8",
+          "content": "Then you can dance!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "k29ywzxaf0t05s6e7awztan4",
+          "order": 1,
+          "chinese": "你会跳舞吗？",
+          "english": "Can you dance ?",
+          "soundmark": "kæn; kən juː; jʊ dæns",
+          "type": "sentence",
+          "sentenceId": "oegnik82y21htdmdg1bexsxh",
+          "image": null,
+          "startTime": 9.94,
+          "endTime": 43.36
+        },
+        {
+          "id": "vb97wihinyram4fqbrum03b5",
+          "order": 2,
+          "chinese": "不，我不会跳舞。",
+          "english": "No , I can't dance",
+          "soundmark": "noʊ aɪ kænt dæns",
+          "type": "sentence",
+          "sentenceId": "otd0ktxmm6hol50vce76yduf",
+          "image": null,
+          "startTime": 48.49,
+          "endTime": 52.65
+        },
+        {
+          "id": "ewa5abluxmsrueed0d5au3dh",
+          "order": 3,
+          "chinese": "我觉得你会。",
+          "english": "I think you can",
+          "soundmark": "aɪ θɪŋk juː; jʊ kæn; kən",
+          "type": "sentence",
+          "sentenceId": "vh21h70ddt5gc21ieorfhje2",
+          "image": null,
+          "startTime": 54.16,
+          "endTime": 56.51
+        },
+        {
+          "id": "h724oscb8u4f8sv0nfly51uu",
+          "order": 4,
+          "chinese": "你会做这个吗？",
+          "english": "Can you do this ?",
+          "soundmark": "kæn; kən juː; jʊ duː; də ðɪs",
+          "type": "sentence",
+          "sentenceId": "u7d9otaux0ridus7uemxfvuz",
+          "image": null,
+          "startTime": 60.99,
+          "endTime": 63.1
+        },
+        {
+          "id": "njfuljfri41bf7jowksnfkrp",
+          "order": 5,
+          "chinese": "是的，我会。",
+          "english": "Yes , I can",
+          "soundmark": "jes aɪ kæn; kən",
+          "type": "sentence",
+          "sentenceId": "ln1v1c0fm6472d5834kdw4nb",
+          "image": null,
+          "startTime": 71.64,
+          "endTime": 73.83
+        },
+        {
+          "id": "hn8j3hl5838ez89koj2938gb",
+          "order": 6,
+          "chinese": "我会做那个。",
+          "english": "I can do that",
+          "soundmark": "aɪ kæn; kən duː; də ðæt",
+          "type": "sentence",
+          "sentenceId": "yjaf5feinv9fqs5yst0im7cj",
+          "image": null,
+          "startTime": 78.88,
+          "endTime": 81.31
+        },
+        {
+          "id": "zbom4w5axu4z5172pa3ak9ox",
+          "order": 7,
+          "chinese": "你会拍手吗？",
+          "english": "Can you clap ?",
+          "soundmark": "kæn; kən juː; jʊ klæp",
+          "type": "sentence",
+          "sentenceId": "gpntoa64badc6jv6o9gwj6om",
+          "image": null,
+          "startTime": 87.74,
+          "endTime": 89.65
+        },
+        {
+          "id": "qcm3lbrmv043v0gu1jupu1qi",
+          "order": 8,
+          "chinese": "是的，我会拍手。",
+          "english": "Yes , I can clap",
+          "soundmark": "jes aɪ kæn; kən klæp",
+          "type": "sentence",
+          "sentenceId": "w6qmtex3xn1wcy2heed6cxfu",
+          "image": null,
+          "startTime": 93.23,
+          "endTime": 96.18
+        },
+        {
+          "id": "m2vnj53r50go3uku9o2o1o71",
+          "order": 9,
+          "chinese": "你能跳三下吗？",
+          "english": "Can you hop three times ?",
+          "soundmark": "kæn; kən juː; jʊ hɑːp θriː taɪmz",
+          "type": "sentence",
+          "sentenceId": "zsuz7fjaoog9ar6efkve4uu7",
+          "image": null,
+          "startTime": 105.81,
+          "endTime": 109.07
+        },
+        {
+          "id": "qjsjxxjb97lx4667rcqv3oye",
+          "order": 10,
+          "chinese": "是的，我能跳三下。",
+          "english": "Yes , I can hop three times",
+          "soundmark": "jes aɪ kæn; kən hɑːp θriː taɪmz",
+          "type": "sentence",
+          "sentenceId": "vpsyv6xjsm9iiil4rbrls35l",
+          "image": null,
+          "startTime": 116.66,
+          "endTime": 120.82
+        },
+        {
+          "id": "oidcs1i5zc0j2slptoe76pjm",
+          "order": 11,
+          "chinese": "你能像这样动吗？",
+          "english": "Can you move like this ?",
+          "soundmark": "kæn; kən juː; jʊ muːv laɪk ðɪs",
+          "type": "sentence",
+          "sentenceId": "e570tszsw7s8b30mxo5np5hs",
+          "image": null,
+          "startTime": 131.63,
+          "endTime": 134.41
+        },
+        {
+          "id": "u7ejblhioh4i21u5y7wmsis1",
+          "order": 12,
+          "chinese": "是的，我能像那样动。",
+          "english": "Yes , I can move like that",
+          "soundmark": "jes aɪ kæn; kən muːv laɪk ðæt",
+          "type": "sentence",
+          "sentenceId": "sd4xy9yvc435f9vczsl8nhay",
+          "image": null,
+          "startTime": 141.07,
+          "endTime": 145.17
+        },
+        {
+          "id": "ngfc621hev2yt03q0ibbm790",
+          "order": 13,
+          "chinese": "那些你全都会做？",
+          "english": "You can do all of that ?",
+          "soundmark": "juː; jʊ kæn; kən duː; də ɔːl ʌv; əv ðæt",
+          "type": "sentence",
+          "sentenceId": "bfbi6s39vjazsxbxyy3dhbqz",
+          "image": null,
+          "startTime": 152.01,
+          "endTime": 154.18
+        },
+        {
+          "id": "ve2a7sbn22sw7u0owezv9sxj",
+          "order": 14,
+          "chinese": "是的，我全都会做。",
+          "english": "Yes , I can do all of it",
+          "soundmark": "jes aɪ kæn; kən duː; də ɔːl ʌv; əv ɪt",
+          "type": "sentence",
+          "sentenceId": "vv94hotuymzpqih4blcmnckg",
+          "image": null,
+          "startTime": 154.74,
+          "endTime": 158.18
+        },
+        {
+          "id": "pnalq9m8jk4evxvnp45hjxs4",
+          "order": 15,
+          "chinese": "那你会跳舞啊！",
+          "english": "Then you can dance !",
+          "soundmark": "ðen juː; jʊ kæn; kən dæns",
+          "type": "sentence",
+          "sentenceId": "hw1ks68ige4zrp7nxnlxi5r8",
+          "image": null,
+          "startTime": 159.28,
+          "endTime": 162.01
+        }
+      ]
+    },
+    {
+      "id": "n7btytq5q7aqkxisyucw9mux",
+      "order": 18,
+      "title": "018 你会摔倒的",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/36dc49af-20f4-4b9f-826d-dec3896dc15e.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 13,
+      "sentenceCount": 13,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "mpr97odiz3zkt0c6mt25vx0e",
+          "content": "You will fall off the log.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "pdcqmj9v3pv68pxqsu792e3b",
+          "content": "I will not fall.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "bgn7vl025mmkpbuj9qmw7wcw",
+          "content": "Oof! I fell off the log.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "yztcxw21n35glvpgcott1v7v",
+          "content": "You will fall off that rock.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "k6e2drl9ap8vqjwisgt3xzib",
+          "content": "I will not fall.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vvkksa9dekaji262ogtde0le",
+          "content": "Oof! I fell off the rock.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "oixyjxv5g6zl44vw1movq10u",
+          "content": "You will fall.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "fd5cm1idgv8zyz6uvb4byr0k",
+          "content": "You will fall from the tree.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "gqpdjzpvxyv8oov54bl9zog1",
+          "content": "I will not fall.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "rqv3j5n7qehxnbf4eb4rm8w2",
+          "content": "Oof!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "jeeejqbqcyynv2hcavgfyszm",
+          "content": "Ouch!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "jl530lm7xgdxcg2czr0bhjr8",
+          "content": "I fell from the tree.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "n7txkuwvk57z85sh3mx6mumy",
+          "content": "You fell on me!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "ul5wwl602q1meatdyodmjj8n",
+          "order": 1,
+          "chinese": "你会从木头上摔下来。",
+          "english": "You will fall off the log",
+          "soundmark": "juː; jʊ wɪl fɔːl ɔːf ðə; ði lɔːɡ",
+          "type": "sentence",
+          "sentenceId": "mpr97odiz3zkt0c6mt25vx0e",
+          "image": null,
+          "startTime": 9.87,
+          "endTime": 25.74
+        },
+        {
+          "id": "b5nsyv8ky2w8fu6anll4rlk5",
+          "order": 2,
+          "chinese": "我不会摔下来的。",
+          "english": "I will not fall",
+          "soundmark": "aɪ wɪl nɑːt fɔːl",
+          "type": "sentence",
+          "sentenceId": "pdcqmj9v3pv68pxqsu792e3b",
+          "image": null,
+          "startTime": 26.94,
+          "endTime": 29.87
+        },
+        {
+          "id": "ue1c7t9alxpsv34xr44xgu0d",
+          "order": 3,
+          "chinese": "哎哟！我从木头上摔下来了。",
+          "english": "Oof ! I fell off the log",
+          "soundmark": "uːf aɪ fel ɔːf ðə; ði lɔːɡ",
+          "type": "sentence",
+          "sentenceId": "bgn7vl025mmkpbuj9qmw7wcw",
+          "image": null,
+          "startTime": 41.42,
+          "endTime": 50.6
+        },
+        {
+          "id": "ccc85aowsmv4jbbyp6rsfa7k",
+          "order": 4,
+          "chinese": "你会从那块石头上摔下来的。",
+          "english": "You will fall off that rock",
+          "soundmark": "juː; jʊ wɪl fɔːl ɔːf ðæt rɑːk",
+          "type": "sentence",
+          "sentenceId": "yztcxw21n35glvpgcott1v7v",
+          "image": null,
+          "startTime": 63.55,
+          "endTime": 66.44
+        },
+        {
+          "id": "rgg64422jufkwcjucah0v8j9",
+          "order": 5,
+          "chinese": "我不会摔下来的。",
+          "english": "I will not fall",
+          "soundmark": "aɪ wɪl nɑːt fɔːl",
+          "type": "sentence",
+          "sentenceId": "k6e2drl9ap8vqjwisgt3xzib",
+          "image": null,
+          "startTime": 71.13,
+          "endTime": 74.5
+        },
+        {
+          "id": "nktf2o1ooxocfo45un5iz8oy",
+          "order": 6,
+          "chinese": "哎哟！我从石头上摔下来了。",
+          "english": "Oof ! I fell off the rock",
+          "soundmark": "uːf aɪ fel ɔːf ðə; ði rɑːk",
+          "type": "sentence",
+          "sentenceId": "vvkksa9dekaji262ogtde0le",
+          "image": null,
+          "startTime": 83.94,
+          "endTime": 93.87
+        },
+        {
+          "id": "ezfce1azgfal5r5xja1g97k1",
+          "order": 7,
+          "chinese": "你会摔下来的。",
+          "english": "You will fall",
+          "soundmark": "juː; jʊ wɪl fɔːl",
+          "type": "sentence",
+          "sentenceId": "oixyjxv5g6zl44vw1movq10u",
+          "image": null,
+          "startTime": 115.87,
+          "endTime": 117.8
+        },
+        {
+          "id": "mrirtb99hpha20gg05vp7p02",
+          "order": 8,
+          "chinese": "你会从树上摔下来。",
+          "english": "You will fall from the tree",
+          "soundmark": "juː; jʊ wɪl fɔːl frʌm; frəm ðə; ði triː",
+          "type": "sentence",
+          "sentenceId": "fd5cm1idgv8zyz6uvb4byr0k",
+          "image": null,
+          "startTime": 122.94,
+          "endTime": 125.4
+        },
+        {
+          "id": "gz6kh1uqqi10dg0w75yst1er",
+          "order": 9,
+          "chinese": "我不会摔下来的。",
+          "english": "I will not fall",
+          "soundmark": "aɪ wɪl nɑːt fɔːl",
+          "type": "sentence",
+          "sentenceId": "gqpdjzpvxyv8oov54bl9zog1",
+          "image": null,
+          "startTime": 126.67,
+          "endTime": 128.92
+        },
+        {
+          "id": "t6zbohd90zbm5kmkmsqy17lj",
+          "order": 10,
+          "chinese": "哎哟！",
+          "english": "Oof !",
+          "soundmark": "uːf",
+          "type": "sentence",
+          "sentenceId": "rqv3j5n7qehxnbf4eb4rm8w2",
+          "image": null,
+          "startTime": 143.22,
+          "endTime": 144.56
+        },
+        {
+          "id": "saikbdwcw80jdxhdkq6e9oee",
+          "order": 11,
+          "chinese": "好疼！",
+          "english": "Ouch !",
+          "soundmark": "aʊtʃ",
+          "type": "sentence",
+          "sentenceId": "jeeejqbqcyynv2hcavgfyszm",
+          "image": null,
+          "startTime": 147.94,
+          "endTime": 149.11
+        },
+        {
+          "id": "u78fyr4gm6o5qkw12gq4p7sd",
+          "order": 12,
+          "chinese": "我从树上摔下来了。",
+          "english": "I fell from the tree",
+          "soundmark": "aɪ fel frʌm; frəm ðə; ði triː",
+          "type": "sentence",
+          "sentenceId": "jl530lm7xgdxcg2czr0bhjr8",
+          "image": null,
+          "startTime": 151.49,
+          "endTime": 154.17
+        },
+        {
+          "id": "y8y3b5bn5sfga9lg23mrgcho",
+          "order": 13,
+          "chinese": "你摔到我身上了！",
+          "english": "You fell on me !",
+          "soundmark": "juː; jʊ fel ɑːn miː; mi",
+          "type": "sentence",
+          "sentenceId": "n7txkuwvk57z85sh3mx6mumy",
+          "image": null,
+          "startTime": 157.96,
+          "endTime": 160.81
+        }
+      ]
+    },
+    {
+      "id": "d8yybvtswnnoy358s0td2pp6",
+      "order": 19,
+      "title": "019 一起做点东西吧",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/081973db-b78f-440d-9a9a-390611a4acb1.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 12,
+      "sentenceCount": 12,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "s6w9cpy41r9qfl0ziqslpubi",
+          "content": "Let's make something.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "c3fs92s4pvsx3ed1tp0wh10x",
+          "content": "Let's make something with snow.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "cq7b56ixz13fowxm9pcarzkf",
+          "content": "I will make a snowball.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "n91tz4u6tp1d71ke3ecow66m",
+          "content": "Hmm. I will make a bigger snowball.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vl0nsewey2hbguqzdwuj6z47",
+          "content": "I can make an arm.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "yffwbgqqhf119pcsqe6x1873",
+          "content": "I can make an arm too.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "u5w7jdgp2w4lopvu9v08zspm",
+          "content": "I can make eyes.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "rby39oirxkra2kjzrtvaem4n",
+          "content": "I can make a mouth.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "p7n63x0x4yjw7t7hn5guil6b",
+          "content": "I can make a nose.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "pl7sltcd07mv8awvwmve6926",
+          "content": "Aha! We made something.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "bbstp8itn3jqh50uec77147b",
+          "content": "We made a snowman!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "uah3qohxzi8q6jy0m03xwiey",
+          "content": "We make a good team!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "x17d3x0ojar9slvy108n6rjf",
+          "order": 1,
+          "chinese": "我们来做个东西吧。",
+          "english": "Let's make something",
+          "soundmark": "lets meɪk ˈsʌmθɪŋ",
+          "type": "sentence",
+          "sentenceId": "s6w9cpy41r9qfl0ziqslpubi",
+          "image": null,
+          "startTime": 9.87,
+          "endTime": 19.56
+        },
+        {
+          "id": "scb2615nw1fp1xbaocr9gl85",
+          "order": 2,
+          "chinese": "我们用雪做个东西吧。",
+          "english": "Let's make something with snow",
+          "soundmark": "lets meɪk ˈsʌmθɪŋ wɪð; wɪθ snoʊ",
+          "type": "sentence",
+          "sentenceId": "c3fs92s4pvsx3ed1tp0wh10x",
+          "image": null,
+          "startTime": 20.7,
+          "endTime": 23.59
+        },
+        {
+          "id": "dlgxeuvi3ifx02qooi7i08wx",
+          "order": 3,
+          "chinese": "我来做一个雪球。",
+          "english": "I will make a snowball",
+          "soundmark": "aɪ wɪl meɪk ə; eɪ ˈsnoʊbɔːl",
+          "type": "sentence",
+          "sentenceId": "cq7b56ixz13fowxm9pcarzkf",
+          "image": null,
+          "startTime": 48.28,
+          "endTime": 51.55
+        },
+        {
+          "id": "tk91zsgme4xuitl8g0m4oune",
+          "order": 4,
+          "chinese": "嗯，我来做个更大的雪球。",
+          "english": "Hmm . I will make a bigger snowball",
+          "soundmark": "m aɪ wɪl meɪk ə; eɪ bɪgə(r) ˈsnoʊbɔːl",
+          "type": "sentence",
+          "sentenceId": "n91tz4u6tp1d71ke3ecow66m",
+          "image": null,
+          "startTime": 73.69,
+          "endTime": 79.3
+        },
+        {
+          "id": "yqmr7da6xz3gux2f5hv01lss",
+          "order": 5,
+          "chinese": "我可以做一只胳膊。",
+          "english": "I can make an arm",
+          "soundmark": "aɪ kæn; kən meɪk æn; ən ɑːrm",
+          "type": "sentence",
+          "sentenceId": "vl0nsewey2hbguqzdwuj6z47",
+          "image": null,
+          "startTime": 104.86,
+          "endTime": 107.32
+        },
+        {
+          "id": "nm9z1yaik79act35ywf13af3",
+          "order": 6,
+          "chinese": "我也可以做一只胳膊。",
+          "english": "I can make an arm too",
+          "soundmark": "aɪ kæn; kən meɪk æn; ən ɑːrm tuː",
+          "type": "sentence",
+          "sentenceId": "yffwbgqqhf119pcsqe6x1873",
+          "image": null,
+          "startTime": 112.54,
+          "endTime": 117.39
+        },
+        {
+          "id": "glbsfdttkm506m0cd8hsazy7",
+          "order": 7,
+          "chinese": "我可以做眼睛。",
+          "english": "I can make eyes",
+          "soundmark": "aɪ kæn; kən meɪk aɪz",
+          "type": "sentence",
+          "sentenceId": "u5w7jdgp2w4lopvu9v08zspm",
+          "image": null,
+          "startTime": 123.95,
+          "endTime": 126.23
+        },
+        {
+          "id": "aemjsicyg55jjjmj60xjra6n",
+          "order": 8,
+          "chinese": "我可以做嘴巴。",
+          "english": "I can make a mouth",
+          "soundmark": "aɪ kæn; kən meɪk ə; eɪ maʊθ",
+          "type": "sentence",
+          "sentenceId": "rby39oirxkra2kjzrtvaem4n",
+          "image": null,
+          "startTime": 138.94,
+          "endTime": 140.8
+        },
+        {
+          "id": "h6prcbecaizzs1i5j8d0k8cv",
+          "order": 9,
+          "chinese": "我可以做鼻子。",
+          "english": "I can make a nose",
+          "soundmark": "aɪ kæn; kən meɪk ə; eɪ noʊz",
+          "type": "sentence",
+          "sentenceId": "p7n63x0x4yjw7t7hn5guil6b",
+          "image": null,
+          "startTime": 148.61,
+          "endTime": 151.11
+        },
+        {
+          "id": "kbcz2kjlcgsufv9lhertw6hh",
+          "order": 10,
+          "chinese": "啊哈！我们做了个东西。",
+          "english": "Aha ! We made something",
+          "soundmark": "ɑːˈhɑː wiː; wi meɪd ˈsʌmθɪŋ",
+          "type": "sentence",
+          "sentenceId": "pl7sltcd07mv8awvwmve6926",
+          "image": null,
+          "startTime": 157.66,
+          "endTime": 161.63
+        },
+        {
+          "id": "lvk517l5dmhc4v5lba86icqb",
+          "order": 11,
+          "chinese": "我们堆了个雪人！",
+          "english": "We made a snowman !",
+          "soundmark": "wiː; wi meɪd ə; eɪ ˈsnoʊmæn",
+          "type": "sentence",
+          "sentenceId": "bbstp8itn3jqh50uec77147b",
+          "image": null,
+          "startTime": 162.34,
+          "endTime": 165.19
+        },
+        {
+          "id": "ofnxot37ck5e8g91sso8bysy",
+          "order": 12,
+          "chinese": "我们合作得真好！",
+          "english": "We make a good team !",
+          "soundmark": "wiː; wi meɪk ə; eɪ ɡʊd tiːm",
+          "type": "sentence",
+          "sentenceId": "uah3qohxzi8q6jy0m03xwiey",
+          "image": null,
+          "startTime": 174.07,
+          "endTime": 177.12
+        }
+      ]
+    },
+    {
+      "id": "nhhihkwa5f8uthpz0ukbk9oa",
+      "order": 20,
+      "title": "020 我能拿住它",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/dd910c28-80e1-4789-bc49-167bcfef17c5.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 12,
+      "sentenceCount": 12,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "noge3jhycpvu319fx1kf3oge",
+          "content": "Can you hold this big stick?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "z7ijf7sgjv68fom1gm6qv0a1",
+          "content": "Yes, I can hold this stick.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "og0crjt35lhh5op2rays15g3",
+          "content": "I can hold it too.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ezehzhorj3mhfttv2svb7fi8",
+          "content": "Can you hold this rock?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ry5goe0ykqs66i6fbhqe56jv",
+          "content": "Yes, I can hold this rock.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "f61g7g5rexidox2kpdhn4v4z",
+          "content": "No, I can't hold it.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "hvbto3msvi7snvl3ogp0qzld",
+          "content": "Can you hold this big rock?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "oqjp7r8q3vklk27kdfmiv435",
+          "content": "No, I can't hold it.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "re9j27up12z4q1p1qwt4k5b7",
+          "content": "I can't hold it either.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "swlideg96f6kzl4s87jx0aqq",
+          "content": "Only I can hold this big rock!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "toc5g0kmsq0c67ngh98dpygl",
+          "content": "I am very strong.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ke1078nj4tvy970m7vmdath8",
+          "content": "Ahem. Look what I can hold!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "inf7gc4ysjn9yslrflz32e2b",
+          "order": 1,
+          "chinese": "你能拿住这根大棍子吗？",
+          "english": "Can you hold this big stick ?",
+          "soundmark": "kæn; kən juː; jʊ hoʊld ðɪs bɪɡ stɪk",
+          "type": "sentence",
+          "sentenceId": "noge3jhycpvu319fx1kf3oge",
+          "image": null,
+          "startTime": 9.87,
+          "endTime": 24.61
+        },
+        {
+          "id": "jfoj3u8ks5k0d2bep5d7e0hd",
+          "order": 2,
+          "chinese": "是的，我能拿住这根棍子。",
+          "english": "Yes , I can hold this stick",
+          "soundmark": "jes aɪ kæn; kən hoʊld ðɪs stɪk",
+          "type": "sentence",
+          "sentenceId": "z7ijf7sgjv68fom1gm6qv0a1",
+          "image": null,
+          "startTime": 31.02,
+          "endTime": 34.16
+        },
+        {
+          "id": "of9ep6xhlcygmkta8xwdkf8z",
+          "order": 3,
+          "chinese": "我也能拿住它。",
+          "english": "I can hold it too",
+          "soundmark": "aɪ kæn; kən hoʊld ɪt tuː",
+          "type": "sentence",
+          "sentenceId": "og0crjt35lhh5op2rays15g3",
+          "image": null,
+          "startTime": 39.6,
+          "endTime": 41.97
+        },
+        {
+          "id": "gxw2ka1mg28de5dodwxq9z1z",
+          "order": 4,
+          "chinese": "你能拿住这块石头吗？",
+          "english": "Can you hold this rock ?",
+          "soundmark": "kæn; kən juː; jʊ hoʊld ðɪs rɑːk",
+          "type": "sentence",
+          "sentenceId": "ezehzhorj3mhfttv2svb7fi8",
+          "image": null,
+          "startTime": 60.98,
+          "endTime": 63.33
+        },
+        {
+          "id": "xrbalgpr5n48dd9vsiw9o2k4",
+          "order": 5,
+          "chinese": "是的，我能拿住这块石头。",
+          "english": "Yes , I can hold this rock",
+          "soundmark": "jes aɪ kæn; kən hoʊld ðɪs rɑːk",
+          "type": "sentence",
+          "sentenceId": "ry5goe0ykqs66i6fbhqe56jv",
+          "image": null,
+          "startTime": 70.01,
+          "endTime": 73.15
+        },
+        {
+          "id": "agio4psmg9irdputyfe36lm3",
+          "order": 6,
+          "chinese": "不，我拿不住。",
+          "english": "No , I can't hold it",
+          "soundmark": "noʊ aɪ kænt hoʊld ɪt",
+          "type": "sentence",
+          "sentenceId": "f61g7g5rexidox2kpdhn4v4z",
+          "image": null,
+          "startTime": 93.97,
+          "endTime": 97.42
+        },
+        {
+          "id": "ues6cf67ya1468v12obc4ifl",
+          "order": 7,
+          "chinese": "你能拿住这块大石头吗？",
+          "english": "Can you hold this big rock ?",
+          "soundmark": "kæn; kən juː; jʊ hoʊld ðɪs bɪɡ rɑːk",
+          "type": "sentence",
+          "sentenceId": "hvbto3msvi7snvl3ogp0qzld",
+          "image": null,
+          "startTime": 120.99,
+          "endTime": 123.75
+        },
+        {
+          "id": "d0cv10n4zrw8g807lek37frp",
+          "order": 8,
+          "chinese": "不，我拿不住。",
+          "english": "No , I can't hold it",
+          "soundmark": "noʊ aɪ kænt hoʊld ɪt",
+          "type": "sentence",
+          "sentenceId": "oqjp7r8q3vklk27kdfmiv435",
+          "image": null,
+          "startTime": 136.66,
+          "endTime": 140.02
+        },
+        {
+          "id": "xed5gw7m86kb9odn9au39alv",
+          "order": 9,
+          "chinese": "我也拿不住。",
+          "english": "I can't hold it either",
+          "soundmark": "aɪ kænt hoʊld ɪt ˈiːðər",
+          "type": "sentence",
+          "sentenceId": "re9j27up12z4q1p1qwt4k5b7",
+          "image": null,
+          "startTime": 147.73,
+          "endTime": 150.63
+        },
+        {
+          "id": "y2jugeit9vgnd50k4vkmnc8c",
+          "order": 10,
+          "chinese": "只有我能拿住这块大石头！",
+          "english": "Only I can hold this big rock !",
+          "soundmark": "ˈoʊnli aɪ kæn; kən hoʊld ðɪs bɪɡ rɑːk",
+          "type": "sentence",
+          "sentenceId": "swlideg96f6kzl4s87jx0aqq",
+          "image": null,
+          "startTime": 154.17,
+          "endTime": 157.28
+        },
+        {
+          "id": "gelk3said8d4fztdk9x3fink",
+          "order": 11,
+          "chinese": "我很强壮。",
+          "english": "I am very strong",
+          "soundmark": "aɪ æm; əm ˈveri strɔːŋ",
+          "type": "sentence",
+          "sentenceId": "toc5g0kmsq0c67ngh98dpygl",
+          "image": null,
+          "startTime": 158.74,
+          "endTime": 161.56
+        },
+        {
+          "id": "jk7nx0cp865mw7ggldayg6g8",
+          "order": 12,
+          "chinese": "咳咳。看看我能拿住什么！",
+          "english": "Ahem . Look what I can hold !",
+          "soundmark": "əˈhemˌəˈhəm lʊk wʌt aɪ kæn; kən hoʊld",
+          "type": "sentence",
+          "sentenceId": "ke1078nj4tvy970m7vmdath8",
+          "image": null,
+          "startTime": 167.21,
+          "endTime": 174.25
+        }
+      ]
+    },
+    {
+      "id": "ghgk78wdvjffnfsdzwk79hfr",
+      "order": 21,
+      "title": "021 我有个东西",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/bc5b0560-5f76-43ec-968e-884e8d8636a9.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 14,
+      "sentenceCount": 14,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "vuzvwstbef6sn55uvqrpjio3",
+          "content": "I have something.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "t8xy6zqgozod1v8d80amv6kp",
+          "content": "What do you have?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "s1dqvyun9icfcykt4izuqmrh",
+          "content": "I have a leaf.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "i5uhtht9nog1armiw6wvsneq",
+          "content": "I have something too.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "nqdewykm0mpmnxjxofv9d4qr",
+          "content": "What do you have?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "no17i9j8we5lw5lptova0xnv",
+          "content": "I have a flower.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ov7jrqgx60hzbj2sxviwjom2",
+          "content": "I have two things.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "eh3ntp9qofkxeplzzcw15mqt",
+          "content": "What do you have?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "x0fl1bka26bvhgmz1bmyqyw4",
+          "content": "I have two sticks.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ycguitzorjnhuo5sbbdvgic7",
+          "content": "I have an idea!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "m5stebd6lccqfcm25dn2l7tw",
+          "content": "We all have things that float.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ftvm3e6d6o9tj93o9k9dtdow",
+          "content": "And we have a stream.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "d6qjautusotrj4zbsmsxtya8",
+          "content": "Let's have a race!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ssq622r9d7u4115g01afqdq4",
+          "content": "We are having fun!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "wpu3ld8c0kxbd4bztw6244ff",
+          "order": 1,
+          "chinese": "我有东西。",
+          "english": "I have something",
+          "soundmark": "aɪ hæv; həv ˈsʌmθɪŋ",
+          "type": "sentence",
+          "sentenceId": "vuzvwstbef6sn55uvqrpjio3",
+          "image": null,
+          "startTime": 9.94,
+          "endTime": 21.9
+        },
+        {
+          "id": "hc2olu5qj6ydt0tn6h401lbp",
+          "order": 2,
+          "chinese": "你有什么？",
+          "english": "What do you have ?",
+          "soundmark": "wʌt duː; də juː; jʊ hæv; həv",
+          "type": "sentence",
+          "sentenceId": "t8xy6zqgozod1v8d80amv6kp",
+          "image": null,
+          "startTime": 30.87,
+          "endTime": 33.66
+        },
+        {
+          "id": "juqzvpzi5lxnjasrorv0s296",
+          "order": 3,
+          "chinese": "我有一片叶子。",
+          "english": "I have a leaf",
+          "soundmark": "aɪ hæv; həv ə; eɪ liːf",
+          "type": "sentence",
+          "sentenceId": "s1dqvyun9icfcykt4izuqmrh",
+          "image": null,
+          "startTime": 35.94,
+          "endTime": 38.36
+        },
+        {
+          "id": "c2u5xj113yzeybe4lkqcugvc",
+          "order": 4,
+          "chinese": "我也有东西。",
+          "english": "I have something too",
+          "soundmark": "aɪ hæv; həv ˈsʌmθɪŋ tuː",
+          "type": "sentence",
+          "sentenceId": "i5uhtht9nog1armiw6wvsneq",
+          "image": null,
+          "startTime": 44.4,
+          "endTime": 47.99
+        },
+        {
+          "id": "g0qhx0p3iai4tiigzxrrwt40",
+          "order": 5,
+          "chinese": "你有什么？",
+          "english": "What do you have ?",
+          "soundmark": "wʌt duː; də juː; jʊ hæv; həv",
+          "type": "sentence",
+          "sentenceId": "nqdewykm0mpmnxjxofv9d4qr",
+          "image": null,
+          "startTime": 50.95,
+          "endTime": 53.2
+        },
+        {
+          "id": "izlv4dgwijp83up9eoeymwhe",
+          "order": 6,
+          "chinese": "我有一朵花。",
+          "english": "I have a flower",
+          "soundmark": "aɪ hæv; həv ə; eɪ ˈflaʊər",
+          "type": "sentence",
+          "sentenceId": "no17i9j8we5lw5lptova0xnv",
+          "image": null,
+          "startTime": 56.11,
+          "endTime": 59.66
+        },
+        {
+          "id": "a7ck44ri6x32987lulmmm5xm",
+          "order": 7,
+          "chinese": "我有两样东西。",
+          "english": "I have two things",
+          "soundmark": "aɪ hæv; həv tuː θɪŋz",
+          "type": "sentence",
+          "sentenceId": "ov7jrqgx60hzbj2sxviwjom2",
+          "image": null,
+          "startTime": 67.19,
+          "endTime": 69.49
+        },
+        {
+          "id": "mgqi9sh9icayu8dxjb1u566m",
+          "order": 8,
+          "chinese": "你有什么？",
+          "english": "What do you have ?",
+          "soundmark": "wʌt duː; də juː; jʊ hæv; həv",
+          "type": "sentence",
+          "sentenceId": "eh3ntp9qofkxeplzzcw15mqt",
+          "image": null,
+          "startTime": 71.35,
+          "endTime": 73.84
+        },
+        {
+          "id": "u79hnxxt0ekiasihhekzx6zd",
+          "order": 9,
+          "chinese": "我有两根树枝。",
+          "english": "I have two sticks",
+          "soundmark": "aɪ hæv; həv tuː stɪks",
+          "type": "sentence",
+          "sentenceId": "x0fl1bka26bvhgmz1bmyqyw4",
+          "image": null,
+          "startTime": 75.27,
+          "endTime": 77.61
+        },
+        {
+          "id": "bfhmj12kuwnvvp9s8x5fuai0",
+          "order": 10,
+          "chinese": "我有个主意！",
+          "english": "I have an idea !",
+          "soundmark": "aɪ hæv; həv æn; ən aɪˈdiːə",
+          "type": "sentence",
+          "sentenceId": "ycguitzorjnhuo5sbbdvgic7",
+          "image": null,
+          "startTime": 87.58,
+          "endTime": 90.01
+        },
+        {
+          "id": "b1uoj5qhkt4e0drvnxa33v8v",
+          "order": 11,
+          "chinese": "我们都有能漂浮的东西。",
+          "english": "We all have things that float",
+          "soundmark": "wiː; wi ɔːl hæv; həv θɪŋz ðæt floʊt",
+          "type": "sentence",
+          "sentenceId": "m5stebd6lccqfcm25dn2l7tw",
+          "image": null,
+          "startTime": 90.6,
+          "endTime": 93.55
+        },
+        {
+          "id": "k7q58c9ypey24gw3kuzikhs9",
+          "order": 12,
+          "chinese": "而且我们有一条小溪。",
+          "english": "And we have a stream",
+          "soundmark": "ænd; ənd wiː; wi hæv; həv ə; eɪ striːm",
+          "type": "sentence",
+          "sentenceId": "ftvm3e6d6o9tj93o9k9dtdow",
+          "image": null,
+          "startTime": 101.66,
+          "endTime": 105.04
+        },
+        {
+          "id": "nhsju36d8ap3hi7n1kayhdlk",
+          "order": 13,
+          "chinese": "我们来比赛吧！",
+          "english": "Let's have a race !",
+          "soundmark": "lets hæv; həv ə; eɪ reɪs",
+          "type": "sentence",
+          "sentenceId": "d6qjautusotrj4zbsmsxtya8",
+          "image": null,
+          "startTime": 106.94,
+          "endTime": 109.21
+        },
+        {
+          "id": "bie4ba0akw4im9v0ttz25twx",
+          "order": 14,
+          "chinese": "我们玩得很开心！",
+          "english": "We are having fun !",
+          "soundmark": "wiː; wi ɑːr; ər ˈhævɪŋ fʌn",
+          "type": "sentence",
+          "sentenceId": "ssq622r9d7u4115g01afqdq4",
+          "image": null,
+          "startTime": 126.18,
+          "endTime": 129.08
+        }
+      ]
+    },
+    {
+      "id": "mj8r0qsvck7fw0o63j6g86pd",
+      "order": 22,
+      "title": "022 我长得高",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/44e0b2a9-35fd-459c-8688-65f0d7b6a6b9.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 13,
+      "sentenceCount": 13,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "fwk7jenpug8mvp5rjgmr6vse",
+          "content": "I am tall.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ef9pfwakt6ms387n9b9l8uio",
+          "content": "I am taller than you are.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "spyt4epwuepz2k922obiwfbi",
+          "content": "No, I am taller!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "cleasmwlmqmkr5nz5yrtr9ro",
+          "content": "I am the tallest.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vmi0ktm4m39mxjzs6k4eqh9b",
+          "content": "Well, I am strong!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "tcbk313ibbqmjxambfstfxps",
+          "content": "I am stronger than you are.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ua8yj2ae7th5hxjqzvs1vlpk",
+          "content": "I am strong too.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "s1yhoun3e4bj7ws8kfnqjpnx",
+          "content": "I am also stronger than you are.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "kb4dn7y8z4u3dilb8pjjbvs8",
+          "content": "No, I am the strongest.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "p4ilrpl2pluzu6ud8m21mc5r",
+          "content": "I am also the fastest!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "nccpkjyyf6igjugsn31xezlq",
+          "content": "I am the fastest!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "f9c3nhrkd7yuu9y8jy13bwk5",
+          "content": "No, I am the fastest!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "mqd1563g0jaw84by6othoc83",
+          "content": "Shh! I am sleeping!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "fllh709m2bgk8dyslrzyc9tu",
+          "order": 1,
+          "chinese": "我很高。",
+          "english": "I am tall",
+          "soundmark": "aɪ æm; əm tɔːl",
+          "type": "sentence",
+          "sentenceId": "fwk7jenpug8mvp5rjgmr6vse",
+          "image": null,
+          "startTime": 9.94,
+          "endTime": 26.46
+        },
+        {
+          "id": "ijx8gw800vt6rq1vavza7ybh",
+          "order": 2,
+          "chinese": "我比你高。",
+          "english": "I am taller than you are",
+          "soundmark": "aɪ æm; əm ˈtɔːlər ðæn; ðən juː; jʊ ɑːr; ər",
+          "type": "sentence",
+          "sentenceId": "ef9pfwakt6ms387n9b9l8uio",
+          "image": null,
+          "startTime": 32.37,
+          "endTime": 34.99
+        },
+        {
+          "id": "qqiouxszj0c7bu2pyybjtmom",
+          "order": 3,
+          "chinese": "不，我更高！",
+          "english": "No , I am taller !",
+          "soundmark": "noʊ aɪ æm; əm ˈtɔːlər",
+          "type": "sentence",
+          "sentenceId": "spyt4epwuepz2k922obiwfbi",
+          "image": null,
+          "startTime": 37.54,
+          "endTime": 40.4
+        },
+        {
+          "id": "x7ms9lqqjkfb2s0d40gui16r",
+          "order": 4,
+          "chinese": "我是最高的。",
+          "english": "I am the tallest",
+          "soundmark": "aɪ æm; əm ðə; ði tɔːlɪst",
+          "type": "sentence",
+          "sentenceId": "cleasmwlmqmkr5nz5yrtr9ro",
+          "image": null,
+          "startTime": 56.28,
+          "endTime": 58.94
+        },
+        {
+          "id": "ithwpt3se6o26te0uajlj3h6",
+          "order": 5,
+          "chinese": "哼，我力气大！",
+          "english": "Well , I am strong !",
+          "soundmark": "wel aɪ æm; əm strɔːŋ",
+          "type": "sentence",
+          "sentenceId": "vmi0ktm4m39mxjzs6k4eqh9b",
+          "image": null,
+          "startTime": 61.01,
+          "endTime": 63.95
+        },
+        {
+          "id": "vef3g4dffdh9at2akgg9tq6b",
+          "order": 6,
+          "chinese": "我比你力气更大。",
+          "english": "I am stronger than you are",
+          "soundmark": "aɪ æm; əm strɔːŋgər ðæn; ðən juː; jʊ ɑːr; ər",
+          "type": "sentence",
+          "sentenceId": "tcbk313ibbqmjxambfstfxps",
+          "image": null,
+          "startTime": 72.06,
+          "endTime": 74.86
+        },
+        {
+          "id": "tm914c577lvoxgyjyjwwcan0",
+          "order": 7,
+          "chinese": "我力气也很大。",
+          "english": "I am strong too",
+          "soundmark": "aɪ æm; əm strɔːŋ tuː",
+          "type": "sentence",
+          "sentenceId": "ua8yj2ae7th5hxjqzvs1vlpk",
+          "image": null,
+          "startTime": 77.47,
+          "endTime": 79.53
+        },
+        {
+          "id": "w5swufe17twfn120ke7kez1n",
+          "order": 8,
+          "chinese": "我也比你力气更大。",
+          "english": "I am also stronger than you are",
+          "soundmark": "aɪ æm; əm ˈɔːlsoʊ strɔːŋgər ðæn; ðən juː; jʊ ɑːr; ər",
+          "type": "sentence",
+          "sentenceId": "s1yhoun3e4bj7ws8kfnqjpnx",
+          "image": null,
+          "startTime": 89.53,
+          "endTime": 92.78
+        },
+        {
+          "id": "ppjyobttip843y6sbr5xdmsn",
+          "order": 9,
+          "chinese": "不，我力气最大。",
+          "english": "No , I am the strongest",
+          "soundmark": "noʊ aɪ æm; əm ðə; ði ˈstrɔːŋɪst; ˈstrɔːŋɡəst",
+          "type": "sentence",
+          "sentenceId": "kb4dn7y8z4u3dilb8pjjbvs8",
+          "image": null,
+          "startTime": 94.21,
+          "endTime": 97.69
+        },
+        {
+          "id": "cetsm797cmjghwx0yjgi3zvo",
+          "order": 10,
+          "chinese": "我也是最快的！",
+          "english": "I am also the fastest !",
+          "soundmark": "aɪ æm; əm ˈɔːlsoʊ ðə; ði fæstɪst",
+          "type": "sentence",
+          "sentenceId": "p4ilrpl2pluzu6ud8m21mc5r",
+          "image": null,
+          "startTime": 110.4,
+          "endTime": 113.26
+        },
+        {
+          "id": "hp4p5repmztyfs4tfanx46ew",
+          "order": 11,
+          "chinese": "我是最快的！",
+          "english": "I am the fastest !",
+          "soundmark": "aɪ æm; əm ðə; ði fæstɪst",
+          "type": "sentence",
+          "sentenceId": "nccpkjyyf6igjugsn31xezlq",
+          "image": null,
+          "startTime": 115.01,
+          "endTime": 118.35
+        },
+        {
+          "id": "nqiacf49nnnc47sgn5nye3tr",
+          "order": 12,
+          "chinese": "不，我是最快的！",
+          "english": "No , I am the fastest !",
+          "soundmark": "noʊ aɪ æm; əm ðə; ði fæstɪst",
+          "type": "sentence",
+          "sentenceId": "f9c3nhrkd7yuu9y8jy13bwk5",
+          "image": null,
+          "startTime": 120.62,
+          "endTime": 123.48
+        },
+        {
+          "id": "isvgs1wnsg7pymllvlwn4k9h",
+          "order": 13,
+          "chinese": "嘘！我在睡觉！",
+          "english": "Shh ! I am sleeping !",
+          "soundmark": "ʃ aɪ æm; əm ˈsliːpɪŋ",
+          "type": "sentence",
+          "sentenceId": "mqd1563g0jaw84by6othoc83",
+          "image": null,
+          "startTime": 154.44,
+          "endTime": 160.49
+        }
+      ]
+    },
+    {
+      "id": "h2chm0krjn0e2s5q6sqw1gng",
+      "order": 23,
+      "title": "023 我会画画",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/553b94a7-86db-49ca-83da-35bcf51b5705.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 14,
+      "sentenceCount": 14,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "y7hx3agz62jsn8dl1fljz7pk",
+          "content": "Can you draw?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "a3q77hyctxw08c6um287lysh",
+          "content": "Yes, I can draw.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "m1y4cdv4ktzrkuco8h0h0bmm",
+          "content": "I can draw with sticks.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "l8k7a0sj4ejqyx24un98dcvw",
+          "content": "I can draw on the ground.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "n7ok3ff776mn1zr1bjy82668",
+          "content": "I can draw in the dirt.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "zsk8p2vyzgdj4mrombyj4fay",
+          "content": "I can draw circles.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "l9mwpzt2gqram9nri9g08fha",
+          "content": "I can draw squares.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "tb0l9s99bxy6fp8dn3cyx07s",
+          "content": "I can draw lines.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "yiooae4hltcz677rnvcmu22i",
+          "content": "I can draw dots.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "b6vler6yf6357m02w37cwb7m",
+          "content": "Do you see what I drew?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "wwzmxnjnwxwfhrg5gy81lw4y",
+          "content": "What did you draw?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "gxx9hqzlh21mgnkju5uclh7o",
+          "content": "I drew you!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "yx442ll5gc2e1pu31p9zggl3",
+          "content": "You draw very well.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ul7lng6rhnas8knfiqw0by2n",
+          "content": "Thank you.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "ukhhia7eka4gqejhwesxzbyq",
+          "order": 1,
+          "chinese": "你会画画吗？",
+          "english": "Can you draw ?",
+          "soundmark": "kæn; kən juː; jʊ drɔː",
+          "type": "sentence",
+          "sentenceId": "y7hx3agz62jsn8dl1fljz7pk",
+          "image": null,
+          "startTime": 9.94,
+          "endTime": 21.26
+        },
+        {
+          "id": "gvxc6u97y7oskeyvkcd4apj8",
+          "order": 2,
+          "chinese": "是的，我会画画。",
+          "english": "Yes , I can draw",
+          "soundmark": "jes aɪ kæn; kən drɔː",
+          "type": "sentence",
+          "sentenceId": "a3q77hyctxw08c6um287lysh",
+          "image": null,
+          "startTime": 22.14,
+          "endTime": 24.46
+        },
+        {
+          "id": "mwpek93zu3dxmqjzjcy8jptb",
+          "order": 3,
+          "chinese": "我会用树枝画画。",
+          "english": "I can draw with sticks",
+          "soundmark": "aɪ kæn; kən drɔː wɪð; wɪθ stɪks",
+          "type": "sentence",
+          "sentenceId": "m1y4cdv4ktzrkuco8h0h0bmm",
+          "image": null,
+          "startTime": 30.49,
+          "endTime": 33.16
+        },
+        {
+          "id": "uit77027yrckrtcz2tbfg43k",
+          "order": 4,
+          "chinese": "我能在地上画画。",
+          "english": "I can draw on the ground",
+          "soundmark": "aɪ kæn; kən drɔː ɑːn ðə; ði ɡraʊnd",
+          "type": "sentence",
+          "sentenceId": "l8k7a0sj4ejqyx24un98dcvw",
+          "image": null,
+          "startTime": 35.53,
+          "endTime": 37.9
+        },
+        {
+          "id": "p70ijox5xw1utium70daw9rn",
+          "order": 5,
+          "chinese": "我能在泥土上画画。",
+          "english": "I can draw in the dirt",
+          "soundmark": "aɪ kæn; kən drɔː ɪn ðə; ði dɜːrt",
+          "type": "sentence",
+          "sentenceId": "n7ok3ff776mn1zr1bjy82668",
+          "image": null,
+          "startTime": 40.21,
+          "endTime": 42.48
+        },
+        {
+          "id": "xi8h6s17b2l4hzykkymxllv5",
+          "order": 6,
+          "chinese": "我会画圆圈。",
+          "english": "I can draw circles",
+          "soundmark": "aɪ kæn; kən drɔː ˈsɜːrkl",
+          "type": "sentence",
+          "sentenceId": "zsk8p2vyzgdj4mrombyj4fay",
+          "image": null,
+          "startTime": 47.15,
+          "endTime": 49.65
+        },
+        {
+          "id": "p8mmzgtfhn5bcpm5fk7uppm2",
+          "order": 7,
+          "chinese": "我会画方形。",
+          "english": "I can draw squares",
+          "soundmark": "aɪ kæn; kən drɔː skwer",
+          "type": "sentence",
+          "sentenceId": "l9mwpzt2gqram9nri9g08fha",
+          "image": null,
+          "startTime": 59.47,
+          "endTime": 62.12
+        },
+        {
+          "id": "ujwml6muy8t321kekgh4ue5n",
+          "order": 8,
+          "chinese": "我会画线条。",
+          "english": "I can draw lines",
+          "soundmark": "aɪ kæn; kən drɔː laɪnz",
+          "type": "sentence",
+          "sentenceId": "tb0l9s99bxy6fp8dn3cyx07s",
+          "image": null,
+          "startTime": 72.33,
+          "endTime": 74.64
+        },
+        {
+          "id": "wg2efvwu6idqjqvbw27l8hr8",
+          "order": 9,
+          "chinese": "我会画圆点。",
+          "english": "I can draw dots",
+          "soundmark": "aɪ kæn; kən drɔː dɑːts",
+          "type": "sentence",
+          "sentenceId": "yiooae4hltcz677rnvcmu22i",
+          "image": null,
+          "startTime": 87.28,
+          "endTime": 89.29
+        },
+        {
+          "id": "m4ii7vwxzvdgodaeqwfqsmr4",
+          "order": 10,
+          "chinese": "你看见我画了什么吗？",
+          "english": "Do you see what I drew ?",
+          "soundmark": "duː; də juː; jʊ siː wʌt aɪ druː",
+          "type": "sentence",
+          "sentenceId": "b6vler6yf6357m02w37cwb7m",
+          "image": null,
+          "startTime": 91.01,
+          "endTime": 93.23
+        },
+        {
+          "id": "jz4ien5gp92h5c6d0ghosf1a",
+          "order": 11,
+          "chinese": "你画了什么？",
+          "english": "What did you draw ?",
+          "soundmark": "wʌt dɪd juː; jʊ drɔː",
+          "type": "sentence",
+          "sentenceId": "wwzmxnjnwxwfhrg5gy81lw4y",
+          "image": null,
+          "startTime": 97.03,
+          "endTime": 99.84
+        },
+        {
+          "id": "yc6cheeaeoygpd5hwsdphj6e",
+          "order": 12,
+          "chinese": "我画的是你！",
+          "english": "I drew you !",
+          "soundmark": "aɪ druː juː; jʊ",
+          "type": "sentence",
+          "sentenceId": "gxx9hqzlh21mgnkju5uclh7o",
+          "image": null,
+          "startTime": 100.27,
+          "endTime": 102.35
+        },
+        {
+          "id": "nf4uoad0bcj57kzb96kkul26",
+          "order": 13,
+          "chinese": "你画得真好。",
+          "english": "You draw very well",
+          "soundmark": "juː; jʊ drɔː ˈveri wel",
+          "type": "sentence",
+          "sentenceId": "yx442ll5gc2e1pu31p9zggl3",
+          "image": null,
+          "startTime": 107.41,
+          "endTime": 110.69
+        },
+        {
+          "id": "jokuq4abq68nas3wgdq43w6b",
+          "order": 14,
+          "chinese": "谢谢你。",
+          "english": "Thank you",
+          "soundmark": "θæŋk juː; jʊ",
+          "type": "sentence",
+          "sentenceId": "ul7lng6rhnas8knfiqw0by2n",
+          "image": null,
+          "startTime": 111.14,
+          "endTime": 112.35
+        }
+      ]
+    },
+    {
+      "id": "i1ttrczn51b0r7ccg4a2r4rj",
+      "order": 24,
+      "title": "024 一起摘苹果吧",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/2cd7cac4-165b-440a-b503-332c7994804e.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 15,
+      "sentenceCount": 15,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "jl95yljyh9l2oyc3fh441cs1",
+          "content": "Let's get apples.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "n215hg646as4y9ug5tq0ug6x",
+          "content": "How will we get them?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "mafh2b3m4t66myrkey64iwbc",
+          "content": "Get some sticks.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "znrescsai3zvc6l0i36pw76d",
+          "content": "And get some long grass.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "pum196mkaotk3f0nujoa56x4",
+          "content": "We will get sticks.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "n0mu1i5txvwu7advy5mwg9oj",
+          "content": "I will get the grass.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "l5hoihv1jpc8uy7gfase8fsn",
+          "content": "We got lots of sticks.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "du0r3yfuo14a0h52lk26ig4m",
+          "content": "I got lots of grass.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "uyr943dv02c0sn6mna90ytc0",
+          "content": "Now we have a raft!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "po6e7mek52gcbjpq8x4ule5r",
+          "content": "Uh-oh!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "cyex433p0q352aul2v4f3dq8",
+          "content": "Get the raft!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "odwit6nvx3oxuqm1mp47pgfg",
+          "content": "Oh no!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vavtp6537e5u55vzk9qogbop",
+          "content": "Now we can't get apples.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "k0zk6nm4gs8vlxjetec3039w",
+          "content": "We can't get apples.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "uusmuij5r3c2gb67zbm69joq",
+          "content": "But we can get blueberries!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "sleegxy7yp2vu8uuq1e7hni6",
+          "order": 1,
+          "chinese": "我们去摘苹果吧。",
+          "english": "Let's get apples",
+          "soundmark": "lets ɡet ˈæplz",
+          "type": "sentence",
+          "sentenceId": "jl95yljyh9l2oyc3fh441cs1",
+          "image": null,
+          "startTime": 9.73,
+          "endTime": 33.15
+        },
+        {
+          "id": "tsfino7xpj8okahi3zse6nks",
+          "order": 2,
+          "chinese": "我们怎么摘呢？",
+          "english": "How will we get them ?",
+          "soundmark": "haʊ wɪl wiː; wi ɡet ðem; ðəm",
+          "type": "sentence",
+          "sentenceId": "n215hg646as4y9ug5tq0ug6x",
+          "image": null,
+          "startTime": 35.7,
+          "endTime": 37.63
+        },
+        {
+          "id": "b5wgh8g7ul2bjtl5oad22e5m",
+          "order": 3,
+          "chinese": "找些棍子来。",
+          "english": "Get some sticks",
+          "soundmark": "ɡet sʌm; səm stɪks",
+          "type": "sentence",
+          "sentenceId": "mafh2b3m4t66myrkey64iwbc",
+          "image": null,
+          "startTime": 43.88,
+          "endTime": 45.31
+        },
+        {
+          "id": "wa0sbl45l5xn7l14wd5cujcj",
+          "order": 4,
+          "chinese": "再找些长草。",
+          "english": "And get some long grass",
+          "soundmark": "ænd; ənd ɡet sʌm; səm lɔːŋ ɡræs",
+          "type": "sentence",
+          "sentenceId": "znrescsai3zvc6l0i36pw76d",
+          "image": null,
+          "startTime": 48.57,
+          "endTime": 50.58
+        },
+        {
+          "id": "dm9cdj1l64lnyd89esru4f34",
+          "order": 5,
+          "chinese": "我们去捡棍子。",
+          "english": "We will get sticks",
+          "soundmark": "wiː; wi wɪl ɡet stɪks",
+          "type": "sentence",
+          "sentenceId": "pum196mkaotk3f0nujoa56x4",
+          "image": null,
+          "startTime": 52.14,
+          "endTime": 54.03
+        },
+        {
+          "id": "vvlxapvza9it7o815qp8etp9",
+          "order": 6,
+          "chinese": "我去拔草。",
+          "english": "I will get the grass",
+          "soundmark": "aɪ wɪl ɡet ðə; ði ɡræs",
+          "type": "sentence",
+          "sentenceId": "n0mu1i5txvwu7advy5mwg9oj",
+          "image": null,
+          "startTime": 58.35,
+          "endTime": 60.62
+        },
+        {
+          "id": "bu1qgdlyjr95l36ig5z4m186",
+          "order": 7,
+          "chinese": "我们捡了好多棍子。",
+          "english": "We got lots of sticks",
+          "soundmark": "wiː; wi ɡɑːt lɑːts ʌv; əv stɪks",
+          "type": "sentence",
+          "sentenceId": "l5hoihv1jpc8uy7gfase8fsn",
+          "image": null,
+          "startTime": 96.33,
+          "endTime": 99.89
+        },
+        {
+          "id": "zy6kz3madb977byglefo57cd",
+          "order": 8,
+          "chinese": "我拔了好多草。",
+          "english": "I got lots of grass",
+          "soundmark": "aɪ ɡɑːt lɑːts ʌv; əv ɡræs",
+          "type": "sentence",
+          "sentenceId": "du0r3yfuo14a0h52lk26ig4m",
+          "image": null,
+          "startTime": 103.67,
+          "endTime": 106.25
+        },
+        {
+          "id": "a2tqq4ymcwwc7fffp347yuwb",
+          "order": 9,
+          "chinese": "现在我们有一个木筏了！",
+          "english": "Now we have a raft !",
+          "soundmark": "naʊ wiː; wi hæv; həv ə; eɪ ræft",
+          "type": "sentence",
+          "sentenceId": "uyr943dv02c0sn6mna90ytc0",
+          "image": null,
+          "startTime": 118.47,
+          "endTime": 121.44
+        },
+        {
+          "id": "oe09h6j1gg00zb1ppf5sqpkx",
+          "order": 10,
+          "chinese": "哎呀！",
+          "english": "Uh-oh !",
+          "soundmark": "ˈʌ oʊ",
+          "type": "sentence",
+          "sentenceId": "po6e7mek52gcbjpq8x4ule5r",
+          "image": null,
+          "startTime": 131.81,
+          "endTime": 133.44
+        },
+        {
+          "id": "jw040dtxr477lc679av16zca",
+          "order": 11,
+          "chinese": "快抓住木筏！",
+          "english": "Get the raft !",
+          "soundmark": "ɡet ðə; ði ræft",
+          "type": "sentence",
+          "sentenceId": "cyex433p0q352aul2v4f3dq8",
+          "image": null,
+          "startTime": 133.83,
+          "endTime": 135.45
+        },
+        {
+          "id": "nh22lw383qodidedof7yidqi",
+          "order": 12,
+          "chinese": "哦不！",
+          "english": "Oh no !",
+          "soundmark": "oʊ noʊ",
+          "type": "sentence",
+          "sentenceId": "odwit6nvx3oxuqm1mp47pgfg",
+          "image": null,
+          "startTime": 136.4,
+          "endTime": 138.17
+        },
+        {
+          "id": "u1zf5to66iyu8xny28d9pgyv",
+          "order": 13,
+          "chinese": "现在我们摘不到苹果了。",
+          "english": "Now we can't get apples",
+          "soundmark": "naʊ wiː; wi kænt ɡet ˈæplz",
+          "type": "sentence",
+          "sentenceId": "vavtp6537e5u55vzk9qogbop",
+          "image": null,
+          "startTime": 139.74,
+          "endTime": 142.21
+        },
+        {
+          "id": "m7h786xlsfqgb5k098aak20z",
+          "order": 14,
+          "chinese": "我们摘不到苹果了。",
+          "english": "We can't get apples",
+          "soundmark": "wiː; wi kænt ɡet ˈæplz",
+          "type": "sentence",
+          "sentenceId": "k0zk6nm4gs8vlxjetec3039w",
+          "image": null,
+          "startTime": 149.12,
+          "endTime": 151.94
+        },
+        {
+          "id": "cfsfhgmel8ycxev7rejndc2t",
+          "order": 15,
+          "chinese": "但是我们可以摘蓝莓！",
+          "english": "But we can get blueberries !",
+          "soundmark": "bʌt; bət wiː; wi kæn; kən ɡet ˈbluːberiz",
+          "type": "sentence",
+          "sentenceId": "uusmuij5r3c2gb67zbm69joq",
+          "image": null,
+          "startTime": 156.27,
+          "endTime": 160.13
+        }
+      ]
+    }
+  ]
+}

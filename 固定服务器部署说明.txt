@@ -1,0 +1,37 @@
+句乐部固定服务器部署说明
+
+推荐方案：Render Web Service + Persistent Disk
+
+为什么这样最稳：
+1. 不再依赖家里 Mac 是否开机。
+2. 不再依赖 Cloudflare 临时网址。
+3. 服务器有固定网址。
+4. 学习进度只保存到服务器 /app/local-data。
+5. local-data 挂载为持久硬盘，重启后数据不会丢。
+
+Render 配置已经准备好：
+1. Dockerfile：负责构建并启动网站服务器。
+2. render.yaml：负责创建 Web Service、固定端口、持久硬盘和环境变量。
+3. .dockerignore：防止上传本地密钥、旧缓存、node_modules、安卓工程。
+
+服务器环境变量：
+HOST=0.0.0.0
+PORT=5188
+OPENAI_API_KEY=你的 OpenAI API Key
+OPENAI_MODEL=gpt-5.6-sol
+OPENAI_FALLBACK_MODEL=gpt-5.5
+OPENAI_REASONING_EFFORT=high
+
+持久硬盘：
+路径：/app/local-data
+大小：1GB
+
+学习数据保存位置：
+账号：/app/local-data/users.json
+进度：/app/local-data/learning-state.json
+语音缓存：/app/local-data/tts-cache
+
+部署后要做的事：
+1. 拿到 Render 的固定网址。
+2. 用这个固定网址重新打包安卓 APK。
+3. 以后手机和网页都连接这个固定网址，进度统一存在服务器。

@@ -1,0 +1,5910 @@
+{
+  "capturedAt": "2026-07-08T06:00:30.152Z",
+  "source": "https://julebu.ai",
+  "coursePack": {
+    "id": "gdz5bircdwb9r2bdg6lj8pvr",
+    "title": "Level 1 05. Mrs. Kelly's Class",
+    "description": "Little Fox 经典课堂会话动画：跟着凯莉老师和同学们学打招呼、问颜色、问时间等最常用的课堂与生活口语，一集一个句型。36 集短视频，每集约 1 分钟。",
+    "cover": "https://assets.julebu.ai/images/course-packs/c4g95sogwelx5ygajrtqhfje/fc7397a04d22ff9a03ad8a19f7e8bc578ad4733fdf4d6583c56c8bb5bb9e8d07.jpg",
+    "author": {
+      "type": "user",
+      "name": "未知用户",
+      "username": "user_o1ijbs",
+      "id": "v2ezhz5sthzi",
+      "avatar": "https://assets.julebu.ai/avatars/0d4a1e4623a65da2be92b887c84f377257cef72ded09e88a816fa28a93171e1c.jpeg"
+    },
+    "usageCount": 1,
+    "freeTrialCourseCount": 4,
+    "courseCount": 36,
+    "mode": "chinese_to_english",
+    "presetKey": "advanced"
+  },
+  "courses": [
+    {
+      "id": "bz3wpnje0t0tn1vfeyd2wvho",
+      "order": 1,
+      "title": "001 你好！",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/6a64d74f-fa8b-418a-ac0c-418c1669cc90.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 8,
+      "sentenceCount": 8,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "xpfmt1o58e4yw5tlbb4ehtlm",
+          "content": "Hello!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "i9qmzwuxyj2k1fj4w25hvke5",
+          "content": "Hello.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "wtaddg5vogod0up7qjxs1kpy",
+          "content": "How are you?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "yaw7mfbnbyeiurpuf3ibl3eu",
+          "content": "I'm fine, thank you.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "zeshk7ux8lkwfnn285newhqn",
+          "content": "Hi!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "h8rw6bilwqa5lvz97llbic04",
+          "content": "Hello.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "cvukq035b01uab049hvilhqh",
+          "content": "How are you?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "psrd1c92372hv65uqqdedn4c",
+          "content": "I'm good, thanks.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "r5kkdto7xgtl4l14rz4tc1w7",
+          "order": 1,
+          "chinese": "你好！",
+          "english": "Hello !",
+          "soundmark": "həˈloʊ",
+          "type": "sentence",
+          "sentenceId": "xpfmt1o58e4yw5tlbb4ehtlm",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 18.33
+        },
+        {
+          "id": "rlp2svktpzdy24un6g5vu98d",
+          "order": 2,
+          "chinese": "你好。",
+          "english": "Hello",
+          "soundmark": "həˈloʊ",
+          "type": "sentence",
+          "sentenceId": "i9qmzwuxyj2k1fj4w25hvke5",
+          "image": null,
+          "startTime": 18.6,
+          "endTime": 19.66
+        },
+        {
+          "id": "q0gryguczd3ab5djxr96meqc",
+          "order": 3,
+          "chinese": "你好吗？",
+          "english": "How are you ?",
+          "soundmark": "haʊ ɑːr; ər juː; jʊ",
+          "type": "sentence",
+          "sentenceId": "wtaddg5vogod0up7qjxs1kpy",
+          "image": null,
+          "startTime": 20.5,
+          "endTime": 22.06
+        },
+        {
+          "id": "joef9k16as1gi8wey27wvz9i",
+          "order": 4,
+          "chinese": "我很好，谢谢。",
+          "english": "I'm fine , thank you",
+          "soundmark": "aɪm faɪn θæŋk juː; jʊ",
+          "type": "sentence",
+          "sentenceId": "yaw7mfbnbyeiurpuf3ibl3eu",
+          "image": null,
+          "startTime": 22.22,
+          "endTime": 24.31
+        },
+        {
+          "id": "ml53vw5k8mqpki1mhf5ftbef",
+          "order": 5,
+          "chinese": "嗨！",
+          "english": "Hi !",
+          "soundmark": "haɪ",
+          "type": "sentence",
+          "sentenceId": "zeshk7ux8lkwfnn285newhqn",
+          "image": null,
+          "startTime": 27.02,
+          "endTime": 28.54
+        },
+        {
+          "id": "oc2pbfbh3f50vcv5xbexwiop",
+          "order": 6,
+          "chinese": "你好。",
+          "english": "Hello",
+          "soundmark": "həˈloʊ",
+          "type": "sentence",
+          "sentenceId": "h8rw6bilwqa5lvz97llbic04",
+          "image": null,
+          "startTime": 28.91,
+          "endTime": 30.18
+        },
+        {
+          "id": "nqy5h0m6pq6re43zyrafmkt1",
+          "order": 7,
+          "chinese": "你好吗？",
+          "english": "How are you ?",
+          "soundmark": "haʊ ɑːr; ər juː; jʊ",
+          "type": "sentence",
+          "sentenceId": "cvukq035b01uab049hvilhqh",
+          "image": null,
+          "startTime": 30.6,
+          "endTime": 31.96
+        },
+        {
+          "id": "pnda2a5a4r8jxckvjslhjdy1",
+          "order": 8,
+          "chinese": "我很好，谢谢。",
+          "english": "I'm good , thanks",
+          "soundmark": "aɪm ɡʊd θæŋks",
+          "type": "sentence",
+          "sentenceId": "psrd1c92372hv65uqqdedn4c",
+          "image": null,
+          "startTime": 32.26,
+          "endTime": 34.16
+        }
+      ]
+    },
+    {
+      "id": "c8e7flm2vld20mkgab2t9l5m",
+      "order": 2,
+      "title": "002 我叫敏宇",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/9522ba1f-d691-4656-a2e8-ccc31303481c.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 8,
+      "sentenceCount": 8,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "ronvhwgv2lhjw035lyqdx5dp",
+          "content": "Hello, I'm Mrs. Kelly.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xsv0a8jfk18dti2wc3hjwqm5",
+          "content": "Nice to meet you, Mrs. Kelly.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "x53x57d457bdmpiaiqlssan0",
+          "content": "What's your name?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "yr3yagz8ei14st6fvwqtzfxn",
+          "content": "My name is Minwoo.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "glx0su0suf57okflnivy33ts",
+          "content": "What's your name?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "nbggy3s8ho0n8mz8plrxc5tv",
+          "content": "My name is Sally!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "cep9wvzd9jvapgxidd6fzvzo",
+          "content": "What's your name?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "g9j073m5juszvtpmf0xsi5sz",
+          "content": "I'm Peter!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "dgr6ylcljezkm855p988h4qw",
+          "order": 1,
+          "chinese": "你好，我是凯莉老师。",
+          "english": "Hello , I'm Mrs. Kelly",
+          "soundmark": "həˈloʊ aɪm ˈmɪsɪz ˈkeli",
+          "type": "sentence",
+          "sentenceId": "ronvhwgv2lhjw035lyqdx5dp",
+          "image": null,
+          "startTime": 8.4,
+          "endTime": 19.12
+        },
+        {
+          "id": "n3382i3bwz2du43754vpi6v9",
+          "order": 2,
+          "chinese": "很高兴认识你，凯莉老师。",
+          "english": "Nice to meet you , Mrs. Kelly",
+          "soundmark": "naɪs tuː; tə miːt juː; jʊ ˈmɪsɪz ˈkeli",
+          "type": "sentence",
+          "sentenceId": "xsv0a8jfk18dti2wc3hjwqm5",
+          "image": null,
+          "startTime": 19.79,
+          "endTime": 22.17
+        },
+        {
+          "id": "j98nxnrtwb924ffyjp63v2tj",
+          "order": 3,
+          "chinese": "你叫什么名字？",
+          "english": "What's your name ?",
+          "soundmark": "wʌts jʊr; jər neɪm",
+          "type": "sentence",
+          "sentenceId": "x53x57d457bdmpiaiqlssan0",
+          "image": null,
+          "startTime": 22.66,
+          "endTime": 24.26
+        },
+        {
+          "id": "nbiql0m78br9zry8d2di0p5n",
+          "order": 4,
+          "chinese": "我叫敏宇。",
+          "english": "My name is Minwoo",
+          "soundmark": "maɪ neɪm ɪz minwoo",
+          "type": "sentence",
+          "sentenceId": "yr3yagz8ei14st6fvwqtzfxn",
+          "image": null,
+          "startTime": 28.62,
+          "endTime": 30.69
+        },
+        {
+          "id": "uyws0kpyegi7dg5xsc04xpca",
+          "order": 5,
+          "chinese": "你叫什么名字？",
+          "english": "What's your name ?",
+          "soundmark": "wʌts jʊr; jər neɪm",
+          "type": "sentence",
+          "sentenceId": "glx0su0suf57okflnivy33ts",
+          "image": null,
+          "startTime": 33.81,
+          "endTime": 35.44
+        },
+        {
+          "id": "dj2lchspuu0taggwh5wipspm",
+          "order": 6,
+          "chinese": "我叫莎莉！",
+          "english": "My name is Sally !",
+          "soundmark": "maɪ neɪm ɪz ˈsæli",
+          "type": "sentence",
+          "sentenceId": "nbggy3s8ho0n8mz8plrxc5tv",
+          "image": null,
+          "startTime": 39.61,
+          "endTime": 41.42
+        },
+        {
+          "id": "g1aygyldclqpb2r4dkhuqhr3",
+          "order": 7,
+          "chinese": "你叫什么名字？",
+          "english": "What's your name ?",
+          "soundmark": "wʌts jʊr; jər neɪm",
+          "type": "sentence",
+          "sentenceId": "cep9wvzd9jvapgxidd6fzvzo",
+          "image": null,
+          "startTime": 45.39,
+          "endTime": 47.12
+        },
+        {
+          "id": "booievh2dktiwe7v0h4y87hy",
+          "order": 8,
+          "chinese": "我是彼得！",
+          "english": "I'm Peter !",
+          "soundmark": "aɪm ˈpiːtər",
+          "type": "sentence",
+          "sentenceId": "g9j073m5juszvtpmf0xsi5sz",
+          "image": null,
+          "startTime": 50.5,
+          "endTime": 52.14
+        }
+      ]
+    },
+    {
+      "id": "h4s1wfy82dgx0kt6dl5i7l3e",
+      "order": 3,
+      "title": "003 这是什么",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/2a284930-bf2d-4ee5-a48e-d5cdd0cd2e39.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 7,
+      "sentenceCount": 7,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "s0bcm2ormaci4vwjhdjr87gr",
+          "content": "What's this?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "qzsdaqrfmxvtg9d9ax200afk",
+          "content": "It's a book.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "b7gdoh24lokoi4pcmd3gu09y",
+          "content": "What's this?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "pln6booxrpq3cwf74hcp36xf",
+          "content": "It's a pencil.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "u2vv8e4k6sxj4q3lqv6tzah3",
+          "content": "Mrs. Kelly, what's this?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "hq7mitkyx79itek168dp16qy",
+          "content": "It's a chair.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "v7z1g7ddrfy8iv50wjlbtos9",
+          "content": "No, it's Sally.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "oz425sshteake64dteum7jzf",
+          "order": 1,
+          "chinese": "这是什么？",
+          "english": "What's this ?",
+          "soundmark": "wʌts ðɪs",
+          "type": "sentence",
+          "sentenceId": "s0bcm2ormaci4vwjhdjr87gr",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 14.33
+        },
+        {
+          "id": "j66myj0yce0fhjk0o8sz78zk",
+          "order": 2,
+          "chinese": "是一本书。",
+          "english": "It's a book",
+          "soundmark": "ɪts ə; eɪ bʊk",
+          "type": "sentence",
+          "sentenceId": "qzsdaqrfmxvtg9d9ax200afk",
+          "image": null,
+          "startTime": 14.78,
+          "endTime": 16.34
+        },
+        {
+          "id": "ogackn1pt4qd0qjh683r66p0",
+          "order": 3,
+          "chinese": "这是什么？",
+          "english": "What's this ?",
+          "soundmark": "wʌts ðɪs",
+          "type": "sentence",
+          "sentenceId": "b7gdoh24lokoi4pcmd3gu09y",
+          "image": null,
+          "startTime": 20.47,
+          "endTime": 22.29
+        },
+        {
+          "id": "j678vevxjvizgjm6zk6kzmkw",
+          "order": 4,
+          "chinese": "是一支铅笔。",
+          "english": "It's a pencil",
+          "soundmark": "ɪts ə; eɪ ˈpens(ə)l",
+          "type": "sentence",
+          "sentenceId": "pln6booxrpq3cwf74hcp36xf",
+          "image": null,
+          "startTime": 22.96,
+          "endTime": 24.84
+        },
+        {
+          "id": "p8efxxe7uor23tv10gnb5rof",
+          "order": 5,
+          "chinese": "凯莉老师，这是什么？",
+          "english": "Mrs. Kelly , what's this ?",
+          "soundmark": "ˈmɪsɪz ˈkeli wʌts ðɪs",
+          "type": "sentence",
+          "sentenceId": "u2vv8e4k6sxj4q3lqv6tzah3",
+          "image": null,
+          "startTime": 30.58,
+          "endTime": 33.46
+        },
+        {
+          "id": "ia731ac2f0a7q0smnu2pz6uj",
+          "order": 6,
+          "chinese": "是一把椅子。",
+          "english": "It's a chair",
+          "soundmark": "ɪts ə; eɪ tʃer",
+          "type": "sentence",
+          "sentenceId": "hq7mitkyx79itek168dp16qy",
+          "image": null,
+          "startTime": 34.14,
+          "endTime": 35.85
+        },
+        {
+          "id": "o2py3fir92b9pdfsrow05tax",
+          "order": 7,
+          "chinese": "不，是莎莉。",
+          "english": "No , it's Sally",
+          "soundmark": "noʊ ɪts ˈsæli",
+          "type": "sentence",
+          "sentenceId": "v7z1g7ddrfy8iv50wjlbtos9",
+          "image": null,
+          "startTime": 37.73,
+          "endTime": 39.73
+        }
+      ]
+    },
+    {
+      "id": "lnhmkquptikr61or1b70kob7",
+      "order": 4,
+      "title": "004 一起来玩吧！",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/034a72c8-0d6d-4c95-9683-9519645176ff.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "mul95hw08uboq2dyuk5o2nkx",
+          "content": "It's playtime, everyone!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "wd2qt1bzdbtya2f5wbb91e53",
+          "content": "Let's paint.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "wafzeco6dgmog2g9h68l70ug",
+          "content": "No, let's sing.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "wf59kor4wcwxw6d6um98g137",
+          "content": "No, let's play a game.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "hscetzu3p82ctvmgm9axe3so",
+          "content": "Okay. Good idea!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "st6uuyvcm9b13uwfxlb8tbdx",
+          "content": "It's my turn.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "dumoyhqcucpvy5vv01iwjf30",
+          "content": "It's my turn.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "f59hb2y8b7cab5zk9jsjogj8",
+          "content": "My turn!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "owkn7v87hxyhxe7j97y917c4",
+          "content": "Let's color!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "tg1id6fbqbz33dk2h14e2qr8",
+          "order": 1,
+          "chinese": "玩耍时间到了，大家！",
+          "english": "It's playtime , everyone !",
+          "soundmark": "ɪts ˈpleɪtaɪm ˈevriwʌn",
+          "type": "sentence",
+          "sentenceId": "mul95hw08uboq2dyuk5o2nkx",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 12.54
+        },
+        {
+          "id": "m8zj9qajpcts48t6jy2y03h1",
+          "order": 2,
+          "chinese": "我们画画吧。",
+          "english": "Let's paint",
+          "soundmark": "lets peɪnt",
+          "type": "sentence",
+          "sentenceId": "wd2qt1bzdbtya2f5wbb91e53",
+          "image": null,
+          "startTime": 13.74,
+          "endTime": 15.37
+        },
+        {
+          "id": "mrlnvso2g7kf9p6sbfa2p41l",
+          "order": 3,
+          "chinese": "不，我们唱歌吧。",
+          "english": "No , let's sing",
+          "soundmark": "noʊ lets sɪŋ",
+          "type": "sentence",
+          "sentenceId": "wafzeco6dgmog2g9h68l70ug",
+          "image": null,
+          "startTime": 19.51,
+          "endTime": 22.08
+        },
+        {
+          "id": "csmdlu4hmjfvcdfplfq1lnj7",
+          "order": 4,
+          "chinese": "不，我们玩游戏吧。",
+          "english": "No , let's play a game",
+          "soundmark": "noʊ lets pleɪ ə; eɪ ɡeɪm",
+          "type": "sentence",
+          "sentenceId": "wf59kor4wcwxw6d6um98g137",
+          "image": null,
+          "startTime": 22.95,
+          "endTime": 25.8
+        },
+        {
+          "id": "ywgyukbko1fez5u75jr3by1t",
+          "order": 5,
+          "chinese": "好的。好主意！",
+          "english": "Okay . Good idea !",
+          "soundmark": "oʊˈkeɪ ɡʊd aɪˈdiːə",
+          "type": "sentence",
+          "sentenceId": "hscetzu3p82ctvmgm9axe3so",
+          "image": null,
+          "startTime": 26.76,
+          "endTime": 29.04
+        },
+        {
+          "id": "mifcdftmu4qj1gaocmxdvfha",
+          "order": 6,
+          "chinese": "轮到我了。",
+          "english": "It's my turn",
+          "soundmark": "ɪts maɪ tɜːrn",
+          "type": "sentence",
+          "sentenceId": "st6uuyvcm9b13uwfxlb8tbdx",
+          "image": null,
+          "startTime": 31.04,
+          "endTime": 32.58
+        },
+        {
+          "id": "hyp985f330o55jrd0x9wirrk",
+          "order": 7,
+          "chinese": "轮到我了。",
+          "english": "It's my turn",
+          "soundmark": "ɪts maɪ tɜːrn",
+          "type": "sentence",
+          "sentenceId": "dumoyhqcucpvy5vv01iwjf30",
+          "image": null,
+          "startTime": 35.83,
+          "endTime": 37.77
+        },
+        {
+          "id": "wapekgknqvwrjmjin8c5g05b",
+          "order": 8,
+          "chinese": "轮到我了！",
+          "english": "My turn !",
+          "soundmark": "maɪ tɜːrn",
+          "type": "sentence",
+          "sentenceId": "f59hb2y8b7cab5zk9jsjogj8",
+          "image": null,
+          "startTime": 41.29,
+          "endTime": 42.96
+        },
+        {
+          "id": "frqon33jq14f3d2ejc1iyc3m",
+          "order": 9,
+          "chinese": "我们涂颜色吧！",
+          "english": "Let's color !",
+          "soundmark": "lets ˈkʌlər",
+          "type": "sentence",
+          "sentenceId": "owkn7v87hxyhxe7j97y917c4",
+          "image": null,
+          "startTime": 46.74,
+          "endTime": 48.73
+        }
+      ]
+    },
+    {
+      "id": "fiyd7y4abq6za2qtkzl07cmi",
+      "order": 5,
+      "title": "005 坐下！",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/e5dc9d5f-8a90-4652-a81f-b198f849012a.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 7,
+      "sentenceCount": 7,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "rnjc5g4ujf9z732lfbvwxfdl",
+          "content": "Hey! Sit down!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "d1vj0mj1ywueuu5stbuvl7xi",
+          "content": "Sally, be quiet!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "n3y3gpp3ko4asi2410zedhm1",
+          "content": "Boys, clean up!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "or7ps1kf8yj6wnnw0tryfyku",
+          "content": "I'm sorry, Mrs. Kelly.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ywb5fieze3worzmjfhtw8tir",
+          "content": "Me too.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "kqtqpq8izmwrx2bpz3pt8whq",
+          "content": "That's okay.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "lnuhzdd1y4u4rkf5uvtowsr0",
+          "content": "Open your book, everyone.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "hea9zrholwowvddellvs38x2",
+          "order": 1,
+          "chinese": "嘿！坐下！",
+          "english": "Hey ! Sit down !",
+          "soundmark": "heɪ sɪt daʊn",
+          "type": "sentence",
+          "sentenceId": "rnjc5g4ujf9z732lfbvwxfdl",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 13.15
+        },
+        {
+          "id": "bpl1258pv5z9o80ptpfgjef9",
+          "order": 2,
+          "chinese": "萨莉，安静！",
+          "english": "Sally , be quiet !",
+          "soundmark": "ˈsæli biː; bi ˈkwaɪət",
+          "type": "sentence",
+          "sentenceId": "d1vj0mj1ywueuu5stbuvl7xi",
+          "image": null,
+          "startTime": 14.03,
+          "endTime": 16.56
+        },
+        {
+          "id": "donw0orvx7r3jmqlkxrc11es",
+          "order": 3,
+          "chinese": "男生们，收拾干净！",
+          "english": "Boys , clean up !",
+          "soundmark": "bɔɪz kliːn ʌp",
+          "type": "sentence",
+          "sentenceId": "n3y3gpp3ko4asi2410zedhm1",
+          "image": null,
+          "startTime": 18.08,
+          "endTime": 20.15
+        },
+        {
+          "id": "mnc5zi1zjptsyfs0o9lajdn1",
+          "order": 4,
+          "chinese": "对不起，凯莉老师。",
+          "english": "I'm sorry , Mrs. Kelly",
+          "soundmark": "aɪm ˈsɑːri ˈmɪsɪz ˈkeli",
+          "type": "sentence",
+          "sentenceId": "or7ps1kf8yj6wnnw0tryfyku",
+          "image": null,
+          "startTime": 24.36,
+          "endTime": 27.06
+        },
+        {
+          "id": "idkdqg4ti0gci0sk722z1tg3",
+          "order": 5,
+          "chinese": "我也是。",
+          "english": "Me too",
+          "soundmark": "miː; mi tuː",
+          "type": "sentence",
+          "sentenceId": "ywb5fieze3worzmjfhtw8tir",
+          "image": null,
+          "startTime": 27.22,
+          "endTime": 28.42
+        },
+        {
+          "id": "jnxt4irwmf3kn3b80cvxfwoz",
+          "order": 6,
+          "chinese": "没关系。",
+          "english": "That's okay",
+          "soundmark": "ðæts oʊˈkeɪ",
+          "type": "sentence",
+          "sentenceId": "kqtqpq8izmwrx2bpz3pt8whq",
+          "image": null,
+          "startTime": 28.69,
+          "endTime": 30.17
+        },
+        {
+          "id": "yupoaqmy9qx7y8kiu3bn1cw4",
+          "order": 7,
+          "chinese": "大家打开书。",
+          "english": "Open your book , everyone",
+          "soundmark": "ˈoʊpən jʊr; jər bʊk ˈevriwʌn",
+          "type": "sentence",
+          "sentenceId": "lnuhzdd1y4u4rkf5uvtowsr0",
+          "image": null,
+          "startTime": 32.13,
+          "endTime": 34.51
+        }
+      ]
+    },
+    {
+      "id": "mhk8dlknauv61yddge3uvc60",
+      "order": 6,
+      "title": "006 这是什么颜色",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/d19c30de-0a16-46a1-9b7c-8c7eb2d25973.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 10,
+      "sentenceCount": 10,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "ltfklmbbtpwc4i3m5rfbbav2",
+          "content": "What color is this?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "mxaggjxkl16xh461a4u9cd67",
+          "content": "It's red.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "uw664cdu6hwjyh3yzi3x7zvi",
+          "content": "What color is this?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "dcf4mkb8wbo4t63lq9i5sbrw",
+          "content": "It's yellow.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "c94y2c8bzoeudj5371ht1e9a",
+          "content": "It's orange!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "uchytwzmq3eqzi2wiubbvotu",
+          "content": "It's green.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "c2jbgdoe30zp0wi9sjrx2ijh",
+          "content": "It's blue!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "rdv9hyrnqrys7nryzm5b1wp4",
+          "content": "It's yellow.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "kz5r2w6i25dv8w7caeg41uad",
+          "content": "It's orange!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "il95el4n9te1nn93lrnrh8kq",
+          "content": "It's green.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "ajidqtlpc1kwgktsrc5fz7wq",
+          "order": 1,
+          "chinese": "这是什么颜色？",
+          "english": "What color is this ?",
+          "soundmark": "wʌt ˈkʌlər ɪz ðɪs",
+          "type": "sentence",
+          "sentenceId": "ltfklmbbtpwc4i3m5rfbbav2",
+          "image": null,
+          "startTime": 8.41,
+          "endTime": 12.94
+        },
+        {
+          "id": "dxhoanumegmw2ogv5nor2dnr",
+          "order": 2,
+          "chinese": "这是红色。",
+          "english": "It's red",
+          "soundmark": "ɪts red",
+          "type": "sentence",
+          "sentenceId": "mxaggjxkl16xh461a4u9cd67",
+          "image": null,
+          "startTime": 13.12,
+          "endTime": 14.23
+        },
+        {
+          "id": "kdh1bempjyb9owiivh6zs006",
+          "order": 3,
+          "chinese": "这是什么颜色？",
+          "english": "What color is this ?",
+          "soundmark": "wʌt ˈkʌlər ɪz ðɪs",
+          "type": "sentence",
+          "sentenceId": "uw664cdu6hwjyh3yzi3x7zvi",
+          "image": null,
+          "startTime": 17.63,
+          "endTime": 19.8
+        },
+        {
+          "id": "kyd1gmwokoh239sk1vmjx5o2",
+          "order": 4,
+          "chinese": "这是黄色。",
+          "english": "It's yellow",
+          "soundmark": "ɪts ˈjeloʊ",
+          "type": "sentence",
+          "sentenceId": "dcf4mkb8wbo4t63lq9i5sbrw",
+          "image": null,
+          "startTime": 20.95,
+          "endTime": 22.55
+        },
+        {
+          "id": "i2h35ru5rdqnihm7pb1f3qqk",
+          "order": 5,
+          "chinese": "这是橙色！",
+          "english": "It's orange !",
+          "soundmark": "ɪts ˈɔrɪndʒ",
+          "type": "sentence",
+          "sentenceId": "c94y2c8bzoeudj5371ht1e9a",
+          "image": null,
+          "startTime": 27.3,
+          "endTime": 28.95
+        },
+        {
+          "id": "p1jq5ta97boa0211zbbhs5ql",
+          "order": 6,
+          "chinese": "这是绿色。",
+          "english": "It's green",
+          "soundmark": "ɪts ɡriːn",
+          "type": "sentence",
+          "sentenceId": "uchytwzmq3eqzi2wiubbvotu",
+          "image": null,
+          "startTime": 32.84,
+          "endTime": 34.38
+        },
+        {
+          "id": "msfy7q5pwwdutd5c03zyfr14",
+          "order": 7,
+          "chinese": "这是蓝色！",
+          "english": "It's blue !",
+          "soundmark": "ɪts bluː",
+          "type": "sentence",
+          "sentenceId": "c2jbgdoe30zp0wi9sjrx2ijh",
+          "image": null,
+          "startTime": 42.1,
+          "endTime": 43.68
+        },
+        {
+          "id": "lah6r0v57nhqmwsz6j53kbwi",
+          "order": 8,
+          "chinese": "这是黄色。",
+          "english": "It's yellow",
+          "soundmark": "ɪts ˈjeloʊ",
+          "type": "sentence",
+          "sentenceId": "rdv9hyrnqrys7nryzm5b1wp4",
+          "image": null,
+          "startTime": 46.09,
+          "endTime": 47.62
+        },
+        {
+          "id": "opysroz0j59xfauqykzt54kv",
+          "order": 9,
+          "chinese": "这是橙色！",
+          "english": "It's orange !",
+          "soundmark": "ɪts ˈɔrɪndʒ",
+          "type": "sentence",
+          "sentenceId": "kz5r2w6i25dv8w7caeg41uad",
+          "image": null,
+          "startTime": 48.8,
+          "endTime": 50.44
+        },
+        {
+          "id": "ib80w3bg9gbjtsrkmy8s71qx",
+          "order": 10,
+          "chinese": "这是绿色。",
+          "english": "It's green",
+          "soundmark": "ɪts ɡriːn",
+          "type": "sentence",
+          "sentenceId": "il95el4n9te1nn93lrnrh8kq",
+          "image": null,
+          "startTime": 52.5,
+          "endTime": 53.89
+        }
+      ]
+    },
+    {
+      "id": "tw59va4i8q07xc11qoyqcu3b",
+      "order": 7,
+      "title": "007 你几岁了",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/9d4dd407-8316-4f41-a0cc-cc9ec918d2d3.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "wudm06cq1tajqvacas50v521",
+          "content": "How old are you, Minwoo?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "od3teq5ctljvagcrt2zyiww0",
+          "content": "I'm five years old.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "t7qyqhy6mmq9rl9kbg3rg67z",
+          "content": "How old are you, Peter?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "eu4gb41goqk6e23f6upwrse3",
+          "content": "I'm six.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "uq0w85snw07u15o9umjhfjwc",
+          "content": "Me too!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "b0bmlu46ogi3bjuoc74bq3lp",
+          "content": "I'm six years old.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "f8f6l8qpfi6ijllqznlcv993",
+          "content": "Mrs. Kelly!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "mrq11pqyqnronq9b86ij4g5u",
+          "content": "How old are you?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "jpeacqexwlo001bl2u9ls392",
+          "content": "I am 1 and 2 and 3 and 4 and 5 and 6 and 7 . . .",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "v0djhm69c8uiyraq277wwvu3",
+          "order": 1,
+          "chinese": "你多大了，敏宇？",
+          "english": "How old are you , Minwoo ?",
+          "soundmark": "haʊ oʊld ɑːr; ər juː; jʊ minwoo",
+          "type": "sentence",
+          "sentenceId": "wudm06cq1tajqvacas50v521",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 12.66
+        },
+        {
+          "id": "f9gdgj97jd6mxzemeienryqi",
+          "order": 2,
+          "chinese": "我五岁了。",
+          "english": "I'm five years old",
+          "soundmark": "aɪm faɪv jɪrz oʊld",
+          "type": "sentence",
+          "sentenceId": "od3teq5ctljvagcrt2zyiww0",
+          "image": null,
+          "startTime": 12.89,
+          "endTime": 14.88
+        },
+        {
+          "id": "d5wy30pcor4qqyys4mq1m1q7",
+          "order": 3,
+          "chinese": "你多大了，彼得？",
+          "english": "How old are you , Peter ?",
+          "soundmark": "haʊ oʊld ɑːr; ər juː; jʊ ˈpiːtər",
+          "type": "sentence",
+          "sentenceId": "t7qyqhy6mmq9rl9kbg3rg67z",
+          "image": null,
+          "startTime": 16.83,
+          "endTime": 19.1
+        },
+        {
+          "id": "nbpf7xotlcoil68dz2ilv50o",
+          "order": 4,
+          "chinese": "我六岁。",
+          "english": "I'm six",
+          "soundmark": "aɪm sɪks",
+          "type": "sentence",
+          "sentenceId": "eu4gb41goqk6e23f6upwrse3",
+          "image": null,
+          "startTime": 19.43,
+          "endTime": 20.71
+        },
+        {
+          "id": "d30s5vgkptwdej3vvfn9vc3u",
+          "order": 5,
+          "chinese": "我也是！",
+          "english": "Me too !",
+          "soundmark": "miː; mi tuː",
+          "type": "sentence",
+          "sentenceId": "uq0w85snw07u15o9umjhfjwc",
+          "image": null,
+          "startTime": 21.64,
+          "endTime": 23.18
+        },
+        {
+          "id": "kw4zrta9imwue02mooi09uz1",
+          "order": 6,
+          "chinese": "我六岁了。",
+          "english": "I'm six years old",
+          "soundmark": "aɪm sɪks jɪrz oʊld",
+          "type": "sentence",
+          "sentenceId": "b0bmlu46ogi3bjuoc74bq3lp",
+          "image": null,
+          "startTime": 23.28,
+          "endTime": 24.96
+        },
+        {
+          "id": "dyr6jdsie9sszxomp10iatac",
+          "order": 7,
+          "chinese": "凯莉老师！",
+          "english": "Mrs. Kelly !",
+          "soundmark": "ˈmɪsɪz ˈkeli",
+          "type": "sentence",
+          "sentenceId": "f8f6l8qpfi6ijllqznlcv993",
+          "image": null,
+          "startTime": 25.83,
+          "endTime": 27.45
+        },
+        {
+          "id": "fuy4abxr3qbwaqon3jt2nc5b",
+          "order": 8,
+          "chinese": "你多大了？",
+          "english": "How old are you ?",
+          "soundmark": "haʊ oʊld ɑːr; ər juː; jʊ",
+          "type": "sentence",
+          "sentenceId": "mrq11pqyqnronq9b86ij4g5u",
+          "image": null,
+          "startTime": 27.6,
+          "endTime": 29
+        },
+        {
+          "id": "juquiu0lirhzcwlrq3zzdxz1",
+          "order": 9,
+          "chinese": "我1岁、2岁、3岁、4岁、5岁、6岁、7岁……",
+          "english": "I am 1 and 2 and 3 and 4 and 5 and 6 and 7 ..",
+          "soundmark": "aɪ æm; əm wʌn ænd; ənd tuː ænd; ənd θriː ænd; ənd fɔːr ænd; ənd faɪv ænd; ənd sɪks ænd; ənd ˈsevn",
+          "type": "sentence",
+          "sentenceId": "jpeacqexwlo001bl2u9ls392",
+          "image": null,
+          "startTime": 29.94,
+          "endTime": 38.11
+        }
+      ]
+    },
+    {
+      "id": "afchudaurw1ljxm7noax3sef",
+      "order": 8,
+      "title": "008 她是我妈妈",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/0e9ec2a2-d322-4d4c-9ac5-2fae99973414.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 8,
+      "sentenceCount": 8,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "u6gppgfmru7erhsz3c5wbcl5",
+          "content": "Peter, who's she?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "n86alh01jflwinw7bgetkw5n",
+          "content": "She's my sister.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "maa9lsmv80lic9n60z5ln87o",
+          "content": "Who's he?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "i9u5hdnilbp3hpuqnjsdzxxc",
+          "content": "He's my father.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "lc9rq3yem2om6cxxjpdh4qc0",
+          "content": "Who's she?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "gbp0iuvbdz9js84ym73s9h1x",
+          "content": "She is my mother.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "jlefu7qukbfgw11vnwx8acdc",
+          "content": "Who's he?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "f7fbavs7niv6jjbbkumuijdm",
+          "content": "He's my friend.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "uouu7rgmay4r85xsk3hc4yb7",
+          "order": 1,
+          "chinese": "彼得，她是谁？",
+          "english": "Peter , who's she ?",
+          "soundmark": "ˈpiːtər huz ʃiː; ʃi",
+          "type": "sentence",
+          "sentenceId": "u6gppgfmru7erhsz3c5wbcl5",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 14.57
+        },
+        {
+          "id": "y3mjn72pcyp0og7lycp9lhge",
+          "order": 2,
+          "chinese": "她是我的姐姐。",
+          "english": "She's my sister",
+          "soundmark": "ʃiːz maɪ ˈsɪstər",
+          "type": "sentence",
+          "sentenceId": "n86alh01jflwinw7bgetkw5n",
+          "image": null,
+          "startTime": 14.67,
+          "endTime": 16.11
+        },
+        {
+          "id": "eyazykxpggtod3w13ndrbx61",
+          "order": 3,
+          "chinese": "他是谁？",
+          "english": "Who's he ?",
+          "soundmark": "huz hiː; hi",
+          "type": "sentence",
+          "sentenceId": "maa9lsmv80lic9n60z5ln87o",
+          "image": null,
+          "startTime": 18.97,
+          "endTime": 20.33
+        },
+        {
+          "id": "ndhu2rmsy5wup7xdqf9wqsik",
+          "order": 4,
+          "chinese": "他是我的爸爸。",
+          "english": "He's my father",
+          "soundmark": "hiːz maɪ ˈfɑːðər",
+          "type": "sentence",
+          "sentenceId": "i9u5hdnilbp3hpuqnjsdzxxc",
+          "image": null,
+          "startTime": 20.62,
+          "endTime": 22.15
+        },
+        {
+          "id": "cbed6iw5khkzreyx3j6z27eo",
+          "order": 5,
+          "chinese": "她是谁？",
+          "english": "Who's she ?",
+          "soundmark": "huz ʃiː; ʃi",
+          "type": "sentence",
+          "sentenceId": "lc9rq3yem2om6cxxjpdh4qc0",
+          "image": null,
+          "startTime": 23.59,
+          "endTime": 24.96
+        },
+        {
+          "id": "iokvg6z9uxzzn01vggl2a6p8",
+          "order": 6,
+          "chinese": "她是我的妈妈。",
+          "english": "She is my mother",
+          "soundmark": "ʃiː; ʃi ɪz maɪ ˈmʌðər",
+          "type": "sentence",
+          "sentenceId": "gbp0iuvbdz9js84ym73s9h1x",
+          "image": null,
+          "startTime": 25.11,
+          "endTime": 26.54
+        },
+        {
+          "id": "nq79kgf165ysjjw504io48fa",
+          "order": 7,
+          "chinese": "他是谁？",
+          "english": "Who's he ?",
+          "soundmark": "huz hiː; hi",
+          "type": "sentence",
+          "sentenceId": "jlefu7qukbfgw11vnwx8acdc",
+          "image": null,
+          "startTime": 32.43,
+          "endTime": 33.52
+        },
+        {
+          "id": "t8vvehghahgr7mzddd0pcjhq",
+          "order": 8,
+          "chinese": "他是我的朋友。",
+          "english": "He's my friend",
+          "soundmark": "hiːz maɪ frend",
+          "type": "sentence",
+          "sentenceId": "f7fbavs7niv6jjbbkumuijdm",
+          "image": null,
+          "startTime": 33.71,
+          "endTime": 34.9
+        }
+      ]
+    },
+    {
+      "id": "c3m5ltuaql5b2jxxqz6fo3j6",
+      "order": 9,
+      "title": "009 再见！",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/50de9bb1-731d-46b7-a71e-a90131accd11.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 8,
+      "sentenceCount": 8,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "mhqf90b13qbkcsf52bo70rj2",
+          "content": "Good-bye, everyone.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "lqj3kos7yy7lyadybo6i5jpx",
+          "content": "Good-bye, Mrs. Kelly.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "okavq8qnj4kqitxh77er33nj",
+          "content": "See you tomorrow, Peter!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "y7wqltbkjua8ot9h9mu4kbpn",
+          "content": "See you tomorrow, Sally.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "f0q4uwwvdo6wa5tk59zhyr8e",
+          "content": "Bye, Minwoo.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "wm9vltrjnzh8qeko6ccef0zj",
+          "content": "Good-bye, computer!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "y45eil7owc25o94bp7bsgrhh",
+          "content": "Good-bye, board!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "dstnu4n7xzqvbmvnv2viv0ft",
+          "content": "Good-bye, Peter.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "r410qgayudc0yx8yu9byus9k",
+          "order": 1,
+          "chinese": "再见，大家。",
+          "english": "Good-bye , everyone",
+          "soundmark": "ˌɡʊd ˈbaɪ ˈevriwʌn",
+          "type": "sentence",
+          "sentenceId": "mhqf90b13qbkcsf52bo70rj2",
+          "image": null,
+          "startTime": 8.33,
+          "endTime": 13.6
+        },
+        {
+          "id": "f8tm1xu4w05nmj5efkm60ksp",
+          "order": 2,
+          "chinese": "再见，凯莉老师。",
+          "english": "Good-bye , Mrs. Kelly",
+          "soundmark": "ˌɡʊd ˈbaɪ ˈmɪsɪz ˈkeli",
+          "type": "sentence",
+          "sentenceId": "lqj3kos7yy7lyadybo6i5jpx",
+          "image": null,
+          "startTime": 13.77,
+          "endTime": 15.83
+        },
+        {
+          "id": "c5soyucp2mpsb3wbwcpj9d3b",
+          "order": 3,
+          "chinese": "明天见，彼得！",
+          "english": "See you tomorrow , Peter !",
+          "soundmark": "siː juː; jʊ təˈmɑːroʊ ˈpiːtər",
+          "type": "sentence",
+          "sentenceId": "okavq8qnj4kqitxh77er33nj",
+          "image": null,
+          "startTime": 17.08,
+          "endTime": 19.54
+        },
+        {
+          "id": "ncqmrqmur1igw8ynpy8iesmo",
+          "order": 4,
+          "chinese": "明天见，莎莉。",
+          "english": "See you tomorrow , Sally",
+          "soundmark": "siː juː; jʊ təˈmɑːroʊ ˈsæli",
+          "type": "sentence",
+          "sentenceId": "y7wqltbkjua8ot9h9mu4kbpn",
+          "image": null,
+          "startTime": 19.64,
+          "endTime": 21.51
+        },
+        {
+          "id": "yrp9tj5b7qpz79li7vgd16ed",
+          "order": 5,
+          "chinese": "再见，敏宇。",
+          "english": "Bye , Minwoo",
+          "soundmark": "baɪ minwoo",
+          "type": "sentence",
+          "sentenceId": "f0q4uwwvdo6wa5tk59zhyr8e",
+          "image": null,
+          "startTime": 21.66,
+          "endTime": 22.78
+        },
+        {
+          "id": "utevm783veqqg4bvl0rowa8f",
+          "order": 6,
+          "chinese": "再见，电脑！",
+          "english": "Good-bye , computer !",
+          "soundmark": "ˌɡʊd ˈbaɪ kəmˈpjuːtər",
+          "type": "sentence",
+          "sentenceId": "wm9vltrjnzh8qeko6ccef0zj",
+          "image": null,
+          "startTime": 28.25,
+          "endTime": 30.08
+        },
+        {
+          "id": "hcve4ou6mp0x3jcz2jmbdzo6",
+          "order": 7,
+          "chinese": "再见，黑板！",
+          "english": "Good-bye , board !",
+          "soundmark": "ˌɡʊd ˈbaɪ bɔːrd",
+          "type": "sentence",
+          "sentenceId": "y45eil7owc25o94bp7bsgrhh",
+          "image": null,
+          "startTime": 31.18,
+          "endTime": 32.82
+        },
+        {
+          "id": "vvib4m10dwxu67kegg2ie2w0",
+          "order": 8,
+          "chinese": "再见，彼得。",
+          "english": "Good-bye , Peter",
+          "soundmark": "ˌɡʊd ˈbaɪ ˈpiːtər",
+          "type": "sentence",
+          "sentenceId": "dstnu4n7xzqvbmvnv2viv0ft",
+          "image": null,
+          "startTime": 35.66,
+          "endTime": 37.84
+        }
+      ]
+    },
+    {
+      "id": "uud10lmruml9keit8afptz2e",
+      "order": 10,
+      "title": "010 请给我水！",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/601428d8-8241-4e3b-b0e2-372046ad8556.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 10,
+      "sentenceCount": 10,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "o6a5uwpk7i4myp7e10bbjolh",
+          "content": "I'm home!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "f7f6nfoa8yfbro2k0s14t2rc",
+          "content": "Hello, Peter! How are you?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "rvs5nhe2al5027invsemrj6g",
+          "content": "I'm good, thanks.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "c3r411ilztd7bcsv2x1nzcoe",
+          "content": "Water, please.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "p9wn8pois5svx2vxxcxlh450",
+          "content": "Thank you.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "u50jfkwkq87lz4coym9o8pfc",
+          "content": "Cookies, please.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "o2wsjmeix46q5mbvbgpmwm96",
+          "content": "Thank you.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "grxubpgjmbqwhxm8oivqojo5",
+          "content": "Soda, please.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ty593gxvq3pkt19wozzzpc2r",
+          "content": "Thank you.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xulo44whonvmaspldea3nfs7",
+          "content": "Pe-ter!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "kzr852wmwzmhdxq7l7jcnx9z",
+          "order": 1,
+          "chinese": "我回来了！",
+          "english": "I'm home !",
+          "soundmark": "aɪm hoʊm",
+          "type": "sentence",
+          "sentenceId": "o6a5uwpk7i4myp7e10bbjolh",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 14.33
+        },
+        {
+          "id": "oqnn9f1exrr0jats14u7esz5",
+          "order": 2,
+          "chinese": "你好，彼得！你好吗？",
+          "english": "Hello , Peter ! How are you ?",
+          "soundmark": "həˈloʊ ˈpiːtər haʊ ɑːr; ər juː; jʊ",
+          "type": "sentence",
+          "sentenceId": "f7f6nfoa8yfbro2k0s14t2rc",
+          "image": null,
+          "startTime": 15.94,
+          "endTime": 18.9
+        },
+        {
+          "id": "z6uh57wbizm7yyjuyguamfwh",
+          "order": 3,
+          "chinese": "我很好，谢谢。",
+          "english": "I'm good , thanks",
+          "soundmark": "aɪm ɡʊd θæŋks",
+          "type": "sentence",
+          "sentenceId": "rvs5nhe2al5027invsemrj6g",
+          "image": null,
+          "startTime": 19.17,
+          "endTime": 20.85
+        },
+        {
+          "id": "rm2iy0tqnykm31imqv66kzc8",
+          "order": 4,
+          "chinese": "请给我水。",
+          "english": "Water , please",
+          "soundmark": "ˈwɔːtər pliːz",
+          "type": "sentence",
+          "sentenceId": "c3r411ilztd7bcsv2x1nzcoe",
+          "image": null,
+          "startTime": 23.54,
+          "endTime": 25.59
+        },
+        {
+          "id": "rfov41nwnzly6l59ymtlgugh",
+          "order": 5,
+          "chinese": "谢谢。",
+          "english": "Thank you",
+          "soundmark": "θæŋk juː; jʊ",
+          "type": "sentence",
+          "sentenceId": "p9wn8pois5svx2vxxcxlh450",
+          "image": null,
+          "startTime": 29.32,
+          "endTime": 30.77
+        },
+        {
+          "id": "lihylnqdwjcan2s4riz3q831",
+          "order": 6,
+          "chinese": "请给我饼干。",
+          "english": "Cookies , please",
+          "soundmark": "ˈkʊkiz pliːz",
+          "type": "sentence",
+          "sentenceId": "u50jfkwkq87lz4coym9o8pfc",
+          "image": null,
+          "startTime": 33.17,
+          "endTime": 35.06
+        },
+        {
+          "id": "dneqocfjlw2ydkuvwx796hjg",
+          "order": 7,
+          "chinese": "谢谢。",
+          "english": "Thank you",
+          "soundmark": "θæŋk juː; jʊ",
+          "type": "sentence",
+          "sentenceId": "o2wsjmeix46q5mbvbgpmwm96",
+          "image": null,
+          "startTime": 36.48,
+          "endTime": 37.82
+        },
+        {
+          "id": "j118estjlhv9cwi47bbhgiu1",
+          "order": 8,
+          "chinese": "请给我汽水。",
+          "english": "Soda , please",
+          "soundmark": "ˈsoʊdə pliːz",
+          "type": "sentence",
+          "sentenceId": "grxubpgjmbqwhxm8oivqojo5",
+          "image": null,
+          "startTime": 39.22,
+          "endTime": 40.99
+        },
+        {
+          "id": "h9ebjk3cqdqnc7q3ub2y8wlo",
+          "order": 9,
+          "chinese": "谢谢。",
+          "english": "Thank you",
+          "soundmark": "θæŋk juː; jʊ",
+          "type": "sentence",
+          "sentenceId": "ty593gxvq3pkt19wozzzpc2r",
+          "image": null,
+          "startTime": 42.26,
+          "endTime": 43.74
+        },
+        {
+          "id": "ykf10ulmsfvftl536nd9yarj",
+          "order": 10,
+          "chinese": "彼得！",
+          "english": "Pe-ter !",
+          "soundmark": "ˈpiːtər",
+          "type": "sentence",
+          "sentenceId": "xulo44whonvmaspldea3nfs7",
+          "image": null,
+          "startTime": 44,
+          "endTime": 45.05
+        }
+      ]
+    },
+    {
+      "id": "geecu4w07jnt0elqq667q28x",
+      "order": 11,
+      "title": "011 你喜欢什么",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/3cb13f21-7285-428d-b6a2-e5834f6e71f3.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 8,
+      "sentenceCount": 8,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "mivo5v3exnd4i4fyugyrjl2v",
+          "content": "Hi, I'm home!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xmcwkv98q32btyymm4iqmj4l",
+          "content": "Hello. Sally, look!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "zldr2axttzpqt7vqsd9qfq4f",
+          "content": "What do you like?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ibxfiw266b3cv98wkpzcs9mq",
+          "content": "I like cats.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vm3m2nshmi1wq66ivanqm92d",
+          "content": "I don't like spiders.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "p7x2noowgxet49a76nm5d6is",
+          "content": "I really like dogs!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "k9mn2u6nomwbvcadwddmc1m7",
+          "content": "Surprise!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "v5bm4tzmb0olkox3dujf0le2",
+          "content": "A dog! Thank you!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "ghglwt3ecus2rbenebgdu4tw",
+          "order": 1,
+          "chinese": "嗨，我回来啦！",
+          "english": "Hi , I'm home !",
+          "soundmark": "haɪ aɪm hoʊm",
+          "type": "sentence",
+          "sentenceId": "mivo5v3exnd4i4fyugyrjl2v",
+          "image": null,
+          "startTime": 8.4,
+          "endTime": 12.53
+        },
+        {
+          "id": "j3i4aosz6e1rxwhjd9jqkpcw",
+          "order": 2,
+          "chinese": "你好，Sally，看！",
+          "english": "Hello . Sally , look !",
+          "soundmark": "həˈloʊ ˈsæli lʊk",
+          "type": "sentence",
+          "sentenceId": "xmcwkv98q32btyymm4iqmj4l",
+          "image": null,
+          "startTime": 12.91,
+          "endTime": 15.26
+        },
+        {
+          "id": "pk7eqdsxysz6610qnqzvxq4r",
+          "order": 3,
+          "chinese": "你喜欢什么？",
+          "english": "What do you like ?",
+          "soundmark": "wʌt duː; də juː; jʊ laɪk",
+          "type": "sentence",
+          "sentenceId": "zldr2axttzpqt7vqsd9qfq4f",
+          "image": null,
+          "startTime": 16.77,
+          "endTime": 18.71
+        },
+        {
+          "id": "edm92e3cp6vyeik7awohpa3j",
+          "order": 4,
+          "chinese": "我喜欢猫。",
+          "english": "I like cats",
+          "soundmark": "aɪ laɪk kæts",
+          "type": "sentence",
+          "sentenceId": "ibxfiw266b3cv98wkpzcs9mq",
+          "image": null,
+          "startTime": 18.95,
+          "endTime": 20.42
+        },
+        {
+          "id": "mofm1zrvzakuopkhngfsk009",
+          "order": 5,
+          "chinese": "我不喜欢蜘蛛。",
+          "english": "I don't like spiders",
+          "soundmark": "aɪ doʊnt laɪk ˈspaɪdər",
+          "type": "sentence",
+          "sentenceId": "vm3m2nshmi1wq66ivanqm92d",
+          "image": null,
+          "startTime": 20.91,
+          "endTime": 22.85
+        },
+        {
+          "id": "u990xq9dmd7pyn0fkx0f7ng1",
+          "order": 6,
+          "chinese": "我非常喜欢狗！",
+          "english": "I really like dogs !",
+          "soundmark": "aɪ ˈriːəli laɪk dɔːɡz",
+          "type": "sentence",
+          "sentenceId": "p7x2noowgxet49a76nm5d6is",
+          "image": null,
+          "startTime": 24.47,
+          "endTime": 27.09
+        },
+        {
+          "id": "a7pm6gor7jrkgxx83guxvn95",
+          "order": 7,
+          "chinese": "惊喜！",
+          "english": "Surprise !",
+          "soundmark": "sərˈpraɪz",
+          "type": "sentence",
+          "sentenceId": "k9mn2u6nomwbvcadwddmc1m7",
+          "image": null,
+          "startTime": 30.54,
+          "endTime": 32.37
+        },
+        {
+          "id": "fl9k8ws37sm5phryzbzjqjw7",
+          "order": 8,
+          "chinese": "一只小狗！谢谢你！",
+          "english": "A dog ! Thank you !",
+          "soundmark": "ə; eɪ dɔːɡ θæŋk juː; jʊ",
+          "type": "sentence",
+          "sentenceId": "v5bm4tzmb0olkox3dujf0le2",
+          "image": null,
+          "startTime": 32.9,
+          "endTime": 35.66
+        }
+      ]
+    },
+    {
+      "id": "jsx4jppehq1h4o6bcqp3r4b9",
+      "order": 12,
+      "title": "012 我会接球",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/3e288495-d473-4232-800a-a34fb68c0788.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "jvoldtamhnp6q9ghd1tj2qa7",
+          "content": "Hi, Sally!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "hgpqyitw8k6zmv92ondwbf25",
+          "content": "This is my dog, Spike.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "g6ayco8vbhh3yytv9p54epb3",
+          "content": "Look, Spike, I can run.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "yfhll523lpgca1m30968b7vf",
+          "content": "He can run!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "zr6az47cy6yvxz6nal4syllo",
+          "content": "My turn!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "b7l74v1wkngwbjjlqotqg72m",
+          "content": "Spike, I can catch!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "iexcmuc8x683yj2pup8mwrmd",
+          "content": "He can catch!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "a70j9351f74yom2pnr2na5up",
+          "content": "One more time, Spike!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "m63mnzhxhnc97q71z7pgpf02",
+          "content": "Spike, you can fly!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "zk0m46d8bzwqufbtb12ke5yj",
+          "order": 1,
+          "chinese": "嘿，萨莉！",
+          "english": "Hi , Sally !",
+          "soundmark": "haɪ ˈsæli",
+          "type": "sentence",
+          "sentenceId": "jvoldtamhnp6q9ghd1tj2qa7",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 11.01
+        },
+        {
+          "id": "ote5usaq51unaawdygb9n0we",
+          "order": 2,
+          "chinese": "这是我的狗，斯派克。",
+          "english": "This is my dog , Spike",
+          "soundmark": "ðɪs ɪz maɪ dɔːɡ spaɪk",
+          "type": "sentence",
+          "sentenceId": "hgpqyitw8k6zmv92ondwbf25",
+          "image": null,
+          "startTime": 11.3,
+          "endTime": 13.51
+        },
+        {
+          "id": "aatpdya6hn5e2h3pl0fdd63a",
+          "order": 3,
+          "chinese": "看，斯派克，我能跑。",
+          "english": "Look , Spike , I can run",
+          "soundmark": "lʊk spaɪk aɪ kæn; kən rʌn",
+          "type": "sentence",
+          "sentenceId": "g6ayco8vbhh3yytv9p54epb3",
+          "image": null,
+          "startTime": 14.84,
+          "endTime": 18.09
+        },
+        {
+          "id": "sv4kzc192ues3f02jbarvhxp",
+          "order": 4,
+          "chinese": "他能跑！",
+          "english": "He can run !",
+          "soundmark": "hiː; hi kæn; kən rʌn",
+          "type": "sentence",
+          "sentenceId": "yfhll523lpgca1m30968b7vf",
+          "image": null,
+          "startTime": 18.25,
+          "endTime": 19.71
+        },
+        {
+          "id": "zcf4ttcfvuv3bk6178ox37nt",
+          "order": 5,
+          "chinese": "轮到我了！",
+          "english": "My turn !",
+          "soundmark": "maɪ tɜːrn",
+          "type": "sentence",
+          "sentenceId": "zr6az47cy6yvxz6nal4syllo",
+          "image": null,
+          "startTime": 20.83,
+          "endTime": 22.33
+        },
+        {
+          "id": "cvjw3s5dw13mxtexf6kb7uzn",
+          "order": 6,
+          "chinese": "斯派克，我能接住！",
+          "english": "Spike , I can catch !",
+          "soundmark": "spaɪk aɪ kæn; kən kætʃ",
+          "type": "sentence",
+          "sentenceId": "b7l74v1wkngwbjjlqotqg72m",
+          "image": null,
+          "startTime": 22.44,
+          "endTime": 24.61
+        },
+        {
+          "id": "mqwgisqup8cdiiqlkyi1o60s",
+          "order": 7,
+          "chinese": "他能接住！",
+          "english": "He can catch !",
+          "soundmark": "hiː; hi kæn; kən kætʃ",
+          "type": "sentence",
+          "sentenceId": "iexcmuc8x683yj2pup8mwrmd",
+          "image": null,
+          "startTime": 24.73,
+          "endTime": 26.56
+        },
+        {
+          "id": "v8fgz8eha59io282xk003nba",
+          "order": 8,
+          "chinese": "再来一次，斯派克！",
+          "english": "One more time , Spike !",
+          "soundmark": "wʌn mɔːr taɪm spaɪk",
+          "type": "sentence",
+          "sentenceId": "a70j9351f74yom2pnr2na5up",
+          "image": null,
+          "startTime": 28.17,
+          "endTime": 30.37
+        },
+        {
+          "id": "vqc3xa4rqtlrg7finsw2rvo9",
+          "order": 9,
+          "chinese": "斯派克，你会飞了！",
+          "english": "Spike , you can fly !",
+          "soundmark": "spaɪk juː; jʊ kæn; kən flaɪ",
+          "type": "sentence",
+          "sentenceId": "m63mnzhxhnc97q71z7pgpf02",
+          "image": null,
+          "startTime": 30.47,
+          "endTime": 32.95
+        }
+      ]
+    },
+    {
+      "id": "ncqglsn8g4udu00cezsocnl4",
+      "order": 13,
+      "title": "013 我饿了",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/116a4f5b-ba11-4174-b49b-d252d2f9befc.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "xm19e6ws2k8l27t9jqweu3vy",
+          "content": "I'm hungry.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "t3cn7rwoxdmg2m3irb2nm6d1",
+          "content": "Dinner is ready.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "obdmp9ii2p1ua529m9r8z9n6",
+          "content": "Sit down, everyone.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "tzlt6iul8kxswth9vgu8ij90",
+          "content": "Mmm, I like salad.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ijz7afjuloqd9exrgs739kug",
+          "content": "I'm full!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "csw6l9nuo7hy0kpajzvqg53p",
+          "content": "I'm not full!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xfusem1mtf10dnj53v3hh9ci",
+          "content": "I am sleepy!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "y1nhdrtdxyfdauggmwlf45tt",
+          "content": "I'm not sleepy.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "txwpop72o48i8f2p83sd0u2v",
+          "content": "I'm thirsty!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "i92g92uirkbe8wvkg0knuz9a",
+          "order": 1,
+          "chinese": "我饿了。",
+          "english": "I'm hungry",
+          "soundmark": "aɪm ˈhʌŋɡri",
+          "type": "sentence",
+          "sentenceId": "xm19e6ws2k8l27t9jqweu3vy",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 11.2
+        },
+        {
+          "id": "vo74e8jabe5x6nrtcgcn1c8a",
+          "order": 2,
+          "chinese": "晚饭好了。",
+          "english": "Dinner is ready",
+          "soundmark": "ˈdɪnər ɪz ˈredi",
+          "type": "sentence",
+          "sentenceId": "t3cn7rwoxdmg2m3irb2nm6d1",
+          "image": null,
+          "startTime": 12.23,
+          "endTime": 14.37
+        },
+        {
+          "id": "pl1qacximu9p5tws2m0nog3o",
+          "order": 3,
+          "chinese": "大家坐下。",
+          "english": "Sit down , everyone",
+          "soundmark": "sɪt daʊn ˈevriwʌn",
+          "type": "sentence",
+          "sentenceId": "obdmp9ii2p1ua529m9r8z9n6",
+          "image": null,
+          "startTime": 16.28,
+          "endTime": 18.32
+        },
+        {
+          "id": "ifohmro6plojl161ivjx59hq",
+          "order": 4,
+          "chinese": "嗯，我喜欢沙拉。",
+          "english": "Mmm , I like salad",
+          "soundmark": "m aɪ laɪk ˈsæləd",
+          "type": "sentence",
+          "sentenceId": "tzlt6iul8kxswth9vgu8ij90",
+          "image": null,
+          "startTime": 18.7,
+          "endTime": 21.55
+        },
+        {
+          "id": "wnowv063ywjo2w7vba4zf3o8",
+          "order": 5,
+          "chinese": "我饱了！",
+          "english": "I'm full !",
+          "soundmark": "aɪm fʊl",
+          "type": "sentence",
+          "sentenceId": "ijz7afjuloqd9exrgs739kug",
+          "image": null,
+          "startTime": 23.33,
+          "endTime": 24.78
+        },
+        {
+          "id": "iqq2g5ftjv3spoojil44fx4d",
+          "order": 6,
+          "chinese": "我没饱！",
+          "english": "I'm not full !",
+          "soundmark": "aɪm nɑːt fʊl",
+          "type": "sentence",
+          "sentenceId": "csw6l9nuo7hy0kpajzvqg53p",
+          "image": null,
+          "startTime": 25.36,
+          "endTime": 27.04
+        },
+        {
+          "id": "zim23pld1qmhp682vilt2zd1",
+          "order": 7,
+          "chinese": "我困了！",
+          "english": "I am sleepy !",
+          "soundmark": "aɪ æm; əm ˈsliːpi",
+          "type": "sentence",
+          "sentenceId": "xfusem1mtf10dnj53v3hh9ci",
+          "image": null,
+          "startTime": 30.34,
+          "endTime": 32.44
+        },
+        {
+          "id": "mm2jzm8nyepx9gw9e699r9vh",
+          "order": 8,
+          "chinese": "我不困。",
+          "english": "I'm not sleepy",
+          "soundmark": "aɪm nɑːt ˈsliːpi",
+          "type": "sentence",
+          "sentenceId": "y1nhdrtdxyfdauggmwlf45tt",
+          "image": null,
+          "startTime": 32.81,
+          "endTime": 34.49
+        },
+        {
+          "id": "encc2mtfvy4l9lo7h9e7bnnj",
+          "order": 9,
+          "chinese": "我渴了！",
+          "english": "I'm thirsty !",
+          "soundmark": "aɪm ˈθɜːrsti",
+          "type": "sentence",
+          "sentenceId": "txwpop72o48i8f2p83sd0u2v",
+          "image": null,
+          "startTime": 34.87,
+          "endTime": 36.47
+        }
+      ]
+    },
+    {
+      "id": "nokzchxlcjcfn5intxn0jvqd",
+      "order": 14,
+      "title": "014 去洗脸",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/134f9217-14ce-4b69-9c2c-712812dd4adb.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 7,
+      "sentenceCount": 7,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "pur37j9xjj7zbd7ifx1fae59",
+          "content": "Peter! It's bath time.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "y5nnzg3a8hxmwww0rdkmx1cq",
+          "content": "Mom, I'm sleepy.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "fhkvfgvnfoqppghwl3u9oeps",
+          "content": "Wash your face.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "tgur1wxd4q680mjkci4kq54a",
+          "content": "Okay.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vqua49ayh4q6rbnn7m1jt0x7",
+          "content": "Wash your feet.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ts9gwnmc8zhu2aenugeprb53",
+          "content": "Brush your teeth, Peter.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xv0o7bmmdx027mlz6p3advqj",
+          "content": "Peter!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "iypi70o531cg6o640pogmui6",
+          "order": 1,
+          "chinese": "彼得！洗澡时间到了。",
+          "english": "Peter ! It's bath time",
+          "soundmark": "ˈpiːtər ɪts bæθ taɪm",
+          "type": "sentence",
+          "sentenceId": "pur37j9xjj7zbd7ifx1fae59",
+          "image": null,
+          "startTime": 8.4,
+          "endTime": 12.82
+        },
+        {
+          "id": "nwk68emgbymq0209fdgafibp",
+          "order": 2,
+          "chinese": "妈妈，我困了。",
+          "english": "Mom , I'm sleepy",
+          "soundmark": "mɑːm aɪm ˈsliːpi",
+          "type": "sentence",
+          "sentenceId": "y5nnzg3a8hxmwww0rdkmx1cq",
+          "image": null,
+          "startTime": 13.1,
+          "endTime": 15.86
+        },
+        {
+          "id": "wyzlkox9xwkq7fmboopf27gq",
+          "order": 3,
+          "chinese": "洗脸。",
+          "english": "Wash your face",
+          "soundmark": "wɑːʃ jʊr; jər feɪs",
+          "type": "sentence",
+          "sentenceId": "fhkvfgvnfoqppghwl3u9oeps",
+          "image": null,
+          "startTime": 17.14,
+          "endTime": 19.17
+        },
+        {
+          "id": "kcnbpjhrqhwxf7z5lnhlfc9v",
+          "order": 4,
+          "chinese": "好的。",
+          "english": "Okay",
+          "soundmark": "oʊˈkeɪ",
+          "type": "sentence",
+          "sentenceId": "tgur1wxd4q680mjkci4kq54a",
+          "image": null,
+          "startTime": 19.3,
+          "endTime": 20.41
+        },
+        {
+          "id": "xvnj3urnejjt7w3hpkeov678",
+          "order": 5,
+          "chinese": "洗脚。",
+          "english": "Wash your feet",
+          "soundmark": "wɑːʃ jʊr; jər fiːt",
+          "type": "sentence",
+          "sentenceId": "vqua49ayh4q6rbnn7m1jt0x7",
+          "image": null,
+          "startTime": 24.62,
+          "endTime": 26.57
+        },
+        {
+          "id": "b51qej7kyegnuq6f0r7jnzb3",
+          "order": 6,
+          "chinese": "刷牙，彼得。",
+          "english": "Brush your teeth , Peter",
+          "soundmark": "brʌʃ jʊr; jər tiːθ ˈpiːtər",
+          "type": "sentence",
+          "sentenceId": "ts9gwnmc8zhu2aenugeprb53",
+          "image": null,
+          "startTime": 30.04,
+          "endTime": 32.43
+        },
+        {
+          "id": "bz2q9c2yistcp4o7r804n6rf",
+          "order": 7,
+          "chinese": "彼得！",
+          "english": "Peter !",
+          "soundmark": "ˈpiːtər",
+          "type": "sentence",
+          "sentenceId": "xv0o7bmmdx027mlz6p3advqj",
+          "image": null,
+          "startTime": 33.58,
+          "endTime": 34.87
+        }
+      ]
+    },
+    {
+      "id": "rhtri4yy27npteft9qu6vaid",
+      "order": 15,
+      "title": "015 我能看电视吗",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/5581db39-7f65-4ab5-bc0e-860f2ad13437.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "fqkn6y5u8eugsckw5t8j8qzx",
+          "content": "Minwoo, time for bed!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "sb2ua64b8zk05unydgqeb3vn",
+          "content": "Oh Daddy, can I play?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "epzw2yyrbld9339wlvm77nxt",
+          "content": "No, you can't.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ct54dc3c5j7rwohd3l84we2y",
+          "content": "Daddy, can I watch TV?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ela2h9fif6xyy4fbebof5642",
+          "content": "No, you can't.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "sj670br5c7gxpshamul52hoq",
+          "content": "Minwoo, time for bed!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "aui4qxynoda9mzjzng748v3d",
+          "content": "Can I read a book?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "rzuq0nx4rjti1vofmjx4tv8u",
+          "content": "Yes, you can.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "b3w72ziu8vej334jykwbqdd7",
+          "content": "Let's read a book!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "vwewiulpng6dgnak3f48u5ku",
+          "order": 1,
+          "chinese": "敏宇，该睡觉了！",
+          "english": "Minwoo , time for bed !",
+          "soundmark": "minwoo taɪm fɔːr; fər bed",
+          "type": "sentence",
+          "sentenceId": "fqkn6y5u8eugsckw5t8j8qzx",
+          "image": null,
+          "startTime": 8.4,
+          "endTime": 11.57
+        },
+        {
+          "id": "xs3h3pojjhv2rnrr6am0j0zy",
+          "order": 2,
+          "chinese": "哦爸爸，我能玩会儿吗？",
+          "english": "Oh Daddy , can I play ?",
+          "soundmark": "oʊ ˈdædi kæn; kən aɪ pleɪ",
+          "type": "sentence",
+          "sentenceId": "sb2ua64b8zk05unydgqeb3vn",
+          "image": null,
+          "startTime": 13.46,
+          "endTime": 15.84
+        },
+        {
+          "id": "dc7besz75yqr9cdusn367k5d",
+          "order": 3,
+          "chinese": "不行，不能玩。",
+          "english": "No , you can't",
+          "soundmark": "noʊ juː; jʊ kænt",
+          "type": "sentence",
+          "sentenceId": "epzw2yyrbld9339wlvm77nxt",
+          "image": null,
+          "startTime": 16.51,
+          "endTime": 17.9
+        },
+        {
+          "id": "v6zvrpa7cv82arblx6qx0wkd",
+          "order": 4,
+          "chinese": "爸爸，我能看电视吗？",
+          "english": "Daddy , can I watch TV ?",
+          "soundmark": "ˈdædi kæn; kən aɪ wɑːtʃ ˌtiː ˈviː",
+          "type": "sentence",
+          "sentenceId": "ct54dc3c5j7rwohd3l84we2y",
+          "image": null,
+          "startTime": 20.07,
+          "endTime": 23.17
+        },
+        {
+          "id": "kv6e16q7y975onh7friciyy5",
+          "order": 5,
+          "chinese": "不行，不能看。",
+          "english": "No , you can't",
+          "soundmark": "noʊ juː; jʊ kænt",
+          "type": "sentence",
+          "sentenceId": "ela2h9fif6xyy4fbebof5642",
+          "image": null,
+          "startTime": 23.37,
+          "endTime": 24.52
+        },
+        {
+          "id": "i0xck2bjpe40x7g9vm7ez2kw",
+          "order": 6,
+          "chinese": "敏宇，该睡觉了！",
+          "english": "Minwoo , time for bed !",
+          "soundmark": "minwoo taɪm fɔːr; fər bed",
+          "type": "sentence",
+          "sentenceId": "sj670br5c7gxpshamul52hoq",
+          "image": null,
+          "startTime": 24.64,
+          "endTime": 26.35
+        },
+        {
+          "id": "ir02y7dhdqfuzzi5snv88r4x",
+          "order": 7,
+          "chinese": "我能读本书吗？",
+          "english": "Can I read a book ?",
+          "soundmark": "kæn; kən aɪ riːd ə; eɪ bʊk",
+          "type": "sentence",
+          "sentenceId": "aui4qxynoda9mzjzng748v3d",
+          "image": null,
+          "startTime": 28.85,
+          "endTime": 30.6
+        },
+        {
+          "id": "pqq8gbw4fbzy8gbdilx68n8i",
+          "order": 8,
+          "chinese": "可以，可以读。",
+          "english": "Yes , you can",
+          "soundmark": "jes juː; jʊ kæn; kən",
+          "type": "sentence",
+          "sentenceId": "rzuq0nx4rjti1vofmjx4tv8u",
+          "image": null,
+          "startTime": 30.72,
+          "endTime": 31.96
+        },
+        {
+          "id": "c00t9i0wk4x3hkdv0tgsbwi2",
+          "order": 9,
+          "chinese": "我们来读书吧！",
+          "english": "Let's read a book !",
+          "soundmark": "lets riːd ə; eɪ bʊk",
+          "type": "sentence",
+          "sentenceId": "b3w72ziu8vej334jykwbqdd7",
+          "image": null,
+          "startTime": 32.33,
+          "endTime": 33.66
+        }
+      ]
+    },
+    {
+      "id": "a0rmfvdjloyawsyx0q6kdei0",
+      "order": 16,
+      "title": "016 起床啦！",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/fcce39e5-c733-454b-90d3-07f000ed5594.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 8,
+      "sentenceCount": 8,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "w65qbsa7mh66hvninwii9bgv",
+          "content": "Wake up, Peter!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "l8io5fjxh21dh67zkpms46wa",
+          "content": "No . . . no . . . I'm sleepy.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "b6a68km65akmh330r0d8k2yt",
+          "content": "It's time to wake up!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "m41vwt3dwznobrv97xbxo4r3",
+          "content": "No . . . no . . . I'm sleepy!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "wbnczmeos3docbokn8ombelp",
+          "content": "Hi, Peter! Good morning.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xtl5mdev82duoijr96eqijco",
+          "content": "It's time to take a shower, sleepyhead!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "tnowwbeuh6g4zmsehfpdc1pz",
+          "content": "Lisa!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "fjhf142joi261r9awc3ec0et",
+          "content": "He isn't sleepy now!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "gbygkjsfzlo7j3a70jsco2bo",
+          "order": 1,
+          "chinese": "醒醒，彼得！",
+          "english": "Wake up , Peter !",
+          "soundmark": "weɪk ʌp ˈpiːtər",
+          "type": "sentence",
+          "sentenceId": "w65qbsa7mh66hvninwii9bgv",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 12.89
+        },
+        {
+          "id": "e3pubz2yxvcp2m86ibh70m7d",
+          "order": 2,
+          "chinese": "不……不……我困。",
+          "english": "No .. . no .. . I'm sleepy",
+          "soundmark": "noʊ noʊ aɪm ˈsliːpi",
+          "type": "sentence",
+          "sentenceId": "l8io5fjxh21dh67zkpms46wa",
+          "image": null,
+          "startTime": 13.17,
+          "endTime": 16.74
+        },
+        {
+          "id": "jb3gml8yqfrye0c9dun05h1j",
+          "order": 3,
+          "chinese": "该起床了！",
+          "english": "It's time to wake up !",
+          "soundmark": "ɪts taɪm tuː; tə weɪk ʌp",
+          "type": "sentence",
+          "sentenceId": "b6a68km65akmh330r0d8k2yt",
+          "image": null,
+          "startTime": 17.88,
+          "endTime": 20.2
+        },
+        {
+          "id": "byjkrw86zk0zlxw98oddgvfz",
+          "order": 4,
+          "chinese": "不……不……我困！",
+          "english": "No .. . no .. . I'm sleepy !",
+          "soundmark": "noʊ noʊ aɪm ˈsliːpi",
+          "type": "sentence",
+          "sentenceId": "m41vwt3dwznobrv97xbxo4r3",
+          "image": null,
+          "startTime": 20.58,
+          "endTime": 24.18
+        },
+        {
+          "id": "l4s79uqxnlrsvg7wf2vut5bs",
+          "order": 5,
+          "chinese": "嗨，彼得！早上好。",
+          "english": "Hi , Peter ! Good morning",
+          "soundmark": "haɪ ˈpiːtər ɡʊd ˈmɔːrnɪŋ",
+          "type": "sentence",
+          "sentenceId": "wbnczmeos3docbokn8ombelp",
+          "image": null,
+          "startTime": 27.48,
+          "endTime": 29.89
+        },
+        {
+          "id": "a0uhxs67gqiog6k6b1n0j5yw",
+          "order": 6,
+          "chinese": "该洗澡了，小懒虫！",
+          "english": "It's time to take a shower , sleepyhead !",
+          "soundmark": "ɪts taɪm tuː; tə teɪk ə; eɪ ˈʃaʊər ˈsliːpihed",
+          "type": "sentence",
+          "sentenceId": "xtl5mdev82duoijr96eqijco",
+          "image": null,
+          "startTime": 29.97,
+          "endTime": 32.86
+        },
+        {
+          "id": "f1c62auf2fdqxj2ri6fb7nc5",
+          "order": 7,
+          "chinese": "丽莎！",
+          "english": "Lisa !",
+          "soundmark": "ˈliːsə",
+          "type": "sentence",
+          "sentenceId": "tnowwbeuh6g4zmsehfpdc1pz",
+          "image": null,
+          "startTime": 34.77,
+          "endTime": 36.37
+        },
+        {
+          "id": "domfy325466yvxj6nilsjz7a",
+          "order": 8,
+          "chinese": "他现在不困了！",
+          "english": "He isn't sleepy now !",
+          "soundmark": "hiː; hi ˈɪz(ə)nt ˈsliːpi naʊ",
+          "type": "sentence",
+          "sentenceId": "fjhf142joi261r9awc3ec0et",
+          "image": null,
+          "startTime": 37.54,
+          "endTime": 39.82
+        }
+      ]
+    },
+    {
+      "id": "mvrtlpljo9k6ujw3cfeyuki6",
+      "order": 17,
+      "title": "017 我的T恤在哪里",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/f252d322-c872-4103-98fa-375e693fd466.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 8,
+      "sentenceCount": 8,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "u4kwn44y4we55nx3r95m0xm7",
+          "content": "Sally, your sock!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "zqz0mr18xghp3obeimibrk4s",
+          "content": "Where is my skirt?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "v94pes3oaenp3r0c1zn73rv7",
+          "content": "Here it is.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "g935xb8bs5jqmkocy0cubvnl",
+          "content": "Where is my T-shirt?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "aw73xg7v1rir6wouswbm4828",
+          "content": "Here it is.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "abq6s4gkva5gqhtulswwxopo",
+          "content": "No, my yellow T-shirt.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "n5brmbjdp7om051uqbm7p9md",
+          "content": "Thank you, Spike!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "nzmudwogb371ktmlo2y2pler",
+          "content": "Good dog, Spike!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "wwti2iqowv40b8xhgpod2gzz",
+          "order": 1,
+          "chinese": "萨莉，你的袜子！",
+          "english": "Sally , your sock !",
+          "soundmark": "ˈsæli jʊr; jər sɑːk",
+          "type": "sentence",
+          "sentenceId": "u4kwn44y4we55nx3r95m0xm7",
+          "image": null,
+          "startTime": 8.4,
+          "endTime": 12.74
+        },
+        {
+          "id": "kr7tis37mrhy2rnxp6cmzlzh",
+          "order": 2,
+          "chinese": "我的裙子在哪里？",
+          "english": "Where is my skirt ?",
+          "soundmark": "wer ɪz maɪ skɜːrt",
+          "type": "sentence",
+          "sentenceId": "zqz0mr18xghp3obeimibrk4s",
+          "image": null,
+          "startTime": 18.35,
+          "endTime": 20.31
+        },
+        {
+          "id": "gs1wad4zjzfcmyvv88378xtv",
+          "order": 3,
+          "chinese": "在这里。",
+          "english": "Here it is",
+          "soundmark": "hɪr ɪt ɪz",
+          "type": "sentence",
+          "sentenceId": "v94pes3oaenp3r0c1zn73rv7",
+          "image": null,
+          "startTime": 21.62,
+          "endTime": 23.08
+        },
+        {
+          "id": "rqlw2moy3az6463toco17pse",
+          "order": 4,
+          "chinese": "我的T恤衫在哪里？",
+          "english": "Where is my T-shirt ?",
+          "soundmark": "wer ɪz maɪ ˈtiː ʃɜːrt",
+          "type": "sentence",
+          "sentenceId": "g935xb8bs5jqmkocy0cubvnl",
+          "image": null,
+          "startTime": 27.09,
+          "endTime": 29.34
+        },
+        {
+          "id": "nbzmvf8jwouahzzcsdouvwc1",
+          "order": 5,
+          "chinese": "在这里。",
+          "english": "Here it is",
+          "soundmark": "hɪr ɪt ɪz",
+          "type": "sentence",
+          "sentenceId": "aw73xg7v1rir6wouswbm4828",
+          "image": null,
+          "startTime": 30.63,
+          "endTime": 31.95
+        },
+        {
+          "id": "ropuiwky0suxnqfkxmhwffmx",
+          "order": 6,
+          "chinese": "不，我的黄色T恤衫。",
+          "english": "No , my yellow T-shirt",
+          "soundmark": "noʊ maɪ ˈjeloʊ ˈtiː ʃɜːrt",
+          "type": "sentence",
+          "sentenceId": "abq6s4gkva5gqhtulswwxopo",
+          "image": null,
+          "startTime": 34.06,
+          "endTime": 36.78
+        },
+        {
+          "id": "z1v0ktk9den8bmmmwu5wykjk",
+          "order": 7,
+          "chinese": "谢谢你，斯派克！",
+          "english": "Thank you , Spike !",
+          "soundmark": "θæŋk juː; jʊ spaɪk",
+          "type": "sentence",
+          "sentenceId": "n5brmbjdp7om051uqbm7p9md",
+          "image": null,
+          "startTime": 39.68,
+          "endTime": 41.25
+        },
+        {
+          "id": "mhh86xjo0odst1rwgfzsfsss",
+          "order": 8,
+          "chinese": "好狗狗，斯派克！",
+          "english": "Good dog , Spike !",
+          "soundmark": "ɡʊd dɔːɡ spaɪk",
+          "type": "sentence",
+          "sentenceId": "nzmudwogb371ktmlo2y2pler",
+          "image": null,
+          "startTime": 41.87,
+          "endTime": 43.8
+        }
+      ]
+    },
+    {
+      "id": "onz7zv2tpz3ljwlqbpxgldh8",
+      "order": 18,
+      "title": "018 你想要什么",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/24bb8b71-3a0a-471f-b26b-676625c6d83d.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "fvzucz6nkd86hlgiz1i2mp46",
+          "content": "Good morning!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "w1g0g7vth4dyyqlm1psrw6ke",
+          "content": "What do you want?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "glyg2apwo0dci9fz7dd7u9ya",
+          "content": "Milk or juice?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "twzms3nc0269adz4f67gzqpg",
+          "content": "I want milk, please.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "kh3jbfdmw6tzddrdi4b1ubbv",
+          "content": "Pancakes or cereal, Peter?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "n4tnlb4ofdg26vpjnokqdogc",
+          "content": "I want pancakes, please.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "zs0571bdm7lha91k9ji8rowg",
+          "content": "Yummy! I love pancakes!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "p64z778yqlsfjddbpcknbgs2",
+          "content": "Mommy! I want pancakes too!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "e6dl02rjm93w70o0bbodjxob",
+          "content": "Eat your cereal, Lisa.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "d7v5t0kl62g246324zmec6yo",
+          "order": 1,
+          "chinese": "早上好！",
+          "english": "Good morning !",
+          "soundmark": "ɡʊd ˈmɔːrnɪŋ",
+          "type": "sentence",
+          "sentenceId": "fvzucz6nkd86hlgiz1i2mp46",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 12.47
+        },
+        {
+          "id": "hnp1t50fkw2jlbuskjkocc4l",
+          "order": 2,
+          "chinese": "你想要什么？",
+          "english": "What do you want ?",
+          "soundmark": "wʌt duː; də juː; jʊ wɑːnt",
+          "type": "sentence",
+          "sentenceId": "w1g0g7vth4dyyqlm1psrw6ke",
+          "image": null,
+          "startTime": 15.44,
+          "endTime": 17.27
+        },
+        {
+          "id": "laix7t609vls2a6aao72vbgo",
+          "order": 3,
+          "chinese": "牛奶还是果汁？",
+          "english": "Milk or juice ?",
+          "soundmark": "mɪlk ɔːr dʒuːs",
+          "type": "sentence",
+          "sentenceId": "glyg2apwo0dci9fz7dd7u9ya",
+          "image": null,
+          "startTime": 17.65,
+          "endTime": 19.44
+        },
+        {
+          "id": "vjiytvied7pgaw8e3sb7fbei",
+          "order": 4,
+          "chinese": "请给我牛奶。",
+          "english": "I want milk , please",
+          "soundmark": "aɪ wɑːnt mɪlk pliːz",
+          "type": "sentence",
+          "sentenceId": "twzms3nc0269adz4f67gzqpg",
+          "image": null,
+          "startTime": 19.62,
+          "endTime": 21.57
+        },
+        {
+          "id": "cal4h8o648ye1vceyzkezy8o",
+          "order": 5,
+          "chinese": "薄饼还是麦片，彼得？",
+          "english": "Pancakes or cereal , Peter ?",
+          "soundmark": "ˈpænkeɪks ɔːr ˈsɪriəl ˈpiːtər",
+          "type": "sentence",
+          "sentenceId": "kh3jbfdmw6tzddrdi4b1ubbv",
+          "image": null,
+          "startTime": 25.15,
+          "endTime": 27.56
+        },
+        {
+          "id": "to0kjacu3a6wat3qhd7zqkez",
+          "order": 6,
+          "chinese": "请给我薄饼。",
+          "english": "I want pancakes , please",
+          "soundmark": "aɪ wɑːnt ˈpænkeɪks pliːz",
+          "type": "sentence",
+          "sentenceId": "n4tnlb4ofdg26vpjnokqdogc",
+          "image": null,
+          "startTime": 27.97,
+          "endTime": 30.18
+        },
+        {
+          "id": "trq3dx0enuf0yjpdg7bfn1l6",
+          "order": 7,
+          "chinese": "好吃！我喜欢薄饼！",
+          "english": "Yummy ! I love pancakes !",
+          "soundmark": "ˈjʌmi aɪ lʌv ˈpænkeɪks",
+          "type": "sentence",
+          "sentenceId": "zs0571bdm7lha91k9ji8rowg",
+          "image": null,
+          "startTime": 34.49,
+          "endTime": 37.35
+        },
+        {
+          "id": "dm473yfh34clmg19tf3k3pgu",
+          "order": 8,
+          "chinese": "妈妈！我也要薄饼！",
+          "english": "Mommy ! I want pancakes too !",
+          "soundmark": "ˈmɑːmi aɪ wɑːnt ˈpænkeɪks tuː",
+          "type": "sentence",
+          "sentenceId": "p64z778yqlsfjddbpcknbgs2",
+          "image": null,
+          "startTime": 37.8,
+          "endTime": 40.65
+        },
+        {
+          "id": "x62dz4lnks5iwqym2822taj4",
+          "order": 9,
+          "chinese": "吃你的麦片，丽莎。",
+          "english": "Eat your cereal , Lisa",
+          "soundmark": "iːt jʊr; jər ˈsɪriəl ˈliːsə",
+          "type": "sentence",
+          "sentenceId": "e6dl02rjm93w70o0bbodjxob",
+          "image": null,
+          "startTime": 40.97,
+          "endTime": 43.12
+        }
+      ]
+    },
+    {
+      "id": "csablarkngqlys4v40fu1ws1",
+      "order": 19,
+      "title": "019 天气怎么样",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/630af62a-3b55-419f-ac90-acf467857bf8.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 7,
+      "sentenceCount": 7,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "c6w1hz3jpxvu1h6rms5osdwv",
+          "content": "How's the weather?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ctg3ec2o9ubduq0493leplvt",
+          "content": "It's sunny.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "jtn8jo7f776wh90zlwnairu6",
+          "content": "Peter, where's your hat?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ulg957kwd1vf0cmfwreep8ll",
+          "content": "Here it is!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "plsuq0a25w9mqtow0ot3ep79",
+          "content": "Let's see the farm!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "gvnoynq9j67q2i7nzni556g1",
+          "content": "Mrs. Kelly, it's raining.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xg61guo2uqlnfd0lyfcbvju3",
+          "content": "Pe-ter!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "tt6fe3rgw1ebd4szjqt9pt54",
+          "order": 1,
+          "chinese": "天气怎么样？",
+          "english": "How's the weather ?",
+          "soundmark": "haʊz ðə; ði ˈweðər",
+          "type": "sentence",
+          "sentenceId": "c6w1hz3jpxvu1h6rms5osdwv",
+          "image": null,
+          "startTime": 8.36,
+          "endTime": 14.22
+        },
+        {
+          "id": "zd1bjoxmpyjlbesvvb5le0dj",
+          "order": 2,
+          "chinese": "是晴天。",
+          "english": "It's sunny",
+          "soundmark": "ɪts ˈsʌni",
+          "type": "sentence",
+          "sentenceId": "ctg3ec2o9ubduq0493leplvt",
+          "image": null,
+          "startTime": 14.6,
+          "endTime": 15.97
+        },
+        {
+          "id": "vkeomm3mmz2gsxbb9njqink8",
+          "order": 3,
+          "chinese": "彼得，你的帽子呢？",
+          "english": "Peter , where's your hat ?",
+          "soundmark": "ˈpiːtər werz jʊr; jər hæt",
+          "type": "sentence",
+          "sentenceId": "jtn8jo7f776wh90zlwnairu6",
+          "image": null,
+          "startTime": 17.71,
+          "endTime": 20.18
+        },
+        {
+          "id": "klxucbhl7fgf46fr0ohymhf9",
+          "order": 4,
+          "chinese": "在这儿！",
+          "english": "Here it is !",
+          "soundmark": "hɪr ɪt ɪz",
+          "type": "sentence",
+          "sentenceId": "ulg957kwd1vf0cmfwreep8ll",
+          "image": null,
+          "startTime": 20.41,
+          "endTime": 21.91
+        },
+        {
+          "id": "rmn5c4j4mmnapreo35606vmq",
+          "order": 5,
+          "chinese": "我们去看农场吧！",
+          "english": "Let's see the farm !",
+          "soundmark": "lets siː ðə; ði fɑːrm",
+          "type": "sentence",
+          "sentenceId": "plsuq0a25w9mqtow0ot3ep79",
+          "image": null,
+          "startTime": 24.75,
+          "endTime": 26.75
+        },
+        {
+          "id": "b5tvgzkjvixigx4c86d3bttv",
+          "order": 6,
+          "chinese": "凯莉老师，下雨了。",
+          "english": "Mrs. Kelly , it's raining",
+          "soundmark": "ˈmɪsɪz ˈkeli ɪts ˈreɪnɪŋ",
+          "type": "sentence",
+          "sentenceId": "gvnoynq9j67q2i7nzni556g1",
+          "image": null,
+          "startTime": 27.3,
+          "endTime": 29.91
+        },
+        {
+          "id": "gu4ly9oa6g2wt8uwugvo3vpb",
+          "order": 7,
+          "chinese": "彼得！",
+          "english": "Pe-ter !",
+          "soundmark": "ˈpiːtər",
+          "type": "sentence",
+          "sentenceId": "xg61guo2uqlnfd0lyfcbvju3",
+          "image": null,
+          "startTime": 33.17,
+          "endTime": 34.51
+        }
+      ]
+    },
+    {
+      "id": "tdx0zm2ezk64ycmpjh0e6xar",
+      "order": 20,
+      "title": "020 那是什么",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/a09ce8c0-9833-42fa-98ea-1b04f45dea4c.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "ssue7w3cwsou3hwoqt7cqun6",
+          "content": "Baaa-aaa! Baaa-aaa!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "iv1a7cmabixxbdvdkcn4sqvf",
+          "content": "What's this?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vdf9qczy9b3b715srovphar8",
+          "content": "It's a sheep.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "o5a6fzh6ainodp1k2ta61goz",
+          "content": "Mooo-oooo. Mooo-oooo.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "d6ed1ivx6aqum6eqr4s2oalh",
+          "content": "What's that?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ip8pf5kyb8ylxmhf2wq6ac2g",
+          "content": "It's a cow.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "i88yizsg2tfzjp1g2a9mmmgd",
+          "content": "Neigh! Neigh!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xu3wzramaci0zfmorg9fw6pu",
+          "content": "What's that?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ilajwu0fzzv3f27503x29kxf",
+          "content": "It's a horse.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "vb98wxvtt4kylyb7qefutr9b",
+          "order": 1,
+          "chinese": "咩——！咩——！",
+          "english": "Baaa-aaa ! Baaa-aaa !",
+          "soundmark": "baaa-aaa baaa-aaa",
+          "type": "sentence",
+          "sentenceId": "ssue7w3cwsou3hwoqt7cqun6",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 10.85
+        },
+        {
+          "id": "wu5pdxu63uvcq2cca2mlv82e",
+          "order": 2,
+          "chinese": "这是什么？",
+          "english": "What's this ?",
+          "soundmark": "wʌts ðɪs",
+          "type": "sentence",
+          "sentenceId": "iv1a7cmabixxbdvdkcn4sqvf",
+          "image": null,
+          "startTime": 10.95,
+          "endTime": 12.42
+        },
+        {
+          "id": "k4t81dyczeeaw3cqategh84a",
+          "order": 3,
+          "chinese": "是羊。",
+          "english": "It's a sheep",
+          "soundmark": "ɪts ə; eɪ ʃiːp",
+          "type": "sentence",
+          "sentenceId": "vdf9qczy9b3b715srovphar8",
+          "image": null,
+          "startTime": 13.13,
+          "endTime": 14.52
+        },
+        {
+          "id": "cp34rbxo0dvxklh5khcao5yw",
+          "order": 4,
+          "chinese": "哞——！哞——！",
+          "english": "Mooo-oooo . Mooo-oooo",
+          "soundmark": "mooo-oooo mooo-oooo",
+          "type": "sentence",
+          "sentenceId": "o5a6fzh6ainodp1k2ta61goz",
+          "image": null,
+          "startTime": 17.05,
+          "endTime": 20.83
+        },
+        {
+          "id": "z6so8x0pr96yj87n1uia5qdr",
+          "order": 5,
+          "chinese": "那是什么？",
+          "english": "What's that ?",
+          "soundmark": "wʌts ðæt",
+          "type": "sentence",
+          "sentenceId": "d6ed1ivx6aqum6eqr4s2oalh",
+          "image": null,
+          "startTime": 20.94,
+          "endTime": 22.2
+        },
+        {
+          "id": "dle8xlws13z9fxbt4b5qn43a",
+          "order": 6,
+          "chinese": "是牛。",
+          "english": "It's a cow",
+          "soundmark": "ɪts ə; eɪ kaʊ",
+          "type": "sentence",
+          "sentenceId": "ip8pf5kyb8ylxmhf2wq6ac2g",
+          "image": null,
+          "startTime": 23.36,
+          "endTime": 25.02
+        },
+        {
+          "id": "kex3sz5tywywepwiyy4kpd7d",
+          "order": 7,
+          "chinese": "嘶——！嘶——！",
+          "english": "Neigh ! Neigh !",
+          "soundmark": "neɪ neɪ",
+          "type": "sentence",
+          "sentenceId": "i88yizsg2tfzjp1g2a9mmmgd",
+          "image": null,
+          "startTime": 26.56,
+          "endTime": 29.41
+        },
+        {
+          "id": "uu4m1lkrbrr98hosfsergm9n",
+          "order": 8,
+          "chinese": "那是什么？",
+          "english": "What's that ?",
+          "soundmark": "wʌts ðæt",
+          "type": "sentence",
+          "sentenceId": "xu3wzramaci0zfmorg9fw6pu",
+          "image": null,
+          "startTime": 29.51,
+          "endTime": 30.71
+        },
+        {
+          "id": "u7fr68iwsmg38t1jx6jvqnqn",
+          "order": 9,
+          "chinese": "是马。",
+          "english": "It's a horse",
+          "soundmark": "ɪts ə; eɪ hɔːrs",
+          "type": "sentence",
+          "sentenceId": "ilajwu0fzzv3f27503x29kxf",
+          "image": null,
+          "startTime": 33.12,
+          "endTime": 35.16
+        }
+      ]
+    },
+    {
+      "id": "tjcduib6ugoe3emna1hwa0q9",
+      "order": 21,
+      "title": "021 这是胡萝卜吗",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/c86f64b0-b70a-4b39-bddc-3c4ce513a9b0.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "ai8cq54f62t090lfsyo06wk3",
+          "content": "We have many vegetables.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "g9s1rx4gfxu5dwh0il2jd40q",
+          "content": "Is this a carrot?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "taa1p5r86h1oh3ytdsr7a9cu",
+          "content": "Yes, it is.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "enjr3tunpa2y89dnbl0p8pqy",
+          "content": "Is this cabbage?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ezgoalmcn72eqtnicpj0tqcf",
+          "content": "No, it isn't.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "c9oszr27ui4u8i1pup6uq5p3",
+          "content": "It's lettuce.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "exr801sufczrh8ny0lmtb5pr",
+          "content": "Is this a man?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "y73vemcgit2l4jl1h8r8ddkp",
+          "content": "No, it isn't.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "t9b2839kvqdddkrxabigmwpw",
+          "content": "It's a pumpkin!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "d23dl3nw9yf2552kyq41dzof",
+          "order": 1,
+          "chinese": "我们有很多蔬菜。",
+          "english": "We have many vegetables",
+          "soundmark": "wiː; wi hæv; həv ˈmeni ˈvedʒtəb(ə)lz",
+          "type": "sentence",
+          "sentenceId": "ai8cq54f62t090lfsyo06wk3",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 10.61
+        },
+        {
+          "id": "e3or52hd97z0ivn22vupmhwf",
+          "order": 2,
+          "chinese": "这是胡萝卜吗？",
+          "english": "Is this a carrot ?",
+          "soundmark": "ɪz ðɪs ə; eɪ ˈkærət",
+          "type": "sentence",
+          "sentenceId": "g9s1rx4gfxu5dwh0il2jd40q",
+          "image": null,
+          "startTime": 11.81,
+          "endTime": 13.68
+        },
+        {
+          "id": "f85i79e6warwepkv4qiljl7b",
+          "order": 3,
+          "chinese": "是的。",
+          "english": "Yes , it is",
+          "soundmark": "jes ɪt ɪz",
+          "type": "sentence",
+          "sentenceId": "taa1p5r86h1oh3ytdsr7a9cu",
+          "image": null,
+          "startTime": 15.07,
+          "endTime": 16.56
+        },
+        {
+          "id": "r06pu3nupi3azjllres2jyut",
+          "order": 4,
+          "chinese": "这是卷心菜吗？",
+          "english": "Is this cabbage ?",
+          "soundmark": "ɪz ðɪs ˈkæbɪdʒ",
+          "type": "sentence",
+          "sentenceId": "enjr3tunpa2y89dnbl0p8pqy",
+          "image": null,
+          "startTime": 19.36,
+          "endTime": 21.25
+        },
+        {
+          "id": "wboyj5aepqbqi43coppjbg06",
+          "order": 5,
+          "chinese": "不，不是。",
+          "english": "No , it isn't",
+          "soundmark": "noʊ ɪt ˈɪz(ə)nt",
+          "type": "sentence",
+          "sentenceId": "ezgoalmcn72eqtnicpj0tqcf",
+          "image": null,
+          "startTime": 21.46,
+          "endTime": 22.96
+        },
+        {
+          "id": "v75nhwcwb8axmjmr5b8dfw80",
+          "order": 6,
+          "chinese": "是生菜。",
+          "english": "It's lettuce",
+          "soundmark": "ɪts ˈletɪs",
+          "type": "sentence",
+          "sentenceId": "c9oszr27ui4u8i1pup6uq5p3",
+          "image": null,
+          "startTime": 23.07,
+          "endTime": 24.22
+        },
+        {
+          "id": "tvxoxcsx7fqpk5oex57ssjgm",
+          "order": 7,
+          "chinese": "这是一个人吗？",
+          "english": "Is this a man ?",
+          "soundmark": "ɪz ðɪs ə; eɪ mæn",
+          "type": "sentence",
+          "sentenceId": "exr801sufczrh8ny0lmtb5pr",
+          "image": null,
+          "startTime": 27.03,
+          "endTime": 29.04
+        },
+        {
+          "id": "jp9obudc1tb0fencl0tjbn5g",
+          "order": 8,
+          "chinese": "不，不是。",
+          "english": "No , it isn't",
+          "soundmark": "noʊ ɪt ˈɪz(ə)nt",
+          "type": "sentence",
+          "sentenceId": "y73vemcgit2l4jl1h8r8ddkp",
+          "image": null,
+          "startTime": 29.33,
+          "endTime": 30.83
+        },
+        {
+          "id": "c0yemelvhm8v5ykwja7qgstg",
+          "order": 9,
+          "chinese": "是一个南瓜！",
+          "english": "It's a pumpkin !",
+          "soundmark": "ɪts ə; eɪ ˈpʌmpkɪn",
+          "type": "sentence",
+          "sentenceId": "t9b2839kvqdddkrxabigmwpw",
+          "image": null,
+          "startTime": 30.94,
+          "endTime": 32.29
+        }
+      ]
+    },
+    {
+      "id": "jj72q6lfp77cki2j8bhidfkx",
+      "order": 22,
+      "title": "022 这是我的球棒",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/7e18cc7c-d11d-4acb-97f5-b239aaebd832.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 7,
+      "sentenceCount": 7,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "sdphgmvrv6yq07tq8ph2trp6",
+          "content": "This is my bat.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "b7kr63zxwa64fd4fxyni3a3k",
+          "content": "This is your mitt.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ai3fu5xveku4rzru9dkp9yj5",
+          "content": "No, it's my mitt!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "kwc2sa6op5080dpjwjgr33af",
+          "content": "Sally and Minwoo, look!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "j012osg5psm8h0h2t5ag12fo",
+          "content": "What is that?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "n53hvcgda6qj3mz85vaxd7zn",
+          "content": "It's your mitt!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "y04xftgidce2h2c4hi28n1iu",
+          "content": "Let's play!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "e0rz0jr1i35p5mv2hnucvqk0",
+          "order": 1,
+          "chinese": "这是我的球棒。",
+          "english": "This is my bat",
+          "soundmark": "ðɪs ɪz maɪ bæt",
+          "type": "sentence",
+          "sentenceId": "sdphgmvrv6yq07tq8ph2trp6",
+          "image": null,
+          "startTime": 8.4,
+          "endTime": 11.65
+        },
+        {
+          "id": "rkppzixzijy5ituksd5emonk",
+          "order": 2,
+          "chinese": "这是你的手套。",
+          "english": "This is your mitt",
+          "soundmark": "ðɪs ɪz jʊr; jər mɪt",
+          "type": "sentence",
+          "sentenceId": "b7kr63zxwa64fd4fxyni3a3k",
+          "image": null,
+          "startTime": 14.6,
+          "endTime": 16.53
+        },
+        {
+          "id": "zqg08wqujsnkldxla0kk01yl",
+          "order": 3,
+          "chinese": "不，这是我的手套！",
+          "english": "No , it's my mitt !",
+          "soundmark": "noʊ ɪts maɪ mɪt",
+          "type": "sentence",
+          "sentenceId": "ai3fu5xveku4rzru9dkp9yj5",
+          "image": null,
+          "startTime": 17.07,
+          "endTime": 19.2
+        },
+        {
+          "id": "j5v9xdwdcsobuq1udhl1izc1",
+          "order": 4,
+          "chinese": "萨莉和民宇，看！",
+          "english": "Sally and Minwoo , look !",
+          "soundmark": "ˈsæli ænd; ənd minwoo lʊk",
+          "type": "sentence",
+          "sentenceId": "kwc2sa6op5080dpjwjgr33af",
+          "image": null,
+          "startTime": 21.35,
+          "endTime": 24.13
+        },
+        {
+          "id": "gbj2etche8p2ooku5xfxya7u",
+          "order": 5,
+          "chinese": "那是什么？",
+          "english": "What is that ?",
+          "soundmark": "wʌt ɪz ðæt",
+          "type": "sentence",
+          "sentenceId": "j012osg5psm8h0h2t5ag12fo",
+          "image": null,
+          "startTime": 25.68,
+          "endTime": 27.38
+        },
+        {
+          "id": "gjtmbod2mave6f5un3z6zu5i",
+          "order": 6,
+          "chinese": "那是你的手套！",
+          "english": "It's your mitt !",
+          "soundmark": "ɪts jʊr; jər mɪt",
+          "type": "sentence",
+          "sentenceId": "n53hvcgda6qj3mz85vaxd7zn",
+          "image": null,
+          "startTime": 27.59,
+          "endTime": 29.04
+        },
+        {
+          "id": "o1wabv3x47yp65ygcurvqi0z",
+          "order": 7,
+          "chinese": "我们玩吧！",
+          "english": "Let's play !",
+          "soundmark": "lets pleɪ",
+          "type": "sentence",
+          "sentenceId": "y04xftgidce2h2c4hi28n1iu",
+          "image": null,
+          "startTime": 29.99,
+          "endTime": 31.84
+        }
+      ]
+    },
+    {
+      "id": "a03w83x2r7cgz7ceosw0q223",
+      "order": 23,
+      "title": "023 你会骑自行车吗",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/32cab353-dda9-4a1a-8d16-07e6d2bf6e7e.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 8,
+      "sentenceCount": 8,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "qo9lsq428p0txi3nlxv87j2u",
+          "content": "Can you ride a bike?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "z6eg4j7a8agpqwfrt7nocspp",
+          "content": "Yes, I can.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "z0iilx8pxgu16e2a2mfn9ep9",
+          "content": "Peter, can you rollerblade?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "lhc3rk7axzheaj1rq1pn5709",
+          "content": "Yes, I can.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "p3c2qp2a942jh5gajmuioelz",
+          "content": "Minwoo, can you rollerblade?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "fc0o5jke3dbeqrrw2n4asezv",
+          "content": "No, I can't.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ecu4jw7i1is20bb4xyr21qtc",
+          "content": "Come on, Minwoo!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ufp9xxk7k26jowv93b3c969x",
+          "content": "Let's go!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "m4flv4ooex3rzik2mso7sisl",
+          "order": 1,
+          "chinese": "你会骑自行车吗？",
+          "english": "Can you ride a bike ?",
+          "soundmark": "kæn; kən juː; jʊ raɪd ə; eɪ baɪk",
+          "type": "sentence",
+          "sentenceId": "qo9lsq428p0txi3nlxv87j2u",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 11.03
+        },
+        {
+          "id": "s314url0448af0baw691e37t",
+          "order": 2,
+          "chinese": "我会。",
+          "english": "Yes , I can",
+          "soundmark": "jes aɪ kæn; kən",
+          "type": "sentence",
+          "sentenceId": "z6eg4j7a8agpqwfrt7nocspp",
+          "image": null,
+          "startTime": 11.13,
+          "endTime": 12.6
+        },
+        {
+          "id": "ypxp3626e7oov5vjxe6rhuq2",
+          "order": 3,
+          "chinese": "彼得，你会滑旱冰吗？",
+          "english": "Peter , can you rollerblade ?",
+          "soundmark": "ˈpiːtər kæn; kən juː; jʊ ˈroʊlərbleɪd",
+          "type": "sentence",
+          "sentenceId": "z0iilx8pxgu16e2a2mfn9ep9",
+          "image": null,
+          "startTime": 15.3,
+          "endTime": 18.15
+        },
+        {
+          "id": "zno8uohel5zhwofi6k8nspoo",
+          "order": 4,
+          "chinese": "我会。",
+          "english": "Yes , I can",
+          "soundmark": "jes aɪ kæn; kən",
+          "type": "sentence",
+          "sentenceId": "lhc3rk7axzheaj1rq1pn5709",
+          "image": null,
+          "startTime": 18.25,
+          "endTime": 19.71
+        },
+        {
+          "id": "n1z8g4ivmvtcbdelcgpmc1ue",
+          "order": 5,
+          "chinese": "敏宇，你会滑旱冰吗？",
+          "english": "Minwoo , can you rollerblade ?",
+          "soundmark": "minwoo kæn; kən juː; jʊ ˈroʊlərbleɪd",
+          "type": "sentence",
+          "sentenceId": "p3c2qp2a942jh5gajmuioelz",
+          "image": null,
+          "startTime": 22.74,
+          "endTime": 25.74
+        },
+        {
+          "id": "ti4pbi0ubkg31gt9cqk0tisr",
+          "order": 6,
+          "chinese": "我不会。",
+          "english": "No , I can't",
+          "soundmark": "noʊ aɪ kænt",
+          "type": "sentence",
+          "sentenceId": "fc0o5jke3dbeqrrw2n4asezv",
+          "image": null,
+          "startTime": 25.88,
+          "endTime": 28.03
+        },
+        {
+          "id": "f5abmr82sqiulduayqh83p0s",
+          "order": 7,
+          "chinese": "加油，敏宇！",
+          "english": "Come on , Minwoo !",
+          "soundmark": "kʌm ɑːn minwoo",
+          "type": "sentence",
+          "sentenceId": "ecu4jw7i1is20bb4xyr21qtc",
+          "image": null,
+          "startTime": 28.25,
+          "endTime": 29.82
+        },
+        {
+          "id": "qo4d0wn2kcs0y0ztnmishmp8",
+          "order": 8,
+          "chinese": "我们走吧！",
+          "english": "Let's go !",
+          "soundmark": "lets ɡoʊ",
+          "type": "sentence",
+          "sentenceId": "ufp9xxk7k26jowv93b3c969x",
+          "image": null,
+          "startTime": 33.57,
+          "endTime": 35.31
+        }
+      ]
+    },
+    {
+      "id": "n7afl78gtes3qnohazp2spsr",
+      "order": 24,
+      "title": "024 有多少只蚂蚁",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/53d5366c-d9c8-4d32-9e41-a48c3a03a620.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "wkppt6v9w0zxpshuyoddblcm",
+          "content": "I'm hungry!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "b4wcgabk239d104407oeatu2",
+          "content": "Uh-oh. An ant!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "eholghxmpi5i1zqweuvihqb4",
+          "content": "How many ants?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "hobiic7oxwl7eaoa5gtdm909",
+          "content": "One ant. Two ants. Three ants . . .",
+          "hasLearningContent": false
+        },
+        {
+          "id": "h25g5czy8zt4abybfxd8qubi",
+          "content": "Six ants. Seven ants. Eight ants.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "o4v9zdg0u7kcqpn20gmcf8kt",
+          "content": "Uh-oh. A bee!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "tc5kl0d51ckxhru1fm1m5fpa",
+          "content": "How many bees?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "c7k9pvyzbn8hvdwu09vtwneg",
+          "content": "One bee. Two bees. Three bees . . .",
+          "hasLearningContent": false
+        },
+        {
+          "id": "lgq7aqqa7jxfga9k7ngs001j",
+          "content": "Run!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "dm1iyi2tvtjqjcnzr9kadab7",
+          "order": 1,
+          "chinese": "我饿了！",
+          "english": "I'm hungry !",
+          "soundmark": "aɪm ˈhʌŋɡri",
+          "type": "sentence",
+          "sentenceId": "wkppt6v9w0zxpshuyoddblcm",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 10.53
+        },
+        {
+          "id": "b1ulc5ibqvpc2sbr7zqbyh5a",
+          "order": 2,
+          "chinese": "哎呀。一只蚂蚁！",
+          "english": "Uh-oh . An ant !",
+          "soundmark": "ˈʌ oʊ æn; ən ænt",
+          "type": "sentence",
+          "sentenceId": "b4wcgabk239d104407oeatu2",
+          "image": null,
+          "startTime": 14.74,
+          "endTime": 17.64
+        },
+        {
+          "id": "m5njl8rl39y4zgxa8j7anvf0",
+          "order": 3,
+          "chinese": "有多少只蚂蚁？",
+          "english": "How many ants ?",
+          "soundmark": "haʊ ˈmeni ænts",
+          "type": "sentence",
+          "sentenceId": "eholghxmpi5i1zqweuvihqb4",
+          "image": null,
+          "startTime": 19.56,
+          "endTime": 21.65
+        },
+        {
+          "id": "yim2vfzwosgogcwtrzpdopy1",
+          "order": 4,
+          "chinese": "一只蚂蚁。两只蚂蚁。三只蚂蚁……",
+          "english": "One ant . Two ants . Three ants ..",
+          "soundmark": "wʌn ænt tuː ænts θriː ænts",
+          "type": "sentence",
+          "sentenceId": "hobiic7oxwl7eaoa5gtdm909",
+          "image": null,
+          "startTime": 21.78,
+          "endTime": 26.05
+        },
+        {
+          "id": "ghqonjltuj4aivtmymsrq81d",
+          "order": 5,
+          "chinese": "六只蚂蚁。七只蚂蚁。八只蚂蚁。",
+          "english": "Six ants . Seven ants . Eight ants",
+          "soundmark": "sɪks ænts ˈsev(ə)n ænts eɪt ænts",
+          "type": "sentence",
+          "sentenceId": "h25g5czy8zt4abybfxd8qubi",
+          "image": null,
+          "startTime": 26.89,
+          "endTime": 32.06
+        },
+        {
+          "id": "crzbmepfjrludaczen9en4f3",
+          "order": 6,
+          "chinese": "哎呀。一只蜜蜂！",
+          "english": "Uh-oh . A bee !",
+          "soundmark": "ˈʌ oʊ ə; eɪ biː",
+          "type": "sentence",
+          "sentenceId": "o4v9zdg0u7kcqpn20gmcf8kt",
+          "image": null,
+          "startTime": 32.54,
+          "endTime": 35.14
+        },
+        {
+          "id": "ypfap5c93ftbb00gujc6ltex",
+          "order": 7,
+          "chinese": "有多少只蜜蜂？",
+          "english": "How many bees ?",
+          "soundmark": "haʊ ˈmeni biːz",
+          "type": "sentence",
+          "sentenceId": "tc5kl0d51ckxhru1fm1m5fpa",
+          "image": null,
+          "startTime": 36.66,
+          "endTime": 38.59
+        },
+        {
+          "id": "ogv0q58imjcq00oiypeqg1bp",
+          "order": 8,
+          "chinese": "一只蜜蜂。两只蜜蜂。三只蜜蜂……",
+          "english": "One bee . Two bees . Three bees ..",
+          "soundmark": "wʌn biː tuː biːz θriː biːz",
+          "type": "sentence",
+          "sentenceId": "c7k9pvyzbn8hvdwu09vtwneg",
+          "image": null,
+          "startTime": 38.8,
+          "endTime": 42.74
+        },
+        {
+          "id": "d6larrhe7r0veib8h6ofylj6",
+          "order": 9,
+          "chinese": "快跑！",
+          "english": "Run !",
+          "soundmark": "rʌn",
+          "type": "sentence",
+          "sentenceId": "lgq7aqqa7jxfga9k7ngs001j",
+          "image": null,
+          "startTime": 43.49,
+          "endTime": 45.01
+        }
+      ]
+    },
+    {
+      "id": "q3byaxm0pv7tung39prwrojz",
+      "order": 25,
+      "title": "025 它们是香蕉",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/55246606-bd1f-4926-8e3e-f90b9e9994d7.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 12,
+      "sentenceCount": 12,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "rxqzb6dvewqhe988riiimvrc",
+          "content": "What are they?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "uikcsfyrwlwhergcqnzch7f9",
+          "content": "They're cats.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "aqrcsocahnb3fquuk0u917ol",
+          "content": "They're oranges!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "jmslvcw56hxp89l873og9eha",
+          "content": "What are they?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "c9353thzdgymolp4ounod8p7",
+          "content": "They're octopuses!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "rhlq8p20vo0immuc5syjb2n8",
+          "content": "They're bananas.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "zjcisf69e595utxr2hudktjw",
+          "content": "What are they?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "rd8330uhy6itn45ksyopqhwn",
+          "content": "They're birds.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "tvdoo27sftro5e2h2ykt839k",
+          "content": "They're apples.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "e71rk8rsvm4omay304b622nd",
+          "content": "What are they?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "os59g4r65moel0g5gcdbmre9",
+          "content": "They're fish.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ui9ue4zv3o5dffi6kfdrrux9",
+          "content": "They're lemons.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "kwm56hfimzicm3jsag0ca9et",
+          "order": 1,
+          "chinese": "它们是什么？",
+          "english": "What are they ?",
+          "soundmark": "wʌt ɑːr; ər ðeɪ",
+          "type": "sentence",
+          "sentenceId": "rxqzb6dvewqhe988riiimvrc",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 12.75
+        },
+        {
+          "id": "mexpeuk6q0ram93t3w9lz1pf",
+          "order": 2,
+          "chinese": "它们是猫。",
+          "english": "They're cats",
+          "soundmark": "ˈðer kæts",
+          "type": "sentence",
+          "sentenceId": "uikcsfyrwlwhergcqnzch7f9",
+          "image": null,
+          "startTime": 12.93,
+          "endTime": 14.41
+        },
+        {
+          "id": "g1jfeflu84pdd8gipyna2mw8",
+          "order": 3,
+          "chinese": "它们是橙子！",
+          "english": "They're oranges !",
+          "soundmark": "ˈðer ˈɔːrɪndʒɪz",
+          "type": "sentence",
+          "sentenceId": "aqrcsocahnb3fquuk0u917ol",
+          "image": null,
+          "startTime": 15.04,
+          "endTime": 16.95
+        },
+        {
+          "id": "wukedawpbcn54ikbo6q60ygd",
+          "order": 4,
+          "chinese": "它们是什么？",
+          "english": "What are they ?",
+          "soundmark": "wʌt ɑːr; ər ðeɪ",
+          "type": "sentence",
+          "sentenceId": "jmslvcw56hxp89l873og9eha",
+          "image": null,
+          "startTime": 19.76,
+          "endTime": 21.51
+        },
+        {
+          "id": "qdt9dup3ai2mcz43kkub551k",
+          "order": 5,
+          "chinese": "它们是章鱼！",
+          "english": "They're octopuses !",
+          "soundmark": "ˈðer ˈɑːktəpəsɪz",
+          "type": "sentence",
+          "sentenceId": "c9353thzdgymolp4ounod8p7",
+          "image": null,
+          "startTime": 21.76,
+          "endTime": 23.65
+        },
+        {
+          "id": "zymp3y7jy6shph87as7qtrsw",
+          "order": 6,
+          "chinese": "它们是香蕉。",
+          "english": "They're bananas",
+          "soundmark": "ˈðer bəˈnænəz",
+          "type": "sentence",
+          "sentenceId": "rhlq8p20vo0immuc5syjb2n8",
+          "image": null,
+          "startTime": 23.91,
+          "endTime": 25.63
+        },
+        {
+          "id": "i3pwra19wy3v1nwlmu2wj6fx",
+          "order": 7,
+          "chinese": "它们是什么？",
+          "english": "What are they ?",
+          "soundmark": "wʌt ɑːr; ər ðeɪ",
+          "type": "sentence",
+          "sentenceId": "zjcisf69e595utxr2hudktjw",
+          "image": null,
+          "startTime": 28.42,
+          "endTime": 30.17
+        },
+        {
+          "id": "c0d3nlvpze0i4z2onaboolav",
+          "order": 8,
+          "chinese": "它们是鸟。",
+          "english": "They're birds",
+          "soundmark": "ˈðer bɜːrdz",
+          "type": "sentence",
+          "sentenceId": "rd8330uhy6itn45ksyopqhwn",
+          "image": null,
+          "startTime": 30.3,
+          "endTime": 31.81
+        },
+        {
+          "id": "e39f7rjaqzov1ijqmjdi4iq7",
+          "order": 9,
+          "chinese": "它们是苹果。",
+          "english": "They're apples",
+          "soundmark": "ˈðer ˈæplz",
+          "type": "sentence",
+          "sentenceId": "tvdoo27sftro5e2h2ykt839k",
+          "image": null,
+          "startTime": 32.09,
+          "endTime": 33.75
+        },
+        {
+          "id": "k9tkr1042aersdhf6iasgf66",
+          "order": 10,
+          "chinese": "它们是什么？",
+          "english": "What are they ?",
+          "soundmark": "wʌt ɑːr; ər ðeɪ",
+          "type": "sentence",
+          "sentenceId": "e71rk8rsvm4omay304b622nd",
+          "image": null,
+          "startTime": 36.3,
+          "endTime": 38.14
+        },
+        {
+          "id": "v6i1wosirlrgiilsi20h9hnr",
+          "order": 11,
+          "chinese": "它们是鱼。",
+          "english": "They're fish",
+          "soundmark": "ˈðer fɪʃ",
+          "type": "sentence",
+          "sentenceId": "os59g4r65moel0g5gcdbmre9",
+          "image": null,
+          "startTime": 38.28,
+          "endTime": 39.54
+        },
+        {
+          "id": "v7k2evt9a199gd9yarhfo50e",
+          "order": 12,
+          "chinese": "它们是柠檬。",
+          "english": "They're lemons",
+          "soundmark": "ˈðer ˈlemənz",
+          "type": "sentence",
+          "sentenceId": "ui9ue4zv3o5dffi6kfdrrux9",
+          "image": null,
+          "startTime": 39.86,
+          "endTime": 41.54
+        }
+      ]
+    },
+    {
+      "id": "ih2iqgkq8qo1viyux0c91xq5",
+      "order": 26,
+      "title": "026 它们很小",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/8f09118c-f03b-4cc4-8404-414e54649ac0.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 6,
+      "sentenceCount": 6,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "p75x5eizilhyol6cpbgbhc6n",
+          "content": "It's a watermelon.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "iehtm9im3ica6r94vrw8o3k7",
+          "content": "It's big.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "k7b68slxq5weplpis6gp8u3r",
+          "content": "They're grapes.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "cmnr3zyyytx9ql3p8ksz4opd",
+          "content": "They're small.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ywzwkh1ggyhvvmytvswqw7zu",
+          "content": "They're short.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "mv546sxt6r4939t1w4ln9qv2",
+          "content": "It's long.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "ibpi7hp6zsfdiwse7kkpctra",
+          "order": 1,
+          "chinese": "这是一个西瓜。",
+          "english": "It's a watermelon",
+          "soundmark": "ɪts ə; eɪ ˈwɔːtərmelən",
+          "type": "sentence",
+          "sentenceId": "p75x5eizilhyol6cpbgbhc6n",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 11.88
+        },
+        {
+          "id": "spxbhl3u6u2q7nxawgs5016i",
+          "order": 2,
+          "chinese": "它很大。",
+          "english": "It's big",
+          "soundmark": "ɪts bɪɡ",
+          "type": "sentence",
+          "sentenceId": "iehtm9im3ica6r94vrw8o3k7",
+          "image": null,
+          "startTime": 12.02,
+          "endTime": 13.31
+        },
+        {
+          "id": "v3aallw4plbupuw8a4dm9zwn",
+          "order": 3,
+          "chinese": "它们是葡萄。",
+          "english": "They're grapes",
+          "soundmark": "ˈðer ɡreɪps",
+          "type": "sentence",
+          "sentenceId": "k7b68slxq5weplpis6gp8u3r",
+          "image": null,
+          "startTime": 15.79,
+          "endTime": 17.47
+        },
+        {
+          "id": "xy25esz2pumxyzohces7yse1",
+          "order": 4,
+          "chinese": "它们很小。",
+          "english": "They're small",
+          "soundmark": "ˈðer smɔːl",
+          "type": "sentence",
+          "sentenceId": "cmnr3zyyytx9ql3p8ksz4opd",
+          "image": null,
+          "startTime": 17.58,
+          "endTime": 18.94
+        },
+        {
+          "id": "mxyv9yuc858h99azvwnokgbd",
+          "order": 5,
+          "chinese": "它们很短。",
+          "english": "They're short",
+          "soundmark": "ˈðer ʃɔːrt",
+          "type": "sentence",
+          "sentenceId": "ywzwkh1ggyhvvmytvswqw7zu",
+          "image": null,
+          "startTime": 22.61,
+          "endTime": 24.37
+        },
+        {
+          "id": "hf2b6lm9hyo7k5kksbq8rlvz",
+          "order": 6,
+          "chinese": "它很长。",
+          "english": "It's long",
+          "soundmark": "ɪts lɔːŋ",
+          "type": "sentence",
+          "sentenceId": "mv546sxt6r4939t1w4ln9qv2",
+          "image": null,
+          "startTime": 31.2,
+          "endTime": 32.85
+        }
+      ]
+    },
+    {
+      "id": "vnmr25y0v2ggy3ucbq4drmjd",
+      "order": 27,
+      "title": "027 西瓜在哪里",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/11d03252-0fbe-4a1b-9b48-6e43959e7e9e.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 8,
+      "sentenceCount": 8,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "uwwv8eqzjzr3vr7edlj22vte",
+          "content": "Hi, Mom!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "mnqu0uoqh2rw1kzgdibbt5n2",
+          "content": "We're home.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "k89vqrcqqil9q906i2mr4tui",
+          "content": "Where's the watermelon?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "eifb95vxu6u56w7kxoka7nm6",
+          "content": "It's under the table.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "uipbf8zz9ekxpt737ozeih7j",
+          "content": "Where's the lemon?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "erh5mny02x4gpp31hqg2t6jo",
+          "content": "It's behind the bananas.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "mzqccwobqbxl7iflf7fgbaos",
+          "content": "Where are the grapes?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xjo77ypn44d6k3vwnqy4lvgx",
+          "content": "They're on the TV.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "oo0ray7fh5oqu3e7deda7ixj",
+          "order": 1,
+          "chinese": "嗨，妈妈！",
+          "english": "Hi , Mom !",
+          "soundmark": "haɪ mɑːm",
+          "type": "sentence",
+          "sentenceId": "uwwv8eqzjzr3vr7edlj22vte",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 10.46
+        },
+        {
+          "id": "vf8vhpjuaein9p569bd1itmm",
+          "order": 2,
+          "chinese": "我们到家了。",
+          "english": "We're home",
+          "soundmark": "wɪr hoʊm",
+          "type": "sentence",
+          "sentenceId": "mnqu0uoqh2rw1kzgdibbt5n2",
+          "image": null,
+          "startTime": 10.55,
+          "endTime": 11.84
+        },
+        {
+          "id": "xdo7tmf3e4wna3w4c1ivoryi",
+          "order": 3,
+          "chinese": "西瓜在哪儿？",
+          "english": "Where's the watermelon ?",
+          "soundmark": "werz ðə; ði ˈwɔːtərmelən",
+          "type": "sentence",
+          "sentenceId": "k89vqrcqqil9q906i2mr4tui",
+          "image": null,
+          "startTime": 14.22,
+          "endTime": 16.63
+        },
+        {
+          "id": "utnwohaxmsshmysi68s066wq",
+          "order": 4,
+          "chinese": "在桌子下面。",
+          "english": "It's under the table",
+          "soundmark": "ɪts ˈʌndər ðə; ði ˈteɪbl",
+          "type": "sentence",
+          "sentenceId": "eifb95vxu6u56w7kxoka7nm6",
+          "image": null,
+          "startTime": 16.76,
+          "endTime": 18.5
+        },
+        {
+          "id": "jt5g3lzbgvg1zj9y53wz0dul",
+          "order": 5,
+          "chinese": "柠檬在哪儿？",
+          "english": "Where's the lemon ?",
+          "soundmark": "werz ðə; ði ˈlemən",
+          "type": "sentence",
+          "sentenceId": "uipbf8zz9ekxpt737ozeih7j",
+          "image": null,
+          "startTime": 20.34,
+          "endTime": 22.37
+        },
+        {
+          "id": "tcg2jacbyab85lvxm1exxgcr",
+          "order": 6,
+          "chinese": "在香蕉后面。",
+          "english": "It's behind the bananas",
+          "soundmark": "ɪts bɪˈhaɪnd ðə; ði bəˈnænəz",
+          "type": "sentence",
+          "sentenceId": "erh5mny02x4gpp31hqg2t6jo",
+          "image": null,
+          "startTime": 22.49,
+          "endTime": 24.66
+        },
+        {
+          "id": "cago76oaovb4t9airakyyjnb",
+          "order": 7,
+          "chinese": "葡萄在哪儿？",
+          "english": "Where are the grapes ?",
+          "soundmark": "wer ɑːr; ər ðə; ði ɡreɪps",
+          "type": "sentence",
+          "sentenceId": "mzqccwobqbxl7iflf7fgbaos",
+          "image": null,
+          "startTime": 28.2,
+          "endTime": 30.17
+        },
+        {
+          "id": "xa3poaac61eki7pkbyidor86",
+          "order": 8,
+          "chinese": "在电视机上。",
+          "english": "They're on the TV",
+          "soundmark": "ˈðer ɑːn ðə; ði ˌtiː ˈviː",
+          "type": "sentence",
+          "sentenceId": "xjo77ypn44d6k3vwnqy4lvgx",
+          "image": null,
+          "startTime": 31.06,
+          "endTime": 33.18
+        }
+      ]
+    },
+    {
+      "id": "uto5lvy1kmtuzdwdn9luzbc7",
+      "order": 28,
+      "title": "028 有一条蛇",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/65d68f19-644a-4ea2-a94e-b2266f79ea75.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 7,
+      "sentenceCount": 7,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "olmcwxq33s7rp5xkzzqytnh0",
+          "content": "Wow! There's a snake.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "nh3yef6jnf0564hlz05mgrkc",
+          "content": "There is a snake on the rock.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "fbllugfrhpefqf131ea7z912",
+          "content": "There are two tigers.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "a361mx71ohif8ty9s1p4j27h",
+          "content": "There are three monkeys.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ntzs11em6l3fxac70myn4gyo",
+          "content": "Look at that!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "hmtr8dmbmweyumuhl485yke9",
+          "content": "There's a baby elephant.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vw14lu3e5atjja9al4admfe2",
+          "content": "How cute!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "zjl5qpnik4p57ztiguqc2gtu",
+          "order": 1,
+          "chinese": "哇！有一条蛇。",
+          "english": "Wow ! There's a snake",
+          "soundmark": "waʊ ðerz ə; eɪ sneɪk",
+          "type": "sentence",
+          "sentenceId": "olmcwxq33s7rp5xkzzqytnh0",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 11.99
+        },
+        {
+          "id": "oxkfl4jketio70j4pdprxeui",
+          "order": 2,
+          "chinese": "石头上有一条蛇。",
+          "english": "There is a snake on the rock",
+          "soundmark": "ðer; ðər ɪz ə; eɪ sneɪk ɑːn ðə; ði rɑːk",
+          "type": "sentence",
+          "sentenceId": "nh3yef6jnf0564hlz05mgrkc",
+          "image": null,
+          "startTime": 13.45,
+          "endTime": 16.09
+        },
+        {
+          "id": "svmfo1v856fqfewe28whyl2m",
+          "order": 3,
+          "chinese": "有两只老虎。",
+          "english": "There are two tigers",
+          "soundmark": "ðer; ðər ɑːr; ər tuː ˈtaɪɡərz",
+          "type": "sentence",
+          "sentenceId": "fbllugfrhpefqf131ea7z912",
+          "image": null,
+          "startTime": 19.47,
+          "endTime": 21.87
+        },
+        {
+          "id": "klxletzjytkmz29zl55fyiwh",
+          "order": 4,
+          "chinese": "有三只猴子。",
+          "english": "There are three monkeys",
+          "soundmark": "ðer; ðər ɑːr; ər θriː ˈmʌŋkiz",
+          "type": "sentence",
+          "sentenceId": "a361mx71ohif8ty9s1p4j27h",
+          "image": null,
+          "startTime": 25.53,
+          "endTime": 27.89
+        },
+        {
+          "id": "fq49bq0s1vcms4wt9gc7hd6i",
+          "order": 5,
+          "chinese": "看那个！",
+          "english": "Look at that !",
+          "soundmark": "lʊk æt; ət ðæt",
+          "type": "sentence",
+          "sentenceId": "ntzs11em6l3fxac70myn4gyo",
+          "image": null,
+          "startTime": 31.04,
+          "endTime": 32.54
+        },
+        {
+          "id": "ldqef1ilmg8mnmxbg2qs51zt",
+          "order": 6,
+          "chinese": "有一只小象。",
+          "english": "There's a baby elephant",
+          "soundmark": "ðerz ə; eɪ ˈbeɪbi ˈelɪfənt; ˈeləfənt",
+          "type": "sentence",
+          "sentenceId": "hmtr8dmbmweyumuhl485yke9",
+          "image": null,
+          "startTime": 32.85,
+          "endTime": 34.49
+        },
+        {
+          "id": "yu0o8guswi99lxozb2bsq5qv",
+          "order": 7,
+          "chinese": "好可爱！",
+          "english": "How cute !",
+          "soundmark": "haʊ kjuːt",
+          "type": "sentence",
+          "sentenceId": "vw14lu3e5atjja9al4admfe2",
+          "image": null,
+          "startTime": 34.95,
+          "endTime": 36.54
+        }
+      ]
+    },
+    {
+      "id": "ld0fmhhb7r2qp47tjsuqbqwb",
+      "order": 29,
+      "title": "029 你有什么",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/59eb2a25-f47c-48e3-bb13-caee20fc9917.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 10,
+      "sentenceCount": 10,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "u65p8llmzalskip4pxvmulla",
+          "content": "What do you have?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "qr6jmq0pdons71ktufwwe74p",
+          "content": "I have yogurt.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ux5854d2f7f9rczislk2jt0m",
+          "content": "It's my favorite.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vuhkouljbyly4x0kz0zahhil",
+          "content": "Peter, what do you have?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "mkzffnxoehfg3qcz9zri5xxn",
+          "content": "I have sandwiches.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "i7r7bsidkv3jp38dl5ipynrr",
+          "content": "Sally, what do you have?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vptzjd02ypha5r664ox0i6al",
+          "content": "I have a donut.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "d2etrnvhdi7acnz1bemsehqy",
+          "content": "Mrs. Kelly, what do you have?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "u2lrev1p9etm9utppv0j1mbn",
+          "content": "I have cookies!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "fkl84ccx5hgjvavzskoc921m",
+          "content": "Hooray!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "tds9go9u9zwsrot77nlwjahx",
+          "order": 1,
+          "chinese": "你有什么？",
+          "english": "What do you have ?",
+          "soundmark": "wʌt duː; də juː; jʊ hæv; həv",
+          "type": "sentence",
+          "sentenceId": "u65p8llmzalskip4pxvmulla",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 12.94
+        },
+        {
+          "id": "cu6vc4q9c5u00al0rbwq0gkt",
+          "order": 2,
+          "chinese": "我有酸奶。",
+          "english": "I have yogurt",
+          "soundmark": "aɪ hæv; həv ˈjoʊɡərt",
+          "type": "sentence",
+          "sentenceId": "qr6jmq0pdons71ktufwwe74p",
+          "image": null,
+          "startTime": 13.41,
+          "endTime": 15.04
+        },
+        {
+          "id": "ostrhc9lu7q5bh8m6zj825w9",
+          "order": 3,
+          "chinese": "这是我最喜欢的。",
+          "english": "It's my favorite",
+          "soundmark": "ɪts maɪ ˈfeɪvərɪt",
+          "type": "sentence",
+          "sentenceId": "ux5854d2f7f9rczislk2jt0m",
+          "image": null,
+          "startTime": 15.17,
+          "endTime": 16.8
+        },
+        {
+          "id": "yiiasgeufyxc3fc4pky7edxr",
+          "order": 4,
+          "chinese": "彼得，你有什么？",
+          "english": "Peter , what do you have ?",
+          "soundmark": "ˈpiːtər wʌt duː; də juː; jʊ hæv; həv",
+          "type": "sentence",
+          "sentenceId": "vuhkouljbyly4x0kz0zahhil",
+          "image": null,
+          "startTime": 17.56,
+          "endTime": 20.16
+        },
+        {
+          "id": "zbfu5lztg8nlktm4pfdwzvub",
+          "order": 5,
+          "chinese": "我有三明治。",
+          "english": "I have sandwiches",
+          "soundmark": "aɪ hæv; həv ˈsænwɪtʃɪz; ˈsænwɪdʒɪz",
+          "type": "sentence",
+          "sentenceId": "mkzffnxoehfg3qcz9zri5xxn",
+          "image": null,
+          "startTime": 20.3,
+          "endTime": 22.17
+        },
+        {
+          "id": "za6kgrwbilbjl1wv76za8mj6",
+          "order": 6,
+          "chinese": "莎莉，你有什么？",
+          "english": "Sally , what do you have ?",
+          "soundmark": "ˈsæli wʌt duː; də juː; jʊ hæv; həv",
+          "type": "sentence",
+          "sentenceId": "i7r7bsidkv3jp38dl5ipynrr",
+          "image": null,
+          "startTime": 23.4,
+          "endTime": 26.11
+        },
+        {
+          "id": "lta1cdkeug1vrihkm3ic9xmw",
+          "order": 7,
+          "chinese": "我有一个甜甜圈。",
+          "english": "I have a donut",
+          "soundmark": "aɪ hæv; həv ə; eɪ ˈdoʊnʌt",
+          "type": "sentence",
+          "sentenceId": "vptzjd02ypha5r664ox0i6al",
+          "image": null,
+          "startTime": 26.26,
+          "endTime": 27.81
+        },
+        {
+          "id": "hvetu9oy63l0hzpqx46uc45k",
+          "order": 8,
+          "chinese": "凯莉老师，你有什么？",
+          "english": "Mrs. Kelly , what do you have ?",
+          "soundmark": "ˈmɪsɪz ˈkeli wʌt duː; də juː; jʊ hæv; həv",
+          "type": "sentence",
+          "sentenceId": "d2etrnvhdi7acnz1bemsehqy",
+          "image": null,
+          "startTime": 29.15,
+          "endTime": 32.26
+        },
+        {
+          "id": "favt0dmwvfg32czsupz1oi7c",
+          "order": 9,
+          "chinese": "我有曲奇饼干！",
+          "english": "I have cookies !",
+          "soundmark": "aɪ hæv; həv ˈkʊkiz",
+          "type": "sentence",
+          "sentenceId": "u2lrev1p9etm9utppv0j1mbn",
+          "image": null,
+          "startTime": 32.4,
+          "endTime": 34.08
+        },
+        {
+          "id": "r34jllyraq3a3y0a3irhjr4l",
+          "order": 10,
+          "chinese": "好棒啊！",
+          "english": "Hooray !",
+          "soundmark": "huˈreɪ",
+          "type": "sentence",
+          "sentenceId": "fkl84ccx5hgjvavzskoc921m",
+          "image": null,
+          "startTime": 34.23,
+          "endTime": 35.84
+        }
+      ]
+    },
+    {
+      "id": "qbgmos8flssng878xrrjcewa",
+      "order": 30,
+      "title": "030 现在几点了",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/06c621e0-fd72-40da-aa80-7deb635afcb0.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 10,
+      "sentenceCount": 10,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "vzvq00jooi7tvwxks2e5k6ye",
+          "content": "Mrs. Kelly, what time is it?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xoqi0k66hbze3x76eblpj3e8",
+          "content": "It's one o'clock.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xh50ajzwz7f5c2ie6ldzjeao",
+          "content": "Let's line up.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "m9l4zmk0i5nzqd09f44shu0s",
+          "content": "Excuse me, what time is it?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "bnckpv1tcwqsudiy06k7a41y",
+          "content": "It's two o'clock.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "vdyo5vd0giur83bpu0dxulry",
+          "content": "What time is it?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "thr561wgh6txqi5hjygrimwp",
+          "content": "It's three o'clock!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "pv3p3fuwrhnu4kua08qxmffx",
+          "content": "Children, it's four o'clock.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "uf286oon6qkqzwwyawmt9x7r",
+          "content": "It's time to go home.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "nzm71q7hmqc0xthdn52ndr7s",
+          "content": "Good-bye!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "k2au50o114itbali3bkx0ilv",
+          "order": 1,
+          "chinese": "凯丽老师，现在几点了？",
+          "english": "Mrs. Kelly , what time is it ?",
+          "soundmark": "ˈmɪsɪz ˈkeli wʌt taɪm ɪz ɪt",
+          "type": "sentence",
+          "sentenceId": "vzvq00jooi7tvwxks2e5k6ye",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 12.42
+        },
+        {
+          "id": "ccsnycvpbgdp35hff7cqvno6",
+          "order": 2,
+          "chinese": "一点了。",
+          "english": "It's one o'clock",
+          "soundmark": "ɪts wʌn əˈklɑːk",
+          "type": "sentence",
+          "sentenceId": "xoqi0k66hbze3x76eblpj3e8",
+          "image": null,
+          "startTime": 12.87,
+          "endTime": 14.43
+        },
+        {
+          "id": "xveppvr9cczt37c8gzpw58ng",
+          "order": 3,
+          "chinese": "我们排队吧。",
+          "english": "Let's line up",
+          "soundmark": "lets laɪn ʌp",
+          "type": "sentence",
+          "sentenceId": "xh50ajzwz7f5c2ie6ldzjeao",
+          "image": null,
+          "startTime": 14.8,
+          "endTime": 16.23
+        },
+        {
+          "id": "ywi7xvev6211lhs1dqcngq4w",
+          "order": 4,
+          "chinese": "请问，现在几点了？",
+          "english": "Excuse me , what time is it ?",
+          "soundmark": "ɪkˈskjuːs miː; mi wʌt taɪm ɪz ɪt",
+          "type": "sentence",
+          "sentenceId": "m9l4zmk0i5nzqd09f44shu0s",
+          "image": null,
+          "startTime": 21.26,
+          "endTime": 24.53
+        },
+        {
+          "id": "qwggtgbj86v4qween15qp56n",
+          "order": 5,
+          "chinese": "两点了。",
+          "english": "It's two o'clock",
+          "soundmark": "ɪts tuː əˈklɑːk",
+          "type": "sentence",
+          "sentenceId": "bnckpv1tcwqsudiy06k7a41y",
+          "image": null,
+          "startTime": 24.99,
+          "endTime": 26.96
+        },
+        {
+          "id": "u6j39btza5ltrt1ne6r1gojl",
+          "order": 6,
+          "chinese": "现在几点了？",
+          "english": "What time is it ?",
+          "soundmark": "wʌt taɪm ɪz ɪt",
+          "type": "sentence",
+          "sentenceId": "vdyo5vd0giur83bpu0dxulry",
+          "image": null,
+          "startTime": 30.48,
+          "endTime": 32.27
+        },
+        {
+          "id": "o38q6ozql1s78ifid6j18c02",
+          "order": 7,
+          "chinese": "三点了！",
+          "english": "It's three o'clock !",
+          "soundmark": "ɪts θriː əˈklɑːk",
+          "type": "sentence",
+          "sentenceId": "thr561wgh6txqi5hjygrimwp",
+          "image": null,
+          "startTime": 34.3,
+          "endTime": 36.48
+        },
+        {
+          "id": "fuqurbwbf524c7hw8zzxw5r0",
+          "order": 8,
+          "chinese": "孩子们，四点了。",
+          "english": "Children , it's four o'clock",
+          "soundmark": "ˈtʃɪldrən ɪts fɔːr əˈklɑːk",
+          "type": "sentence",
+          "sentenceId": "pv3p3fuwrhnu4kua08qxmffx",
+          "image": null,
+          "startTime": 41.05,
+          "endTime": 43.89
+        },
+        {
+          "id": "x07za8f49bc2qlfx1kmeqz6x",
+          "order": 9,
+          "chinese": "该回家了。",
+          "english": "It's time to go home",
+          "soundmark": "ɪts taɪm tuː; tə ɡoʊ hoʊm",
+          "type": "sentence",
+          "sentenceId": "uf286oon6qkqzwwyawmt9x7r",
+          "image": null,
+          "startTime": 44.06,
+          "endTime": 45.88
+        },
+        {
+          "id": "t3iawq0wqkyme7a2i0zsw8xj",
+          "order": 10,
+          "chinese": "再见！",
+          "english": "Good-bye !",
+          "soundmark": "ˌɡʊd ˈbaɪ",
+          "type": "sentence",
+          "sentenceId": "nzm71q7hmqc0xthdn52ndr7s",
+          "image": null,
+          "startTime": 46.97,
+          "endTime": 48.59
+        }
+      ]
+    },
+    {
+      "id": "ebfj1hztxedqlvgn64fjhqdq",
+      "order": 31,
+      "title": "031 今天星期几",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/98883580-4c82-4797-a730-24cad3c27648.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "hehiny0tiw0n8zqcnt7z4mol",
+          "content": "What day is it today?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "obfnbhq6wpxrnor9azkjfjpq",
+          "content": "It's Tuesday.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "qwzopnqz1g8stkclyn41p8u1",
+          "content": "Mom, what day is it today?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "a32o8va15shebppghw5m3qqc",
+          "content": "It's Wednesday.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "b5te473v6en924n4p594nvg6",
+          "content": "Today is Thursday, Spike.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "qsbx1ozxi2btautxbb78cx9y",
+          "content": "I am going to school.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "mevgur72oapt6qxkcabj0x76",
+          "content": "What day is it today, Sally?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "q3qtonavpmmq1tgw35hrx7ai",
+          "content": "It's Friday! I'm on vacation.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "h4uegh1si6vr4jrhsuuc675p",
+          "content": "Let's play!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "vfushycoufm319cryew4eo6w",
+          "order": 1,
+          "chinese": "今天是星期几？",
+          "english": "What day is it today ?",
+          "soundmark": "wʌt deɪ ɪz ɪt təˈdeɪ",
+          "type": "sentence",
+          "sentenceId": "hehiny0tiw0n8zqcnt7z4mol",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 11.59
+        },
+        {
+          "id": "qn3lcrjj46woe8quq0wbzaal",
+          "order": 2,
+          "chinese": "今天是星期二。",
+          "english": "It's Tuesday",
+          "soundmark": "ɪts ˈtuːzdeɪ",
+          "type": "sentence",
+          "sentenceId": "obfnbhq6wpxrnor9azkjfjpq",
+          "image": null,
+          "startTime": 12.04,
+          "endTime": 13.57
+        },
+        {
+          "id": "ftgvojte25jk9vp7u3sdomo6",
+          "order": 3,
+          "chinese": "妈妈，今天是星期几？",
+          "english": "Mom , what day is it today ?",
+          "soundmark": "mɑːm wʌt deɪ ɪz ɪt təˈdeɪ",
+          "type": "sentence",
+          "sentenceId": "qwzopnqz1g8stkclyn41p8u1",
+          "image": null,
+          "startTime": 20.22,
+          "endTime": 23.39
+        },
+        {
+          "id": "lmlb6vjs7c83lbet7jzcq46n",
+          "order": 4,
+          "chinese": "今天是星期三。",
+          "english": "It's Wednesday",
+          "soundmark": "ɪts ˈwenzdeɪ",
+          "type": "sentence",
+          "sentenceId": "a32o8va15shebppghw5m3qqc",
+          "image": null,
+          "startTime": 23.69,
+          "endTime": 25.28
+        },
+        {
+          "id": "v9theeuorfhya3ecsj1msh01",
+          "order": 5,
+          "chinese": "今天是星期四，斯派克。",
+          "english": "Today is Thursday , Spike",
+          "soundmark": "təˈdeɪ ɪz ˈθɜːrzdeɪ spaɪk",
+          "type": "sentence",
+          "sentenceId": "b5te473v6en924n4p594nvg6",
+          "image": null,
+          "startTime": 29.65,
+          "endTime": 32.18
+        },
+        {
+          "id": "n9kqh5fpuf8x2u79mhx1kxrp",
+          "order": 6,
+          "chinese": "我要去上学了。",
+          "english": "I am going to school",
+          "soundmark": "aɪ æm; əm ˈɡoʊɪŋ tuː; tə skuːl",
+          "type": "sentence",
+          "sentenceId": "qsbx1ozxi2btautxbb78cx9y",
+          "image": null,
+          "startTime": 32.95,
+          "endTime": 35.2
+        },
+        {
+          "id": "zesorx5n3eqheeae8jhe2aey",
+          "order": 7,
+          "chinese": "今天星期几，萨莉？",
+          "english": "What day is it today , Sally ?",
+          "soundmark": "wʌt deɪ ɪz ɪt təˈdeɪ ˈsæli",
+          "type": "sentence",
+          "sentenceId": "mevgur72oapt6qxkcabj0x76",
+          "image": null,
+          "startTime": 42.27,
+          "endTime": 44.91
+        },
+        {
+          "id": "zzn08g74fzx97xcdk66seb1e",
+          "order": 8,
+          "chinese": "今天是星期五！我放假了。",
+          "english": "It's Friday ! I'm on vacation",
+          "soundmark": "ɪts ˈfraɪdeɪ aɪm ɑːn veɪˈkeɪʃ(ə)n",
+          "type": "sentence",
+          "sentenceId": "q3qtonavpmmq1tgw35hrx7ai",
+          "image": null,
+          "startTime": 45.3,
+          "endTime": 48.48
+        },
+        {
+          "id": "hkjo336bg7xpyw93omd70iq2",
+          "order": 9,
+          "chinese": "我们来玩吧！",
+          "english": "Let's play !",
+          "soundmark": "lets pleɪ",
+          "type": "sentence",
+          "sentenceId": "h4uegh1si6vr4jrhsuuc675p",
+          "image": null,
+          "startTime": 51.26,
+          "endTime": 53.43
+        }
+      ]
+    },
+    {
+      "id": "erfcpqit5zjhntd1rxscuvme",
+      "order": 32,
+      "title": "032 你星期一做什么",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/4431bf99-0441-44aa-b8f9-9f4a06413cf0.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "j80w6krk43x67951hfy9ix2d",
+          "content": "What do you do on Mondays?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "d907h42brua8l99ohwx1awtv",
+          "content": "I play badminton on Mondays.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "refujd3ek0tb78263fg83ync",
+          "content": "Sally, what do you do on Tuesdays?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ja3gyrrnv29d9rpxkbtsafwn",
+          "content": "I play soccer with Spike.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "chxi6pqw3ebs5p8jp5wz35qj",
+          "content": "That's fun!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "p268f1ov69erth58bxf8v792",
+          "content": "Peter, what do you do on Fridays?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "bhsdqr7czopslwizrol7op65",
+          "content": "I play ping-pong on Fridays.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "s3b1rkyk6t6wek0bmkw1dono",
+          "content": "Minwoo, what do you do on Sundays?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "en9py6o5hagc9swindkxgeba",
+          "content": "I play baseball.",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "lxgwdohgxdimiy2bz1kqpkbo",
+          "order": 1,
+          "chinese": "星期一你做什么？",
+          "english": "What do you do on Mondays ?",
+          "soundmark": "wʌt duː; də juː; jʊ duː; də ɑːn ˈmʌndeɪz; ˈmʌndiz",
+          "type": "sentence",
+          "sentenceId": "j80w6krk43x67951hfy9ix2d",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 11.08
+        },
+        {
+          "id": "uoiie5fqh2eh2t0newuqedi8",
+          "order": 2,
+          "chinese": "我星期一打羽毛球。",
+          "english": "I play badminton on Mondays",
+          "soundmark": "aɪ pleɪ ˈbædmɪntən ɑːn ˈmʌndeɪz; ˈmʌndiz",
+          "type": "sentence",
+          "sentenceId": "d907h42brua8l99ohwx1awtv",
+          "image": null,
+          "startTime": 11.43,
+          "endTime": 13.96
+        },
+        {
+          "id": "d4e63u6fp7m67brfhku88ujm",
+          "order": 3,
+          "chinese": "Sally，星期二你做什么？",
+          "english": "Sally , what do you do on Tuesdays ?",
+          "soundmark": "ˈsæli wʌt duː; də juː; jʊ duː; də ɑːn ˈtuːzdeɪz",
+          "type": "sentence",
+          "sentenceId": "refujd3ek0tb78263fg83ync",
+          "image": null,
+          "startTime": 15.02,
+          "endTime": 18.53
+        },
+        {
+          "id": "bq2ak4nn1h3cp95twh4qfpr2",
+          "order": 4,
+          "chinese": "我和Spike踢足球。",
+          "english": "I play soccer with Spike",
+          "soundmark": "aɪ pleɪ ˈsɑːkər wɪð; wɪθ spaɪk",
+          "type": "sentence",
+          "sentenceId": "ja3gyrrnv29d9rpxkbtsafwn",
+          "image": null,
+          "startTime": 18.84,
+          "endTime": 20.87
+        },
+        {
+          "id": "ti85tjahjjk932lcnl5pzax2",
+          "order": 5,
+          "chinese": "真有趣！",
+          "english": "That's fun !",
+          "soundmark": "ðæts fʌn",
+          "type": "sentence",
+          "sentenceId": "chxi6pqw3ebs5p8jp5wz35qj",
+          "image": null,
+          "startTime": 21.3,
+          "endTime": 22.6
+        },
+        {
+          "id": "jvwf0lxng5sv49bj7gvt8cx9",
+          "order": 6,
+          "chinese": "Peter，星期五你做什么？",
+          "english": "Peter , what do you do on Fridays ?",
+          "soundmark": "ˈpiːtər wʌt duː; də juː; jʊ duː; də ɑːn ˈfraɪ.deɪz",
+          "type": "sentence",
+          "sentenceId": "p268f1ov69erth58bxf8v792",
+          "image": null,
+          "startTime": 24.34,
+          "endTime": 27.43
+        },
+        {
+          "id": "kwicdf7jhjyodjq3xx4r7d5b",
+          "order": 7,
+          "chinese": "我星期五打乒乓球。",
+          "english": "I play ping-pong on Fridays",
+          "soundmark": "aɪ pleɪ ˈpɪŋ pɑːŋ ɑːn ˈfraɪ.deɪz",
+          "type": "sentence",
+          "sentenceId": "bhsdqr7czopslwizrol7op65",
+          "image": null,
+          "startTime": 27.75,
+          "endTime": 30.25
+        },
+        {
+          "id": "n2t7s63c4goa0c2sgl4ksjfg",
+          "order": 8,
+          "chinese": "Minwoo，星期天你做什么？",
+          "english": "Minwoo , what do you do on Sundays ?",
+          "soundmark": "minwoo wʌt duː; də juː; jʊ duː; də ɑːn ˈsʌndez",
+          "type": "sentence",
+          "sentenceId": "s3b1rkyk6t6wek0bmkw1dono",
+          "image": null,
+          "startTime": 32.14,
+          "endTime": 35.59
+        },
+        {
+          "id": "t8ewunlg4naoo49y2kg95eeu",
+          "order": 9,
+          "chinese": "我打棒球。",
+          "english": "I play baseball",
+          "soundmark": "aɪ pleɪ ˈbeɪsbɔːl",
+          "type": "sentence",
+          "sentenceId": "en9py6o5hagc9swindkxgeba",
+          "image": null,
+          "startTime": 35.72,
+          "endTime": 37.18
+        }
+      ]
+    },
+    {
+      "id": "rcyy14sicjwhurga8stxvy29",
+      "order": 33,
+      "title": "033 这是他的录像",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/d1354ae0-ed84-4f69-84b3-56b0b75b2a59.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 8,
+      "sentenceCount": 8,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "yvhtk41sd83ojklumlh8a19g",
+          "content": "Whose comic book is this?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "gky213a8p094i458mdxxjch9",
+          "content": "It's Sally's comic book.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ctjphcgpnxou77tl4b5urk75",
+          "content": "Whose video is this?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "m9g1jt10golajdpccdf2ocqo",
+          "content": "It's his video.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "m5os41cltuar3nx1vr4oxcv1",
+          "content": "Whose book is this?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "psjo7nqoan7k0osq3mprc01q",
+          "content": "It's Minwoo's book.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "kj9dhb2rlfbr3oico0g26xjv",
+          "content": "Whose computer game is this?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ltbk4pmtsvbzzgzoeagxc1p5",
+          "content": "It's my computer game!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "v63pq1wz9zmjd0hi3s6n5o91",
+          "order": 1,
+          "chinese": "这是谁的漫画书？",
+          "english": "Whose comic book is this ?",
+          "soundmark": "huːz ˈkɑːmɪk bʊk ɪz ðɪs",
+          "type": "sentence",
+          "sentenceId": "yvhtk41sd83ojklumlh8a19g",
+          "image": null,
+          "startTime": 8.4,
+          "endTime": 17.59
+        },
+        {
+          "id": "ypsc0fuscxb8xpbgmevlq1o2",
+          "order": 2,
+          "chinese": "这是萨莉的漫画书。",
+          "english": "It's Sally's comic book",
+          "soundmark": "ɪts ˈsæliːz ˈkɑːmɪk bʊk",
+          "type": "sentence",
+          "sentenceId": "gky213a8p094i458mdxxjch9",
+          "image": null,
+          "startTime": 17.89,
+          "endTime": 19.9
+        },
+        {
+          "id": "kt1sgs3n318g51rpuon4jyov",
+          "order": 3,
+          "chinese": "这是谁的录像？",
+          "english": "Whose video is this ?",
+          "soundmark": "huːz ˈvɪdioʊ ɪz ðɪs",
+          "type": "sentence",
+          "sentenceId": "ctjphcgpnxou77tl4b5urk75",
+          "image": null,
+          "startTime": 24.37,
+          "endTime": 26.38
+        },
+        {
+          "id": "i0bfpjhqwo2axg0smx299nra",
+          "order": 4,
+          "chinese": "这是他的录像。",
+          "english": "It's his video",
+          "soundmark": "ɪts hɪz; ɪz ˈvɪdioʊ",
+          "type": "sentence",
+          "sentenceId": "m9g1jt10golajdpccdf2ocqo",
+          "image": null,
+          "startTime": 26.89,
+          "endTime": 28.69
+        },
+        {
+          "id": "sctdz5n3649me0qsiid9cdav",
+          "order": 5,
+          "chinese": "这是谁的书？",
+          "english": "Whose book is this ?",
+          "soundmark": "huːz bʊk ɪz ðɪs",
+          "type": "sentence",
+          "sentenceId": "m5os41cltuar3nx1vr4oxcv1",
+          "image": null,
+          "startTime": 33.9,
+          "endTime": 36.02
+        },
+        {
+          "id": "a7zigfs6598pxxdvd06undp5",
+          "order": 6,
+          "chinese": "这是敏宇的书。",
+          "english": "It's Minwoo's book",
+          "soundmark": "ɪts minwoo's bʊk",
+          "type": "sentence",
+          "sentenceId": "psjo7nqoan7k0osq3mprc01q",
+          "image": null,
+          "startTime": 36.6,
+          "endTime": 38.55
+        },
+        {
+          "id": "vx1hd70cu7kwlq4w5rrjuo3p",
+          "order": 7,
+          "chinese": "这是谁的电脑游戏？",
+          "english": "Whose computer game is this ?",
+          "soundmark": "huːz kəmˈpjuːtər ɡeɪm ɪz ðɪs",
+          "type": "sentence",
+          "sentenceId": "kj9dhb2rlfbr3oico0g26xjv",
+          "image": null,
+          "startTime": 42.16,
+          "endTime": 45.3
+        },
+        {
+          "id": "gmmrvyf3pdj97pwi38p1mypl",
+          "order": 8,
+          "chinese": "这是我的电脑游戏！",
+          "english": "It's my computer game !",
+          "soundmark": "ɪts maɪ kəmˈpjuːtər ɡeɪm",
+          "type": "sentence",
+          "sentenceId": "ltbk4pmtsvbzzgzoeagxc1p5",
+          "image": null,
+          "startTime": 45.58,
+          "endTime": 47.65
+        }
+      ]
+    },
+    {
+      "id": "cymplf1jjw32p8r3p8q78sw8",
+      "order": 34,
+      "title": "034 打开窗户",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/bbab2aef-4321-4ce2-8f7d-87652b6f5242.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 8,
+      "sentenceCount": 8,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "c0u0ggpghe5039xmu4t9nz3e",
+          "content": "It's hot!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xastq7r17si53f4c3gaevpiy",
+          "content": "Open the window.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "cwh61175mbwjgr5tpuupql1q",
+          "content": "Okay.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "hqgqlhwapesbo5fw4vys7x47",
+          "content": "Sally, please turn off the light.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "p7lhwihpb6xl30pblbm7y5pi",
+          "content": "I'm sorry, Minwoo.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "zrcvj7iuc5w6hl2zah2xdp16",
+          "content": "Turn on the TV, Peter.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "zqlhrrwt9n4rhytla8hylx6q",
+          "content": "Turn off the computer, Sally.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "nroeaur9rf4z4msk6ou3z9cr",
+          "content": "Minwoo! Get off the table!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "cws2kzcylig8l6ii5gcpq3ge",
+          "order": 1,
+          "chinese": "好热啊！",
+          "english": "It's hot !",
+          "soundmark": "ɪts hɑːt",
+          "type": "sentence",
+          "sentenceId": "c0u0ggpghe5039xmu4t9nz3e",
+          "image": null,
+          "startTime": 8.34,
+          "endTime": 11.58
+        },
+        {
+          "id": "lsigv8gkf34k9n2vtt7zp8we",
+          "order": 2,
+          "chinese": "打开窗户。",
+          "english": "Open the window",
+          "soundmark": "ˈoʊpən ðə; ði ˈwɪndoʊ",
+          "type": "sentence",
+          "sentenceId": "xastq7r17si53f4c3gaevpiy",
+          "image": null,
+          "startTime": 12.32,
+          "endTime": 14.06
+        },
+        {
+          "id": "i9vm7n0rrmf3psktirgbhxjp",
+          "order": 3,
+          "chinese": "好的。",
+          "english": "Okay",
+          "soundmark": "oʊˈkeɪ",
+          "type": "sentence",
+          "sentenceId": "cwh61175mbwjgr5tpuupql1q",
+          "image": null,
+          "startTime": 14.44,
+          "endTime": 15.7
+        },
+        {
+          "id": "crx1uaobrzhi4el5bizfg9kd",
+          "order": 4,
+          "chinese": "莎莉，请关灯。",
+          "english": "Sally , please turn off the light",
+          "soundmark": "ˈsæli pliːz tɜːrn ɔːf ðə; ði laɪt",
+          "type": "sentence",
+          "sentenceId": "hqgqlhwapesbo5fw4vys7x47",
+          "image": null,
+          "startTime": 25.61,
+          "endTime": 28.92
+        },
+        {
+          "id": "glxavgrnw8t4jsjdepkgoo2m",
+          "order": 5,
+          "chinese": "对不起，敏宇。",
+          "english": "I'm sorry , Minwoo",
+          "soundmark": "aɪm ˈsɑːri minwoo",
+          "type": "sentence",
+          "sentenceId": "p7lhwihpb6xl30pblbm7y5pi",
+          "image": null,
+          "startTime": 29.2,
+          "endTime": 31
+        },
+        {
+          "id": "h9wyxxnhrr59mdiqv4kqt0bh",
+          "order": 6,
+          "chinese": "彼得，打开电视。",
+          "english": "Turn on the TV , Peter",
+          "soundmark": "tɜːrn ɑːn ðə; ði ˌtiː ˈviː ˈpiːtər",
+          "type": "sentence",
+          "sentenceId": "zrcvj7iuc5w6hl2zah2xdp16",
+          "image": null,
+          "startTime": 34.35,
+          "endTime": 36.89
+        },
+        {
+          "id": "f3ecxi6g9avrxf07ihwofk50",
+          "order": 7,
+          "chinese": "莎莉，关掉电脑。",
+          "english": "Turn off the computer , Sally",
+          "soundmark": "tɜːrn ɔːf ðə; ði kəmˈpjuːtər ˈsæli",
+          "type": "sentence",
+          "sentenceId": "zqlhrrwt9n4rhytla8hylx6q",
+          "image": null,
+          "startTime": 39.51,
+          "endTime": 41.93
+        },
+        {
+          "id": "f5mkxm4ao2f3d2chdt6l2fxh",
+          "order": 8,
+          "chinese": "敏宇！从桌子上下来！",
+          "english": "Minwoo ! Get off the table !",
+          "soundmark": "minwoo ɡet ɔːf ðə; ði ˈteɪbl",
+          "type": "sentence",
+          "sentenceId": "nroeaur9rf4z4msk6ou3z9cr",
+          "image": null,
+          "startTime": 47.64,
+          "endTime": 50.61
+        }
+      ]
+    },
+    {
+      "id": "uh9mdmjx3kpb5ncyv0jhaxkk",
+      "order": 35,
+      "title": "035 他是做什么的",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/ac09b42e-837b-43cb-98f0-da5ab7b8621f.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 9,
+      "sentenceCount": 9,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "skbvjf0yif1s6i0wrz71xugw",
+          "content": "Who's he?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "m6daotdjvxze3v7wxch4bvp7",
+          "content": "He's my uncle.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "hkr7hkyp9bvu7l6yncizey9z",
+          "content": "What does he do?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "nony4aw4bov9706ooq7gdwc1",
+          "content": "He's a bus driver.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "x7ik997b7zx90gwkbxds2i8g",
+          "content": "Who's she?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "m6t4w5wu3ngthim1gur36nxo",
+          "content": "She's my aunt.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "dlp4lw0s4sbtoaehjjvlr2ld",
+          "content": "What does she do?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "g4g560okhfhcgsjr3s3sthhw",
+          "content": "She's a police officer.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "l2s7fp1faycak6smeyqjk3nf",
+          "content": "Wow. She's cool!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "wpld7uaatqfea53059ejj9ep",
+          "order": 1,
+          "chinese": "他是谁？",
+          "english": "Who's he ?",
+          "soundmark": "huz hiː; hi",
+          "type": "sentence",
+          "sentenceId": "skbvjf0yif1s6i0wrz71xugw",
+          "image": null,
+          "startTime": 8.4,
+          "endTime": 15.56
+        },
+        {
+          "id": "m6iz68ud5i85h6so7gnni6qz",
+          "order": 2,
+          "chinese": "他是我叔叔。",
+          "english": "He's my uncle",
+          "soundmark": "hiːz maɪ ˈʌŋk(ə)l",
+          "type": "sentence",
+          "sentenceId": "m6daotdjvxze3v7wxch4bvp7",
+          "image": null,
+          "startTime": 16.74,
+          "endTime": 18.65
+        },
+        {
+          "id": "pajk821zys8wliw86y9qnsb9",
+          "order": 3,
+          "chinese": "他是做什么的？",
+          "english": "What does he do ?",
+          "soundmark": "wʌt dʌz hiː; hi duː; də",
+          "type": "sentence",
+          "sentenceId": "hkr7hkyp9bvu7l6yncizey9z",
+          "image": null,
+          "startTime": 21.86,
+          "endTime": 23.88
+        },
+        {
+          "id": "vhtrut605v2yqpboqdpcxtk5",
+          "order": 4,
+          "chinese": "他是公交车司机。",
+          "english": "He's a bus driver",
+          "soundmark": "hiːz ə; eɪ bʌs ˈdraɪvər",
+          "type": "sentence",
+          "sentenceId": "nony4aw4bov9706ooq7gdwc1",
+          "image": null,
+          "startTime": 25.7,
+          "endTime": 27.59
+        },
+        {
+          "id": "oey074kp8oobkhaz6odjdqkd",
+          "order": 5,
+          "chinese": "她是谁？",
+          "english": "Who's she ?",
+          "soundmark": "huz ʃiː; ʃi",
+          "type": "sentence",
+          "sentenceId": "x7ik997b7zx90gwkbxds2i8g",
+          "image": null,
+          "startTime": 30.45,
+          "endTime": 32.16
+        },
+        {
+          "id": "ucdk9na03qevpa3smhoquhi1",
+          "order": 6,
+          "chinese": "她是我阿姨。",
+          "english": "She's my aunt",
+          "soundmark": "ʃiːz maɪ ænt",
+          "type": "sentence",
+          "sentenceId": "m6t4w5wu3ngthim1gur36nxo",
+          "image": null,
+          "startTime": 33.69,
+          "endTime": 35.66
+        },
+        {
+          "id": "h9yffdammlvfq8kq5v256xez",
+          "order": 7,
+          "chinese": "她是做什么的？",
+          "english": "What does she do ?",
+          "soundmark": "wʌt dʌz ʃiː; ʃi duː; də",
+          "type": "sentence",
+          "sentenceId": "dlp4lw0s4sbtoaehjjvlr2ld",
+          "image": null,
+          "startTime": 38.62,
+          "endTime": 40.62
+        },
+        {
+          "id": "g4xdw35pbz4cvq3mb07rs83i",
+          "order": 8,
+          "chinese": "她是警察。",
+          "english": "She's a police officer",
+          "soundmark": "ʃiːz ə; eɪ pəˈliːs ˈɑːfɪsər",
+          "type": "sentence",
+          "sentenceId": "g4g560okhfhcgsjr3s3sthhw",
+          "image": null,
+          "startTime": 42.81,
+          "endTime": 45.13
+        },
+        {
+          "id": "xno9dn8e47sm065fstu70jgx",
+          "order": 9,
+          "chinese": "哇，她好酷！",
+          "english": "Wow . She's cool !",
+          "soundmark": "waʊ ʃiːz kuːl",
+          "type": "sentence",
+          "sentenceId": "l2s7fp1faycak6smeyqjk3nf",
+          "image": null,
+          "startTime": 45.71,
+          "endTime": 48.58
+        }
+      ]
+    },
+    {
+      "id": "ybo3s0pkztyfxidlcdc5dvuz",
+      "order": 36,
+      "title": "036 我不喜欢沙拉",
+      "description": "",
+      "type": "video",
+      "isLocked": false,
+      "mediaUrl": "https://assets.julebu.ai/videos/81a130a4-eed0-4895-8872-93e54c514aee.mp4",
+      "image": null,
+      "mode": "chinese_to_english",
+      "presetKey": "advanced",
+      "statementCount": 10,
+      "sentenceCount": 10,
+      "overview": "",
+      "sentences": [
+        {
+          "id": "gfjfrua9qvfbrk0qzy5d8goi",
+          "content": "Mom, we're hungry.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "g2xafj8s33kmtcah8sii3r5o",
+          "content": "What do you like?",
+          "hasLearningContent": false
+        },
+        {
+          "id": "uenlp5nbvd9bg5ro9nxc2fob",
+          "content": "I like chicken.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "guwmhfzi1yke57zaw6vg7shm",
+          "content": "I don't like chicken.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "ok4han63s7s0qr2inym1aecz",
+          "content": "I like salad.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "l0eia8pecgux8yihox0jfown",
+          "content": "I don't like salad.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "pxhck2q8a66lqqoa4i997ddr",
+          "content": "I like noodles.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "xqnmhbc3m85br105a4p0urou",
+          "content": "I want noodles!",
+          "hasLearningContent": false
+        },
+        {
+          "id": "sqey0fxv5zqzp2jvop70zrru",
+          "content": "I don't want noodles.",
+          "hasLearningContent": false
+        },
+        {
+          "id": "hbnis6jpakvl2lm44q9zji8s",
+          "content": "Lunch is over!",
+          "hasLearningContent": false
+        }
+      ],
+      "statements": [
+        {
+          "id": "vtl142dw55qe2linett10o8e",
+          "order": 1,
+          "chinese": "妈妈，我们饿了。",
+          "english": "Mom , we're hungry",
+          "soundmark": "mɑːm wɪr ˈhʌŋɡri",
+          "type": "sentence",
+          "sentenceId": "gfjfrua9qvfbrk0qzy5d8goi",
+          "image": null,
+          "startTime": 8.47,
+          "endTime": 11.73
+        },
+        {
+          "id": "cves7h5j8wbd2x402o8cxo7a",
+          "order": 2,
+          "chinese": "你喜欢什么？",
+          "english": "What do you like ?",
+          "soundmark": "wʌt duː; də juː; jʊ laɪk",
+          "type": "sentence",
+          "sentenceId": "g2xafj8s33kmtcah8sii3r5o",
+          "image": null,
+          "startTime": 11.95,
+          "endTime": 13.12
+        },
+        {
+          "id": "nbzpp0n1gft0l3zwibq8gg37",
+          "order": 3,
+          "chinese": "我喜欢鸡肉。",
+          "english": "I like chicken",
+          "soundmark": "aɪ laɪk ˈtʃɪkɪn",
+          "type": "sentence",
+          "sentenceId": "uenlp5nbvd9bg5ro9nxc2fob",
+          "image": null,
+          "startTime": 18.27,
+          "endTime": 20.1
+        },
+        {
+          "id": "h7d94mohbaumze9k2nyoishy",
+          "order": 4,
+          "chinese": "我不喜欢鸡肉。",
+          "english": "I don't like chicken",
+          "soundmark": "aɪ doʊnt laɪk ˈtʃɪkɪn",
+          "type": "sentence",
+          "sentenceId": "guwmhfzi1yke57zaw6vg7shm",
+          "image": null,
+          "startTime": 20.35,
+          "endTime": 22.5
+        },
+        {
+          "id": "jpmq0l47e5q4pm9d0ukzq962",
+          "order": 5,
+          "chinese": "我喜欢沙拉。",
+          "english": "I like salad",
+          "soundmark": "aɪ laɪk ˈsæləd",
+          "type": "sentence",
+          "sentenceId": "ok4han63s7s0qr2inym1aecz",
+          "image": null,
+          "startTime": 24.93,
+          "endTime": 26.85
+        },
+        {
+          "id": "yfo9srg7ylqgshksf9mgagwq",
+          "order": 6,
+          "chinese": "我不喜欢沙拉。",
+          "english": "I don't like salad",
+          "soundmark": "aɪ doʊnt laɪk ˈsæləd",
+          "type": "sentence",
+          "sentenceId": "l0eia8pecgux8yihox0jfown",
+          "image": null,
+          "startTime": 27.46,
+          "endTime": 29.32
+        },
+        {
+          "id": "tj9c31iwqzwtyakpf26scqrl",
+          "order": 7,
+          "chinese": "我喜欢面条。",
+          "english": "I like noodles",
+          "soundmark": "aɪ laɪk ˈnuːd(ə)lz",
+          "type": "sentence",
+          "sentenceId": "pxhck2q8a66lqqoa4i997ddr",
+          "image": null,
+          "startTime": 32.43,
+          "endTime": 34.48
+        },
+        {
+          "id": "zxz17014xuf6dowfrpjgo9pw",
+          "order": 8,
+          "chinese": "我想要面条！",
+          "english": "I want noodles !",
+          "soundmark": "aɪ wɑːnt ˈnuːd(ə)lz",
+          "type": "sentence",
+          "sentenceId": "xqnmhbc3m85br105a4p0urou",
+          "image": null,
+          "startTime": 34.65,
+          "endTime": 36.26
+        },
+        {
+          "id": "ttarhvdngdb05a8ey2nlx6y8",
+          "order": 9,
+          "chinese": "我不想要面条。",
+          "english": "I don't want noodles",
+          "soundmark": "aɪ doʊnt wɑːnt ˈnuːd(ə)lz",
+          "type": "sentence",
+          "sentenceId": "sqey0fxv5zqzp2jvop70zrru",
+          "image": null,
+          "startTime": 36.54,
+          "endTime": 38.75
+        },
+        {
+          "id": "yb7yxac72fpsforstc755fod",
+          "order": 10,
+          "chinese": "午餐结束了！",
+          "english": "Lunch is over !",
+          "soundmark": "lʌntʃ ɪz ˈoʊvər",
+          "type": "sentence",
+          "sentenceId": "hbnis6jpakvl2lm44q9zji8s",
+          "image": null,
+          "startTime": 39.9,
+          "endTime": 41.8
+        }
+      ]
+    }
+  ]
+}

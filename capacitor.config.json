@@ -1,0 +1,8 @@
+{
+  "appId": "com.jay.julebu",
+  "appName": "句乐部",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}

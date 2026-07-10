@@ -1,0 +1,13 @@
+node_modules
+dist
+android
+local-data
+.playwright-cli
+.DS_Store
+npm-debug.log
+data/old-site
+scripts
+*.zip
+*.apk
+public/downloads/*.apk
+!public/downloads/julebu-android-release.apk
