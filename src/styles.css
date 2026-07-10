@@ -3245,3 +3245,80 @@ button.queue-row:focus-visible {
     justify-self: stretch;
   }
 }
+
+.game-page.keyboard-open {
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+}
+
+.game-page.keyboard-open .game-topbar {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.game-page.keyboard-open .game-stats {
+  gap: 10px;
+  padding-top: 4px;
+  padding-bottom: 2px;
+}
+
+.game-page.keyboard-open .audio-pill {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.game-page.keyboard-open .game-stage {
+  --stage-lift: 0px;
+  align-content: start;
+  overflow: visible;
+  gap: 6px;
+  padding: 0 12px 8px;
+}
+
+.game-page.keyboard-open .game-stage > * {
+  transform: none;
+}
+
+.game-page.keyboard-open .game-stage h1 {
+  font-size: clamp(28px, calc(var(--julebu-stable-vh, 1vh) * 5), 54px);
+  line-height: 1.06;
+}
+
+.game-page.keyboard-open .soundmark-line {
+  margin-top: -6px;
+}
+
+.game-page.keyboard-open .answer-entry {
+  min-height: 0;
+}
+
+.game-page.keyboard-open .answer-slots {
+  gap: 8px 10px;
+}
+
+.game-page.keyboard-open .answer-slot {
+  min-height: 44px;
+  padding-bottom: 6px;
+  font-size: 26px;
+}
+
+.game-page.keyboard-open .game-shortcuts {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  padding: 5px 6px calc(5px + env(safe-area-inset-bottom));
+}
+
+.game-page.keyboard-open .game-shortcuts button {
+  min-height: 38px;
+  grid-template-columns: 1fr;
+  gap: 0;
+  padding: 0;
+}
+
+.game-page.keyboard-open .game-shortcuts button span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

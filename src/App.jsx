@@ -2589,6 +2589,7 @@ function PracticeView({
   const [chineseVisible, setChineseVisible] = useState(() => currentChineseVisible)
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const [answerCountAnimating, setAnswerCountAnimating] = useState(false)
+  const [keyboardOpen, setKeyboardOpen] = useState(false)
   const isListening = practice.modeId === 'listening'
   const isSpeaking = practice.modeId === 'speaking'
   const isDictation = practice.modeId === 'dictation'
@@ -2661,6 +2662,43 @@ function PracticeView({
   useEffect(() => () => stopSpeech(), [])
 
   useEffect(() => {
+    let frame = 0
+    let stableHeight = Math.max(window.innerHeight || 0, window.visualViewport?.height || 0)
+
+    function updateKeyboardState() {
+      window.cancelAnimationFrame(frame)
+      frame = window.requestAnimationFrame(() => {
+        const viewportHeight = window.visualViewport?.height || window.innerHeight || stableHeight
+        stableHeight = Math.max(stableHeight, viewportHeight, window.innerHeight || 0)
+        document.documentElement.style.setProperty('--julebu-stable-vh', `${stableHeight / 100}px`)
+
+        const activeElement = document.activeElement
+        const answerFocused = activeElement?.classList?.contains('game-answer-input')
+        const shrink = Math.max(0, stableHeight - viewportHeight)
+        const isOpen = Boolean(answerFocused && (shrink > 120 || viewportHeight < 620))
+        setKeyboardOpen(isOpen)
+      })
+    }
+
+    updateKeyboardState()
+    window.addEventListener('resize', updateKeyboardState)
+    window.addEventListener('focusin', updateKeyboardState)
+    window.addEventListener('focusout', updateKeyboardState)
+    window.visualViewport?.addEventListener('resize', updateKeyboardState)
+    window.visualViewport?.addEventListener('scroll', updateKeyboardState)
+
+    return () => {
+      window.cancelAnimationFrame(frame)
+      window.removeEventListener('resize', updateKeyboardState)
+      window.removeEventListener('focusin', updateKeyboardState)
+      window.removeEventListener('focusout', updateKeyboardState)
+      window.visualViewport?.removeEventListener('resize', updateKeyboardState)
+      window.visualViewport?.removeEventListener('scroll', updateKeyboardState)
+      document.documentElement.style.removeProperty('--julebu-stable-vh')
+    }
+  }, [])
+
+  useEffect(() => {
     function handleShortcut(event) {
       if (event.key === 'Enter' && !event.shiftKey && !event.metaKey && !event.ctrlKey && !event.altKey) {
         const targetTag = event.target?.tagName?.toLowerCase()
@@ -2699,7 +2737,7 @@ function PracticeView({
   }, [hasAnswerShown, onMaster, onRetry, onShowAnswer, onSubmit, onVocab, statement])
 
   return (
-    <div className="game-page page-enter">
+    <div className={`game-page page-enter ${keyboardOpen ? 'keyboard-open' : ''}`}>
       <header className="game-topbar">
         <button className="icon-button" type="button" onClick={() => setShowExit(true)} aria-label="退出">
           <ChevronLeft size={20} />
