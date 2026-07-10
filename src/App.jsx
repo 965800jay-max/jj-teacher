@@ -1839,11 +1839,17 @@ function App() {
     const target = modePicker || { course: selectedCourse, lesson: getContinueLesson(selectedCourse) }
     const lesson = getLesson(target.course, target.lesson)
     const lessonProgress = savedProgress[target.course.id]?.lessonProgress?.[lesson?.id] || {}
+    const totalStatements = getLessonStatementCount(lesson)
+    const completedStatements = Number(lessonProgress.completedStatements) || 0
+    const lessonCompleted = totalStatements
+      ? completedStatements >= totalStatements || target.lesson <= (savedProgress[target.course.id]?.completed || target.course.completed || 0)
+      : target.lesson <= (savedProgress[target.course.id]?.completed || target.course.completed || 0)
+    const startIndex = lessonCompleted ? 0 : lessonProgress.statementIndex || 0
     setPractice({
       course: target.course,
       lesson: target.lesson,
       modeId,
-      statementIndex: lessonProgress.statementIndex || 0,
+      statementIndex: startIndex,
     })
     setActiveView(modeId === 'reading' ? 'reading' : 'practice')
     setModePicker(null)
