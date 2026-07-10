@@ -472,13 +472,34 @@ function getPracticeStatement(practice) {
   }
 }
 
+function sanitizeAnswerInput(value) {
+  return String(value || '')
+    .normalize('NFKC')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .replace(/[\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]/g, ' ')
+}
+
 function normalizeAnswer(value) {
-  return value
+  return sanitizeAnswerInput(value)
     .trim()
     .toLowerCase()
-    .replace(/[’]/g, "'")
-    .replace(/[.,!?;:"“”]/g, '')
+    .replace(/[‘’`´]/g, "'")
+    .replace(/[\u2010-\u2015]/g, '-')
+    .replace(/[.,!?;:"“”。，！？；：]/g, '')
     .replace(/\s+/g, ' ')
+}
+
+function answerTokens(value) {
+  const normalized = normalizeAnswer(value)
+  return normalized ? normalized.split(' ').filter(Boolean) : []
+}
+
+function isAnswerCorrect(answerValue, expectedValue) {
+  const typedTokens = answerTokens(answerValue)
+  const expectedTokens = answerTokens(expectedValue)
+  return typedTokens.length > 0
+    && typedTokens.length === expectedTokens.length
+    && typedTokens.every((token, index) => token === expectedTokens[index])
 }
 
 function audioTextFromRequest(url) {
@@ -1615,9 +1636,7 @@ function App() {
           hint: statement.soundmark || '',
         }
       : practicePrompts[practice.modeId]
-    const normalized = answer.trim().toLowerCase()
-    const expected = prompt.answer.trim().toLowerCase()
-    const isCorrect = normalized && normalizeAnswer(normalized) === normalizeAnswer(expected)
+    const isCorrect = isAnswerCorrect(answer, prompt.answer)
     playOneShot(isCorrect ? correctSoundUrl : errorSoundUrl, 1, isCorrect ? 'correct' : 'error')
     if (isCorrect && statement) {
       playAutoStatementAudio(statement, { delay: correctReadDelayMs, gap: repeatReadGapMs })
@@ -2819,34 +2838,91 @@ function PracticeView({
 
 function splitWords(value) {
   if (!value) return []
-  return value.trim().split(/\s+/).filter(Boolean)
+  return sanitizeAnswerInput(value).trim().split(/\s+/).filter(Boolean)
 }
 
 function typedWordsFromAnswer(value) {
   if (!value) return []
-  const words = value.trimStart().split(/\s+/)
-  if (/\s$/.test(value)) words.push('')
+  const sanitized = sanitizeAnswerInput(value)
+  const words = sanitized.trimStart().split(/\s+/)
+  if (/\s$/.test(sanitized)) words.push('')
   return words
 }
 
 function answerWordRanges(value) {
   const ranges = []
+  const sanitized = sanitizeAnswerInput(value)
   const matcher = /\S+/g
-  let match = matcher.exec(value)
+  let match = matcher.exec(sanitized)
   while (match) {
     ranges.push({ start: match.index, end: match.index + match[0].length })
-    match = matcher.exec(value)
+    match = matcher.exec(sanitized)
   }
   return ranges
+}
+
+function getAnswerSlotFromCaret(ranges, caret, fallbackSlot, slotCount) {
+  if (fallbackSlot >= 0 && fallbackSlot < slotCount) {
+    const fallbackRange = ranges[fallbackSlot]
+    if (!fallbackRange || caret >= fallbackRange.start) return fallbackSlot
+  }
+
+  const containingRange = ranges.findIndex((range) => caret > range.start && caret <= range.end)
+  if (containingRange >= 0) return Math.min(containingRange, slotCount - 1)
+
+  const nextRange = ranges.findIndex((range) => caret < range.start)
+  if (nextRange >= 0) return Math.max(0, Math.min(nextRange - 1, slotCount - 1))
+
+  return Math.max(0, Math.min(ranges.length, slotCount - 1))
 }
 
 function AnswerEntry({ answer, expected, placeholder, onAnswerChange, onSubmit }) {
   const inputRef = useRef(null)
   const [activeSlot, setActiveSlot] = useState(null)
   const expectedWords = splitWords(expected)
+  const expectedTokens = answerTokens(expected)
   const slots = expectedWords.length ? expectedWords : ['']
   const typedWords = typedWordsFromAnswer(answer)
   const ranges = answerWordRanges(answer)
+
+  function applyAutoAdvance(nextAnswer, selectionStart) {
+    if (!expectedTokens.length) return { value: nextAnswer, activeSlot, selection: null }
+    const nextRanges = answerWordRanges(nextAnswer)
+    const slotIndex = getAnswerSlotFromCaret(
+      nextRanges,
+      selectionStart,
+      Number.isInteger(activeSlot) ? activeSlot : -1,
+      expectedTokens.length,
+    )
+    const range = nextRanges[slotIndex]
+    const expectedToken = expectedTokens[slotIndex]
+    if (!range || !expectedToken || slotIndex >= expectedTokens.length - 1) {
+      return { value: nextAnswer, activeSlot: slotIndex, selection: null }
+    }
+
+    const typedToken = answerTokens(nextAnswer.slice(range.start, range.end))[0] || ''
+    if (typedToken.length < expectedToken.length) {
+      return { value: nextAnswer, activeSlot: slotIndex, selection: null }
+    }
+
+    let value = nextAnswer
+    let caret = range.end
+    if (value[range.end] === ' ') {
+      caret = range.end + 1
+    } else {
+      value = `${value.slice(0, range.end)} ${value.slice(range.end)}`
+      caret = range.end + 1
+    }
+
+    const nextSlot = slotIndex + 1
+    const updatedRanges = answerWordRanges(value)
+    const nextRange = updatedRanges[nextSlot]
+    return {
+      value,
+      activeSlot: nextSlot,
+      selection: nextRange ? [nextRange.start, nextRange.end] : [caret, caret],
+    }
+  }
 
   function selectSlot(index) {
     const input = inputRef.current
@@ -2887,8 +2963,20 @@ function AnswerEntry({ answer, expected, placeholder, onAnswerChange, onSubmit }
         className="game-answer-input"
         value={answer}
         onChange={(event) => {
-          if (event.target.value !== answer) playTypingSound()
-          onAnswerChange(event.target.value)
+          const nextAnswer = sanitizeAnswerInput(event.target.value)
+          const selectionStart = event.target.selectionStart ?? nextAnswer.length
+          const isForwardInput = nextAnswer.length >= answer.length
+          const result = isForwardInput
+            ? applyAutoAdvance(nextAnswer, selectionStart)
+            : { value: nextAnswer, activeSlot, selection: null }
+          if (result.value !== answer) playTypingSound()
+          setActiveSlot(result.activeSlot)
+          onAnswerChange(result.value)
+          if (result.selection) {
+            window.requestAnimationFrame(() => {
+              inputRef.current?.setSelectionRange(result.selection[0], result.selection[1])
+            })
+          }
         }}
         onKeyDown={(event) => {
           if (event.key === 'Enter') {
