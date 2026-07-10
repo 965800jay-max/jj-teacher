@@ -1319,7 +1319,7 @@ function normalizeCoursePack(course, pack) {
 
 async function loadCoursePack(course) {
   if (course.lessonData?.length) return course
-  const response = await apiFetch(`${import.meta.env.BASE_URL}${course.dataPath}`)
+  const response = await fetch(`${import.meta.env.BASE_URL}${course.dataPath}`, { cache: 'force-cache' })
   if (!response.ok) throw new Error('课程包加载失败')
   const pack = await response.json()
   return { ...course, ...normalizeCoursePack(course, pack) }

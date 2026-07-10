@@ -885,11 +885,6 @@ async function serveFile(response, filePath) {
 }
 
 async function handleStatic(request, response, pathname) {
-  if (pathname.startsWith('/data/') && !(await authenticatedUser(request))) {
-    sendLoginRequired(response)
-    return
-  }
-
   let filePath = safeStaticPath(pathname)
   if (!filePath) {
     sendText(response, 403, 'Forbidden')
