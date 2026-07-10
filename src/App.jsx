@@ -54,7 +54,7 @@ const typingSoundUrl = `${import.meta.env.BASE_URL}audio/typing-sounds/default.m
 const correctSoundUrl = `${import.meta.env.BASE_URL}audio/game-sounds/correct.mp3`
 const errorSoundUrl = `${import.meta.env.BASE_URL}audio/game-sounds/error.mp3`
 const speechVoiceWaitMs = 1200
-const questionReadDelayMs = 360
+const questionReadDelayMs = 80
 const repeatReadGapMs = 520
 const correctReadDelayMs = 460
 let speechRunId = 0
@@ -768,7 +768,10 @@ function stopCurrentSpeechPlayback() {
   if (isNativeApp()) TextToSpeech.stop().catch(() => {})
   if (activeSpeechAudio) {
     activeSpeechAudio.pause()
+    activeSpeechAudio.currentTime = 0
+    activeSpeechAudio.removeAttribute?.('src')
     activeSpeechAudio.src = ''
+    activeSpeechAudio.load?.()
     activeSpeechAudio = null
   }
 }
@@ -1674,6 +1677,7 @@ function App() {
   }
 
   function movePractice(delta) {
+    stopSpeech()
     setPractice((current) => {
       if (!current) return current
       const data = getPracticeStatement(current)
