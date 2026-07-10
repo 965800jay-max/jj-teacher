@@ -1859,14 +1859,19 @@ button.queue-row:focus-visible {
 }
 
 .game-stage {
+  --stage-lift: clamp(10px, 2.2vh, 30px);
   display: grid;
   min-height: 0;
   place-items: center;
   align-content: center;
   overflow: hidden;
-  gap: clamp(12px, 2.4vh, 26px);
-  padding: clamp(14px, 3vh, 44px) 20px clamp(10px, 2vh, 34px);
+  gap: clamp(8px, 1.8vh, 20px);
+  padding: clamp(6px, 1.6vh, 24px) 20px clamp(22px, 4vh, 58px);
   text-align: center;
+}
+
+.game-stage > * {
+  transform: translateY(calc(-1 * var(--stage-lift)));
 }
 
 .game-stage h1 {
@@ -1918,9 +1923,9 @@ button.queue-row:focus-visible {
   align-items: flex-end;
   justify-content: center;
   border: 0;
-  border-bottom: 3px solid #a23cff;
+  border-bottom: 3px solid #111827;
   background: transparent;
-  color: #8232d8;
+  color: #111827;
   cursor: text;
   font-family: inherit;
   padding: 0 8px 8px;
@@ -1934,8 +1939,8 @@ button.queue-row:focus-visible {
 }
 
 .answer-slot.active {
-  border-bottom-color: #34d0ba;
-  background: rgba(52, 208, 186, 0.08);
+  border-bottom-color: #111827;
+  background: rgba(17, 24, 39, 0.06);
 }
 
 .answer-slot span {
@@ -2968,8 +2973,9 @@ button.queue-row:focus-visible {
   }
 
   .game-stage {
-    gap: 10px;
-    padding: 10px 12px 8px;
+    --stage-lift: clamp(18px, 4vh, 34px);
+    gap: 6px;
+    padding: 2px 12px 22px;
   }
 
   .game-stage h1 {
@@ -3185,6 +3191,7 @@ button.queue-row:focus-visible {
   }
 
   .game-stage {
+    --stage-lift: clamp(16px, 3.4vh, 34px);
     padding-right: 12px;
     padding-left: 12px;
   }

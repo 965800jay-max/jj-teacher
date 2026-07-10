@@ -2570,7 +2570,6 @@ function PracticeView({
   const [chineseVisible, setChineseVisible] = useState(() => currentChineseVisible)
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const [answerCountAnimating, setAnswerCountAnimating] = useState(false)
-  const Icon = mode?.icon || MessageSquareText
   const isListening = practice.modeId === 'listening'
   const isSpeaking = practice.modeId === 'speaking'
   const isDictation = practice.modeId === 'dictation'
@@ -2733,11 +2732,6 @@ function PracticeView({
       </div>
 
       <section className="game-stage">
-        <div className="mode-badge">
-          <Icon size={20} />
-          <span>{mode?.title}</span>
-        </div>
-
         {isListening ? (
           <ListeningStage prompt={{ ...actualPrompt, prompt: actualPrompt.answer }} />
         ) : isSpeaking ? (
