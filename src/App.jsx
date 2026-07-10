@@ -48,6 +48,7 @@ const sessionKey = 'julebu-web-redesign-session'
 const speechSettingsKey = 'julebu-web-redesign-speech-settings'
 const autoReadRepeatKey = 'julebu-web-redesign-auto-read-repeat'
 const chineseVisibleKey = 'julebu-web-redesign-chinese-visible'
+const pendingServerStateKey = 'julebu-web-redesign-pending-server-state'
 const globalStatsKey = '__julebuGlobalStats'
 const serverApiBaseUrl = (import.meta.env.VITE_JULEBU_API_BASE || '').replace(/\/$/, '')
 const typingSoundUrl = `${import.meta.env.BASE_URL}audio/typing-sounds/default.mp3`
@@ -69,9 +70,15 @@ const soundBufferCache = new Map()
 const soundDecodePromises = new Map()
 const instantToneKinds = new Set(['typing', 'correct', 'error', 'tap'])
 const aiTutorSessions = new Map()
-let serverStateSaveChain = Promise.resolve()
+let serverStateQueuedPayload = null
+let serverStateSaveInFlight = false
+let serverStateSaveTimer = 0
+let serverStateSaveWaiters = []
 const defaultSpeechSettings = { rate: 0.92, voiceGender: 'female' }
 const autoReadRepeatModes = [2, 1, 0]
+const serverSaveRetryDelays = [350, 900, 1800, 3500, 6500, 10000]
+const serverSaveRetryLaterDelayMs = 15000
+const serverSaveRequestTimeoutMs = 10000
 const voiceNamePatterns = {
   female: /female|woman|girl|ava|samantha|jenny|aria|victoria|karen|susan|zira|allison|joanna|kendra|kimberly|salli|ivy|emma|amy|olivia|sonia|libby|natasha|nicky|moira|fiona|tessa|veena|serena|ava.*neural|jenny.*neural|aria.*neural/i,
   male: /male|man|boy|alex|daniel|fred|tom|matthew|david|mark|guy|davis|andrew|brian|aaron|ryan|george|arthur|oliver|thomas|roger|eddy|reed|ralph|albert|junior|jacob|justin|kevin|christopher|eric|william|michael|james|john|paul|richard|nathan|liam|noah|jack|henry|charles|guy.*neural|davis.*neural|andrew.*neural/i,
@@ -233,13 +240,31 @@ function preloadCloudTts(texts, speechSettings = currentSpeechSettings, limit = 
 }
 
 async function apiFetch(url, options = {}, code) {
+  const { timeoutMs, ...fetchOptions } = options
   const headers = {
-    ...(options.headers || {}),
+    ...(fetchOptions.headers || {}),
     ...authHeaders(code),
   }
-  const response = await fetch(serverUrl(url), { ...options, headers })
+  const targetUrl = serverUrl(url)
+  const response = timeoutMs
+    ? await fetchWithTimeout(targetUrl, { ...fetchOptions, headers }, timeoutMs)
+    : await fetch(targetUrl, { ...fetchOptions, headers })
   if (response.status === 401) throw new AccessRequiredError('请先登录')
   return response
+}
+
+function wait(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms))
+}
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = serverSaveRequestTimeoutMs) {
+  const controller = new AbortController()
+  const timer = window.setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    return await fetch(url, { ...options, signal: controller.signal })
+  } finally {
+    window.clearTimeout(timer)
+  }
 }
 
 async function askAiTutor(payload) {
@@ -422,22 +447,182 @@ async function loadServerState(code) {
   }
 }
 
-function saveServerState(progress, savedItems) {
-  const payload = JSON.stringify({
+function makeServerStatePayload(progress, savedItems) {
+  return {
     progress: normalizeProgress(progress),
     savedItems: normalizeSavedItems(savedItems),
+  }
+}
+
+function mergeServerStatePayload(current, incoming) {
+  if (!current) return incoming
+  if (!incoming) return current
+  return {
+    progress: mergeProgressState(current.progress, incoming.progress),
+    savedItems: mergeSavedItemsState(current.savedItems, incoming.savedItems),
+  }
+}
+
+function pendingServerStateStorageKey(token = getStoredSession()) {
+  return `${pendingServerStateKey}:${token || 'anonymous'}`
+}
+
+function readPendingServerState(token = getStoredSession()) {
+  try {
+    const raw = localStorage.getItem(pendingServerStateStorageKey(token))
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    return makeServerStatePayload(parsed.progress, parsed.savedItems)
+  } catch {
+    return null
+  }
+}
+
+function persistPendingServerState(payload, token = getStoredSession()) {
+  try {
+    localStorage.setItem(pendingServerStateStorageKey(token), JSON.stringify(payload))
+  } catch {
+    // The server queue still keeps the latest state in memory while the app is open.
+  }
+}
+
+function clearPendingServerState(token = getStoredSession()) {
+  try {
+    localStorage.removeItem(pendingServerStateStorageKey(token))
+  } catch {
+    // Ignore storage cleanup errors.
+  }
+}
+
+function mergeServerStateWithPending(serverState, token = getStoredSession()) {
+  const pendingState = readPendingServerState(token)
+  if (!pendingState) {
+    return {
+      progress: normalizeProgress(serverState.progress),
+      savedItems: normalizeSavedItems(serverState.savedItems),
+      hadPending: false,
+    }
+  }
+  return {
+    progress: mergeProgressState(serverState.progress, pendingState.progress),
+    savedItems: mergeSavedItemsState(serverState.savedItems, pendingState.savedItems),
+    hadPending: true,
+  }
+}
+
+async function sendServerStatePayload(payload) {
+  const response = await apiFetch('/api/state', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    cache: 'no-store',
+    timeoutMs: serverSaveRequestTimeoutMs,
   })
-  const request = async () => {
-    const response = await apiFetch('/api/state', {
+  if (!response.ok) throw new Error('服务器保存失败')
+  return response.json().catch(() => ({}))
+}
+
+async function sendServerStatePayloadWithRetry(payload) {
+  let lastError = null
+  for (let attempt = 0; attempt <= serverSaveRetryDelays.length; attempt += 1) {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        throw new Error('网络离线')
+      }
+      return await sendServerStatePayload(payload)
+    } catch (error) {
+      lastError = error
+      if (error instanceof AccessRequiredError || attempt >= serverSaveRetryDelays.length) break
+      const jitter = Math.round(Math.random() * 180)
+      await wait(serverSaveRetryDelays[attempt] + jitter)
+    }
+  }
+  throw lastError || new Error('服务器保存失败')
+}
+
+function settleServerStateWaiters(type, value) {
+  const waiters = serverStateSaveWaiters
+  serverStateSaveWaiters = []
+  waiters.forEach((waiter) => waiter[type](value))
+}
+
+function emitServerSyncStatus(status) {
+  if (typeof window === 'undefined') return
+  window.dispatchEvent(new CustomEvent('julebu-server-sync', { detail: { status } }))
+}
+
+function scheduleServerStateFlush(delayMs = 0) {
+  if (typeof window === 'undefined') return
+  window.clearTimeout(serverStateSaveTimer)
+  serverStateSaveTimer = window.setTimeout(() => {
+    flushServerStateQueue()
+  }, delayMs)
+}
+
+async function flushServerStateQueue() {
+  if (serverStateSaveInFlight) return
+  const token = getStoredSession()
+  serverStateQueuedPayload = mergeServerStatePayload(readPendingServerState(token), serverStateQueuedPayload)
+  if (!serverStateQueuedPayload) return
+
+  serverStateSaveInFlight = true
+  let continueImmediately = false
+  const savingPayload = serverStateQueuedPayload
+  const savingPayloadText = JSON.stringify(savingPayload)
+  try {
+    await sendServerStatePayloadWithRetry(savingPayload)
+    const latestText = serverStateQueuedPayload ? JSON.stringify(serverStateQueuedPayload) : ''
+    if (latestText === savingPayloadText) {
+      serverStateQueuedPayload = null
+      clearPendingServerState(token)
+      emitServerSyncStatus('saved')
+      settleServerStateWaiters('resolve')
+    } else {
+      persistPendingServerState(serverStateQueuedPayload, token)
+      continueImmediately = true
+    }
+  } catch (error) {
+    persistPendingServerState(serverStateQueuedPayload, token)
+    emitServerSyncStatus('retrying')
+    settleServerStateWaiters('reject', error)
+    scheduleServerStateFlush(serverSaveRetryLaterDelayMs)
+  } finally {
+    serverStateSaveInFlight = false
+  }
+
+  if (serverStateQueuedPayload && continueImmediately) {
+    scheduleServerStateFlush(0)
+  }
+}
+
+function saveServerState(progress, savedItems) {
+  const payload = makeServerStatePayload(progress, savedItems)
+  const token = getStoredSession()
+  serverStateQueuedPayload = mergeServerStatePayload(serverStateQueuedPayload, payload)
+  persistPendingServerState(serverStateQueuedPayload, token)
+  const promise = new Promise((resolve, reject) => {
+    serverStateSaveWaiters.push({ resolve, reject })
+  })
+  scheduleServerStateFlush(0)
+  return promise
+}
+
+function wakeServerStateSaveQueue() {
+  if (serverStateQueuedPayload || readPendingServerState()) {
+    scheduleServerStateFlush(0)
+  }
+}
+
+function saveServerStateNow(progress, savedItems) {
+  const payload = makeServerStatePayload(progress, savedItems)
+  persistPendingServerState(payload)
+  return apiFetch('/api/state', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: payload,
+      body: JSON.stringify(payload),
+      cache: 'no-store',
+      keepalive: true,
     })
-    if (!response.ok) throw new Error('服务器保存失败')
-    return response.json().catch(() => ({}))
-  }
-  serverStateSaveChain = serverStateSaveChain.catch(() => {}).then(request)
-  return serverStateSaveChain
 }
 
 function hasSavedItems(value) {
@@ -1492,13 +1677,18 @@ function App() {
 
         setCurrentUser(session.user)
         setAuthError('')
-        const serverState = await loadServerState()
+        const serverState = mergeServerStateWithPending(await loadServerState())
         if (cancelled) return
         clearLocalLearningState()
         setSavedProgress(serverState.progress)
         setSavedItems(serverState.savedItems)
         setUsesServerStorage(true)
         setSyncError('')
+        if (serverState.hadPending) {
+          saveServerState(serverState.progress, serverState.savedItems)
+            .then(() => setSyncError(''))
+            .catch(() => setSyncError('网络不稳，正在自动重试保存'))
+        }
       } catch {
         if (cancelled) return
         clearStoredSession()
@@ -1538,7 +1728,47 @@ function App() {
     if (usesServerStorage) {
       saveServerState(savedProgress, savedItems)
         .then(() => setSyncError(''))
-        .catch(() => setSyncError('服务器保存失败，请检查网络后继续'))
+        .catch(() => setSyncError('网络不稳，正在自动重试保存'))
+    }
+  }, [currentUser, savedProgress, savedItems, storageReady, usesServerStorage])
+
+  useEffect(() => {
+    function handleSyncStatus(event) {
+      if (event.detail?.status === 'saved') setSyncError('')
+      if (event.detail?.status === 'retrying') setSyncError('网络不稳，正在自动重试保存')
+    }
+
+    function retryPendingSave() {
+      wakeServerStateSaveQueue()
+    }
+
+    window.addEventListener('julebu-server-sync', handleSyncStatus)
+    window.addEventListener('online', retryPendingSave)
+    document.addEventListener('visibilitychange', retryPendingSave)
+    return () => {
+      window.removeEventListener('julebu-server-sync', handleSyncStatus)
+      window.removeEventListener('online', retryPendingSave)
+      document.removeEventListener('visibilitychange', retryPendingSave)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!storageReady || !currentUser || !usesServerStorage) return undefined
+
+    function flushBeforePause() {
+      saveServerState(savedProgress, savedItems).catch(() => {})
+      saveServerStateNow(savedProgress, savedItems).catch(() => {})
+    }
+
+    function handleVisibilityFlush() {
+      if (document.visibilityState === 'hidden') flushBeforePause()
+    }
+
+    window.addEventListener('pagehide', flushBeforePause)
+    document.addEventListener('visibilitychange', handleVisibilityFlush)
+    return () => {
+      window.removeEventListener('pagehide', flushBeforePause)
+      document.removeEventListener('visibilitychange', handleVisibilityFlush)
     }
   }, [currentUser, savedProgress, savedItems, storageReady, usesServerStorage])
 
@@ -1784,13 +2014,18 @@ function App() {
     setModePicker(null)
     setUserPanelOpen(false)
 
-    const serverState = await loadServerState(token)
+    const serverState = mergeServerStateWithPending(await loadServerState(token), token)
     clearLocalLearningState()
     setSavedProgress(serverState.progress)
     setSavedItems(serverState.savedItems)
     setUsesServerStorage(true)
     setStorageReady(true)
     setSyncError('')
+    if (serverState.hadPending) {
+      saveServerState(serverState.progress, serverState.savedItems)
+        .then(() => setSyncError(''))
+        .catch(() => setSyncError('网络不稳，正在自动重试保存'))
+    }
   }
 
   async function authenticateUser({ username, password, mode }) {
@@ -3040,9 +3275,11 @@ function AnswerEntry({ answer, expected, placeholder, onAnswerChange, onSubmit }
 
 function AnswerBreakdown({ statement, lesson, showChinese = true }) {
   const words = buildWordBreakdown(statement, lesson)
+  const wordCount = words.length
+  const fitClass = wordCount >= 10 ? 'dense' : wordCount >= 7 ? 'compact' : ''
 
   return (
-    <div className="answer-breakdown">
+    <div className={`answer-breakdown ${fitClass}`} style={{ '--answer-word-count': wordCount }}>
       <div className="word-block-row">
         {words.map((item, index) => (
           <button className={`word-block ${item.tone}`} type="button" key={`${item.word}-${index}`} onClick={() => speakText(item.word, { fallbackAudioUrl: item.audioUrl })}>

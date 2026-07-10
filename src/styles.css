@@ -1962,10 +1962,43 @@ button.queue-row:focus-visible {
 }
 
 .answer-breakdown {
+  --answer-scale: 1;
+  --answer-gap-x: 12px;
+  --answer-gap-y: 14px;
+  --answer-card-min-width: 70px;
+  --answer-card-min-height: clamp(86px, 13vh, 108px);
+  --answer-word-font: clamp(28px, 5vh, 48px);
+  --answer-word-padding: 7px 11px 9px;
+  --answer-chinese-font: clamp(20px, 3vw, 30px);
   display: grid;
   justify-items: center;
   gap: clamp(10px, 2vh, 22px);
   width: min(820px, 94vw);
+  max-height: min(100%, calc(100dvh - 230px - env(safe-area-inset-bottom)));
+  overflow: hidden;
+}
+
+.answer-breakdown.compact {
+  --answer-scale: 0.88;
+  --answer-gap-x: 10px;
+  --answer-gap-y: 9px;
+  --answer-card-min-width: 58px;
+  --answer-card-min-height: clamp(72px, 10vh, 88px);
+  --answer-word-font: clamp(23px, 4.1vh, 38px);
+  --answer-word-padding: 6px 9px 8px;
+  --answer-chinese-font: clamp(18px, 2.4vw, 24px);
+}
+
+.answer-breakdown.dense {
+  --answer-scale: 0.76;
+  --answer-gap-x: 8px;
+  --answer-gap-y: 5px;
+  --answer-card-min-width: 48px;
+  --answer-card-min-height: clamp(58px, 8vh, 72px);
+  --answer-word-font: clamp(19px, 3.35vh, 31px);
+  --answer-word-padding: 5px 7px 7px;
+  --answer-chinese-font: clamp(16px, 2vw, 21px);
+  gap: clamp(4px, 1vh, 10px);
 }
 
 .word-block-row {
@@ -1973,7 +2006,8 @@ button.queue-row:focus-visible {
   flex-wrap: wrap;
   justify-content: center;
   align-items: flex-end;
-  gap: 14px 12px;
+  gap: var(--answer-gap-y) var(--answer-gap-x);
+  width: 100%;
 }
 
 .word-block {
@@ -1981,8 +2015,8 @@ button.queue-row:focus-visible {
   --word-line: #b657ff;
   position: relative;
   display: grid;
-  min-width: 70px;
-  min-height: clamp(86px, 13vh, 108px);
+  min-width: var(--answer-card-min-width);
+  min-height: var(--answer-card-min-height);
   grid-template-rows: 20px auto 22px 20px;
   align-items: center;
   justify-items: center;
@@ -1997,8 +2031,8 @@ button.queue-row:focus-visible {
   border-radius: 8px;
   border-bottom: 4px solid var(--word-line);
   background: var(--word-bg);
-  padding: 7px 11px 9px;
-  font-size: clamp(28px, 5vh, 48px);
+  padding: var(--answer-word-padding);
+  font-size: var(--answer-word-font);
   line-height: 1;
   white-space: nowrap;
 }
@@ -2084,7 +2118,7 @@ button.queue-row:focus-visible {
 .answer-chinese {
   margin: 0;
   color: #6a7078;
-  font-size: clamp(20px, 3vw, 30px);
+  font-size: var(--answer-chinese-font);
   font-weight: 900;
 }
 
@@ -2992,12 +3026,12 @@ button.queue-row:focus-visible {
   }
 
   .word-block {
-    min-width: 56px;
+    min-width: var(--answer-card-min-width);
   }
 
   .word-block strong {
-    padding: 6px 9px 8px;
-    font-size: clamp(24px, 4.6vh, 38px);
+    padding: var(--answer-word-padding);
+    font-size: var(--answer-word-font);
   }
 
   .word-block small {

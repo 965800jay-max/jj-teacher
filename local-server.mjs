@@ -739,12 +739,19 @@ async function handleStateApi(request, response) {
   }
 
   if (request.method === 'PUT') {
+    let payload = {}
     try {
       const body = await readRequestBody(request)
-      const payload = body ? JSON.parse(body) : {}
-      sendJson(response, 200, await enqueueStateWrite(() => writeUserState(user, payload)))
+      payload = body ? JSON.parse(body) : {}
     } catch {
       sendJson(response, 400, { error: 'Invalid state payload' })
+      return
+    }
+
+    try {
+      sendJson(response, 200, await enqueueStateWrite(() => writeUserState(user, payload)))
+    } catch {
+      sendJson(response, 500, { error: 'State save failed' })
     }
     return
   }
