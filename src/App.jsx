@@ -2900,18 +2900,20 @@ function answerWordRanges(value) {
 }
 
 function getAnswerSlotFromCaret(ranges, caret, fallbackSlot, slotCount) {
-  if (fallbackSlot >= 0 && fallbackSlot < slotCount) {
-    const fallbackRange = ranges[fallbackSlot]
-    if (!fallbackRange || caret >= fallbackRange.start) return fallbackSlot
-  }
+  const maxSlot = Math.max(0, slotCount - 1)
 
-  const containingRange = ranges.findIndex((range) => caret > range.start && caret <= range.end)
-  if (containingRange >= 0) return Math.min(containingRange, slotCount - 1)
+  const containingRange = ranges.findIndex((range) => caret >= range.start && caret <= range.end)
+  if (containingRange >= 0) return Math.min(containingRange, maxSlot)
 
-  const nextRange = ranges.findIndex((range) => caret < range.start)
-  if (nextRange >= 0) return Math.max(0, Math.min(nextRange - 1, slotCount - 1))
+  let previousRange = -1
+  ranges.forEach((range, index) => {
+    if (caret > range.end) previousRange = index
+  })
+  if (previousRange >= 0) return Math.min(previousRange, maxSlot)
 
-  return Math.max(0, Math.min(ranges.length, slotCount - 1))
+  if (fallbackSlot >= 0 && fallbackSlot < slotCount) return fallbackSlot
+
+  return 0
 }
 
 function AnswerEntry({ answer, expected, placeholder, onAnswerChange, onSubmit }) {
@@ -2938,14 +2940,20 @@ function AnswerEntry({ answer, expected, placeholder, onAnswerChange, onSubmit }
       return { value: nextAnswer, activeSlot: slotIndex, selection: null }
     }
 
-    const typedToken = answerTokens(nextAnswer.slice(range.start, range.end))[0] || ''
+    const typedWord = nextAnswer.slice(range.start, range.end)
+    const typedToken = answerTokens(typedWord)[0] || ''
     if (typedToken.length < expectedToken.length) {
       return { value: nextAnswer, activeSlot: slotIndex, selection: null }
     }
 
     let value = nextAnswer
-    let caret = range.end
-    if (value[range.end] === ' ') {
+    let caret
+    if (typedToken.length > expectedToken.length) {
+      const splitOffset = Math.min(typedWord.length, expectedToken.length)
+      const splitAt = range.start + splitOffset
+      value = `${value.slice(0, splitAt)} ${value.slice(splitAt)}`
+      caret = splitAt + 1
+    } else if (value[range.end] === ' ') {
       caret = range.end + 1
     } else {
       value = `${value.slice(0, range.end)} ${value.slice(range.end)}`
@@ -3003,10 +3011,7 @@ function AnswerEntry({ answer, expected, placeholder, onAnswerChange, onSubmit }
         onChange={(event) => {
           const nextAnswer = sanitizeAnswerInput(event.target.value)
           const selectionStart = event.target.selectionStart ?? nextAnswer.length
-          const isForwardInput = nextAnswer.length >= answer.length
-          const result = isForwardInput
-            ? applyAutoAdvance(nextAnswer, selectionStart)
-            : { value: nextAnswer, activeSlot, selection: null }
+          const result = applyAutoAdvance(nextAnswer, selectionStart)
           if (result.value !== answer) playTypingSound()
           setActiveSlot(result.activeSlot)
           onAnswerChange(result.value)
