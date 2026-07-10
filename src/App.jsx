@@ -65,6 +65,9 @@ let audioUnlocked = false
 let audioUnlockPromise = null
 const retainedUtterances = new Set()
 const soundCache = new Map()
+const soundBufferCache = new Map()
+const soundDecodePromises = new Map()
+const instantToneKinds = new Set(['typing', 'correct', 'error', 'tap'])
 const aiTutorSessions = new Map()
 let serverStateSaveChain = Promise.resolve()
 const defaultSpeechSettings = { rate: 0.92, voiceGender: 'female' }
@@ -549,7 +552,13 @@ function getAudioContext() {
   if (typeof window === 'undefined') return null
   const AudioContextConstructor = window.AudioContext || window.webkitAudioContext
   if (!AudioContextConstructor) return null
-  if (!audioContext) audioContext = new AudioContextConstructor()
+  if (!audioContext) {
+    try {
+      audioContext = new AudioContextConstructor({ latencyHint: 'interactive' })
+    } catch {
+      audioContext = new AudioContextConstructor()
+    }
+  }
   return audioContext
 }
 
@@ -568,20 +577,78 @@ function playTone(kind = 'tap', volume = 1) {
   if (!context) return
   context.resume?.().catch(() => {})
 
-  const now = context.currentTime
+  const now = context.currentTime + 0.001
+  const duration = kind === 'typing' ? 0.028 : kind === 'error' ? 0.13 : kind === 'correct' ? 0.105 : 0.045
+  const peak = Math.max(0.01, (kind === 'typing' ? 0.045 : kind === 'error' ? 0.09 : 0.08) * volume)
   const gain = context.createGain()
   gain.gain.setValueAtTime(0.0001, now)
-  gain.gain.exponentialRampToValueAtTime(Math.max(0.015, 0.08 * volume), now + 0.006)
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + (kind === 'error' ? 0.18 : 0.055))
+  gain.gain.exponentialRampToValueAtTime(peak, now + 0.002)
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration)
   gain.connect(context.destination)
 
   const oscillator = context.createOscillator()
-  oscillator.type = kind === 'error' ? 'sawtooth' : 'sine'
-  oscillator.frequency.setValueAtTime(kind === 'correct' ? 740 : kind === 'error' ? 220 : 880, now)
-  if (kind === 'correct') oscillator.frequency.exponentialRampToValueAtTime(980, now + 0.09)
+  oscillator.type = kind === 'error' ? 'sawtooth' : kind === 'typing' ? 'triangle' : 'sine'
+  oscillator.frequency.setValueAtTime(
+    kind === 'correct' ? 760 : kind === 'error' ? 190 : kind === 'typing' ? 1250 : 920,
+    now,
+  )
+  if (kind === 'correct') oscillator.frequency.exponentialRampToValueAtTime(1080, now + 0.07)
+  if (kind === 'typing') oscillator.frequency.exponentialRampToValueAtTime(980, now + 0.022)
   oscillator.connect(gain)
   oscillator.start(now)
-  oscillator.stop(now + (kind === 'error' ? 0.2 : 0.075))
+  oscillator.stop(now + duration + 0.01)
+}
+
+function primeLowLatencyAudio() {
+  const context = getAudioContext()
+  if (!context) return
+  context.resume?.().catch(() => {})
+  try {
+    const buffer = context.createBuffer(1, 1, context.sampleRate)
+    const source = context.createBufferSource()
+    source.buffer = buffer
+    source.connect(context.destination)
+    source.start(0)
+  } catch {
+    // Silent priming is best-effort only.
+  }
+}
+
+function preloadSoundBuffer(url) {
+  const context = getAudioContext()
+  if (!url || !context || typeof fetch === 'undefined') return null
+  if (soundBufferCache.has(url)) return Promise.resolve(soundBufferCache.get(url))
+  if (soundDecodePromises.has(url)) return soundDecodePromises.get(url)
+
+  const promise = fetch(url, { cache: 'force-cache' })
+    .then((response) => {
+      if (!response.ok) throw new Error('Sound preload failed')
+      return response.arrayBuffer()
+    })
+    .then((buffer) => context.decodeAudioData(buffer))
+    .then((decoded) => {
+      soundBufferCache.set(url, decoded)
+      return decoded
+    })
+    .catch(() => null)
+
+  soundDecodePromises.set(url, promise)
+  return promise
+}
+
+function playBufferedSound(url, volume = 1) {
+  const context = getAudioContext()
+  const buffer = soundBufferCache.get(url)
+  if (!context || !buffer) return false
+  context.resume?.().catch(() => {})
+  const source = context.createBufferSource()
+  const gain = context.createGain()
+  gain.gain.setValueAtTime(Math.max(0.01, volume), context.currentTime)
+  source.buffer = buffer
+  source.connect(gain)
+  gain.connect(context.destination)
+  source.start(context.currentTime + 0.001)
+  return true
 }
 
 function unlockSpeechSynthesis() {
@@ -610,6 +677,9 @@ function unlockAudio() {
   preloadSound(typingSoundUrl)
   preloadSound(correctSoundUrl)
   preloadSound(errorSoundUrl)
+  primeLowLatencyAudio()
+  preloadSoundBuffer(correctSoundUrl)
+  preloadSoundBuffer(errorSoundUrl)
   warmSpeechVoices()
   unlockSpeechSynthesis()
 
@@ -627,9 +697,18 @@ function unlockAudio() {
 
 function playOneShot(url, volume = 1, fallback = 'tap') {
   unlockAudio()
+  if (instantToneKinds.has(fallback)) {
+    playTone(fallback, volume)
+    preloadSoundBuffer(url)
+    return
+  }
+  if (playBufferedSound(url, volume)) return
+  playTone(fallback, volume)
+  preloadSoundBuffer(url)
+  if (getAudioContext()) return
+
   const baseAudio = preloadSound(url)
   if (!baseAudio) {
-    playTone(fallback, volume)
     return
   }
 
@@ -945,7 +1024,8 @@ function playAutoStatementAudio(statement, options = {}) {
 }
 
 function playTypingSound() {
-  playOneShot(typingSoundUrl, 0.7, 'typing')
+  unlockAudio()
+  playTone('typing', 0.85)
 }
 
 function archiveItemFromStatement(statement, lesson) {
