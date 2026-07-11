@@ -2914,7 +2914,7 @@ function PracticeView({
         document.documentElement.style.setProperty('--julebu-stable-vh', `${stableHeight / 100}px`)
 
         const activeElement = document.activeElement
-        const answerFocused = activeElement?.classList?.contains('game-answer-input')
+        const answerFocused = activeElement?.classList?.contains('game-answer-input') || activeElement?.classList?.contains('answer-slot-input')
         const shrink = Math.max(0, stableHeight - viewportHeight)
         const isOpen = Boolean(answerFocused && (shrink > 120 || viewportHeight < 620))
         setKeyboardOpen(isOpen)
@@ -3045,6 +3045,7 @@ function PracticeView({
                 answer={answer}
                 expected={actualPrompt.answer}
                 placeholder={isDictation ? '输入听到的英文' : '输入英文表达'}
+                clearSlotOnSelect={feedback?.status === 'close'}
                 onAnswerChange={setAnswer}
                 onSubmit={onSubmit}
               />
@@ -3120,161 +3121,164 @@ function splitWords(value) {
   return sanitizeAnswerInput(value).trim().split(/\s+/).filter(Boolean)
 }
 
-function typedWordsFromAnswer(value) {
-  if (!value) return []
+function answerPartsFromAnswer(value, slotCount = 0) {
+  if (!value && slotCount <= 0) return []
   const sanitized = sanitizeAnswerInput(value)
-  const words = sanitized.trimStart().split(/\s+/)
-  if (/\s$/.test(sanitized)) words.push('')
-  return words
-}
-
-function answerWordRanges(value) {
-  const ranges = []
-  const sanitized = sanitizeAnswerInput(value)
-  const matcher = /\S+/g
-  let match = matcher.exec(sanitized)
-  while (match) {
-    ranges.push({ start: match.index, end: match.index + match[0].length })
-    match = matcher.exec(sanitized)
+  const parts = sanitized.split(' ')
+  if (slotCount > 0) {
+    while (parts.length < slotCount) parts.push('')
+    return parts.slice(0, slotCount)
   }
-  return ranges
+  return parts
 }
 
-function getAnswerSlotFromCaret(ranges, caret, fallbackSlot, slotCount) {
-  const maxSlot = Math.max(0, slotCount - 1)
-
-  const containingRange = ranges.findIndex((range) => caret >= range.start && caret <= range.end)
-  if (containingRange >= 0) return Math.min(containingRange, maxSlot)
-
-  let previousRange = -1
-  ranges.forEach((range, index) => {
-    if (caret > range.end) previousRange = index
-  })
-  if (previousRange >= 0) return Math.min(previousRange, maxSlot)
-
-  if (fallbackSlot >= 0 && fallbackSlot < slotCount) return fallbackSlot
-
-  return 0
+function typedWordsFromAnswer(value, slotCount = 0) {
+  return answerPartsFromAnswer(value, slotCount)
 }
 
-function AnswerEntry({ answer, expected, placeholder, onAnswerChange, onSubmit }) {
-  const inputRef = useRef(null)
+function joinAnswerParts(parts) {
+  return parts.join(' ')
+}
+
+function AnswerEntry({ answer, expected, placeholder, clearSlotOnSelect = false, onAnswerChange, onSubmit }) {
+  const inputRefs = useRef([])
   const [activeSlot, setActiveSlot] = useState(null)
+  const [composingSlot, setComposingSlot] = useState(null)
   const expectedWords = splitWords(expected)
   const expectedTokens = answerTokens(expected)
   const slots = expectedWords.length ? expectedWords : ['']
-  const typedWords = typedWordsFromAnswer(answer)
-  const ranges = answerWordRanges(answer)
+  const typedWords = typedWordsFromAnswer(answer, slots.length)
 
-  function applyAutoAdvance(nextAnswer, selectionStart) {
-    if (!expectedTokens.length) return { value: nextAnswer, activeSlot, selection: null }
-    const nextRanges = answerWordRanges(nextAnswer)
-    const slotIndex = getAnswerSlotFromCaret(
-      nextRanges,
-      selectionStart,
-      Number.isInteger(activeSlot) ? activeSlot : -1,
-      expectedTokens.length,
-    )
-    const range = nextRanges[slotIndex]
-    const expectedToken = expectedTokens[slotIndex]
-    if (!range || !expectedToken || slotIndex >= expectedTokens.length - 1) {
-      return { value: nextAnswer, activeSlot: slotIndex, selection: null }
-    }
-
-    const typedWord = nextAnswer.slice(range.start, range.end)
-    const typedToken = answerTokens(typedWord)[0] || ''
-    if (typedToken.length < expectedToken.length) {
-      return { value: nextAnswer, activeSlot: slotIndex, selection: null }
-    }
-
-    let value = nextAnswer
-    let caret
-    if (typedToken.length > expectedToken.length) {
-      const splitOffset = Math.min(typedWord.length, expectedToken.length)
-      const splitAt = range.start + splitOffset
-      value = `${value.slice(0, splitAt)} ${value.slice(splitAt)}`
-      caret = splitAt + 1
-    } else if (value[range.end] === ' ') {
-      caret = range.end + 1
-    } else {
-      value = `${value.slice(0, range.end)} ${value.slice(range.end)}`
-      caret = range.end + 1
-    }
-
-    const nextSlot = slotIndex + 1
-    const updatedRanges = answerWordRanges(value)
-    const nextRange = updatedRanges[nextSlot]
-    return {
-      value,
-      activeSlot: nextSlot,
-      selection: nextRange ? [nextRange.start, nextRange.end] : [caret, caret],
-    }
-  }
-
-  function selectSlot(index) {
-    const input = inputRef.current
+  function focusSlot(index, selectText = false) {
+    const input = inputRefs.current[index]
     if (!input) return
-    const range = ranges[index] || { start: answer.length, end: answer.length }
-    setActiveSlot(index)
     input.focus()
     window.requestAnimationFrame(() => {
-      input.setSelectionRange(range.start, range.end)
+      if (selectText) {
+        input.select()
+      } else {
+        const caret = input.value.length
+        input.setSelectionRange(caret, caret)
+      }
     })
   }
 
+  function selectSlot(index) {
+    const input = inputRefs.current[index]
+    if (!input) return
+    const parts = answerPartsFromAnswer(answer, slots.length)
+    const shouldClear = clearSlotOnSelect && Boolean(parts[index])
+    setActiveSlot(index)
+    if (shouldClear) {
+      parts[index] = ''
+      input.value = ''
+      onAnswerChange(joinAnswerParts(parts))
+      focusSlot(index)
+      return
+    }
+    focusSlot(index, Boolean(parts[index]))
+  }
+
+  function commitParts(parts, nextActiveSlot = activeSlot, focusNext = false, selectNext = false) {
+    const nextAnswer = joinAnswerParts(parts)
+    if (nextAnswer !== answer) playTypingSound()
+    setActiveSlot(nextActiveSlot)
+    onAnswerChange(nextAnswer)
+    if (focusNext && Number.isInteger(nextActiveSlot)) {
+      focusSlot(nextActiveSlot, selectNext)
+    }
+  }
+
+  function handleSlotInput(index, rawValue, options = {}) {
+    const allowAutoAdvance = options.allowAutoAdvance === true || (options.allowAutoAdvance !== false && composingSlot !== index)
+    const parts = answerPartsFromAnswer(answer, slots.length)
+    const normalizedRaw = sanitizeAnswerInput(rawValue).replace(/[^\S ]+/g, ' ')
+    const rawTokens = normalizedRaw.trim().split(/\s+/).filter(Boolean)
+
+    if (rawTokens.length > 1) {
+      rawTokens.forEach((token, tokenIndex) => {
+        if (index + tokenIndex < parts.length) parts[index + tokenIndex] = token
+      })
+      const nextIndex = Math.min(index + rawTokens.length, parts.length - 1)
+      commitParts(parts, nextIndex, true, Boolean(parts[nextIndex]))
+      return
+    }
+
+    const cleanValue = normalizedRaw.replace(/\s+/g, '')
+    parts[index] = cleanValue
+
+    const expectedToken = expectedTokens[index] || ''
+    const nextIndex = index + 1
+    const canMoveNext = allowAutoAdvance && expectedToken && nextIndex < parts.length && !parts[nextIndex]
+
+    if (canMoveNext && answerTokens(cleanValue)[0]?.length >= expectedToken.length) {
+      if (cleanValue.length > expectedToken.length) {
+        parts[index] = cleanValue.slice(0, expectedToken.length)
+        parts[nextIndex] = cleanValue.slice(expectedToken.length)
+        commitParts(parts, nextIndex, true, Boolean(parts[nextIndex]))
+        return
+      }
+
+      commitParts(parts, nextIndex, true, false)
+      return
+    }
+
+    commitParts(parts, index)
+  }
+
   return (
-    <div className="answer-entry" role="presentation" onClick={() => inputRef.current?.focus()}>
+    <div className="answer-entry" role="presentation">
       <div className="answer-slots">
         {slots.map((word, index) => {
           const typed = typedWords[index] || ''
           return (
-            <button
+            <label
               className={`answer-slot ${activeSlot === index ? 'active' : ''}`}
               style={{ minWidth: `${Math.max(3, Math.min(word.length + 1, 18))}ch` }}
               key={`${word}-${index}`}
-              type="button"
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={(event) => {
-                event.stopPropagation()
-                selectSlot(index)
-              }}
               aria-label={`修改第 ${index + 1} 格`}
             >
-              <span>{typed}</span>
-            </button>
+              <input
+                ref={(node) => {
+                  inputRefs.current[index] = node
+                }}
+                className="answer-slot-input"
+                value={typed}
+                onFocus={() => setActiveSlot(index)}
+                onClick={() => selectSlot(index)}
+                onChange={(event) => handleSlotInput(index, event.target.value)}
+                onCompositionStart={() => setComposingSlot(index)}
+                onCompositionEnd={(event) => {
+                  setComposingSlot(null)
+                  handleSlotInput(index, event.currentTarget.value, { allowAutoAdvance: true })
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault()
+                    onSubmit()
+                    return
+                  }
+                  if (event.key === ' ') {
+                    event.preventDefault()
+                    const nextIndex = Math.min(index + 1, slots.length - 1)
+                    if (nextIndex !== index) {
+                      setActiveSlot(nextIndex)
+                      focusSlot(nextIndex, Boolean(typedWords[nextIndex]))
+                    }
+                  }
+                }}
+                aria-label={`修改第 ${index + 1} 格`}
+                placeholder={placeholder && index === 0 ? placeholder : ''}
+                autoCapitalize="off"
+                autoComplete="off"
+                autoCorrect="off"
+                autoFocus={index === 0}
+                spellCheck="false"
+              />
+            </label>
           )
         })}
       </div>
-      <input
-        ref={inputRef}
-        className="game-answer-input"
-        value={answer}
-        onChange={(event) => {
-          const nextAnswer = sanitizeAnswerInput(event.target.value)
-          const selectionStart = event.target.selectionStart ?? nextAnswer.length
-          const result = applyAutoAdvance(nextAnswer, selectionStart)
-          if (result.value !== answer) playTypingSound()
-          setActiveSlot(result.activeSlot)
-          onAnswerChange(result.value)
-          if (result.selection) {
-            window.requestAnimationFrame(() => {
-              inputRef.current?.setSelectionRange(result.selection[0], result.selection[1])
-            })
-          }
-        }}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter') {
-            event.preventDefault()
-            onSubmit()
-          }
-        }}
-        placeholder={placeholder}
-        autoCapitalize="off"
-        autoComplete="off"
-        autoCorrect="off"
-        spellCheck="false"
-        autoFocus
-      />
     </div>
   )
 }

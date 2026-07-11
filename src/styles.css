@@ -1933,9 +1933,31 @@ button.queue-row:focus-visible {
   line-height: 1.1;
 }
 
+.answer-slot-input {
+  width: 100%;
+  min-width: 1ch;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  caret-color: #111827;
+  padding: 0;
+  font: inherit;
+  line-height: inherit;
+  text-align: center;
+}
+
+.answer-slot-input::placeholder {
+  color: transparent;
+}
+
 .night-study .answer-slot {
   border-bottom-color: #a855f7;
   color: #fafafa;
+}
+
+.night-study .answer-slot-input {
+  caret-color: #fafafa;
 }
 
 .answer-slot.active {
