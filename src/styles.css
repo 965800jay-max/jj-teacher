@@ -1918,8 +1918,13 @@ button.queue-row:focus-visible {
 }
 
 .answer-slot {
+  position: relative;
   display: inline-flex;
+  width: var(--answer-slot-width, auto);
+  max-width: min(18ch, 84vw);
+  flex: 0 0 auto;
   min-height: 54px;
+  height: 54px;
   align-items: flex-end;
   justify-content: center;
   border: 0;
@@ -1928,23 +1933,27 @@ button.queue-row:focus-visible {
   color: #111827;
   cursor: text;
   font-family: inherit;
-  padding: 0 8px 8px;
+  padding: 0 8px 2px;
   font-size: 26px;
-  line-height: 1.1;
+  line-height: 1;
+  overflow: hidden;
 }
 
 .answer-slot-input {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  min-width: 1ch;
+  height: 100%;
   border: 0;
   outline: 0;
   background: transparent;
-  color: inherit;
-  caret-color: #111827;
+  color: transparent;
+  caret-color: transparent;
   padding: 0;
   font: inherit;
   line-height: inherit;
   text-align: center;
+  opacity: 0;
 }
 
 .answer-slot-input::placeholder {
@@ -1957,7 +1966,7 @@ button.queue-row:focus-visible {
 }
 
 .night-study .answer-slot-input {
-  caret-color: #fafafa;
+  caret-color: transparent;
 }
 
 .answer-slot.active {
@@ -1965,9 +1974,22 @@ button.queue-row:focus-visible {
   background: rgba(17, 24, 39, 0.06);
 }
 
+.night-study .answer-slot.active {
+  border-bottom-color: #a855f7;
+  background: rgba(168, 85, 247, 0.11);
+}
+
 .answer-slot span {
+  display: block;
+  width: 100%;
   min-width: 1ch;
-  overflow-wrap: anywhere;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  pointer-events: none;
+  transform: translateY(2px);
 }
 
 .game-answer-input {
@@ -3353,7 +3375,8 @@ button.queue-row:focus-visible {
 
 .game-page.keyboard-open .answer-slot {
   min-height: 44px;
-  padding-bottom: 6px;
+  height: 44px;
+  padding-bottom: 2px;
   font-size: 26px;
 }
 

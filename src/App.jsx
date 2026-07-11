@@ -3234,10 +3234,11 @@ function AnswerEntry({ answer, expected, placeholder, clearSlotOnSelect = false,
           return (
             <label
               className={`answer-slot ${activeSlot === index ? 'active' : ''}`}
-              style={{ minWidth: `${Math.max(3, Math.min(word.length + 1, 18))}ch` }}
+              style={{ '--answer-slot-width': `${Math.max(3, Math.min(Math.max(word.length, typed.length) + 1, 18))}ch` }}
               key={`${word}-${index}`}
               aria-label={`修改第 ${index + 1} 格`}
             >
+              <span>{typed}</span>
               <input
                 ref={(node) => {
                   inputRefs.current[index] = node
@@ -3268,7 +3269,6 @@ function AnswerEntry({ answer, expected, placeholder, clearSlotOnSelect = false,
                   }
                 }}
                 aria-label={`修改第 ${index + 1} 格`}
-                placeholder={placeholder && index === 0 ? placeholder : ''}
                 autoCapitalize="off"
                 autoComplete="off"
                 autoCorrect="off"
