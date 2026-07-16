@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
-    "android:sync": "npm run build && cap sync android",
+    "android:sync": "npm run build && node scripts/prepare-android-web.mjs && cap sync android",
     "local": "node local-server.mjs",
     "local:build": "npm run build && node local-server.mjs",
     "preview": "vite preview --host 127.0.0.1"

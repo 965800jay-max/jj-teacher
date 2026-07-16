@@ -713,14 +713,14 @@ button:disabled {
 .primary-button {
   min-height: 44px;
   border: 0;
-  background: linear-gradient(135deg, #168775, #278f9c);
+  background: linear-gradient(105deg, #168775 0%, #397fa4 64%, #c39443 118%);
   color: #fff;
   padding: 0 16px;
   box-shadow: 0 10px 22px rgba(22, 135, 117, 0.16);
 }
 
 .primary-button:hover {
-  background: linear-gradient(135deg, #0f7464, #227b87);
+  background: linear-gradient(105deg, #0f7464 0%, #326f90 64%, #ad8239 118%);
 }
 
 .secondary-button {
@@ -760,76 +760,90 @@ button:disabled {
 .course-surface,
 .course-cover {
   --course-accent: #168775;
-  --course-accent-2: #69bbaa;
+  --course-accent-2: #5f86c4;
+  --course-accent-3: #c99745;
   --course-soft: #eaf6f2;
-  --course-cover-end: #cce9e1;
-  --course-line: #bfdfd6;
-  --course-ink: #18473f;
+  --course-soft-2: #edf2fb;
+  --course-soft-3: #fff5e2;
+  --course-line: #cbded8;
+  --course-ink: #213d3a;
 }
 
 .course-surface.accent-teal,
 .course-cover.teal {
   --course-accent: #177d70;
-  --course-accent-2: #69bbaa;
+  --course-accent-2: #5f86c4;
+  --course-accent-3: #c99745;
   --course-soft: #eaf6f2;
-  --course-cover-end: #cce9e1;
-  --course-line: #bfdfd6;
-  --course-ink: #18473f;
+  --course-soft-2: #edf2fb;
+  --course-soft-3: #fff5e2;
+  --course-line: #cbded8;
+  --course-ink: #213d3a;
 }
 
 .course-surface.accent-coral,
 .course-cover.coral {
   --course-accent: #b85f4b;
-  --course-accent-2: #df927f;
+  --course-accent-2: #657fb8;
+  --course-accent-3: #559786;
   --course-soft: #fff1ed;
-  --course-cover-end: #f4d2c8;
-  --course-line: #edc7bc;
-  --course-ink: #693b31;
+  --course-soft-2: #eef2fb;
+  --course-soft-3: #eaf6f2;
+  --course-line: #e7d2ca;
+  --course-ink: #5d3b36;
 }
 
 .course-surface.accent-blue,
 .course-cover.blue {
   --course-accent: #4169b2;
-  --course-accent-2: #7ea1dd;
+  --course-accent-2: #5d9b87;
+  --course-accent-3: #c99846;
   --course-soft: #eef3fb;
-  --course-cover-end: #d6e2f5;
-  --course-line: #c9d8ef;
-  --course-ink: #29456f;
+  --course-soft-2: #eaf6f1;
+  --course-soft-3: #fff5e2;
+  --course-line: #d0d9e8;
+  --course-ink: #2f405f;
 }
 
 .course-surface.accent-gold,
 .course-cover.gold {
   --course-accent: #9a772c;
-  --course-accent-2: #d1ad62;
+  --course-accent-2: #4f8d86;
+  --course-accent-3: #b96d78;
   --course-soft: #fff8e8;
-  --course-cover-end: #f4e5bb;
-  --course-line: #ead9a9;
-  --course-ink: #5a481f;
+  --course-soft-2: #eaf6f3;
+  --course-soft-3: #fbedef;
+  --course-line: #e6dcc4;
+  --course-ink: #54462b;
 }
 
 .course-surface.accent-green,
 .course-cover.green {
   --course-accent: #5f8a4d;
-  --course-accent-2: #94b680;
+  --course-accent-2: #557cba;
+  --course-accent-3: #c4884b;
   --course-soft: #f0f7ec;
-  --course-cover-end: #d9e9cf;
-  --course-line: #ccdfc0;
-  --course-ink: #3f5836;
+  --course-soft-2: #edf2fb;
+  --course-soft-3: #fff1e3;
+  --course-line: #d3dfcd;
+  --course-ink: #3f5438;
 }
 
 .course-surface.accent-ink,
 .course-cover.ink {
   --course-accent: #596578;
-  --course-accent-2: #8894a6;
+  --course-accent-2: #4f9188;
+  --course-accent-3: #ba775d;
   --course-soft: #eff2f6;
-  --course-cover-end: #d9dfe8;
-  --course-line: #cdd4df;
+  --course-soft-2: #eaf5f2;
+  --course-soft-3: #fff0ea;
+  --course-line: #d2d7df;
   --course-ink: #344052;
 }
 
 .continue-panel.course-surface {
   border-color: var(--course-line);
-  background: linear-gradient(135deg, var(--course-soft), rgba(255, 255, 255, 0.96) 46%);
+  background: linear-gradient(125deg, var(--course-soft) 0%, rgba(255, 255, 255, 0.97) 42%, var(--course-soft-2) 72%, var(--course-soft-3) 118%);
 }
 
 .continue-copy {
@@ -902,7 +916,7 @@ button:disabled {
   inset: 0;
   z-index: -3;
   content: "";
-  background: linear-gradient(145deg, var(--course-soft), var(--course-cover-end));
+  background: linear-gradient(128deg, var(--course-soft) 0%, var(--course-soft-2) 56%, var(--course-soft-3) 112%);
 }
 
 .course-cover::after {
@@ -910,7 +924,9 @@ button:disabled {
   inset: 0;
   z-index: -1;
   content: "";
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.58) 48%, rgba(255, 255, 255, 0.16));
+  background:
+    linear-gradient(90deg, var(--course-accent), var(--course-accent-2) 56%, var(--course-accent-3)) bottom / 100% 5px no-repeat,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.52) 48%, rgba(255, 255, 255, 0.12));
 }
 
 .course-cover img {
@@ -920,33 +936,33 @@ button:disabled {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.24;
-  filter: saturate(0.72) contrast(0.92);
+  opacity: 0.18;
+  filter: saturate(0.65) contrast(0.9);
   transform: scale(1.015);
 }
 
 .course-cover.teal::before {
-  background: linear-gradient(145deg, var(--course-soft), var(--course-cover-end));
+  background: linear-gradient(128deg, var(--course-soft), var(--course-soft-2) 56%, var(--course-soft-3) 112%);
 }
 
 .course-cover.coral::before {
-  background: linear-gradient(145deg, var(--course-soft), var(--course-cover-end));
+  background: linear-gradient(128deg, var(--course-soft), var(--course-soft-2) 56%, var(--course-soft-3) 112%);
 }
 
 .course-cover.blue::before {
-  background: linear-gradient(145deg, var(--course-soft), var(--course-cover-end));
+  background: linear-gradient(128deg, var(--course-soft), var(--course-soft-2) 56%, var(--course-soft-3) 112%);
 }
 
 .course-cover.gold::before {
-  background: linear-gradient(145deg, var(--course-soft), var(--course-cover-end));
+  background: linear-gradient(128deg, var(--course-soft), var(--course-soft-2) 56%, var(--course-soft-3) 112%);
 }
 
 .course-cover.green::before {
-  background: linear-gradient(145deg, var(--course-soft), var(--course-cover-end));
+  background: linear-gradient(128deg, var(--course-soft), var(--course-soft-2) 56%, var(--course-soft-3) 112%);
 }
 
 .course-cover.ink::before {
-  background: linear-gradient(145deg, var(--course-soft), var(--course-cover-end));
+  background: linear-gradient(128deg, var(--course-soft), var(--course-soft-2) 56%, var(--course-soft-3) 112%);
 }
 
 .cover-stripe {
@@ -956,10 +972,14 @@ button:disabled {
   width: 150px;
   height: 76px;
   transform: rotate(-18deg);
-  border: 1px solid color-mix(in srgb, var(--course-accent) 30%, transparent);
-  background:
-    repeating-linear-gradient(90deg, color-mix(in srgb, var(--course-accent) 18%, transparent) 0 8px, rgba(255, 255, 255, 0.2) 8px 16px);
-  opacity: 0.72;
+  border: 1px solid color-mix(in srgb, var(--course-accent-2) 24%, transparent);
+  background: repeating-linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--course-accent) 24%, white) 0 12px,
+    color-mix(in srgb, var(--course-accent-2) 24%, white) 12px 24px,
+    color-mix(in srgb, var(--course-accent-3) 24%, white) 24px 36px
+  );
+  opacity: 0.68;
 }
 
 .course-cover strong {
@@ -982,7 +1002,7 @@ button:disabled {
   align-self: flex-start;
   border: 1px solid var(--course-line);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.62);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.78), var(--course-soft-2));
   color: var(--course-ink);
   padding: 4px 8px;
   font-size: 12px;
@@ -1007,7 +1027,7 @@ button:disabled {
 }
 
 .course-surface .progress-track span {
-  background: linear-gradient(90deg, var(--course-accent), var(--course-accent-2));
+  background: linear-gradient(90deg, var(--course-accent), var(--course-accent-2) 56%, var(--course-accent-3));
 }
 
 .metric-row {
@@ -1024,6 +1044,21 @@ button:disabled {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+}
+
+.stats-panel,
+.review-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-panel::before,
+.review-panel::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, #3aa58d, #7296ce 55%, #dda75a);
+  content: "";
 }
 
 .stat-tile {
@@ -1234,6 +1269,16 @@ button.queue-row:focus-visible {
   transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
+.course-card::before {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 3;
+  height: 3px;
+  background: linear-gradient(90deg, var(--course-accent), var(--course-accent-2) 56%, var(--course-accent-3));
+  content: "";
+  pointer-events: none;
+}
+
 .course-card:hover {
   border-color: var(--course-line);
   box-shadow: 0 14px 34px rgba(43, 57, 49, 0.09);
@@ -1254,6 +1299,7 @@ button.queue-row:focus-visible {
   gap: 10px;
   padding: 14px;
   border-top: 1px solid color-mix(in srgb, var(--course-line) 62%, transparent);
+  background: linear-gradient(150deg, #ffffff 0%, #ffffff 68%, color-mix(in srgb, var(--course-soft-3) 42%, white));
 }
 
 .tag-row {
@@ -1273,8 +1319,14 @@ button.queue-row:focus-visible {
 
 .course-card .tag-row span:first-child {
   border: 1px solid var(--course-line);
-  background: var(--course-soft);
+  background: linear-gradient(90deg, var(--course-soft), var(--course-soft-2));
   color: var(--course-accent);
+}
+
+.course-card .tag-row span:nth-child(2) {
+  border: 1px solid color-mix(in srgb, var(--course-accent-3) 20%, var(--line));
+  background: var(--course-soft-3);
+  color: color-mix(in srgb, var(--course-accent-3) 82%, #40464d);
 }
 
 .course-content h2 {
@@ -1318,8 +1370,9 @@ button.queue-row:focus-visible {
 
 .course-card .secondary-button {
   border-color: var(--course-line);
-  background: var(--course-soft);
-  color: var(--course-accent);
+  background: linear-gradient(100deg, var(--course-soft), var(--course-soft-2) 64%, var(--course-soft-3));
+  color: var(--course-ink);
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--course-accent-2) 26%, transparent);
   transition: filter 150ms ease, transform 150ms ease;
 }
 
@@ -1343,7 +1396,7 @@ button.queue-row:focus-visible {
   gap: 22px;
   align-items: center;
   border-color: var(--course-line);
-  background: linear-gradient(120deg, var(--course-soft), rgba(255, 255, 255, 0.96) 52%);
+  background: linear-gradient(120deg, var(--course-soft) 0%, rgba(255, 255, 255, 0.97) 43%, var(--course-soft-2) 74%, var(--course-soft-3) 118%);
 }
 
 .hero-action {
@@ -1506,7 +1559,7 @@ button.queue-row:focus-visible {
 
 .lesson-panel.course-surface {
   border-color: color-mix(in srgb, var(--course-line) 72%, var(--line));
-  background: linear-gradient(180deg, color-mix(in srgb, var(--course-soft) 48%, white), rgba(255, 255, 255, 0.96) 180px);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--course-soft) 58%, white), rgba(255, 255, 255, 0.97) 42%, color-mix(in srgb, var(--course-soft-2) 45%, white) 74%, color-mix(in srgb, var(--course-soft-3) 48%, white));
 }
 
 .lesson-row {
@@ -1527,7 +1580,7 @@ button.queue-row:focus-visible {
 .lesson-row:hover,
 .lesson-row:focus-visible {
   border-color: var(--course-accent);
-  background: var(--course-soft);
+  background: linear-gradient(100deg, var(--course-soft), var(--course-soft-2) 72%, var(--course-soft-3));
 }
 
 .lesson-row:focus-visible {
@@ -1577,8 +1630,8 @@ button.queue-row:focus-visible {
 }
 
 .lesson-row.started em {
-  background: var(--course-soft);
-  color: var(--course-accent);
+  background: linear-gradient(90deg, var(--course-soft-2), var(--course-soft-3));
+  color: var(--course-ink);
 }
 
 .night-study .continue-panel.course-surface,
@@ -1592,6 +1645,14 @@ button.queue-row:focus-visible {
 
 .night-study .course-card .course-content {
   border-top-color: #1f2937;
+  background: #0f0f10;
+}
+
+.night-study .course-card .tag-row span:first-child,
+.night-study .course-card .tag-row span:nth-child(2) {
+  border-color: #34343a;
+  background: #18181b;
+  color: #d1d5db;
 }
 
 .night-study .lesson-row {
