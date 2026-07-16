@@ -883,14 +883,17 @@ button:disabled {
   overflow: hidden;
   border-radius: 8px;
   padding: 16px;
-  border: 1px solid var(--course-line);
-  color: var(--course-ink);
+  border: 1px solid color-mix(in srgb, var(--course-accent-2) 28%, rgba(255, 255, 255, 0.65));
+  color: #fff;
   isolation: isolate;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  background: linear-gradient(128deg, var(--course-accent), var(--course-accent-2) 56%, var(--course-accent-3));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.44),
+    0 12px 28px color-mix(in srgb, var(--course-accent) 15%, transparent);
 }
 
 .course-cover.normal {
-  height: 168px;
+  height: 184px;
 }
 
 .course-cover.small {
@@ -902,12 +905,12 @@ button:disabled {
 }
 
 .course-cover.large {
-  height: 190px;
+  height: 210px;
 }
 
 .course-cover.hero {
-  width: 220px;
-  height: 180px;
+  width: 240px;
+  height: 200px;
   flex: 0 0 auto;
 }
 
@@ -926,7 +929,8 @@ button:disabled {
   content: "";
   background:
     linear-gradient(90deg, var(--course-accent), var(--course-accent-2) 56%, var(--course-accent-3)) bottom / 100% 5px no-repeat,
-    linear-gradient(90deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.52) 48%, rgba(255, 255, 255, 0.12));
+    linear-gradient(0deg, rgba(5, 12, 18, 0.82) 0%, rgba(8, 18, 25, 0.38) 36%, rgba(8, 18, 25, 0.05) 72%),
+    linear-gradient(90deg, rgba(7, 15, 22, 0.28), transparent 62%);
 }
 
 .course-cover img {
@@ -936,9 +940,11 @@ button:disabled {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.18;
-  filter: saturate(0.65) contrast(0.9);
-  transform: scale(1.015);
+  object-position: var(--cover-position, center);
+  opacity: 1;
+  filter: saturate(1.08) contrast(1.03);
+  transform: scale(1.01);
+  transition: transform 280ms ease, filter 280ms ease;
 }
 
 .course-cover.teal::before {
@@ -967,19 +973,22 @@ button:disabled {
 
 .cover-stripe {
   position: absolute;
-  inset: 24px -18px auto auto;
+  inset: 14px 14px auto auto;
   z-index: 0;
-  width: 150px;
-  height: 76px;
-  transform: rotate(-18deg);
-  border: 1px solid color-mix(in srgb, var(--course-accent-2) 24%, transparent);
+  width: 82px;
+  height: 24px;
+  overflow: hidden;
+  transform: rotate(-4deg);
+  border: 1px solid rgba(255, 255, 255, 0.46);
+  border-radius: 999px;
   background: repeating-linear-gradient(
     90deg,
-    color-mix(in srgb, var(--course-accent) 24%, white) 0 12px,
-    color-mix(in srgb, var(--course-accent-2) 24%, white) 12px 24px,
-    color-mix(in srgb, var(--course-accent-3) 24%, white) 24px 36px
+    color-mix(in srgb, var(--course-accent) 72%, white) 0 14px,
+    color-mix(in srgb, var(--course-accent-2) 72%, white) 14px 28px,
+    color-mix(in srgb, var(--course-accent-3) 72%, white) 28px 42px
   );
-  opacity: 0.68;
+  opacity: 0.88;
+  box-shadow: 0 5px 14px rgba(8, 16, 24, 0.2);
 }
 
 .course-cover strong {
@@ -988,25 +997,42 @@ button:disabled {
   display: block;
   max-width: 100%;
   overflow-wrap: anywhere;
-  font-size: 30px;
-  line-height: 1;
+  margin-top: auto;
+  padding-top: 46px;
+  font-size: 32px;
+  line-height: 1.05;
+  color: #fff;
+  text-shadow: 0 2px 14px rgba(3, 10, 16, 0.66);
 }
 
 .course-cover.small strong {
-  font-size: 13px;
+  padding-top: 22px;
+  font-size: 12px;
 }
 
 .course-cover span {
   position: relative;
   z-index: 1;
   align-self: flex-start;
-  border: 1px solid var(--course-line);
+  margin-top: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.44);
   border-radius: 8px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.78), var(--course-soft-2));
-  color: var(--course-ink);
+  background: rgba(8, 18, 25, 0.48);
+  color: #fff;
+  backdrop-filter: blur(8px);
   padding: 4px 8px;
   font-size: 12px;
   font-weight: 800;
+}
+
+.course-cover.small .cover-stripe,
+.course-cover.small span {
+  display: none;
+}
+
+.course-card:hover .course-cover img {
+  filter: saturate(1.15) contrast(1.04);
+  transform: scale(1.045);
 }
 
 .progress-track {

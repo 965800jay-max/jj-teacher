@@ -4165,10 +4165,17 @@ function CourseRow({ course, onOpen }) {
 }
 
 function CourseCover({ course, size = 'normal' }) {
+  const coverImageSrc = course.coverImage?.startsWith('http')
+    ? course.coverImage
+    : `${import.meta.env.BASE_URL}${course.coverImage || ''}`
+
   return (
-    <div className={`course-cover ${course.accent} ${size}`}>
-      {course.coverImage && <img src={course.coverImage} alt="" loading="lazy" />}
-      <div className="cover-stripe" />
+    <div
+      className={`course-cover ${course.accent} ${size}`}
+      style={{ '--cover-position': course.coverPosition || 'center' }}
+    >
+      {course.coverImage && <img src={coverImageSrc} alt="" loading="lazy" decoding="async" />}
+      <div className="cover-stripe" aria-hidden="true" />
       <strong>{course.cover}</strong>
       <span>{course.level}</span>
     </div>
