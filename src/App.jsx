@@ -52,6 +52,7 @@ const phoneticVisibleKey = 'julebu-web-redesign-phonetic-visible'
 const pendingServerStateKey = 'julebu-web-redesign-pending-server-state'
 const globalStatsKey = '__julebuGlobalStats'
 const serverApiBaseUrl = (import.meta.env.VITE_JULEBU_API_BASE || '').replace(/\/$/, '')
+const nativeServerApiBaseUrl = 'https://julebu-learning-platform.onrender.com'
 const typingSoundUrl = `${import.meta.env.BASE_URL}audio/typing-sounds/default.mp3`
 const correctSoundUrl = `${import.meta.env.BASE_URL}audio/game-sounds/correct.mp3`
 const errorSoundUrl = `${import.meta.env.BASE_URL}audio/game-sounds/error.mp3`
@@ -205,9 +206,10 @@ function authHeaders(token = getStoredSession()) {
 
 function serverUrl(path) {
   if (/^https?:\/\//i.test(path)) return path
-  if (!serverApiBaseUrl) return path
+  const apiBaseUrl = serverApiBaseUrl || (isNativeApp() ? nativeServerApiBaseUrl : '')
+  if (!apiBaseUrl) return path
   const normalizedPath = path.startsWith('./') ? path.slice(1) : path
-  return `${serverApiBaseUrl}${normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`}`
+  return `${apiBaseUrl}${normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`}`
 }
 
 function cloudTtsUrl(text, speechSettings = currentSpeechSettings) {
