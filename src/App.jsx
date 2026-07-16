@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { Capacitor } from '@capacitor/core'
 import { QueueStrategy, TextToSpeech } from '@capacitor-community/text-to-speech'
 import {
@@ -79,6 +80,8 @@ const autoReadRepeatModes = [2, 1, 0]
 const serverSaveRetryDelays = [350, 900, 1800, 3500, 6500, 10000]
 const serverSaveRetryLaterDelayMs = 15000
 const serverSaveRequestTimeoutMs = 10000
+const courseStudyCheckpointMs = 15000
+const maxCourseStudyGapSeconds = 20
 const voiceNamePatterns = {
   female: /female|woman|girl|ava|samantha|jenny|aria|victoria|karen|susan|zira|allison|joanna|kendra|kimberly|salli|ivy|emma|amy|olivia|sonia|libby|natasha|nicky|moira|fiona|tessa|veena|serena|ava.*neural|jenny.*neural|aria.*neural/i,
   male: /male|man|boy|alex|daniel|fred|tom|matthew|david|mark|guy|davis|andrew|brian|aaron|ryan|george|arthur|oliver|thomas|roger|eddy|reed|ralph|albert|junior|jacob|justin|kevin|christopher|eric|william|michael|james|john|paul|richard|nathan|liam|noah|jack|henry|charles|guy.*neural|davis.*neural|andrew.*neural/i,
@@ -284,7 +287,13 @@ function normalizeProgress(value) {
 }
 
 function createEmptySavedItems() {
-  return { mastered: [], vocab: [], forgottenWords: [], forgottenPhrases: [] }
+  return {
+    mastered: [],
+    vocab: [],
+    removedItems: { mastered: {}, vocab: {} },
+    forgottenWords: [],
+    forgottenPhrases: [],
+  }
 }
 
 function normalizeForgottenItem(item, fallbackKind) {
@@ -315,11 +324,56 @@ function normalizeForgottenItems(items, fallbackKind) {
   return sortForgottenItems(items.map((item) => normalizeForgottenItem(item, fallbackKind)).filter(Boolean))
 }
 
+function archiveTimestamp(value) {
+  const timestamp = Date.parse(String(value || ''))
+  return Number.isFinite(timestamp) ? timestamp : 0
+}
+
+function archiveItemTimestamp(item) {
+  return archiveTimestamp(item?.updatedAt || item?.addedAt)
+}
+
+function normalizeArchiveItems(items) {
+  if (!Array.isArray(items)) return []
+  const byId = new Map()
+  for (const item of items) {
+    if (!item?.id) continue
+    const existing = byId.get(item.id)
+    if (!existing || archiveItemTimestamp(item) >= archiveItemTimestamp(existing)) {
+      byId.set(item.id, { ...existing, ...item })
+    }
+  }
+  return [...byId.values()]
+}
+
+function normalizeArchiveRemovals(value) {
+  if (!value || typeof value !== 'object') return {}
+  return Object.fromEntries(
+    Object.entries(value).filter(([id, removedAt]) => id && archiveTimestamp(removedAt) > 0),
+  )
+}
+
+function normalizeRemovedArchiveItems(value) {
+  return {
+    mastered: normalizeArchiveRemovals(value?.mastered),
+    vocab: normalizeArchiveRemovals(value?.vocab),
+  }
+}
+
+function filterRemovedArchiveItems(items, removals) {
+  return normalizeArchiveItems(items).filter((item) => {
+    const removedAt = removals?.[item.id]
+    return !removedAt || archiveItemTimestamp(item) > archiveTimestamp(removedAt)
+  })
+}
+
 function normalizeSavedItems(value) {
   if (!value || typeof value !== 'object') return createEmptySavedItems()
+  const removedItems = normalizeRemovedArchiveItems(value.removedItems)
   return {
-    mastered: Array.isArray(value.mastered) ? value.mastered : [],
-    vocab: Array.isArray(value.vocab) ? value.vocab : [],
+    mastered: filterRemovedArchiveItems(value.mastered, removedItems.mastered),
+    vocab: filterRemovedArchiveItems(value.vocab, removedItems.vocab),
+    removedItems,
     forgottenWords: normalizeForgottenItems(value.forgottenWords, 'word'),
     forgottenPhrases: normalizeForgottenItems(value.forgottenPhrases, 'phrase'),
   }
@@ -376,6 +430,7 @@ function mergeCourseProgressState(current = {}, incoming = {}) {
     ...incoming,
     completed,
     minutes: maxProgressNumber(current.minutes, incoming.minutes),
+    studySeconds: maxProgressNumber(current.studySeconds, incoming.studySeconds),
     currentLesson: incomingBestLesson >= currentBestLesson ? incoming.currentLesson || current.currentLesson : current.currentLesson || incoming.currentLesson,
     lessonProgress: mergeLessonProgressState(current.lessonProgress || {}, incoming.lessonProgress || {}),
   }
@@ -398,13 +453,21 @@ function mergeProgressState(currentValue = {}, incomingValue = {}) {
   )
 }
 
-function mergeListByIdState(current = [], incoming = []) {
-  const map = new Map()
-  for (const item of [...current, ...incoming]) {
-    if (!item?.id) continue
-    map.set(item.id, { ...(map.get(item.id) || {}), ...item })
+function mergeArchiveRemovals(current = {}, incoming = {}) {
+  const merged = { ...normalizeArchiveRemovals(current) }
+  for (const [id, removedAt] of Object.entries(normalizeArchiveRemovals(incoming))) {
+    if (!merged[id] || archiveTimestamp(removedAt) >= archiveTimestamp(merged[id])) {
+      merged[id] = removedAt
+    }
   }
-  return [...map.values()]
+  return merged
+}
+
+function mergeRemovedArchiveItems(current = {}, incoming = {}) {
+  return {
+    mastered: mergeArchiveRemovals(current.mastered, incoming.mastered),
+    vocab: mergeArchiveRemovals(current.vocab, incoming.vocab),
+  }
 }
 
 function mergeForgottenItemsState(current = [], incoming = []) {
@@ -429,9 +492,11 @@ function mergeForgottenItemsState(current = [], incoming = []) {
 function mergeSavedItemsState(currentValue, incomingValue) {
   const current = normalizeSavedItems(currentValue)
   const incoming = normalizeSavedItems(incomingValue)
+  const removedItems = mergeRemovedArchiveItems(current.removedItems, incoming.removedItems)
   return {
-    mastered: mergeListByIdState(current.mastered, incoming.mastered),
-    vocab: mergeListByIdState(current.vocab, incoming.vocab),
+    mastered: filterRemovedArchiveItems([...current.mastered, ...incoming.mastered], removedItems.mastered),
+    vocab: filterRemovedArchiveItems([...current.vocab, ...incoming.vocab], removedItems.vocab),
+    removedItems,
     forgottenWords: mergeForgottenItemsState(current.forgottenWords, incoming.forgottenWords),
     forgottenPhrases: mergeForgottenItemsState(current.forgottenPhrases, incoming.forgottenPhrases),
   }
@@ -687,6 +752,20 @@ function isAnswerCorrect(answerValue, expectedValue) {
     && typedTokens.every((token, index) => token === expectedTokens[index])
 }
 
+function getPracticeStageFit(promptText, answerText, soundmark) {
+  const promptLength = Array.from(String(promptText || '').replace(/\s+/g, '')).length
+  const answerWords = answerTokens(answerText)
+  const wordCount = answerWords.length
+  const answerLength = answerWords.reduce((total, word) => total + word.length, 0)
+  const soundmarkLength = String(soundmark || '').replace(/\s+/g, '').length
+
+  if (wordCount >= 21 || promptLength >= 35 || answerLength >= 100 || soundmarkLength >= 150) return 'micro'
+  if (wordCount >= 16 || promptLength >= 26 || answerLength >= 72 || soundmarkLength >= 108) return 'ultra'
+  if (wordCount >= 11 || promptLength >= 18 || answerLength >= 48 || soundmarkLength >= 72) return 'dense'
+  if (wordCount >= 7 || promptLength >= 11 || answerLength >= 28 || soundmarkLength >= 40) return 'compact'
+  return 'normal'
+}
+
 function audioTextFromRequest(url) {
   try {
     const parsed = new URL(url)
@@ -744,6 +823,43 @@ function getGlobalStats(progress) {
 
 function getStudyDayCount(stats) {
   return stats.studyDates.length || (stats.answerCount > 0 ? 1 : 0)
+}
+
+function getCourseStudySeconds(course) {
+  return Math.max(0, Math.floor(Number(course?.studySeconds) || 0))
+}
+
+function formatStudyDuration(seconds) {
+  const totalSeconds = Math.max(0, Math.floor(Number(seconds) || 0))
+  if (!totalSeconds) return '0m'
+
+  const totalMinutes = Math.floor(totalSeconds / 60)
+  if (!totalMinutes) return '<1m'
+
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  if (!hours) return `${minutes}m`
+  return minutes ? `${hours}小时${minutes}分` : `${hours}小时`
+}
+
+function addCourseStudyTime(progress, courseId, seconds, timestamp = new Date()) {
+  const addedSeconds = Math.max(0, Math.floor(Number(seconds) || 0))
+  if (!courseId || !addedSeconds) return progress
+
+  const existing = progress[courseId] || {}
+  const stats = getGlobalStats(progress)
+  return {
+    ...progress,
+    [globalStatsKey]: {
+      ...(progress[globalStatsKey] || {}),
+      studyDates: [...new Set([...stats.studyDates, getLocalDateKey(timestamp)])],
+      lastStudiedAt: timestamp.toISOString(),
+    },
+    [courseId]: {
+      ...existing,
+      studySeconds: getCourseStudySeconds(existing) + addedSeconds,
+    },
+  }
 }
 
 function formatElapsedTime(totalSeconds) {
@@ -1239,13 +1355,15 @@ function playTypingSound() {
 
 function archiveItemFromStatement(statement, lesson) {
   if (!statement) return null
+  const savedAt = new Date().toISOString()
   return {
     id: statement.id,
     english: statement.english,
     chinese: statement.chinese,
     soundmark: statement.soundmark || '',
     lessonTitle: lesson?.title || '',
-    addedAt: new Date().toISOString(),
+    addedAt: savedAt,
+    updatedAt: savedAt,
   }
 }
 
@@ -1608,7 +1726,10 @@ function normalizeCoursePack(course, pack) {
 
 async function loadCoursePack(course) {
   if (course.lessonData?.length) return course
-  const response = await fetch(`${import.meta.env.BASE_URL}${course.dataPath}`, { cache: 'force-cache' })
+  const response = await fetch(`${import.meta.env.BASE_URL}${course.dataPath}`, {
+    cache: 'force-cache',
+    headers: authHeaders(),
+  })
   if (!response.ok) throw new Error('课程包加载失败')
   const pack = await response.json()
   return { ...course, ...normalizeCoursePack(course, pack) }
@@ -1636,6 +1757,9 @@ function App() {
   const [authError, setAuthError] = useState('')
   const [syncError, setSyncError] = useState('')
   const [userPanelOpen, setUserPanelOpen] = useState(false)
+  const savedProgressRef = useRef(savedProgress)
+  const savedItemsRef = useRef(savedItems)
+  const courseStudyClockRef = useRef(null)
 
   useEffect(() => {
     warmSpeechVoices()
@@ -1680,6 +1804,8 @@ function App() {
         const serverState = mergeServerStateWithPending(await loadServerState())
         if (cancelled) return
         clearLocalLearningState()
+        savedProgressRef.current = serverState.progress
+        savedItemsRef.current = serverState.savedItems
         setSavedProgress(serverState.progress)
         setSavedItems(serverState.savedItems)
         setUsesServerStorage(true)
@@ -1724,6 +1850,14 @@ function App() {
   }, [isNightStudy])
 
   useEffect(() => {
+    savedProgressRef.current = savedProgress
+  }, [savedProgress])
+
+  useEffect(() => {
+    savedItemsRef.current = savedItems
+  }, [savedItems])
+
+  useEffect(() => {
     if (!storageReady || !currentUser) return
     if (usesServerStorage) {
       saveServerState(savedProgress, savedItems)
@@ -1756,8 +1890,10 @@ function App() {
     if (!storageReady || !currentUser || !usesServerStorage) return undefined
 
     function flushBeforePause() {
-      saveServerState(savedProgress, savedItems).catch(() => {})
-      saveServerStateNow(savedProgress, savedItems).catch(() => {})
+      const latestProgress = savedProgressRef.current
+      const latestItems = savedItemsRef.current
+      saveServerState(latestProgress, latestItems).catch(() => {})
+      saveServerStateNow(latestProgress, latestItems).catch(() => {})
     }
 
     function handleVisibilityFlush() {
@@ -1770,7 +1906,7 @@ function App() {
       window.removeEventListener('pagehide', flushBeforePause)
       document.removeEventListener('visibilitychange', handleVisibilityFlush)
     }
-  }, [currentUser, savedProgress, savedItems, storageReady, usesServerStorage])
+  }, [currentUser, storageReady, usesServerStorage])
 
   const courses = useMemo(
     () =>
@@ -1787,10 +1923,96 @@ function App() {
   const currentMode = practice ? modes.find((mode) => mode.id === practice.modeId) : null
   const isStudyView = activeView === 'practice' || activeView === 'reading'
   const globalStats = getGlobalStats(savedProgress)
+
+  useEffect(() => {
+    const courseId = practice?.course?.id || ''
+    const shouldTrack = Boolean(courseId && isStudyView)
+
+    function clearClock() {
+      courseStudyClockRef.current = null
+    }
+
+    function recordActiveTime(flushNow = false) {
+      const clock = courseStudyClockRef.current
+      if (!clock?.courseId || !clock.startedAt) return
+
+      const now = Date.now()
+      const elapsedSeconds = Math.min(maxCourseStudyGapSeconds, Math.floor((now - clock.startedAt) / 1000))
+      clock.startedAt = now
+      if (!elapsedSeconds) return
+
+      let nextProgress = savedProgressRef.current
+      const updateProgress = (current) => {
+        nextProgress = addCourseStudyTime(current, clock.courseId, elapsedSeconds, new Date(now))
+        savedProgressRef.current = nextProgress
+        return nextProgress
+      }
+
+      if (flushNow) flushSync(() => setSavedProgress(updateProgress))
+      else setSavedProgress(updateProgress)
+
+      if (flushNow && storageReady && currentUser && usesServerStorage) {
+        saveServerState(nextProgress, savedItemsRef.current).catch(() => {})
+        saveServerStateNow(nextProgress, savedItemsRef.current).catch(() => {})
+      }
+    }
+
+    function startTracking() {
+      if (!shouldTrack || document.visibilityState !== 'visible') {
+        clearClock()
+        return
+      }
+
+      const clock = courseStudyClockRef.current
+      if (clock?.courseId && clock.courseId !== courseId) {
+        recordActiveTime()
+        clearClock()
+      }
+
+      if (!courseStudyClockRef.current) {
+        courseStudyClockRef.current = { courseId, startedAt: Date.now() }
+      }
+    }
+
+    function pauseTracking() {
+      recordActiveTime(true)
+      clearClock()
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'hidden') pauseTracking()
+      else startTracking()
+    }
+
+    startTracking()
+    const checkpointTimer = shouldTrack
+      ? window.setInterval(() => {
+          if (document.visibilityState === 'visible') recordActiveTime()
+        }, courseStudyCheckpointMs)
+      : 0
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('pagehide', pauseTracking, { capture: true })
+    return () => {
+      if (checkpointTimer) window.clearInterval(checkpointTimer)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('pagehide', pauseTracking, { capture: true })
+      recordActiveTime()
+      clearClock()
+    }
+  }, [currentUser, isStudyView, practice?.course?.id, storageReady, usesServerStorage])
+
+  const normalizedSavedItems = useMemo(() => normalizeSavedItems(savedItems), [savedItems])
+  const currentPracticeStatementId = practice ? getPracticeStatement(practice).statement?.id || '' : ''
+  const isCurrentPracticeMastered = Boolean(
+    currentPracticeStatementId && normalizedSavedItems.mastered.some((item) => item.id === currentPracticeStatementId),
+  )
+  const isCurrentPracticeVocab = Boolean(
+    currentPracticeStatementId && normalizedSavedItems.vocab.some((item) => item.id === currentPracticeStatementId),
+  )
   const forgottenReviewItems = useMemo(() => {
-    const normalized = normalizeSavedItems(savedItems)
-    return sortForgottenItems([...normalized.forgottenWords, ...normalized.forgottenPhrases])
-  }, [savedItems])
+    return sortForgottenItems([...normalizedSavedItems.forgottenWords, ...normalizedSavedItems.forgottenPhrases])
+  }, [normalizedSavedItems])
 
   function navigate(view) {
     setActiveView(view)
@@ -1913,7 +2135,6 @@ function App() {
         [practice.course.id]: {
           ...existing,
           completed: nextCompleted,
-          minutes: (existing.minutes || practice.course.minutes || 0) + 4,
           currentLesson: getLessonTitle(practice.course, nextLessonNumber),
           lessonProgress: lesson?.id
             ? {
@@ -1926,6 +2147,7 @@ function App() {
             : lessonProgress,
         },
       }
+      savedProgressRef.current = nextProgress
       return nextProgress
     })
 
@@ -1985,28 +2207,53 @@ function App() {
     setFeedback(null)
   }
 
-  function savePracticeItem(type) {
+  function togglePracticeItem(type) {
     if (!practice) return
     const { lesson, statement } = getPracticeStatement(practice)
     const item = archiveItemFromStatement(statement, lesson)
     if (!item) return
+    const isSaved = normalizedSavedItems[type]?.some((existing) => existing.id === item.id)
+    const removedAt = new Date().toISOString()
 
     setSavedItems((current) => {
-      const list = current[type] || []
-      const nextList = [item, ...list.filter((existing) => existing.id !== item.id)]
-      return { ...current, [type]: nextList }
+      const normalized = normalizeSavedItems(current)
+      const list = normalized[type] || []
+      const alreadySaved = list.some((existing) => existing.id === item.id)
+      const removedItems = {
+        ...normalized.removedItems,
+        [type]: { ...normalized.removedItems[type] },
+      }
+
+      if (alreadySaved) {
+        removedItems[type][item.id] = removedAt
+        return {
+          ...normalized,
+          [type]: list.filter((existing) => existing.id !== item.id),
+          removedItems,
+        }
+      }
+
+      return {
+        ...normalized,
+        [type]: [item, ...list.filter((existing) => existing.id !== item.id)],
+        removedItems,
+      }
     })
 
     setFeedback({
-      status: 'saved',
-      title: type === 'mastered' ? '已加入掌握列表' : '已加入生词本',
+      status: isSaved ? 'removed' : 'saved',
+      title: isSaved
+        ? type === 'mastered' ? '已取消掌握' : '已从生词本移除'
+        : type === 'mastered' ? '已加入掌握列表' : '已加入生词本',
       body: item.english,
     })
   }
 
   function resetDemoProgress() {
+    savedProgressRef.current = {}
+    savedItemsRef.current = createEmptySavedItems()
     setSavedProgress({})
-    setSavedItems(createEmptySavedItems())
+    setSavedItems(savedItemsRef.current)
     setFeedback(null)
     setAnswer('')
   }
@@ -2022,6 +2269,8 @@ function App() {
 
     const serverState = mergeServerStateWithPending(await loadServerState(token), token)
     clearLocalLearningState()
+    savedProgressRef.current = serverState.progress
+    savedItemsRef.current = serverState.savedItems
     setSavedProgress(serverState.progress)
     setSavedItems(serverState.savedItems)
     setUsesServerStorage(true)
@@ -2142,7 +2391,7 @@ function App() {
           {activeView === 'course-detail' && (
             <CourseDetail course={selectedCourse} loadingCourseId={loadingCourseId} onBack={() => navigate('courses')} onPractice={openPracticePicker} />
           )}
-          {activeView === 'analytics' && <AnalyticsView courses={courses} savedItems={savedItems} />}
+          {activeView === 'analytics' && <AnalyticsView courses={courses} savedItems={savedItems} savedProgress={savedProgress} />}
           {activeView === 'mastered' && <ArchiveView type="mastered" items={savedItems.mastered} />}
           {activeView === 'review' && <ArchiveView type="review" items={forgottenReviewItems} />}
           {activeView === 'vocab' && <ArchiveView type="vocab" items={savedItems.vocab} />}
@@ -2161,8 +2410,10 @@ function App() {
               onPrevious={() => movePractice(-1)}
               onShowAnswer={showPracticeAnswer}
               onRetry={retryPractice}
-              onMaster={() => savePracticeItem('mastered')}
-              onVocab={() => savePracticeItem('vocab')}
+              onMaster={() => togglePracticeItem('mastered')}
+              onVocab={() => togglePracticeItem('vocab')}
+              isMastered={isCurrentPracticeMastered}
+              isVocab={isCurrentPracticeVocab}
               onExitHome={() => {
                 setActiveView('dashboard')
                 setPractice(null)
@@ -2410,7 +2661,7 @@ function Dashboard({ courses, loadingCourseId, onPractice, onNavigate, savedItem
             <div className="metric-row">
               <span>{primaryCourse.completed}/{primaryCourse.lessons} 课</span>
               <span>{completion}% 完成</span>
-              <span>{primaryCourse.minutes} 分钟</span>
+              <span>学习 {formatStudyDuration(getCourseStudySeconds(primaryCourse))}</span>
             </div>
           </div>
         </div>
@@ -2486,7 +2737,7 @@ function CourseDetail({ course, loadingCourseId, onBack, onPractice }) {
           <div className="metric-row">
             <span>{course.completed}/{course.lessons} 课</span>
             <span>{completion}% 完成</span>
-            <span>学习 {course.minutes} 分钟</span>
+            <span>学习 {formatStudyDuration(getCourseStudySeconds(course))}</span>
             <span>最近学习：不到 1 分钟前</span>
           </div>
         </div>
@@ -2576,7 +2827,7 @@ function getCourseProgressPercent(course) {
 
 function hasCourseProgress(course) {
   const lessonProgress = Object.values(course.lessonProgress || {})
-  return Boolean((course.minutes || 0) > 0 || (course.completed || 0) > 0 || lessonProgress.some((item) => (item.completedStatements || 0) > 0 || (item.statementIndex || 0) > 0))
+  return Boolean(getCourseStudySeconds(course) > 0 || (course.completed || 0) > 0 || lessonProgress.some((item) => (item.completedStatements || 0) > 0 || (item.statementIndex || 0) > 0))
 }
 
 function sumForgottenAttempts(items) {
@@ -2589,24 +2840,24 @@ function sumForgottenAttempts(items) {
   )
 }
 
-function AnalyticsView({ courses, savedItems }) {
+function AnalyticsView({ courses, savedItems, savedProgress }) {
   const normalizedItems = normalizeSavedItems(savedItems)
   const forgottenItems = [...normalizedItems.forgottenWords, ...normalizedItems.forgottenPhrases]
   const forgottenStats = sumForgottenAttempts(forgottenItems)
   const studiedCourses = courses.filter(hasCourseProgress)
   const totalLessons = courses.reduce((sum, course) => sum + (course.completed || 0), 0)
-  const totalMinutes = courses.reduce((sum, course) => sum + (course.minutes || 0), 0)
+  const totalStudySeconds = courses.reduce((sum, course) => sum + getCourseStudySeconds(course), 0)
   const totalStatements = courses.reduce((sum, course) => sum + getCourseStatementTotal(course), 0)
   const completedStatements = courses.reduce((sum, course) => sum + getCourseCompletedStatements(course), 0)
-  const activeDays = totalMinutes > 0 ? 1 : 0
-  const averageMinutes = activeDays ? Math.round(totalMinutes / activeDays) : 0
+  const activeDays = getStudyDayCount(getGlobalStats(savedProgress))
+  const averageStudySeconds = activeDays ? Math.round(totalStudySeconds / activeDays) : 0
   const statementProgress = totalStatements ? Math.round((completedStatements / totalStatements) * 100) : 0
   const courseProgressRows = [...courses]
     .map((course) => ({
       id: course.id,
       title: course.title,
       currentLesson: course.currentLesson,
-      minutes: course.minutes || 0,
+      studySeconds: getCourseStudySeconds(course),
       completed: course.completed || 0,
       lessons: course.lessons || 0,
       percent: getCourseProgressPercent(course),
@@ -2614,11 +2865,11 @@ function AnalyticsView({ courses, savedItems }) {
       totalStatements: getCourseStatementTotal(course),
       active: hasCourseProgress(course),
     }))
-    .sort((a, b) => Number(b.active) - Number(a.active) || b.percent - a.percent || b.minutes - a.minutes)
+    .sort((a, b) => Number(b.active) - Number(a.active) || b.percent - a.percent || b.studySeconds - a.studySeconds)
 
   return (
     <div className="page-stack page-enter">
-      <PageTitle eyebrow="成长分析" title="真实学习统计" meta="基于本地保存进度" />
+      <PageTitle eyebrow="成长分析" title="真实学习统计" meta="基于已保存的学习记录" />
 
       <section className="panel">
         <div className="section-heading compact">
@@ -2627,8 +2878,8 @@ function AnalyticsView({ courses, savedItems }) {
         </div>
         <div className="status-grid four">
           <StatTile label="有记录天数" value={`${activeDays} 天`} tone="teal" />
-          <StatTile label="学习总时长" value={`${totalMinutes}m`} tone="coral" />
-          <StatTile label="平均每日时长" value={`${averageMinutes}m`} tone="blue" />
+          <StatTile label="学习总时长" value={formatStudyDuration(totalStudySeconds)} tone="coral" />
+          <StatTile label="平均每日时长" value={formatStudyDuration(averageStudySeconds)} tone="blue" />
           <StatTile label="学过课程包" value={`${studiedCourses.length}`} tone="gold" />
         </div>
       </section>
@@ -2689,7 +2940,7 @@ function AnalyticsView({ courses, savedItems }) {
               <div>
                 <strong>{course.title}</strong>
                 <small>
-                  {course.active ? `${course.completed}/${course.lessons} 课 · ${course.completedStatements.toLocaleString('zh-CN')}/${course.totalStatements.toLocaleString('zh-CN')} 题 · ${course.minutes} 分钟` : '未学习'}
+                  {course.active ? `${course.completed}/${course.lessons} 课 · ${course.completedStatements.toLocaleString('zh-CN')}/${course.totalStatements.toLocaleString('zh-CN')} 题 · ${formatStudyDuration(course.studySeconds)}` : '未学习'}
                 </small>
               </div>
               <em>{course.active ? `${course.percent}%` : '未学习'}</em>
@@ -2817,6 +3068,8 @@ function PracticeView({
   onRetry,
   onMaster,
   onVocab,
+  isMastered,
+  isVocab,
   onExitHome,
   onExitCourses,
   answerCount,
@@ -2847,6 +3100,7 @@ function PracticeView({
     : prompt
   const showPromptText = chineseVisible && !hasAnswerShown && !isDictation
   const showSoundmarkLine = !hasAnswerShown && !isDictation && actualPrompt?.hint
+  const stageFit = getPracticeStageFit(actualPrompt?.prompt, actualPrompt?.answer, actualPrompt?.hint)
   const ReadIcon = autoReadRepeat > 0 ? Volume2 : VolumeX
   const readLabel = autoReadRepeat > 0 ? String(autoReadRepeat) : '静'
 
@@ -2867,11 +3121,42 @@ function PracticeView({
   }
 
   useEffect(() => {
+    let elapsedSeconds = 0
+    let startedAt = 0
+    let isVisible = document.visibilityState === 'visible'
+
     setElapsedSeconds(0)
-    const timer = window.setInterval(() => {
-      setElapsedSeconds((value) => value + 1)
-    }, 1000)
-    return () => window.clearInterval(timer)
+
+    function recordElapsedTime() {
+      if (!isVisible || !startedAt) return
+      const now = Date.now()
+      const addedSeconds = Math.min(maxCourseStudyGapSeconds, Math.floor((now - startedAt) / 1000))
+      startedAt = now
+      if (!addedSeconds) return
+      elapsedSeconds += addedSeconds
+      setElapsedSeconds(elapsedSeconds)
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'hidden') {
+        recordElapsedTime()
+        isVisible = false
+        startedAt = 0
+        return
+      }
+
+      isVisible = true
+      startedAt = Date.now()
+    }
+
+    if (isVisible) startedAt = Date.now()
+    const timer = window.setInterval(recordElapsedTime, 1000)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      window.clearInterval(timer)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      recordElapsedTime()
+    }
   }, [practice.course.id, practice.lesson, practice.modeId])
 
   useEffect(() => {
@@ -3029,7 +3314,7 @@ function PracticeView({
         </div>
       </div>
 
-      <section className="game-stage">
+      <section className={`game-stage stage-${stageFit}`}>
         {isListening ? (
           <ListeningStage prompt={{ ...actualPrompt, prompt: actualPrompt.answer }} />
         ) : isSpeaking ? (
@@ -3069,11 +3354,25 @@ function PracticeView({
           <Volume2 size={18} />
           <span>发音</span>
         </button>
-        <button className="shortcut-button" type="button" onClick={onMaster}>
+        <button
+          className={`shortcut-button ${isMastered ? 'saved' : ''}`}
+          type="button"
+          aria-pressed={isMastered}
+          aria-label={isMastered ? '已掌握，再次点击取消掌握' : '加入掌握列表'}
+          title={isMastered ? '再次点击取消掌握' : '加入掌握列表'}
+          onClick={onMaster}
+        >
           <BadgeCheck size={18} />
           <span>掌握</span>
         </button>
-        <button className="shortcut-button" type="button" onClick={onVocab}>
+        <button
+          className={`shortcut-button ${isVocab ? 'saved' : ''}`}
+          type="button"
+          aria-pressed={isVocab}
+          aria-label={isVocab ? '已加入生词本，再次点击移除' : '加入生词本'}
+          title={isVocab ? '再次点击移出生词本' : '加入生词本'}
+          onClick={onVocab}
+        >
           <Star size={18} />
           <span>生词</span>
         </button>

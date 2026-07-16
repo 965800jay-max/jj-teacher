@@ -29,6 +29,7 @@ const ttsInFlight = new Map()
 const defaultSavedItems = {
   mastered: [],
   vocab: [],
+  removedItems: { mastered: {}, vocab: {} },
   forgottenWords: [],
   forgottenPhrases: [],
 }
@@ -70,11 +71,58 @@ function corsHeaders() {
   }
 }
 
-function normalizeSavedItems(value) {
-  if (!value || typeof value !== 'object') return defaultSavedItems
+function archiveTimestamp(value) {
+  const timestamp = Date.parse(String(value || ''))
+  return Number.isFinite(timestamp) ? timestamp : 0
+}
+
+function archiveItemTimestamp(item) {
+  return archiveTimestamp(item?.updatedAt || item?.addedAt)
+}
+
+function normalizeArchiveItems(items) {
+  if (!Array.isArray(items)) return []
+  const byId = new Map()
+  for (const item of items) {
+    if (!item?.id) continue
+    const existing = byId.get(item.id)
+    if (!existing || archiveItemTimestamp(item) >= archiveItemTimestamp(existing)) {
+      byId.set(item.id, { ...existing, ...item })
+    }
+  }
+  return [...byId.values()]
+}
+
+function normalizeArchiveRemovals(value) {
+  if (!value || typeof value !== 'object') return {}
+  return Object.fromEntries(
+    Object.entries(value).filter(([id, removedAt]) => id && archiveTimestamp(removedAt) > 0),
+  )
+}
+
+function normalizeRemovedArchiveItems(value) {
   return {
-    mastered: Array.isArray(value.mastered) ? value.mastered : [],
-    vocab: Array.isArray(value.vocab) ? value.vocab : [],
+    mastered: normalizeArchiveRemovals(value?.mastered),
+    vocab: normalizeArchiveRemovals(value?.vocab),
+  }
+}
+
+function filterRemovedArchiveItems(items, removals) {
+  return normalizeArchiveItems(items).filter((item) => {
+    const removedAt = removals?.[item.id]
+    return !removedAt || archiveItemTimestamp(item) > archiveTimestamp(removedAt)
+  })
+}
+
+function normalizeSavedItems(value) {
+  if (!value || typeof value !== 'object') {
+    return { ...defaultSavedItems, removedItems: { mastered: {}, vocab: {} } }
+  }
+  const removedItems = normalizeRemovedArchiveItems(value.removedItems)
+  return {
+    mastered: filterRemovedArchiveItems(value.mastered, removedItems.mastered),
+    vocab: filterRemovedArchiveItems(value.vocab, removedItems.vocab),
+    removedItems,
     forgottenWords: Array.isArray(value.forgottenWords) ? value.forgottenWords : [],
     forgottenPhrases: Array.isArray(value.forgottenPhrases) ? value.forgottenPhrases : [],
   }
@@ -138,6 +186,7 @@ function mergeCourseProgress(current = {}, incoming = {}) {
     ...incoming,
     completed: maxNumber(current.completed, incoming.completed),
     minutes: maxNumber(current.minutes, incoming.minutes),
+    studySeconds: maxNumber(current.studySeconds, incoming.studySeconds),
     currentLesson: incomingIsNewer ? incoming.currentLesson || current.currentLesson : current.currentLesson || incoming.currentLesson,
     lessonProgress: mergeLessonProgress(current.lessonProgress || {}, incoming.lessonProgress || {}),
   }
@@ -165,13 +214,21 @@ function mergeProgress(current = {}, incoming = {}) {
   return merged
 }
 
-function mergeListById(current = [], incoming = []) {
-  const map = new Map()
-  for (const item of [...current, ...incoming]) {
-    if (!item?.id) continue
-    map.set(item.id, { ...(map.get(item.id) || {}), ...item })
+function mergeArchiveRemovals(current = {}, incoming = {}) {
+  const merged = { ...normalizeArchiveRemovals(current) }
+  for (const [id, removedAt] of Object.entries(normalizeArchiveRemovals(incoming))) {
+    if (!merged[id] || archiveTimestamp(removedAt) >= archiveTimestamp(merged[id])) {
+      merged[id] = removedAt
+    }
   }
-  return [...map.values()]
+  return merged
+}
+
+function mergeRemovedArchiveItems(current = {}, incoming = {}) {
+  return {
+    mastered: mergeArchiveRemovals(current.mastered, incoming.mastered),
+    vocab: mergeArchiveRemovals(current.vocab, incoming.vocab),
+  }
 }
 
 function mergeForgottenList(current = [], incoming = []) {
@@ -200,9 +257,11 @@ function mergeForgottenList(current = [], incoming = []) {
 function mergeSavedItems(currentValue, incomingValue) {
   const current = normalizeSavedItems(currentValue)
   const incoming = normalizeSavedItems(incomingValue)
+  const removedItems = mergeRemovedArchiveItems(current.removedItems, incoming.removedItems)
   return {
-    mastered: mergeListById(current.mastered, incoming.mastered),
-    vocab: mergeListById(current.vocab, incoming.vocab),
+    mastered: filterRemovedArchiveItems([...current.mastered, ...incoming.mastered], removedItems.mastered),
+    vocab: filterRemovedArchiveItems([...current.vocab, ...incoming.vocab], removedItems.vocab),
+    removedItems,
     forgottenWords: mergeForgottenList(current.forgottenWords, incoming.forgottenWords),
     forgottenPhrases: mergeForgottenList(current.forgottenPhrases, incoming.forgottenPhrases),
   }
