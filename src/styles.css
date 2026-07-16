@@ -2000,6 +2000,15 @@ button.queue-row:focus-visible {
   background: rgba(168, 85, 247, 0.11);
 }
 
+.answer-slot.incorrect {
+  border-bottom-width: 4px;
+  border-bottom-color: #dc2626;
+}
+
+.night-study .answer-slot.incorrect {
+  border-bottom-color: #fb7185;
+}
+
 .answer-slot span {
   display: block;
   width: 100%;

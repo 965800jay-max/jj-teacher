@@ -2079,7 +2079,7 @@ function App() {
     setAnswer('')
   }
 
-  function submitPractice() {
+  function submitPractice(submittedAnswer = answer) {
     if (!practice) return
     if (feedback?.status === 'good' || feedback?.status === 'answer') {
       movePractice(1)
@@ -2094,13 +2094,15 @@ function App() {
           hint: statement.soundmark || '',
         }
       : practicePrompts[practice.modeId]
-    const isCorrect = isAnswerCorrect(answer, prompt.answer)
+    const answerToCheck = typeof submittedAnswer === 'string' ? submittedAnswer : answer
+    if (answerToCheck !== answer) setAnswer(answerToCheck)
+    const isCorrect = isAnswerCorrect(answerToCheck, prompt.answer)
     playOneShot(isCorrect ? correctSoundUrl : errorSoundUrl, 1, isCorrect ? 'correct' : 'error')
     if (isCorrect && statement) {
       playAutoStatementAudio(statement, { delay: correctReadDelayMs, gap: repeatReadGapMs })
     }
     if (statement) {
-      recordForgottenItems(statement, lesson, isCorrect ? 'correct' : 'wrong', !isCorrect, answer)
+      recordForgottenItems(statement, lesson, isCorrect ? 'correct' : 'wrong', !isCorrect, answerToCheck)
     }
     setAnswerCountPulse((value) => value + 1)
 
@@ -3332,6 +3334,7 @@ function PracticeView({
                 expected={actualPrompt.answer}
                 placeholder={isDictation ? '输入听到的英文' : '输入英文表达'}
                 clearSlotOnSelect={feedback?.status === 'close'}
+                showWrongSlots={feedback?.status === 'close'}
                 onAnswerChange={setAnswer}
                 onSubmit={onSubmit}
               />
@@ -3440,14 +3443,25 @@ function joinAnswerParts(parts) {
   return parts.join(' ')
 }
 
-function AnswerEntry({ answer, expected, placeholder, clearSlotOnSelect = false, onAnswerChange, onSubmit }) {
+function AnswerEntry({ answer, expected, placeholder, clearSlotOnSelect = false, showWrongSlots = false, onAnswerChange, onSubmit }) {
   const inputRefs = useRef([])
+  const latestAnswerRef = useRef(answer)
   const [activeSlot, setActiveSlot] = useState(null)
   const [composingSlot, setComposingSlot] = useState(null)
   const expectedWords = splitWords(expected)
   const expectedTokens = answerTokens(expected)
   const slots = expectedWords.length ? expectedWords : ['']
   const typedWords = typedWordsFromAnswer(answer, slots.length)
+  latestAnswerRef.current = answer
+
+  const incorrectSlotIndexes = new Set()
+  if (showWrongSlots) {
+    slots.forEach((word, index) => {
+      const expectedToken = expectedTokens[index] || normalizeAnswer(word)
+      const typedToken = answerTokens(typedWords[index])[0] || ''
+      if (typedToken !== expectedToken) incorrectSlotIndexes.add(index)
+    })
+  }
 
   function focusSlot(index, selectText = false) {
     const input = inputRefs.current[index]
@@ -3466,13 +3480,15 @@ function AnswerEntry({ answer, expected, placeholder, clearSlotOnSelect = false,
   function selectSlot(index) {
     const input = inputRefs.current[index]
     if (!input) return
-    const parts = answerPartsFromAnswer(answer, slots.length)
+    const parts = answerPartsFromAnswer(latestAnswerRef.current, slots.length)
     const shouldClear = clearSlotOnSelect && Boolean(parts[index])
     setActiveSlot(index)
     if (shouldClear) {
       parts[index] = ''
       input.value = ''
-      onAnswerChange(joinAnswerParts(parts))
+      const nextAnswer = joinAnswerParts(parts)
+      latestAnswerRef.current = nextAnswer
+      onAnswerChange(nextAnswer)
       focusSlot(index)
       return
     }
@@ -3482,6 +3498,7 @@ function AnswerEntry({ answer, expected, placeholder, clearSlotOnSelect = false,
   function commitParts(parts, nextActiveSlot = activeSlot, focusNext = false, selectNext = false) {
     const nextAnswer = joinAnswerParts(parts)
     if (nextAnswer !== answer) playTypingSound()
+    latestAnswerRef.current = nextAnswer
     setActiveSlot(nextActiveSlot)
     onAnswerChange(nextAnswer)
     if (focusNext && Number.isInteger(nextActiveSlot)) {
@@ -3491,7 +3508,7 @@ function AnswerEntry({ answer, expected, placeholder, clearSlotOnSelect = false,
 
   function handleSlotInput(index, rawValue, options = {}) {
     const allowAutoAdvance = options.allowAutoAdvance === true || (options.allowAutoAdvance !== false && composingSlot !== index)
-    const parts = answerPartsFromAnswer(answer, slots.length)
+    const parts = answerPartsFromAnswer(latestAnswerRef.current, slots.length)
     const normalizedRaw = sanitizeAnswerInput(rawValue).replace(/[^\S ]+/g, ' ')
     const rawTokens = normalizedRaw.trim().split(/\s+/).filter(Boolean)
 
@@ -3526,6 +3543,37 @@ function AnswerEntry({ answer, expected, placeholder, clearSlotOnSelect = false,
     commitParts(parts, index)
   }
 
+  function getLiveAnswerParts() {
+    const parts = answerPartsFromAnswer(latestAnswerRef.current, slots.length)
+    const focusedIndex = inputRefs.current.findIndex((input) => input === document.activeElement)
+
+    if (focusedIndex >= 0) {
+      parts[focusedIndex] = sanitizeAnswerInput(inputRefs.current[focusedIndex]?.value || '')
+        .replace(/\s+/g, '')
+    }
+
+    return parts
+  }
+
+  function submitCurrentAnswer(parts = getLiveAnswerParts()) {
+    const nextAnswer = joinAnswerParts(parts)
+    latestAnswerRef.current = nextAnswer
+    if (nextAnswer !== answer) onAnswerChange(nextAnswer)
+    onSubmit(nextAnswer)
+  }
+
+  function focusNextEmptySlot(parts, currentIndex) {
+    const nextIndex = parts.findIndex((value, index) => index > currentIndex && !answerTokens(value).length)
+    const firstEmptyIndex = nextIndex >= 0
+      ? nextIndex
+      : parts.findIndex((value) => !answerTokens(value).length)
+
+    if (firstEmptyIndex >= 0) {
+      setActiveSlot(firstEmptyIndex)
+      focusSlot(firstEmptyIndex, Boolean(parts[firstEmptyIndex]))
+    }
+  }
+
   return (
     <div className="answer-entry" role="presentation">
       <div className="answer-slots">
@@ -3533,7 +3581,7 @@ function AnswerEntry({ answer, expected, placeholder, clearSlotOnSelect = false,
           const typed = typedWords[index] || ''
           return (
             <label
-              className={`answer-slot ${activeSlot === index ? 'active' : ''}`}
+              className={`answer-slot ${activeSlot === index ? 'active' : ''} ${incorrectSlotIndexes.has(index) ? 'incorrect' : ''}`}
               style={{ '--answer-slot-width': `${Math.max(3, Math.min(Math.max(word.length, typed.length) + 1, 18))}ch` }}
               key={`${word}-${index}`}
               aria-label={`修改第 ${index + 1} 格`}
@@ -3555,8 +3603,15 @@ function AnswerEntry({ answer, expected, placeholder, clearSlotOnSelect = false,
                 }}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
+                    if (event.nativeEvent?.isComposing || composingSlot === index) return
                     event.preventDefault()
-                    onSubmit()
+                    event.stopPropagation()
+                    const liveParts = getLiveAnswerParts()
+                    if (liveParts.every((value) => answerTokens(value).length > 0)) {
+                      submitCurrentAnswer(liveParts)
+                    } else {
+                      focusNextEmptySlot(liveParts, index)
+                    }
                     return
                   }
                   if (event.key === ' ') {
@@ -3573,6 +3628,7 @@ function AnswerEntry({ answer, expected, placeholder, clearSlotOnSelect = false,
                 autoComplete="off"
                 autoCorrect="off"
                 autoFocus={index === 0}
+                enterKeyHint={typedWords.every((value) => answerTokens(value).length > 0) ? 'done' : 'next'}
                 spellCheck="false"
               />
             </label>
