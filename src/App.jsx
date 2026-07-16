@@ -48,7 +48,7 @@ const savedItemsKey = 'julebu-web-redesign-items'
 const sessionKey = 'julebu-web-redesign-session'
 const speechSettingsKey = 'julebu-web-redesign-speech-settings'
 const autoReadRepeatKey = 'julebu-web-redesign-auto-read-repeat'
-const chineseVisibleKey = 'julebu-web-redesign-chinese-visible'
+const phoneticVisibleKey = 'julebu-web-redesign-phonetic-visible'
 const pendingServerStateKey = 'julebu-web-redesign-pending-server-state'
 const globalStatsKey = '__julebuGlobalStats'
 const serverApiBaseUrl = (import.meta.env.VITE_JULEBU_API_BASE || '').replace(/\/$/, '')
@@ -104,7 +104,7 @@ const highQualityVoicePattern = /google|microsoft|apple|siri|neural|natural|enha
 const noveltyVoicePattern = /compact|novelty|whisper|bells|boing|bubbles|cellos|hysterical|pipe|trinoids|zarvox|bad news|good news|organ|superstar|deranged|junior/i
 let currentSpeechSettings = loadSpeechSettings()
 let currentAutoReadRepeat = loadAutoReadRepeat()
-let currentChineseVisible = loadChineseVisible()
+let currentPhoneticVisible = loadPhoneticVisible()
 let activeSpeechAudio = null
 const preloadedSpeechUrls = new Set()
 
@@ -180,23 +180,23 @@ function nextAutoReadRepeat(value) {
   return autoReadRepeatModes[(index + 1) % autoReadRepeatModes.length]
 }
 
-function loadChineseVisible() {
+function loadPhoneticVisible() {
   try {
     if (typeof localStorage === 'undefined') return true
-    return localStorage.getItem(chineseVisibleKey) !== 'false'
+    return localStorage.getItem(phoneticVisibleKey) !== 'false'
   } catch {
     return true
   }
 }
 
-function saveChineseVisible(value) {
-  currentChineseVisible = value !== false
+function savePhoneticVisible(value) {
+  currentPhoneticVisible = value !== false
   try {
-    localStorage.setItem(chineseVisibleKey, String(currentChineseVisible))
+    localStorage.setItem(phoneticVisibleKey, String(currentPhoneticVisible))
   } catch {
-    return currentChineseVisible
+    return currentPhoneticVisible
   }
-  return currentChineseVisible
+  return currentPhoneticVisible
 }
 
 function authHeaders(token = getStoredSession()) {
@@ -3080,7 +3080,7 @@ function PracticeView({
   const [aiPanelOpen, setAiPanelOpen] = useState(false)
   const [speechSettings, setSpeechSettings] = useState(() => currentSpeechSettings)
   const [autoReadRepeat, setAutoReadRepeat] = useState(() => currentAutoReadRepeat)
-  const [chineseVisible, setChineseVisible] = useState(() => currentChineseVisible)
+  const [phoneticVisible, setPhoneticVisible] = useState(() => currentPhoneticVisible)
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const [answerCountAnimating, setAnswerCountAnimating] = useState(false)
   const [keyboardOpen, setKeyboardOpen] = useState(false)
@@ -3098,9 +3098,9 @@ function PracticeView({
         hint: statement.soundmark || '',
       }
     : prompt
-  const showPromptText = chineseVisible && !hasAnswerShown && !isDictation
-  const showSoundmarkLine = !hasAnswerShown && !isDictation && actualPrompt?.hint
-  const stageFit = getPracticeStageFit(actualPrompt?.prompt, actualPrompt?.answer, actualPrompt?.hint)
+  const showPromptText = !hasAnswerShown && !isDictation
+  const showSoundmarkLine = phoneticVisible && !hasAnswerShown && !isDictation && actualPrompt?.hint
+  const stageFit = getPracticeStageFit(actualPrompt?.prompt, actualPrompt?.answer, phoneticVisible ? actualPrompt?.hint : '')
   const ReadIcon = autoReadRepeat > 0 ? Volume2 : VolumeX
   const readLabel = autoReadRepeat > 0 ? String(autoReadRepeat) : '静'
 
@@ -3116,8 +3116,8 @@ function PracticeView({
     })
   }
 
-  function toggleChineseVisible() {
-    setChineseVisible((current) => saveChineseVisible(!current))
+  function togglePhoneticVisible() {
+    setPhoneticVisible((current) => savePhoneticVisible(!current))
   }
 
   useEffect(() => {
@@ -3303,11 +3303,12 @@ function PracticeView({
           </button>
           <span className={`audio-mode-label ${autoReadRepeat <= 0 ? 'muted' : ''}`}>{readLabel}</span>
           <button
-            className={`audio-pill-button ${chineseVisible ? '' : 'chinese-hidden'}`}
+            className={`audio-pill-button ${phoneticVisible ? '' : 'phonetic-hidden'}`}
             type="button"
-            aria-label={chineseVisible ? '隐藏中文' : '显示中文'}
-            title={chineseVisible ? '隐藏中文' : '显示中文'}
-            onClick={toggleChineseVisible}
+            aria-label={phoneticVisible ? '隐藏音标' : '显示音标'}
+            title={phoneticVisible ? '隐藏音标' : '显示音标'}
+            aria-pressed={!phoneticVisible}
+            onClick={togglePhoneticVisible}
           >
             <MessageSquareText size={16} />
           </button>
@@ -3324,7 +3325,7 @@ function PracticeView({
             {showPromptText && <h1>{actualPrompt.prompt}</h1>}
             {showSoundmarkLine && <p className="soundmark-line">{actualPrompt.hint}</p>}
             {hasAnswerShown && statement ? (
-              <AnswerBreakdown statement={statement} lesson={lesson} showChinese={chineseVisible} />
+              <AnswerBreakdown statement={statement} lesson={lesson} showPhonetic={phoneticVisible} />
             ) : (
               <AnswerEntry
                 answer={answer}
@@ -3582,7 +3583,7 @@ function AnswerEntry({ answer, expected, placeholder, clearSlotOnSelect = false,
   )
 }
 
-function AnswerBreakdown({ statement, lesson, showChinese = true }) {
+function AnswerBreakdown({ statement, lesson, showPhonetic = true }) {
   const words = buildWordBreakdown(statement, lesson)
   const wordCount = words.length
   const fitClass = wordCount >= 10 ? 'dense' : wordCount >= 7 ? 'compact' : ''
@@ -3592,14 +3593,14 @@ function AnswerBreakdown({ statement, lesson, showChinese = true }) {
       <div className="word-block-row">
         {words.map((item, index) => (
           <button className={`word-block ${item.tone}`} type="button" key={`${item.word}-${index}`} onClick={() => speakText(item.word, { fallbackAudioUrl: item.audioUrl })}>
-            {item.soundmark && <span className="word-soundmark">{item.soundmark}</span>}
+            {showPhonetic && item.soundmark && <span className="word-soundmark">{item.soundmark}</span>}
             <strong>{item.word}</strong>
             <em>{item.pos}</em>
-            {showChinese && item.chinese && <small>{item.chinese}</small>}
+            {item.chinese && <small>{item.chinese}</small>}
           </button>
         ))}
       </div>
-      {showChinese && <p className="answer-chinese">{statement.chinese}</p>}
+      <p className="answer-chinese">{statement.chinese}</p>
     </div>
   )
 }

@@ -1839,7 +1839,7 @@ button.queue-row:focus-visible {
 
 .audio-pill-button.muted,
 .audio-mode-label.muted,
-.audio-pill-button.chinese-hidden {
+.audio-pill-button.phonetic-hidden {
   color: #6b7280;
 }
 
