@@ -902,8 +902,8 @@ function playTone(kind = 'tap', volume = 1) {
   context.resume?.().catch(() => {})
 
   const now = context.currentTime + 0.001
-  const duration = kind === 'typing' ? 0.028 : kind === 'error' ? 0.13 : kind === 'correct' ? 0.105 : 0.045
-  const peak = Math.max(0.01, (kind === 'typing' ? 0.045 : kind === 'error' ? 0.09 : 0.08) * volume)
+  const duration = kind === 'typing' ? 0.034 : kind === 'error' ? 0.13 : kind === 'correct' ? 0.105 : 0.045
+  const peak = Math.max(0.01, (kind === 'typing' ? 0.12 : kind === 'error' ? 0.09 : 0.08) * volume)
   const gain = context.createGain()
   gain.gain.setValueAtTime(0.0001, now)
   gain.gain.exponentialRampToValueAtTime(peak, now + 0.002)
@@ -1352,7 +1352,7 @@ function playAutoStatementAudio(statement, options = {}) {
 
 function playTypingSound() {
   unlockAudio()
-  playTone('typing', 0.85)
+  playTone('typing', 1)
 }
 
 function archiveItemFromStatement(statement, lesson) {
@@ -2642,7 +2642,7 @@ function Dashboard({ courses, loadingCourseId, onPractice, onNavigate, savedItem
 
   return (
     <div className="dashboard-grid page-enter">
-      <section className="panel continue-panel">
+      <section className={`panel continue-panel course-surface accent-${primaryCourse.accent}`}>
         <div className="section-heading">
           <div>
             <p className="eyebrow">今日学习</p>
@@ -2729,7 +2729,7 @@ function CourseDetail({ course, loadingCourseId, onBack, onPractice }) {
         </button>
       </div>
 
-      <section className="panel course-hero">
+      <section className={`panel course-hero course-surface accent-${course.accent}`}>
         <CourseCover course={course} size="hero" />
         <div>
           <p className="eyebrow">{course.tag} · {course.level}</p>
@@ -2763,7 +2763,7 @@ function LessonList({ course, onPractice }) {
   }))
   const lessons = course.lessonData?.length ? course.lessonData : course.lessonSummaries?.length ? course.lessonSummaries : fallbackLessons
   return (
-    <section className="panel lesson-panel">
+    <section className={`panel lesson-panel course-surface accent-${course.accent}`}>
       <div className="lesson-list">
         {lessons.map((lesson, index) => {
           const lessonNumber = index + 1
@@ -4125,7 +4125,7 @@ function PageTitle({ eyebrow, title, meta }) {
 function CourseCard({ course, actionLabel, onOpen, onAction }) {
   const completion = Math.round((course.completed / course.lessons) * 100)
   return (
-    <article className="course-card">
+    <article className={`course-card course-surface accent-${course.accent}`}>
       <button className="course-open" type="button" onClick={onOpen} aria-label={`打开${course.title}`} />
       <CourseCover course={course} />
       <div className="course-content">
