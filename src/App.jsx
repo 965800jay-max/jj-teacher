@@ -3335,7 +3335,6 @@ function PracticeView({
                 answer={answer}
                 expected={actualPrompt.answer}
                 placeholder={isDictation ? '输入听到的英文' : '输入英文表达'}
-                clearSlotOnSelect={feedback?.status === 'close'}
                 showWrongSlots={feedback?.status === 'close'}
                 onAnswerChange={setAnswer}
                 onSubmit={onSubmit}
@@ -3445,7 +3444,7 @@ function joinAnswerParts(parts) {
   return parts.join(' ')
 }
 
-function AnswerEntry({ answer, expected, placeholder, clearSlotOnSelect = false, showWrongSlots = false, onAnswerChange, onSubmit }) {
+function AnswerEntry({ answer, expected, placeholder, showWrongSlots = false, onAnswerChange, onSubmit }) {
   const inputRefs = useRef([])
   const latestAnswerRef = useRef(answer)
   const [activeSlot, setActiveSlot] = useState(null)
@@ -3465,46 +3464,26 @@ function AnswerEntry({ answer, expected, placeholder, clearSlotOnSelect = false,
     })
   }
 
-  function focusSlot(index, selectText = false) {
+  function focusSlot(index, caretPosition = null) {
     const input = inputRefs.current[index]
     if (!input) return
     input.focus()
     window.requestAnimationFrame(() => {
-      if (selectText) {
-        input.select()
-      } else {
-        const caret = input.value.length
-        input.setSelectionRange(caret, caret)
-      }
+      const caret = Number.isInteger(caretPosition)
+        ? Math.min(Math.max(caretPosition, 0), input.value.length)
+        : input.value.length
+      input.setSelectionRange(caret, caret)
     })
   }
 
-  function selectSlot(index) {
-    const input = inputRefs.current[index]
-    if (!input) return
-    const parts = answerPartsFromAnswer(latestAnswerRef.current, slots.length)
-    const shouldClear = clearSlotOnSelect && Boolean(parts[index])
-    setActiveSlot(index)
-    if (shouldClear) {
-      parts[index] = ''
-      input.value = ''
-      const nextAnswer = joinAnswerParts(parts)
-      latestAnswerRef.current = nextAnswer
-      onAnswerChange(nextAnswer)
-      focusSlot(index)
-      return
-    }
-    focusSlot(index, Boolean(parts[index]))
-  }
-
-  function commitParts(parts, nextActiveSlot = activeSlot, focusNext = false, selectNext = false) {
+  function commitParts(parts, nextActiveSlot = activeSlot, focusNext = false, caretPosition = null) {
     const nextAnswer = joinAnswerParts(parts)
     if (nextAnswer !== answer) playTypingSound()
     latestAnswerRef.current = nextAnswer
     setActiveSlot(nextActiveSlot)
     onAnswerChange(nextAnswer)
     if (focusNext && Number.isInteger(nextActiveSlot)) {
-      focusSlot(nextActiveSlot, selectNext)
+      focusSlot(nextActiveSlot, caretPosition)
     }
   }
 
@@ -3519,7 +3498,7 @@ function AnswerEntry({ answer, expected, placeholder, clearSlotOnSelect = false,
         if (index + tokenIndex < parts.length) parts[index + tokenIndex] = token
       })
       const nextIndex = Math.min(index + rawTokens.length, parts.length - 1)
-      commitParts(parts, nextIndex, true, Boolean(parts[nextIndex]))
+      commitParts(parts, nextIndex, true)
       return
     }
 
@@ -3534,15 +3513,49 @@ function AnswerEntry({ answer, expected, placeholder, clearSlotOnSelect = false,
       if (cleanValue.length > expectedToken.length) {
         parts[index] = cleanValue.slice(0, expectedToken.length)
         parts[nextIndex] = cleanValue.slice(expectedToken.length)
-        commitParts(parts, nextIndex, true, Boolean(parts[nextIndex]))
+        commitParts(parts, nextIndex, true)
         return
       }
 
-      commitParts(parts, nextIndex, true, false)
+      commitParts(parts, nextIndex, true)
       return
     }
 
     commitParts(parts, index)
+  }
+
+  function deletePreviousCharacter(index, event) {
+    const parts = getLiveAnswerParts()
+    const input = event.currentTarget
+    const currentValue = parts[index] || ''
+    const selectionEnd = Number.isInteger(input.selectionEnd)
+      ? Math.min(Math.max(input.selectionEnd, 0), currentValue.length)
+      : currentValue.length
+
+    event.preventDefault()
+    event.stopPropagation()
+
+    if (selectionEnd > 0) {
+      const deleteIndex = selectionEnd - 1
+      parts[index] = `${currentValue.slice(0, deleteIndex)}${currentValue.slice(deleteIndex + 1)}`
+      commitParts(parts, index, true, deleteIndex)
+      return
+    }
+
+    if (index <= 0) return
+
+    const previousIndex = index - 1
+    const previousValue = parts[previousIndex] || ''
+    if (previousValue) parts[previousIndex] = previousValue.slice(0, -1)
+    commitParts(parts, previousIndex, true, parts[previousIndex].length)
+  }
+
+  function clearCurrentWord(index, event) {
+    event.preventDefault()
+    event.stopPropagation()
+    const parts = getLiveAnswerParts()
+    parts[index] = ''
+    commitParts(parts, index, true, 0)
   }
 
   function getLiveAnswerParts() {
@@ -3572,7 +3585,7 @@ function AnswerEntry({ answer, expected, placeholder, clearSlotOnSelect = false,
 
     if (firstEmptyIndex >= 0) {
       setActiveSlot(firstEmptyIndex)
-      focusSlot(firstEmptyIndex, Boolean(parts[firstEmptyIndex]))
+      focusSlot(firstEmptyIndex)
     }
   }
 
@@ -3596,7 +3609,7 @@ function AnswerEntry({ answer, expected, placeholder, clearSlotOnSelect = false,
                 className="answer-slot-input"
                 value={typed}
                 onFocus={() => setActiveSlot(index)}
-                onClick={() => selectSlot(index)}
+                onDoubleClick={(event) => clearCurrentWord(index, event)}
                 onChange={(event) => handleSlotInput(index, event.target.value)}
                 onCompositionStart={() => setComposingSlot(index)}
                 onCompositionEnd={(event) => {
@@ -3604,6 +3617,10 @@ function AnswerEntry({ answer, expected, placeholder, clearSlotOnSelect = false,
                   handleSlotInput(index, event.currentTarget.value, { allowAutoAdvance: true })
                 }}
                 onKeyDown={(event) => {
+                  if (event.key === 'Backspace') {
+                    deletePreviousCharacter(index, event)
+                    return
+                  }
                   if (event.key === 'Enter') {
                     if (event.nativeEvent?.isComposing || composingSlot === index) return
                     event.preventDefault()
@@ -3621,7 +3638,7 @@ function AnswerEntry({ answer, expected, placeholder, clearSlotOnSelect = false,
                     const nextIndex = Math.min(index + 1, slots.length - 1)
                     if (nextIndex !== index) {
                       setActiveSlot(nextIndex)
-                      focusSlot(nextIndex, Boolean(typedWords[nextIndex]))
+                      focusSlot(nextIndex)
                     }
                   }
                 }}
