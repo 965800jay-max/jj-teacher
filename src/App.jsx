@@ -21,6 +21,7 @@ import {
   Headphones,
   Home,
   LibraryBig,
+  Languages,
   LogOut,
   Loader2,
   MessageSquareText,
@@ -49,6 +50,7 @@ const sessionKey = 'julebu-web-redesign-session'
 const speechSettingsKey = 'julebu-web-redesign-speech-settings'
 const autoReadRepeatKey = 'julebu-web-redesign-auto-read-repeat'
 const phoneticVisibleKey = 'julebu-web-redesign-phonetic-visible'
+const chineseVisibleKey = 'julebu-web-redesign-chinese-visible'
 const pendingServerStateKey = 'julebu-web-redesign-pending-server-state'
 const globalStatsKey = '__julebuGlobalStats'
 const serverApiBaseUrl = (import.meta.env.VITE_JULEBU_API_BASE || '').replace(/\/$/, '')
@@ -106,6 +108,7 @@ const noveltyVoicePattern = /compact|novelty|whisper|bells|boing|bubbles|cellos|
 let currentSpeechSettings = loadSpeechSettings()
 let currentAutoReadRepeat = loadAutoReadRepeat()
 let currentPhoneticVisible = loadPhoneticVisible()
+let currentChineseVisible = loadChineseVisible()
 let activeSpeechAudio = null
 const preloadedSpeechUrls = new Set()
 
@@ -198,6 +201,25 @@ function savePhoneticVisible(value) {
     return currentPhoneticVisible
   }
   return currentPhoneticVisible
+}
+
+function loadChineseVisible() {
+  try {
+    if (typeof localStorage === 'undefined') return true
+    return localStorage.getItem(chineseVisibleKey) !== 'false'
+  } catch {
+    return true
+  }
+}
+
+function saveChineseVisible(value) {
+  currentChineseVisible = value !== false
+  try {
+    localStorage.setItem(chineseVisibleKey, String(currentChineseVisible))
+  } catch {
+    return currentChineseVisible
+  }
+  return currentChineseVisible
 }
 
 function authHeaders(token = getStoredSession()) {
@@ -3085,6 +3107,7 @@ function PracticeView({
   const [speechSettings, setSpeechSettings] = useState(() => currentSpeechSettings)
   const [autoReadRepeat, setAutoReadRepeat] = useState(() => currentAutoReadRepeat)
   const [phoneticVisible, setPhoneticVisible] = useState(() => currentPhoneticVisible)
+  const [chineseVisible, setChineseVisible] = useState(() => currentChineseVisible)
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const [answerCountAnimating, setAnswerCountAnimating] = useState(false)
   const [keyboardOpen, setKeyboardOpen] = useState(false)
@@ -3102,9 +3125,9 @@ function PracticeView({
         hint: statement.soundmark || '',
       }
     : prompt
-  const showPromptText = !hasAnswerShown && !isDictation
+  const showPromptText = chineseVisible && !hasAnswerShown && !isDictation
   const showSoundmarkLine = phoneticVisible && !hasAnswerShown && !isDictation && actualPrompt?.hint
-  const stageFit = getPracticeStageFit(actualPrompt?.prompt, actualPrompt?.answer, phoneticVisible ? actualPrompt?.hint : '')
+  const stageFit = getPracticeStageFit(chineseVisible ? actualPrompt?.prompt : '', actualPrompt?.answer, phoneticVisible ? actualPrompt?.hint : '')
   const ReadIcon = autoReadRepeat > 0 ? Volume2 : VolumeX
   const readLabel = autoReadRepeat > 0 ? String(autoReadRepeat) : '静'
 
@@ -3122,6 +3145,10 @@ function PracticeView({
 
   function togglePhoneticVisible() {
     setPhoneticVisible((current) => savePhoneticVisible(!current))
+  }
+
+  function toggleChineseVisible() {
+    setChineseVisible((current) => saveChineseVisible(!current))
   }
 
   useEffect(() => {
@@ -3316,6 +3343,16 @@ function PracticeView({
           >
             <MessageSquareText size={16} />
           </button>
+          <button
+            className={`audio-pill-button ${chineseVisible ? '' : 'chinese-hidden'}`}
+            type="button"
+            aria-label={chineseVisible ? '隐藏中文' : '显示中文'}
+            title={chineseVisible ? '隐藏中文' : '显示中文'}
+            aria-pressed={!chineseVisible}
+            onClick={toggleChineseVisible}
+          >
+            <Languages size={16} />
+          </button>
         </div>
       </div>
 
@@ -3323,13 +3360,18 @@ function PracticeView({
         {isListening ? (
           <ListeningStage prompt={{ ...actualPrompt, prompt: actualPrompt.answer }} />
         ) : isSpeaking ? (
-          <SpeakingStage prompt={actualPrompt} />
+          <SpeakingStage prompt={actualPrompt} showChinese={chineseVisible} />
         ) : (
           <>
             {showPromptText && <h1>{actualPrompt.prompt}</h1>}
             {showSoundmarkLine && <p className="soundmark-line">{actualPrompt.hint}</p>}
             {hasAnswerShown && statement ? (
-              <AnswerBreakdown statement={statement} lesson={lesson} showPhonetic={phoneticVisible} />
+              <AnswerBreakdown
+                statement={statement}
+                lesson={lesson}
+                showPhonetic={phoneticVisible}
+                showChinese={chineseVisible}
+              />
             ) : (
               <AnswerEntry
                 answer={answer}
@@ -3658,7 +3700,7 @@ function AnswerEntry({ answer, expected, placeholder, showWrongSlots = false, on
   )
 }
 
-function AnswerBreakdown({ statement, lesson, showPhonetic = true }) {
+function AnswerBreakdown({ statement, lesson, showPhonetic = true, showChinese = true }) {
   const words = buildWordBreakdown(statement, lesson)
   const wordCount = words.length
   const fitClass = wordCount >= 10 ? 'dense' : wordCount >= 7 ? 'compact' : ''
@@ -3671,11 +3713,11 @@ function AnswerBreakdown({ statement, lesson, showPhonetic = true }) {
             {showPhonetic && item.soundmark && <span className="word-soundmark">{item.soundmark}</span>}
             <strong>{item.word}</strong>
             <em>{item.pos}</em>
-            {item.chinese && <small>{item.chinese}</small>}
+            {showChinese && item.chinese && <small>{item.chinese}</small>}
           </button>
         ))}
       </div>
-      <p className="answer-chinese">{statement.chinese}</p>
+      {showChinese && <p className="answer-chinese">{statement.chinese}</p>}
     </div>
   )
 }
@@ -3701,10 +3743,10 @@ function ListeningStage({ prompt }) {
   )
 }
 
-function SpeakingStage({ prompt }) {
+function SpeakingStage({ prompt, showChinese = true }) {
   return (
     <div className="speaking-stage">
-      <h1>{prompt.prompt}</h1>
+      {showChinese && <h1>{prompt.prompt}</h1>}
       <button className="record-button" type="button">
         <Mic2 size={34} />
         开始录音
