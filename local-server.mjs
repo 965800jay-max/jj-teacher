@@ -16,6 +16,7 @@ const legacyAccountFile = join(dataDir, 'user-account.json')
 const ttsCacheDir = join(dataDir, 'tts-cache')
 const openaiKeyFile = join(dataDir, 'openai-api-key.txt')
 const globalStatsKey = '__julebuGlobalStats'
+const customCourseId = 'julebu-custom-course'
 const port = Number(process.env.PORT || process.env.LOCAL_PORT || process.argv[2] || 5188)
 const host = process.env.HOST || '127.0.0.1'
 const openaiApiKey = readOpenAiApiKey()
@@ -34,9 +35,16 @@ const defaultSavedItems = {
   forgottenPhrases: [],
 }
 
+const defaultCustomCourse = {
+  items: [],
+  removedItems: {},
+  updatedAt: null,
+}
+
 const defaultState = {
   progress: {},
   savedItems: defaultSavedItems,
+  customCourse: defaultCustomCourse,
   updatedAt: null,
 }
 
@@ -100,6 +108,61 @@ function normalizeArchiveRemovals(value) {
   )
 }
 
+function normalizeCustomCourseText(value, limit) {
+  return String(value || '')
+    .normalize('NFKC')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, limit)
+}
+
+function normalizeCustomCourseItem(item) {
+  if (!item || typeof item !== 'object') return null
+  const id = normalizeCustomCourseText(item.id, 160)
+  const english = normalizeCustomCourseText(item.english, 600)
+  const chinese = normalizeCustomCourseText(item.chinese, 600)
+  if (!id || !english || !chinese) return null
+  const wordCount = english.match(/[A-Za-z]+(?:'[A-Za-z]+)?/g)?.length || 0
+  return {
+    id,
+    english,
+    chinese,
+    soundmark: normalizeCustomCourseText(item.soundmark, 300),
+    kind: item.kind === 'word' || wordCount === 1 ? 'word' : 'sentence',
+    createdAt: item.createdAt || item.updatedAt || null,
+    updatedAt: item.updatedAt || item.createdAt || null,
+  }
+}
+
+function customCourseItemTimestamp(item) {
+  return archiveTimestamp(item?.updatedAt || item?.createdAt)
+}
+
+function normalizeCustomCourse(value) {
+  if (!value || typeof value !== 'object') {
+    return { ...defaultCustomCourse, removedItems: {} }
+  }
+  const removedItems = normalizeArchiveRemovals(value.removedItems)
+  const byId = new Map()
+  for (const rawItem of Array.isArray(value.items) ? value.items.slice(0, 5000) : []) {
+    const item = normalizeCustomCourseItem(rawItem)
+    if (!item) continue
+    const existing = byId.get(item.id)
+    if (!existing || customCourseItemTimestamp(item) >= customCourseItemTimestamp(existing)) {
+      byId.set(item.id, item)
+    }
+  }
+  const items = [...byId.values()]
+    .filter((item) => !removedItems[item.id] || customCourseItemTimestamp(item) > archiveTimestamp(removedItems[item.id]))
+    .sort((a, b) => customCourseItemTimestamp(a) - customCourseItemTimestamp(b) || a.id.localeCompare(b.id))
+  return {
+    items,
+    removedItems,
+    updatedAt: value.updatedAt || null,
+  }
+}
+
 function normalizeRemovedArchiveItems(value) {
   return {
     mastered: normalizeArchiveRemovals(value?.mastered),
@@ -133,6 +196,7 @@ function normalizeState(value) {
   return {
     progress: value.progress && typeof value.progress === 'object' ? value.progress : {},
     savedItems: normalizeSavedItems(value.savedItems),
+    customCourse: normalizeCustomCourse(value.customCourse),
     updatedAt: value.updatedAt || null,
   }
 }
@@ -192,6 +256,23 @@ function mergeCourseProgress(current = {}, incoming = {}) {
   }
 }
 
+function mergeCustomCourseProgress(current = {}, incoming = {}) {
+  const currentRevision = archiveTimestamp(current.contentUpdatedAt)
+  const incomingRevision = archiveTimestamp(incoming.contentUpdatedAt)
+  if (currentRevision === incomingRevision) return mergeCourseProgress(current, incoming)
+  const latest = incomingRevision > currentRevision ? incoming : current
+  const older = latest === incoming ? current : incoming
+  return {
+    ...older,
+    ...latest,
+    minutes: maxNumber(current.minutes, incoming.minutes),
+    studySeconds: maxNumber(current.studySeconds, incoming.studySeconds),
+    completed: Math.max(0, Number(latest.completed) || 0),
+    currentLesson: latest.currentLesson || '自动整理练习',
+    lessonProgress: latest.lessonProgress || {},
+  }
+}
+
 function mergeProgress(current = {}, incoming = {}) {
   const merged = { ...current, ...incoming }
   const keys = new Set([...Object.keys(current), ...Object.keys(incoming)])
@@ -208,6 +289,10 @@ function mergeProgress(current = {}, incoming = {}) {
       typeof currentValue === 'object' &&
       typeof incomingValue === 'object'
     ) {
+      if (key === customCourseId) {
+        merged[key] = mergeCustomCourseProgress(currentValue, incomingValue)
+        continue
+      }
       merged[key] = mergeCourseProgress(currentValue, incomingValue)
     }
   }
@@ -267,12 +352,33 @@ function mergeSavedItems(currentValue, incomingValue) {
   }
 }
 
+function mergeCustomCourse(currentValue, incomingValue) {
+  const current = normalizeCustomCourse(currentValue)
+  const incoming = normalizeCustomCourse(incomingValue)
+  const removedItems = mergeArchiveRemovals(current.removedItems, incoming.removedItems)
+  const byId = new Map()
+
+  for (const item of [...current.items, ...incoming.items]) {
+    const existing = byId.get(item.id)
+    if (!existing || customCourseItemTimestamp(item) >= customCourseItemTimestamp(existing)) {
+      byId.set(item.id, { ...existing, ...item })
+    }
+  }
+
+  return normalizeCustomCourse({
+    items: [...byId.values()],
+    removedItems,
+    updatedAt: latestDate(current.updatedAt, incoming.updatedAt),
+  })
+}
+
 function mergeState(currentValue, incomingValue, updatedAt) {
   const current = normalizeState(currentValue)
   const incoming = normalizeState(incomingValue)
   return {
     progress: mergeProgress(current.progress, incoming.progress),
     savedItems: mergeSavedItems(current.savedItems, incoming.savedItems),
+    customCourse: mergeCustomCourse(current.customCourse, incoming.customCourse),
     updatedAt: latestDate(current.updatedAt, incoming.updatedAt, updatedAt),
   }
 }
@@ -441,7 +547,8 @@ function stateHasContent(state) {
     state.savedItems?.mastered?.length ||
     state.savedItems?.vocab?.length ||
     state.savedItems?.forgottenWords?.length ||
-    state.savedItems?.forgottenPhrases?.length
+    state.savedItems?.forgottenPhrases?.length ||
+    state.customCourse?.items?.length
   )
 }
 

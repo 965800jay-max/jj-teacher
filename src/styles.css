@@ -1692,6 +1692,196 @@ button.queue-row:focus-visible {
   background: #202124;
 }
 
+.custom-course-page {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+
+.custom-course-hero {
+  background: linear-gradient(120deg, #eef3fb 0%, #ffffff 42%, #eaf6f1 74%, #fff5e2 118%);
+}
+
+.custom-course-editor,
+.custom-course-order {
+  border-color: #d8e0ea;
+}
+
+.custom-course-form {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.custom-course-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.custom-course-fields label,
+.custom-course-bulk-field {
+  display: grid;
+  min-width: 0;
+  gap: 7px;
+}
+
+.custom-course-fields label > span,
+.custom-course-bulk-field > span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.custom-course-form textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  outline: 0;
+  background: var(--surface-soft);
+  color: var(--ink);
+  padding: 12px 13px;
+  line-height: 1.55;
+}
+
+.custom-course-form textarea:focus {
+  border-color: #5479b8;
+  background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(65, 105, 178, 0.12);
+}
+
+.custom-course-form-actions {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.custom-form-status {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.custom-form-status.success {
+  color: var(--teal);
+}
+
+.custom-form-status.error {
+  color: #b54533;
+}
+
+.custom-course-list {
+  display: grid;
+  margin-top: 10px;
+}
+
+.custom-course-row {
+  display: grid;
+  grid-template-columns: 34px 52px minmax(0, 1fr) 42px;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid var(--line);
+  padding: 12px 0;
+}
+
+.custom-course-position {
+  color: var(--faint);
+  font-size: 12px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.custom-course-kind {
+  border-radius: 999px;
+  padding: 5px 7px;
+  font-size: 11px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.custom-course-kind.word {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.custom-course-kind.sentence {
+  background: var(--teal-soft);
+  color: var(--teal);
+}
+
+.custom-course-row > div {
+  min-width: 0;
+}
+
+.custom-course-row strong,
+.custom-course-row small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.custom-course-row strong {
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.custom-course-row small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.custom-course-delete {
+  color: var(--faint);
+}
+
+.custom-course-delete:hover,
+.custom-course-delete:focus-visible {
+  border-color: #e0b4aa;
+  color: #b54533;
+}
+
+.custom-course-empty {
+  min-height: 210px;
+  margin-top: 8px;
+}
+
+.night-study .custom-course-editor,
+.night-study .custom-course-order {
+  border-color: #29292d;
+  background: #0f0f10;
+}
+
+.night-study .custom-course-form textarea {
+  border-color: #34343a;
+  background: #18181b;
+  color: #f5f5f5;
+}
+
+.night-study .custom-course-form textarea:focus {
+  border-color: #7895c5;
+  background: #202124;
+}
+
+.night-study .custom-course-row {
+  border-top-color: #29292d;
+}
+
+.night-study .custom-course-row strong {
+  color: #fafafa;
+}
+
+.night-study .custom-course-kind.word,
+.night-study .custom-course-kind.sentence {
+  background: #202124;
+  color: #d1d5db;
+}
+
 .lesson-tile {
   display: grid;
   min-width: 0;
@@ -3606,6 +3796,31 @@ button.queue-row:focus-visible {
   .status-grid,
   .status-grid.four {
     grid-template-columns: 1fr;
+  }
+
+  .custom-course-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .custom-entry-modes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .custom-course-form-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .custom-course-row {
+    grid-template-columns: 26px 48px minmax(0, 1fr) 38px;
+    gap: 8px;
+  }
+
+  .custom-course-row .icon-button {
+    width: 38px;
+    height: 38px;
   }
 
   .lesson-row {

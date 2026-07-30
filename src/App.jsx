@@ -53,6 +53,7 @@ const phoneticVisibleKey = 'julebu-web-redesign-phonetic-visible'
 const chineseVisibleKey = 'julebu-web-redesign-chinese-visible'
 const pendingServerStateKey = 'julebu-web-redesign-pending-server-state'
 const globalStatsKey = '__julebuGlobalStats'
+const customCourseId = 'julebu-custom-course'
 const serverApiBaseUrl = (import.meta.env.VITE_JULEBU_API_BASE || '').replace(/\/$/, '')
 const nativeServerApiBaseUrl = 'https://julebu-learning-platform.onrender.com'
 const typingSoundUrl = `${import.meta.env.BASE_URL}audio/typing-sounds/default.mp3`
@@ -403,6 +404,93 @@ function normalizeSavedItems(value) {
   }
 }
 
+function createEmptyCustomCourse() {
+  return {
+    items: [],
+    removedItems: {},
+    updatedAt: null,
+  }
+}
+
+function normalizeCustomCourseText(value, limit = 600) {
+  return String(value || '')
+    .normalize('NFKC')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, limit)
+}
+
+function normalizeCustomCourseItem(item) {
+  if (!item || typeof item !== 'object') return null
+  const id = normalizeCustomCourseText(item.id, 160)
+  const english = normalizeCustomCourseText(item.english)
+  const chinese = normalizeCustomCourseText(item.chinese)
+  if (!id || !english || !chinese) return null
+  const wordCount = english.match(/[A-Za-z]+(?:'[A-Za-z]+)?/g)?.length || 0
+  return {
+    id,
+    english,
+    chinese,
+    soundmark: normalizeCustomCourseText(item.soundmark, 300),
+    kind: item.kind === 'word' || wordCount === 1 ? 'word' : 'sentence',
+    createdAt: item.createdAt || item.updatedAt || null,
+    updatedAt: item.updatedAt || item.createdAt || null,
+  }
+}
+
+function customCourseItemTimestamp(item) {
+  return archiveTimestamp(item?.updatedAt || item?.createdAt)
+}
+
+function nextCustomCourseUpdatedAt(value) {
+  return new Date(Math.max(Date.now(), archiveTimestamp(value) + 1)).toISOString()
+}
+
+function normalizeCustomCourse(value) {
+  if (!value || typeof value !== 'object') return createEmptyCustomCourse()
+  const removedItems = normalizeArchiveRemovals(value.removedItems)
+  const byId = new Map()
+  const items = Array.isArray(value.items) ? value.items.slice(0, 5000) : []
+
+  items.forEach((rawItem) => {
+    const item = normalizeCustomCourseItem(rawItem)
+    if (!item) return
+    const existing = byId.get(item.id)
+    if (!existing || customCourseItemTimestamp(item) >= customCourseItemTimestamp(existing)) {
+      byId.set(item.id, item)
+    }
+  })
+
+  return {
+    items: [...byId.values()]
+      .filter((item) => !removedItems[item.id] || customCourseItemTimestamp(item) > archiveTimestamp(removedItems[item.id]))
+      .sort((a, b) => customCourseItemTimestamp(a) - customCourseItemTimestamp(b) || a.id.localeCompare(b.id)),
+    removedItems,
+    updatedAt: value.updatedAt || null,
+  }
+}
+
+function mergeCustomCourseState(currentValue, incomingValue) {
+  const current = normalizeCustomCourse(currentValue)
+  const incoming = normalizeCustomCourse(incomingValue)
+  const removedItems = mergeArchiveRemovals(current.removedItems, incoming.removedItems)
+  const byId = new Map()
+
+  for (const item of [...current.items, ...incoming.items]) {
+    const existing = byId.get(item.id)
+    if (!existing || customCourseItemTimestamp(item) >= customCourseItemTimestamp(existing)) {
+      byId.set(item.id, { ...existing, ...item })
+    }
+  }
+
+  return normalizeCustomCourse({
+    items: [...byId.values()],
+    removedItems,
+    updatedAt: latestProgressDate(current.updatedAt, incoming.updatedAt),
+  })
+}
+
 function maxProgressNumber(...values) {
   return Math.max(0, ...values.map((value) => Number(value) || 0))
 }
@@ -460,6 +548,25 @@ function mergeCourseProgressState(current = {}, incoming = {}) {
   }
 }
 
+function mergeCustomCourseProgressState(current = {}, incoming = {}) {
+  const currentRevision = archiveTimestamp(current.contentUpdatedAt)
+  const incomingRevision = archiveTimestamp(incoming.contentUpdatedAt)
+  if (currentRevision === incomingRevision) {
+    return mergeCourseProgressState(current, incoming)
+  }
+  const latest = incomingRevision > currentRevision ? incoming : current
+  const older = latest === incoming ? current : incoming
+  return {
+    ...older,
+    ...latest,
+    minutes: maxProgressNumber(current.minutes, incoming.minutes),
+    studySeconds: maxProgressNumber(current.studySeconds, incoming.studySeconds),
+    completed: Math.max(0, Number(latest.completed) || 0),
+    currentLesson: latest.currentLesson || '自动整理练习',
+    lessonProgress: latest.lessonProgress || {},
+  }
+}
+
 function mergeProgressState(currentValue = {}, incomingValue = {}) {
   const current = normalizeProgress(currentValue)
   const incoming = normalizeProgress(incomingValue)
@@ -470,6 +577,7 @@ function mergeProgressState(currentValue = {}, incomingValue = {}) {
       const currentItem = current[key]
       const incomingItem = incoming[key]
       if (currentItem && incomingItem && typeof currentItem === 'object' && typeof incomingItem === 'object') {
+        if (key === customCourseId) return [key, mergeCustomCourseProgressState(currentItem, incomingItem)]
         return [key, mergeCourseProgressState(currentItem, incomingItem)]
       }
       return [key, incomingItem || currentItem]
@@ -533,13 +641,15 @@ async function loadServerState(code) {
   return {
     progress: normalizeProgress(data.progress),
     savedItems: normalizeSavedItems(data.savedItems),
+    customCourse: normalizeCustomCourse(data.customCourse),
   }
 }
 
-function makeServerStatePayload(progress, savedItems) {
+function makeServerStatePayload(progress, savedItems, customCourse) {
   return {
     progress: normalizeProgress(progress),
     savedItems: normalizeSavedItems(savedItems),
+    customCourse: normalizeCustomCourse(customCourse),
   }
 }
 
@@ -549,6 +659,7 @@ function mergeServerStatePayload(current, incoming) {
   return {
     progress: mergeProgressState(current.progress, incoming.progress),
     savedItems: mergeSavedItemsState(current.savedItems, incoming.savedItems),
+    customCourse: mergeCustomCourseState(current.customCourse, incoming.customCourse),
   }
 }
 
@@ -561,7 +672,7 @@ function readPendingServerState(token = getStoredSession()) {
     const raw = localStorage.getItem(pendingServerStateStorageKey(token))
     if (!raw) return null
     const parsed = JSON.parse(raw)
-    return makeServerStatePayload(parsed.progress, parsed.savedItems)
+    return makeServerStatePayload(parsed.progress, parsed.savedItems, parsed.customCourse)
   } catch {
     return null
   }
@@ -589,12 +700,14 @@ function mergeServerStateWithPending(serverState, token = getStoredSession()) {
     return {
       progress: normalizeProgress(serverState.progress),
       savedItems: normalizeSavedItems(serverState.savedItems),
+      customCourse: normalizeCustomCourse(serverState.customCourse),
       hadPending: false,
     }
   }
   return {
     progress: mergeProgressState(serverState.progress, pendingState.progress),
     savedItems: mergeSavedItemsState(serverState.savedItems, pendingState.savedItems),
+    customCourse: mergeCustomCourseState(serverState.customCourse, pendingState.customCourse),
     hadPending: true,
   }
 }
@@ -684,8 +797,8 @@ async function flushServerStateQueue() {
   }
 }
 
-function saveServerState(progress, savedItems) {
-  const payload = makeServerStatePayload(progress, savedItems)
+function saveServerState(progress, savedItems, customCourse) {
+  const payload = makeServerStatePayload(progress, savedItems, customCourse)
   const token = getStoredSession()
   serverStateQueuedPayload = mergeServerStatePayload(serverStateQueuedPayload, payload)
   persistPendingServerState(serverStateQueuedPayload, token)
@@ -702,8 +815,8 @@ function wakeServerStateSaveQueue() {
   }
 }
 
-function saveServerStateNow(progress, savedItems) {
-  const payload = makeServerStatePayload(progress, savedItems)
+function saveServerStateNow(progress, savedItems, customCourse) {
+  const payload = makeServerStatePayload(progress, savedItems, customCourse)
   persistPendingServerState(payload)
   return apiFetch('/api/state', {
       method: 'PUT',
@@ -1615,6 +1728,234 @@ function buildAiStatementPayload(statement, lesson) {
   }
 }
 
+const customCourseStopWords = new Set([
+  'a', 'an', 'the', 'i', 'me', 'my', 'you', 'your', 'he', 'him', 'his', 'she', 'her', 'it', 'its',
+  'we', 'us', 'our', 'they', 'them', 'their', 'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+  'do', 'does', 'did', 'have', 'has', 'had', 'to', 'of', 'for', 'in', 'on', 'at', 'by', 'with', 'from',
+  'and', 'or', 'but', 'so', 'that', 'this', 'these', 'those', 'there', 'here', 'as', 'if', 'then', 'than',
+])
+
+const customCourseConceptGroups = [
+  ['like', 'love', 'enjoy', 'prefer'],
+  ['want', 'wish', 'hope', 'plan', 'intend'],
+  ['learn', 'study', 'practice', 'review'],
+  ['speak', 'say', 'tell', 'talk'],
+  ['look', 'see', 'watch', 'view'],
+  ['go', 'travel', 'visit', 'leave'],
+  ['come', 'arrive', 'reach', 'return'],
+  ['eat', 'food', 'meal', 'breakfast', 'lunch', 'dinner'],
+  ['drink', 'water', 'coffee', 'tea'],
+  ['home', 'house', 'room', 'family'],
+  ['work', 'job', 'office', 'business'],
+  ['school', 'class', 'teacher', 'student'],
+  ['happy', 'glad', 'pleased', 'excited'],
+  ['sad', 'upset', 'unhappy', 'sorry'],
+  ['big', 'large', 'huge'],
+  ['small', 'little', 'tiny'],
+  ['good', 'great', 'nice', 'excellent'],
+  ['bad', 'poor', 'terrible', 'awful'],
+  ['important', 'necessary', 'essential'],
+  ['help', 'support', 'assist'],
+  ['buy', 'purchase', 'pay', 'shop'],
+]
+
+const customCourseConceptMap = new Map(
+  customCourseConceptGroups.flatMap((group) => group.map((word) => [word, group[0]])),
+)
+
+const customCourseChineseConcepts = {
+  like: ['喜欢', '喜爱', '爱好', '享受'],
+  want: ['想要', '希望', '打算', '计划'],
+  learn: ['学习', '练习', '复习', '上课'],
+  speak: ['说话', '讲话', '告诉', '交流'],
+  go: ['去', '旅行', '出发', '离开'],
+  come: ['来', '到达', '回来', '返回'],
+  eat: ['吃', '食物', '饭', '早餐', '午餐', '晚餐'],
+  drink: ['喝', '水', '咖啡', '茶'],
+  home: ['家', '房子', '房间', '家庭'],
+  work: ['工作', '上班', '公司', '办公室'],
+  school: ['学校', '课堂', '老师', '学生'],
+  happy: ['开心', '高兴', '快乐', '兴奋'],
+  sad: ['难过', '伤心', '失望', '抱歉'],
+  important: ['重要', '必要', '关键'],
+  help: ['帮助', '帮忙', '支持'],
+  buy: ['买', '购买', '付款', '购物'],
+}
+
+function customCourseTokenStem(value) {
+  let token = normalizeWord(value)
+  if (!token) return ''
+  if (customCourseConceptMap.has(token)) return customCourseConceptMap.get(token)
+  if (token.length > 5 && token.endsWith('ing')) token = token.slice(0, -3)
+  else if (token.length > 4 && token.endsWith('ied')) token = `${token.slice(0, -3)}y`
+  else if (token.length > 4 && token.endsWith('ed')) token = token.slice(0, -2)
+  else if (token.length > 4 && token.endsWith('es')) token = token.slice(0, -2)
+  else if (token.length > 3 && token.endsWith('s')) token = token.slice(0, -1)
+  return customCourseConceptMap.get(token) || token
+}
+
+function customCourseEnglishTokens(item, includeStopWords = false) {
+  const tokens = tokenizeEnglish(item?.english || '')
+    .map(customCourseTokenStem)
+    .filter(Boolean)
+  const meaningful = tokens.filter((token) => !customCourseStopWords.has(token))
+  return new Set(includeStopWords || !meaningful.length ? tokens : meaningful)
+}
+
+function customCourseChineseUnits(value) {
+  const characters = Array.from(String(value || '').replace(/[^\u3400-\u9FFF]/g, ''))
+  const units = new Set()
+  for (let index = 0; index < characters.length - 1; index += 1) {
+    units.add(`${characters[index]}${characters[index + 1]}`)
+  }
+  return units
+}
+
+function customCourseChineseConceptSet(value) {
+  const text = String(value || '')
+  return new Set(
+    Object.entries(customCourseChineseConcepts)
+      .filter(([, keywords]) => keywords.some((keyword) => text.includes(keyword)))
+      .map(([concept]) => concept),
+  )
+}
+
+function setOverlapSize(first, second) {
+  let size = 0
+  first.forEach((value) => {
+    if (second.has(value)) size += 1
+  })
+  return size
+}
+
+function setJaccard(first, second) {
+  if (!first.size || !second.size) return 0
+  const overlap = setOverlapSize(first, second)
+  return overlap / Math.max(first.size + second.size - overlap, 1)
+}
+
+function customCourseSimilarityFeatures(item) {
+  return {
+    rawTokens: customCourseEnglishTokens(item, true),
+    tokens: customCourseEnglishTokens(item),
+    chineseUnits: customCourseChineseUnits(item.chinese),
+    chineseConcepts: customCourseChineseConceptSet(item.chinese),
+  }
+}
+
+function customCourseSimilarity(first, second, featureById = null) {
+  const firstFeatures = featureById?.get(first.id) || customCourseSimilarityFeatures(first)
+  const secondFeatures = featureById?.get(second.id) || customCourseSimilarityFeatures(second)
+  let score = 0
+
+  if (first.kind === 'word' && firstFeatures.rawTokens.size === 1 && setOverlapSize(firstFeatures.rawTokens, secondFeatures.rawTokens)) score += 140
+  if (second.kind === 'word' && secondFeatures.rawTokens.size === 1 && setOverlapSize(firstFeatures.rawTokens, secondFeatures.rawTokens)) score += 140
+  score += setOverlapSize(firstFeatures.tokens, secondFeatures.tokens) * 24
+  score += setJaccard(firstFeatures.tokens, secondFeatures.tokens) * 26
+  score += setOverlapSize(firstFeatures.chineseConcepts, secondFeatures.chineseConcepts) * 24
+  score += setJaccard(firstFeatures.chineseUnits, secondFeatures.chineseUnits) * 20
+  if (first.kind === second.kind) score += 0.25
+  return score
+}
+
+function customCourseItemOrder(item) {
+  return customCourseItemTimestamp(item) || 0
+}
+
+function chooseCustomCourseSeed(items, anchorScores) {
+  const relatedWords = items
+    .filter((item) => item.kind === 'word')
+    .map((item) => ({ item, score: anchorScores.get(item.id) || 0 }))
+    .filter((entry) => entry.score >= 100)
+    .sort((a, b) => b.score - a.score || customCourseItemOrder(a.item) - customCourseItemOrder(b.item))
+  return relatedWords[0]?.item || items[0]
+}
+
+function sortCustomCourseItems(value) {
+  const remaining = [...normalizeCustomCourse(value).items]
+  const featureById = new Map(remaining.map((item) => [item.id, customCourseSimilarityFeatures(item)]))
+  const anchorScores = new Map(
+    remaining
+      .filter((item) => item.kind === 'word')
+      .map((item) => [
+        item.id,
+        Math.max(0, ...remaining
+          .filter((other) => other.id !== item.id)
+          .map((other) => customCourseSimilarity(item, other, featureById))),
+      ]),
+  )
+  const ordered = []
+  let previous = null
+
+  while (remaining.length) {
+    let nextIndex = -1
+    let nextScore = -1
+
+    if (previous) {
+      remaining.forEach((item, index) => {
+        const score = customCourseSimilarity(previous, item, featureById)
+        if (score > nextScore) {
+          nextScore = score
+          nextIndex = index
+        }
+      })
+    }
+
+    if (!previous || nextScore < 8) {
+      const seed = chooseCustomCourseSeed(remaining, anchorScores)
+      nextIndex = Math.max(0, remaining.findIndex((item) => item.id === seed.id))
+    }
+
+    const [next] = remaining.splice(nextIndex, 1)
+    ordered.push(next)
+    previous = next
+  }
+
+  return ordered
+}
+
+function buildCustomCourse(value) {
+  const orderedItems = sortCustomCourseItems(value)
+  const statements = orderedItems.map((item, index) => ({
+    id: `custom-statement:${item.id}`,
+    customItemId: item.id,
+    order: index + 1,
+    english: item.english,
+    chinese: item.chinese,
+    soundmark: item.soundmark || '',
+  }))
+  const lesson = {
+    id: 'custom-course-auto-lesson',
+    order: 1,
+    title: '自动整理练习',
+    description: '自定义单词与句子',
+    statementCount: statements.length,
+    sentenceCount: statements.length,
+    statements,
+    sentences: statements.map((statement) => ({ content: statement.english })),
+    audioByText: {},
+  }
+
+  return {
+    id: customCourseId,
+    isCustom: true,
+    title: '我的自定义课程',
+    subtitle: `${statements.length.toLocaleString('zh-CN')} 条自定义练习`,
+    lessons: 1,
+    completed: 0,
+    minutes: 0,
+    level: '自动整理',
+    tag: '我的内容',
+    accent: 'blue',
+    cover: 'Mine',
+    description: '添加自己的单词和句子，系统会自动整理学习顺序。',
+    currentLesson: '自动整理练习',
+    statementTotal: statements.length,
+    lessonSummaries: [lesson],
+    lessonData: [lesson],
+  }
+}
+
 const baseCourses = courseCatalog
 
 const modes = [
@@ -1763,6 +2104,7 @@ function App() {
   const [activeView, setActiveView] = useState('dashboard')
   const [savedProgress, setSavedProgress] = useState({})
   const [savedItems, setSavedItems] = useState(createEmptySavedItems)
+  const [customCourse, setCustomCourse] = useState(createEmptyCustomCourse)
   const [selectedCourseId, setSelectedCourseId] = useState(baseCourses[0]?.id || '')
   const [loadedCourses, setLoadedCourses] = useState({})
   const [loadingCourseId, setLoadingCourseId] = useState(null)
@@ -1783,6 +2125,7 @@ function App() {
   const [userPanelOpen, setUserPanelOpen] = useState(false)
   const savedProgressRef = useRef(savedProgress)
   const savedItemsRef = useRef(savedItems)
+  const customCourseRef = useRef(customCourse)
   const courseStudyClockRef = useRef(null)
 
   useEffect(() => {
@@ -1830,12 +2173,14 @@ function App() {
         clearLocalLearningState()
         savedProgressRef.current = serverState.progress
         savedItemsRef.current = serverState.savedItems
+        customCourseRef.current = serverState.customCourse
         setSavedProgress(serverState.progress)
         setSavedItems(serverState.savedItems)
+        setCustomCourse(serverState.customCourse)
         setUsesServerStorage(true)
         setSyncError('')
         if (serverState.hadPending) {
-          saveServerState(serverState.progress, serverState.savedItems)
+          saveServerState(serverState.progress, serverState.savedItems, serverState.customCourse)
             .then(() => setSyncError(''))
             .catch(() => setSyncError('网络不稳，正在自动重试保存'))
         }
@@ -1882,13 +2227,17 @@ function App() {
   }, [savedItems])
 
   useEffect(() => {
+    customCourseRef.current = customCourse
+  }, [customCourse])
+
+  useEffect(() => {
     if (!storageReady || !currentUser) return
     if (usesServerStorage) {
-      saveServerState(savedProgress, savedItems)
+      saveServerState(savedProgress, savedItems, customCourse)
         .then(() => setSyncError(''))
         .catch(() => setSyncError('网络不稳，正在自动重试保存'))
     }
-  }, [currentUser, savedProgress, savedItems, storageReady, usesServerStorage])
+  }, [currentUser, customCourse, savedProgress, savedItems, storageReady, usesServerStorage])
 
   useEffect(() => {
     function handleSyncStatus(event) {
@@ -1916,8 +2265,9 @@ function App() {
     function flushBeforePause() {
       const latestProgress = savedProgressRef.current
       const latestItems = savedItemsRef.current
-      saveServerState(latestProgress, latestItems).catch(() => {})
-      saveServerStateNow(latestProgress, latestItems).catch(() => {})
+      const latestCustomCourse = customCourseRef.current
+      saveServerState(latestProgress, latestItems, latestCustomCourse).catch(() => {})
+      saveServerStateNow(latestProgress, latestItems, latestCustomCourse).catch(() => {})
     }
 
     function handleVisibilityFlush() {
@@ -1932,16 +2282,22 @@ function App() {
     }
   }, [currentUser, storageReady, usesServerStorage])
 
-  const courses = useMemo(
-    () =>
-      baseCourses.map((course) => {
+  const courses = useMemo(() => {
+    const standardCourses = baseCourses.map((course) => {
         const loaded = loadedCourses[course.id]
         const hydrated = loaded ? { ...course, ...loaded } : course
         const saved = savedProgress[course.id]
         return saved ? { ...hydrated, ...saved, lessonData: hydrated.lessonData, lessonSummaries: hydrated.lessonSummaries } : hydrated
-      }),
-    [loadedCourses, savedProgress],
-  )
+      })
+    const custom = buildCustomCourse(customCourse)
+    const customSaved = savedProgress[customCourseId]
+    const hydratedCustom = customSaved
+      ? { ...custom, ...customSaved, lessonData: custom.lessonData, lessonSummaries: custom.lessonSummaries }
+      : custom
+    return standardCourses.length
+      ? [standardCourses[0], hydratedCustom, ...standardCourses.slice(1)]
+      : [hydratedCustom]
+  }, [customCourse, loadedCourses, savedProgress])
 
   const selectedCourse = courses.find((course) => course.id === selectedCourseId) || courses[0]
   const currentMode = practice ? modes.find((mode) => mode.id === practice.modeId) : null
@@ -1976,8 +2332,8 @@ function App() {
       else setSavedProgress(updateProgress)
 
       if (flushNow && storageReady && currentUser && usesServerStorage) {
-        saveServerState(nextProgress, savedItemsRef.current).catch(() => {})
-        saveServerStateNow(nextProgress, savedItemsRef.current).catch(() => {})
+        saveServerState(nextProgress, savedItemsRef.current, customCourseRef.current).catch(() => {})
+        saveServerStateNow(nextProgress, savedItemsRef.current, customCourseRef.current).catch(() => {})
       }
     }
 
@@ -2027,6 +2383,7 @@ function App() {
   }, [currentUser, isStudyView, practice?.course?.id, storageReady, usesServerStorage])
 
   const normalizedSavedItems = useMemo(() => normalizeSavedItems(savedItems), [savedItems])
+  const normalizedCustomCourse = useMemo(() => normalizeCustomCourse(customCourse), [customCourse])
   const currentPracticeStatementId = practice ? getPracticeStatement(practice).statement?.id || '' : ''
   const isCurrentPracticeMastered = Boolean(
     currentPracticeStatementId && normalizedSavedItems.mastered.some((item) => item.id === currentPracticeStatementId),
@@ -2050,9 +2407,91 @@ function App() {
     setMobileNavOpen(false)
   }
 
+  function resetCustomCourseLearningProgress(contentUpdatedAt) {
+    setSavedProgress((current) => {
+      const existing = current[customCourseId]
+      if (!existing) return current
+      const nextProgress = {
+        ...current,
+        [customCourseId]: {
+          ...existing,
+          completed: 0,
+          currentLesson: '自动整理练习',
+          lessonProgress: {},
+          contentUpdatedAt,
+        },
+      }
+      savedProgressRef.current = nextProgress
+      return nextProgress
+    })
+  }
+
+  function addCustomCourseEntries(entries) {
+    const current = normalizeCustomCourse(customCourseRef.current)
+    const firstUpdatedAt = nextCustomCourseUpdatedAt(current.updatedAt)
+    const firstUpdatedTime = archiveTimestamp(firstUpdatedAt)
+    const existingKeys = new Set(current.items.map((item) => normalizeAnswer(item.english)))
+    const addedItems = []
+    let skipped = 0
+
+    for (const entry of entries.slice(0, 500)) {
+      const english = normalizeCustomCourseText(entry?.english)
+      const chinese = normalizeCustomCourseText(entry?.chinese)
+      const entryKey = normalizeAnswer(english)
+      if (!english || !chinese || !entryKey || existingKeys.has(entryKey)) {
+        skipped += 1
+        continue
+      }
+      existingKeys.add(entryKey)
+      const itemId = globalThis.crypto?.randomUUID?.() || `custom-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+      const wordCount = tokenizeEnglish(english).length
+      const itemUpdatedAt = new Date(firstUpdatedTime + addedItems.length).toISOString()
+      addedItems.push({
+        id: itemId,
+        english,
+        chinese,
+        soundmark: normalizeCustomCourseText(entry?.soundmark, 300),
+        kind: wordCount === 1 ? 'word' : 'sentence',
+        createdAt: itemUpdatedAt,
+        updatedAt: itemUpdatedAt,
+      })
+    }
+
+    if (!addedItems.length) return { added: 0, skipped }
+
+    const nextCustomCourse = normalizeCustomCourse({
+      ...current,
+      items: [...current.items, ...addedItems],
+      updatedAt: addedItems[addedItems.length - 1].updatedAt,
+    })
+    customCourseRef.current = nextCustomCourse
+    setCustomCourse(nextCustomCourse)
+    resetCustomCourseLearningProgress(nextCustomCourse.updatedAt)
+    return { added: addedItems.length, skipped }
+  }
+
+  function removeCustomCourseItem(itemId) {
+    const current = normalizeCustomCourse(customCourseRef.current)
+    if (!current.items.some((item) => item.id === itemId)) return
+    const removedAt = nextCustomCourseUpdatedAt(current.updatedAt)
+    const nextCustomCourse = normalizeCustomCourse({
+      ...current,
+      items: current.items.filter((item) => item.id !== itemId),
+      removedItems: { ...current.removedItems, [itemId]: removedAt },
+      updatedAt: removedAt,
+    })
+    customCourseRef.current = nextCustomCourse
+    setCustomCourse(nextCustomCourse)
+    resetCustomCourseLearningProgress(nextCustomCourse.updatedAt)
+  }
+
   async function openPracticePicker(courseId, lesson = 1) {
     unlockAudio()
     const course = courses.find((item) => item.id === courseId) || selectedCourse
+    if (course.isCustom && !getCourseStatementTotal(course)) {
+      openCourse(course.id)
+      return
+    }
     setSelectedCourseId(course.id)
     setFeedback(null)
     setAnswer('')
@@ -2160,6 +2599,7 @@ function App() {
         },
         [practice.course.id]: {
           ...existing,
+          ...(practice.course.isCustom ? { contentUpdatedAt: customCourseRef.current.updatedAt } : {}),
           completed: nextCompleted,
           currentLesson: getLessonTitle(practice.course, nextLessonNumber),
           lessonProgress: lesson?.id
@@ -2297,13 +2737,15 @@ function App() {
     clearLocalLearningState()
     savedProgressRef.current = serverState.progress
     savedItemsRef.current = serverState.savedItems
+    customCourseRef.current = serverState.customCourse
     setSavedProgress(serverState.progress)
     setSavedItems(serverState.savedItems)
+    setCustomCourse(serverState.customCourse)
     setUsesServerStorage(true)
     setStorageReady(true)
     setSyncError('')
     if (serverState.hadPending) {
-      saveServerState(serverState.progress, serverState.savedItems)
+      saveServerState(serverState.progress, serverState.savedItems, serverState.customCourse)
         .then(() => setSyncError(''))
         .catch(() => setSyncError('网络不稳，正在自动重试保存'))
     }
@@ -2415,7 +2857,15 @@ function App() {
             />
           )}
           {activeView === 'course-detail' && (
-            <CourseDetail course={selectedCourse} loadingCourseId={loadingCourseId} onBack={() => navigate('courses')} onPractice={openPracticePicker} />
+            <CourseDetail
+              course={selectedCourse}
+              loadingCourseId={loadingCourseId}
+              customCourse={normalizedCustomCourse}
+              onBack={() => navigate('courses')}
+              onPractice={openPracticePicker}
+              onAddCustomEntries={addCustomCourseEntries}
+              onRemoveCustomItem={removeCustomCourseItem}
+            />
           )}
           {activeView === 'analytics' && <AnalyticsView courses={courses} savedItems={savedItems} savedProgress={savedProgress} />}
           {activeView === 'mastered' && <ArchiveView type="mastered" items={savedItems.mastered} />}
@@ -2728,9 +3178,11 @@ function CoursesView({ courses, query, loadingCourseId, onOpenCourse, onPractice
           <CourseCard
             key={course.id}
             course={course}
-            actionLabel={loadingCourseId === course.id ? '加载中' : '开始学习'}
+            actionLabel={course.isCustom && !getCourseStatementTotal(course) ? '添加内容' : loadingCourseId === course.id ? '加载中' : '开始学习'}
             onOpen={() => onOpenCourse(course.id)}
-            onAction={() => onPractice(course.id, getContinueLesson(course))}
+            onAction={() => course.isCustom && !getCourseStatementTotal(course)
+              ? onOpenCourse(course.id)
+              : onPractice(course.id, getContinueLesson(course))}
           />
         ))}
       </div>
@@ -2738,7 +3190,20 @@ function CoursesView({ courses, query, loadingCourseId, onOpenCourse, onPractice
   )
 }
 
-function CourseDetail({ course, loadingCourseId, onBack, onPractice }) {
+function CourseDetail({ course, loadingCourseId, customCourse, onBack, onPractice, onAddCustomEntries, onRemoveCustomItem }) {
+  if (course.isCustom) {
+    return (
+      <CustomCourseDetail
+        course={course}
+        customCourse={customCourse}
+        loadingCourseId={loadingCourseId}
+        onBack={onBack}
+        onPractice={onPractice}
+        onAddEntries={onAddCustomEntries}
+        onRemoveItem={onRemoveCustomItem}
+      />
+    )
+  }
   const completion = Math.round((course.completed / course.lessons) * 100)
   const isLoading = loadingCourseId === course.id
 
@@ -2774,6 +3239,196 @@ function CourseDetail({ course, loadingCourseId, onBack, onPractice }) {
       </section>
 
       <LessonList course={course} onPractice={onPractice} />
+    </div>
+  )
+}
+
+function CustomCourseDetail({ course, customCourse, loadingCourseId, onBack, onPractice, onAddEntries, onRemoveItem }) {
+  const [entryMode, setEntryMode] = useState('single')
+  const [english, setEnglish] = useState('')
+  const [chinese, setChinese] = useState('')
+  const [bulkText, setBulkText] = useState('')
+  const [formStatus, setFormStatus] = useState(null)
+  const orderedItems = useMemo(() => sortCustomCourseItems(customCourse), [customCourse])
+  const itemCount = orderedItems.length
+  const wordCount = orderedItems.filter((item) => item.kind === 'word').length
+  const sentenceCount = itemCount - wordCount
+  const completion = getCourseProgressPercent(course)
+  const isLoading = loadingCourseId === course.id
+
+  function parseBulkEntries(value) {
+    return String(value || '')
+      .split(/\r?\n/)
+      .map((line) => {
+        const separatorIndex = line.search(/[|｜\t]/)
+        if (separatorIndex < 0) return null
+        return {
+          english: line.slice(0, separatorIndex).trim(),
+          chinese: line.slice(separatorIndex + 1).trim(),
+        }
+      })
+      .filter((item) => item?.english && item?.chinese)
+  }
+
+  function handleAdd(event) {
+    event.preventDefault()
+    const entries = entryMode === 'single'
+      ? [{ english, chinese }]
+      : parseBulkEntries(bulkText)
+    if (!entries.length || entries.some((item) => !item.english || !item.chinese)) {
+      setFormStatus({ type: 'error', text: '请填写英文和中文提示' })
+      return
+    }
+
+    const result = onAddEntries(entries)
+    if (!result.added) {
+      setFormStatus({ type: 'error', text: result.skipped ? '这些内容已经在课程中' : '没有可添加的内容' })
+      return
+    }
+
+    setEnglish('')
+    setChinese('')
+    setBulkText('')
+    setFormStatus({
+      type: 'success',
+      text: result.skipped
+        ? `已添加 ${result.added} 条，跳过 ${result.skipped} 条重复内容`
+        : `已添加 ${result.added} 条并自动整理顺序`,
+    })
+  }
+
+  return (
+    <div className="page-stack page-enter custom-course-page">
+      <div className="detail-toolbar">
+        <button className="ghost-button" type="button" onClick={onBack}>
+          <ChevronLeft size={18} />
+          返回
+        </button>
+      </div>
+
+      <section className={`panel course-hero custom-course-hero course-surface accent-${course.accent}`}>
+        <CourseCover course={course} size="hero" />
+        <div>
+          <p className="eyebrow">{course.tag} · {course.level}</p>
+          <h1>{course.title}</h1>
+          <p>{course.description}</p>
+          <div className="progress-track">
+            <span style={{ width: `${completion}%` }} />
+          </div>
+          <div className="metric-row">
+            <span>{itemCount} 条内容</span>
+            <span>{wordCount} 个单词</span>
+            <span>{sentenceCount} 个句子</span>
+            <span>{completion}% 完成</span>
+          </div>
+        </div>
+        <button
+          className="primary-button hero-action"
+          type="button"
+          onClick={() => onPractice(course.id, 1)}
+          disabled={!itemCount || isLoading}
+        >
+          <Play size={18} />
+          {!itemCount ? '先添加内容' : isLoading ? '加载中' : '开始学习'}
+        </button>
+      </section>
+
+      <section className="panel custom-course-editor">
+        <div className="section-heading compact">
+          <div>
+            <p className="eyebrow">添加内容</p>
+            <h2>单词和句子</h2>
+          </div>
+          <div className="segmented-control custom-entry-modes" aria-label="添加方式">
+            <button className={entryMode === 'single' ? 'selected' : ''} type="button" onClick={() => setEntryMode('single')}>
+              逐条添加
+            </button>
+            <button className={entryMode === 'bulk' ? 'selected' : ''} type="button" onClick={() => setEntryMode('bulk')}>
+              批量添加
+            </button>
+          </div>
+        </div>
+
+        <form className="custom-course-form" onSubmit={handleAdd}>
+          {entryMode === 'single' ? (
+            <div className="custom-course-fields">
+              <label>
+                <span>英文单词或句子</span>
+                <textarea
+                  value={english}
+                  onChange={(event) => setEnglish(event.target.value)}
+                  placeholder="I like reading at home."
+                  rows="2"
+                  maxLength="600"
+                />
+              </label>
+              <label>
+                <span>中文提示</span>
+                <textarea
+                  value={chinese}
+                  onChange={(event) => setChinese(event.target.value)}
+                  placeholder="我喜欢在家阅读。"
+                  rows="2"
+                  maxLength="600"
+                />
+              </label>
+            </div>
+          ) : (
+            <label className="custom-course-bulk-field">
+              <span>每行一条：英文 | 中文</span>
+              <textarea
+                value={bulkText}
+                onChange={(event) => setBulkText(event.target.value)}
+                placeholder={'like | 喜欢\nI like this food. | 我喜欢这个食物。'}
+                rows="6"
+              />
+            </label>
+          )}
+          <div className="custom-course-form-actions">
+            <span className={formStatus ? `custom-form-status ${formStatus.type}` : 'custom-form-status'} aria-live="polite">
+              {formStatus?.text || ''}
+            </span>
+            <button className="primary-button" type="submit">
+              <Plus size={18} />
+              添加到课程
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section className="panel custom-course-order">
+        <div className="section-heading compact">
+          <div>
+            <p className="eyebrow">学习顺序</p>
+            <h2>自动整理结果</h2>
+          </div>
+          <Sparkles size={20} />
+        </div>
+
+        {orderedItems.length ? (
+          <div className="custom-course-list">
+            {orderedItems.map((item, index) => (
+              <div className="custom-course-row" key={item.id}>
+                <span className="custom-course-position">{index + 1}</span>
+                <span className={`custom-course-kind ${item.kind}`}>{item.kind === 'word' ? '单词' : '句子'}</span>
+                <div>
+                  <strong>{item.english}</strong>
+                  <small>{item.chinese}</small>
+                </div>
+                <button className="icon-button custom-course-delete" type="button" onClick={() => onRemoveItem(item.id)} aria-label={`删除 ${item.english}`}>
+                  <Trash2 size={17} />
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state custom-course-empty">
+            <BookText size={30} />
+            <h3>还没有自定义内容</h3>
+            <p>添加后会在这里显示整理好的学习顺序。</p>
+          </div>
+        )}
+      </section>
     </div>
   )
 }
@@ -4182,7 +4837,7 @@ function PageTitle({ eyebrow, title, meta }) {
 }
 
 function CourseCard({ course, actionLabel, onOpen, onAction }) {
-  const completion = Math.round((course.completed / course.lessons) * 100)
+  const completion = getCourseProgressPercent(course)
   return (
     <article className={`course-card course-surface accent-${course.accent}`}>
       <button className="course-open" type="button" onClick={onOpen} aria-label={`打开${course.title}`} />
@@ -4198,7 +4853,9 @@ function CourseCard({ course, actionLabel, onOpen, onAction }) {
           <span style={{ width: `${completion}%` }} />
         </div>
         <div className="course-footer">
-          <small>{course.completed}/{course.lessons} 课</small>
+          <small>{course.isCustom
+            ? `${getCourseCompletedStatements(course)}/${getCourseStatementTotal(course)} 题`
+            : `${course.completed}/${course.lessons} 课`}</small>
           <button className="secondary-button" type="button" onClick={onAction}>
             {actionLabel}
             <ChevronRight size={16} />
@@ -4210,7 +4867,7 @@ function CourseCard({ course, actionLabel, onOpen, onAction }) {
 }
 
 function CourseRow({ course, onOpen }) {
-  const completion = Math.round((course.completed / course.lessons) * 100)
+  const completion = getCourseProgressPercent(course)
   return (
     <button className="course-row" type="button" onClick={onOpen}>
       <CourseCover course={course} size="small" />
