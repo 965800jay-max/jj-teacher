@@ -306,6 +306,26 @@ async function askAiTutor(payload) {
   return data
 }
 
+async function translateCustomCourseEntries(entries) {
+  const completedEntries = []
+  for (let index = 0; index < entries.length; index += 40) {
+    const batch = entries.slice(index, index + 40)
+    const response = await apiFetch('/api/custom-course/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ entries: batch }),
+      timeoutMs: 60000,
+    })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error(data?.error || '自动翻译失败，请稍后重试')
+    if (!Array.isArray(data?.entries) || data.entries.length !== batch.length) {
+      throw new Error('自动翻译结果无效，请重试')
+    }
+    completedEntries.push(...data.entries)
+  }
+  return completedEntries
+}
+
 function normalizeProgress(value) {
   if (!value || typeof value !== 'object') return {}
   return value
@@ -419,6 +439,10 @@ function normalizeCustomCourseText(value, limit = 600) {
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, limit)
+}
+
+function containsChineseCharacters(value) {
+  return /[\u3400-\u9FFF]/.test(String(value || ''))
 }
 
 function normalizeCustomCourseItem(item) {
@@ -3249,6 +3273,7 @@ function CustomCourseDetail({ course, customCourse, loadingCourseId, onBack, onP
   const [chinese, setChinese] = useState('')
   const [bulkText, setBulkText] = useState('')
   const [formStatus, setFormStatus] = useState(null)
+  const [isAdding, setIsAdding] = useState(false)
   const orderedItems = useMemo(() => sortCustomCourseItems(customCourse), [customCourse])
   const itemCount = orderedItems.length
   const wordCount = orderedItems.filter((item) => item.kind === 'word').length
@@ -3260,41 +3285,71 @@ function CustomCourseDetail({ course, customCourse, loadingCourseId, onBack, onP
     return String(value || '')
       .split(/\r?\n/)
       .map((line) => {
+        const trimmedLine = line.trim()
+        if (!trimmedLine) return null
         const separatorIndex = line.search(/[|｜\t]/)
-        if (separatorIndex < 0) return null
-        return {
-          english: line.slice(0, separatorIndex).trim(),
-          chinese: line.slice(separatorIndex + 1).trim(),
+        if (separatorIndex < 0) {
+          return containsChineseCharacters(trimmedLine)
+            ? { english: '', chinese: trimmedLine }
+            : { english: trimmedLine, chinese: '' }
         }
+
+        const left = line.slice(0, separatorIndex).trim()
+        const right = line.slice(separatorIndex + 1).trim()
+        if (!left || !right) {
+          const text = left || right
+          return containsChineseCharacters(text)
+            ? { english: '', chinese: text }
+            : { english: text, chinese: '' }
+        }
+        if (containsChineseCharacters(left) && !containsChineseCharacters(right)) {
+          return { english: right, chinese: left }
+        }
+        return { english: left, chinese: right }
       })
-      .filter((item) => item?.english && item?.chinese)
+      .filter((item) => item?.english || item?.chinese)
   }
 
-  function handleAdd(event) {
+  async function handleAdd(event) {
     event.preventDefault()
+    if (isAdding) return
     const entries = entryMode === 'single'
-      ? [{ english, chinese }]
+      ? [{ english: english.trim(), chinese: chinese.trim() }]
       : parseBulkEntries(bulkText)
-    if (!entries.length || entries.some((item) => !item.english || !item.chinese)) {
-      setFormStatus({ type: 'error', text: '请填写英文和中文提示' })
+    if (!entries.length || entries.some((item) => !item.english && !item.chinese)) {
+      setFormStatus({ type: 'error', text: '请输入英文或中文内容' })
       return
     }
 
-    const result = onAddEntries(entries)
-    if (!result.added) {
-      setFormStatus({ type: 'error', text: result.skipped ? '这些内容已经在课程中' : '没有可添加的内容' })
-      return
-    }
+    const needsTranslation = entries.some((item) => !item.english || !item.chinese)
+    setIsAdding(true)
+    setFormStatus(needsTranslation ? { type: 'loading', text: '正在自动生成翻译…' } : null)
+    try {
+      const completedEntries = needsTranslation ? await translateCustomCourseEntries(entries) : entries
+      if (completedEntries.some((item) => !item?.english || !item?.chinese)) {
+        throw new Error('部分内容没有生成翻译，请重试')
+      }
 
-    setEnglish('')
-    setChinese('')
-    setBulkText('')
-    setFormStatus({
-      type: 'success',
-      text: result.skipped
-        ? `已添加 ${result.added} 条，跳过 ${result.skipped} 条重复内容`
-        : `已添加 ${result.added} 条并自动整理顺序`,
-    })
+      const result = onAddEntries(completedEntries)
+      if (!result.added) {
+        setFormStatus({ type: 'error', text: result.skipped ? '这些内容已经在课程中' : '没有可添加的内容' })
+        return
+      }
+
+      setEnglish('')
+      setChinese('')
+      setBulkText('')
+      setFormStatus({
+        type: 'success',
+        text: result.skipped
+          ? `已添加 ${result.added} 条，跳过 ${result.skipped} 条重复内容`
+          : `已添加 ${result.added} 条并自动整理顺序`,
+      })
+    } catch (error) {
+      setFormStatus({ type: 'error', text: error?.message || '自动翻译失败，请稍后重试' })
+    } finally {
+      setIsAdding(false)
+    }
   }
 
   return (
@@ -3353,7 +3408,7 @@ function CustomCourseDetail({ course, customCourse, loadingCourseId, onBack, onP
           {entryMode === 'single' ? (
             <div className="custom-course-fields">
               <label>
-                <span>英文单词或句子</span>
+                <span>英文单词或句子（可留空）</span>
                 <textarea
                   value={english}
                   onChange={(event) => setEnglish(event.target.value)}
@@ -3363,7 +3418,7 @@ function CustomCourseDetail({ course, customCourse, loadingCourseId, onBack, onP
                 />
               </label>
               <label>
-                <span>中文提示</span>
+                <span>中文提示（可留空）</span>
                 <textarea
                   value={chinese}
                   onChange={(event) => setChinese(event.target.value)}
@@ -3375,11 +3430,11 @@ function CustomCourseDetail({ course, customCourse, loadingCourseId, onBack, onP
             </div>
           ) : (
             <label className="custom-course-bulk-field">
-              <span>每行一条：英文 | 中文</span>
+              <span>每行输入一条英文或中文</span>
               <textarea
                 value={bulkText}
                 onChange={(event) => setBulkText(event.target.value)}
-                placeholder={'like | 喜欢\nI like this food. | 我喜欢这个食物。'}
+                placeholder={'I like reading at home.\n我想学习英语。\nlike | 喜欢'}
                 rows="6"
               />
             </label>
@@ -3388,9 +3443,9 @@ function CustomCourseDetail({ course, customCourse, loadingCourseId, onBack, onP
             <span className={formStatus ? `custom-form-status ${formStatus.type}` : 'custom-form-status'} aria-live="polite">
               {formStatus?.text || ''}
             </span>
-            <button className="primary-button" type="submit">
-              <Plus size={18} />
-              添加到课程
+            <button className="primary-button" type="submit" disabled={isAdding}>
+              {isAdding ? <Sparkles size={18} /> : <Plus size={18} />}
+              {isAdding ? '自动翻译中' : '添加到课程'}
             </button>
           </div>
         </form>

@@ -1769,6 +1769,10 @@ button.queue-row:focus-visible {
   color: var(--teal);
 }
 
+.custom-form-status.loading {
+  color: #5479b8;
+}
+
 .custom-form-status.error {
   color: #b54533;
 }
