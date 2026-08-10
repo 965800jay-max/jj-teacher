@@ -1732,6 +1732,13 @@ button.queue-row:focus-visible {
   font-weight: 850;
 }
 
+.custom-paragraph-count {
+  min-height: 18px;
+  color: #5479b8;
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .custom-course-form textarea {
   width: 100%;
   resize: vertical;
@@ -3808,8 +3815,13 @@ button.queue-row:focus-visible {
 
   .custom-entry-modes {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     width: 100%;
+  }
+
+  .custom-entry-modes button {
+    min-width: 0;
+    padding-inline: 6px;
   }
 
   .custom-course-form-actions {

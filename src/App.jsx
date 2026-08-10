@@ -445,6 +445,52 @@ function containsChineseCharacters(value) {
   return /[\u3400-\u9FFF]/.test(String(value || ''))
 }
 
+function shouldMergeParagraphSentence(value) {
+  const sentence = String(value || '').trim()
+  if (!sentence) return false
+  return /\b(?:mr|mrs|ms|dr|prof|sr|jr|st|mt|gen|rep|sen|gov|lt|col|capt|sgt|rev|hon|pres|vs|etc|e\.g|i\.e|a\.m|p\.m|u\.s|u\.k|no|fig|inc|ltd|co|corp)\.$/i.test(sentence)
+    || /(?:^|\s)(?:[A-Z]\.){1,4}$/.test(sentence)
+}
+
+function mergeParagraphSentenceSegments(segments) {
+  const merged = []
+  let pending = ''
+  for (const segment of segments) {
+    pending += segment
+    if (shouldMergeParagraphSentence(pending)) continue
+    merged.push(pending)
+    pending = ''
+  }
+  if (pending) {
+    if (merged.length) merged[merged.length - 1] += pending
+    else merged.push(pending)
+  }
+  return merged
+}
+
+function splitParagraphIntoSentences(value) {
+  const text = String(value || '')
+    .normalize('NFKC')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+  if (!text) return []
+
+  let segments = []
+  if (typeof Intl?.Segmenter === 'function') {
+    const locale = containsChineseCharacters(text) ? 'zh-CN' : 'en'
+    segments = [...new Intl.Segmenter(locale, { granularity: 'sentence' }).segment(text)]
+      .map((item) => item.segment)
+  } else {
+    segments = text.match(/[^.!?。！？]+(?:[.!?。！？]+["'”’）)\]]*|$)/g) || []
+  }
+
+  return mergeParagraphSentenceSegments(segments)
+    .map((sentence) => normalizeCustomCourseText(sentence))
+    .filter((sentence) => /[A-Za-z0-9\u3400-\u9FFF]/.test(sentence))
+    .slice(0, 500)
+}
+
 function normalizeCustomCourseItem(item) {
   if (!item || typeof item !== 'object') return null
   const id = normalizeCustomCourseText(item.id, 160)
@@ -3272,6 +3318,7 @@ function CustomCourseDetail({ course, customCourse, loadingCourseId, onBack, onP
   const [english, setEnglish] = useState('')
   const [chinese, setChinese] = useState('')
   const [bulkText, setBulkText] = useState('')
+  const [paragraphText, setParagraphText] = useState('')
   const [formStatus, setFormStatus] = useState(null)
   const [isAdding, setIsAdding] = useState(false)
   const orderedItems = useMemo(() => sortCustomCourseItems(customCourse), [customCourse])
@@ -3280,6 +3327,10 @@ function CustomCourseDetail({ course, customCourse, loadingCourseId, onBack, onP
   const sentenceCount = itemCount - wordCount
   const completion = getCourseProgressPercent(course)
   const isLoading = loadingCourseId === course.id
+  const paragraphSentenceCount = useMemo(
+    () => splitParagraphIntoSentences(paragraphText).length,
+    [paragraphText],
+  )
 
   function parseBulkEntries(value) {
     return String(value || '')
@@ -3315,15 +3366,28 @@ function CustomCourseDetail({ course, customCourse, loadingCourseId, onBack, onP
     if (isAdding) return
     const entries = entryMode === 'single'
       ? [{ english: english.trim(), chinese: chinese.trim() }]
-      : parseBulkEntries(bulkText)
+      : entryMode === 'paragraph'
+        ? splitParagraphIntoSentences(paragraphText).map((sentence) => (
+            containsChineseCharacters(sentence)
+              ? { english: '', chinese: sentence }
+              : { english: sentence, chinese: '' }
+          ))
+        : parseBulkEntries(bulkText)
     if (!entries.length || entries.some((item) => !item.english && !item.chinese)) {
-      setFormStatus({ type: 'error', text: '请输入英文或中文内容' })
+      setFormStatus({ type: 'error', text: entryMode === 'paragraph' ? '请输入需要拆分的段落' : '请输入英文或中文内容' })
       return
     }
 
     const needsTranslation = entries.some((item) => !item.english || !item.chinese)
     setIsAdding(true)
-    setFormStatus(needsTranslation ? { type: 'loading', text: '正在自动生成翻译…' } : null)
+    setFormStatus(needsTranslation
+      ? {
+          type: 'loading',
+          text: entryMode === 'paragraph'
+            ? `已识别 ${entries.length} 句，正在自动生成翻译…`
+            : '正在自动生成翻译…',
+        }
+      : null)
     try {
       const completedEntries = needsTranslation ? await translateCustomCourseEntries(entries) : entries
       if (completedEntries.some((item) => !item?.english || !item?.chinese)) {
@@ -3339,11 +3403,16 @@ function CustomCourseDetail({ course, customCourse, loadingCourseId, onBack, onP
       setEnglish('')
       setChinese('')
       setBulkText('')
+      setParagraphText('')
       setFormStatus({
         type: 'success',
-        text: result.skipped
-          ? `已添加 ${result.added} 条，跳过 ${result.skipped} 条重复内容`
-          : `已添加 ${result.added} 条并自动整理顺序`,
+        text: entryMode === 'paragraph'
+          ? result.skipped
+            ? `已拆分 ${entries.length} 句，添加 ${result.added} 句，跳过 ${result.skipped} 句重复内容`
+            : `已拆分并添加 ${result.added} 句，已自动整理顺序`
+          : result.skipped
+            ? `已添加 ${result.added} 条，跳过 ${result.skipped} 条重复内容`
+            : `已添加 ${result.added} 条并自动整理顺序`,
       })
     } catch (error) {
       setFormStatus({ type: 'error', text: error?.message || '自动翻译失败，请稍后重试' })
@@ -3401,6 +3470,9 @@ function CustomCourseDetail({ course, customCourse, loadingCourseId, onBack, onP
             <button className={entryMode === 'bulk' ? 'selected' : ''} type="button" onClick={() => setEntryMode('bulk')}>
               批量添加
             </button>
+            <button className={entryMode === 'paragraph' ? 'selected' : ''} type="button" onClick={() => setEntryMode('paragraph')}>
+              段落导入
+            </button>
           </div>
         </div>
 
@@ -3428,7 +3500,7 @@ function CustomCourseDetail({ course, customCourse, loadingCourseId, onBack, onP
                 />
               </label>
             </div>
-          ) : (
+          ) : entryMode === 'bulk' ? (
             <label className="custom-course-bulk-field">
               <span>每行输入一条英文或中文</span>
               <textarea
@@ -3438,6 +3510,20 @@ function CustomCourseDetail({ course, customCourse, loadingCourseId, onBack, onP
                 rows="6"
               />
             </label>
+          ) : (
+            <label className="custom-course-bulk-field">
+              <span>整段英文或中文</span>
+              <textarea
+                value={paragraphText}
+                onChange={(event) => setParagraphText(event.target.value)}
+                placeholder="I get up early every day. I make breakfast and read the news. Then I go to work."
+                rows="8"
+                maxLength="30000"
+              />
+              <small className="custom-paragraph-count" aria-live="polite">
+                {paragraphText.trim() ? `已识别 ${paragraphSentenceCount} 句` : ''}
+              </small>
+            </label>
           )}
           <div className="custom-course-form-actions">
             <span className={formStatus ? `custom-form-status ${formStatus.type}` : 'custom-form-status'} aria-live="polite">
@@ -3445,7 +3531,9 @@ function CustomCourseDetail({ course, customCourse, loadingCourseId, onBack, onP
             </span>
             <button className="primary-button" type="submit" disabled={isAdding}>
               {isAdding ? <Sparkles size={18} /> : <Plus size={18} />}
-              {isAdding ? '自动翻译中' : '添加到课程'}
+              {isAdding
+                ? entryMode === 'paragraph' ? '拆分并导入中' : '自动翻译中'
+                : entryMode === 'paragraph' ? '拆分并导入' : '添加到课程'}
             </button>
           </div>
         </form>
