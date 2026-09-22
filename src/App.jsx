@@ -4154,7 +4154,10 @@ function PracticeView({
         </div>
       </div>
 
-      <section className={`game-stage stage-${stageFit}`}>
+      <section
+        className={`game-stage stage-${stageFit}`}
+        key={`${practice.course.id}-${practice.lesson}-${index}-${hasAnswerShown ? 'answer' : 'question'}`}
+      >
         {isListening ? (
           <ListeningStage prompt={{ ...actualPrompt, prompt: actualPrompt.answer }} />
         ) : isSpeaking ? (

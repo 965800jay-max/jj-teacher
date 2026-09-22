@@ -2297,8 +2297,6 @@ button.queue-row:focus-visible {
 }
 
 .game-stage {
-  --stage-lift: clamp(10px, 2.2vh, 30px);
-  --stage-align: center;
   --stage-gap: clamp(8px, 1.8vh, 20px);
   --stage-padding: clamp(6px, 1.6vh, 24px) 20px clamp(22px, 4vh, 58px);
   --stage-prompt-font: clamp(28px, 5vh, 54px);
@@ -2315,15 +2313,23 @@ button.queue-row:focus-visible {
   display: grid;
   min-height: 0;
   place-items: center;
-  align-content: var(--stage-align);
-  overflow: hidden;
+  align-content: safe center;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   gap: var(--stage-gap);
   padding: var(--stage-padding);
   text-align: center;
 }
 
 .game-stage > * {
-  transform: translateY(calc(-1 * var(--stage-lift)));
+  max-width: 100%;
+}
+
+.game-stage.stage-ultra,
+.game-stage.stage-micro {
+  align-content: start;
 }
 
 .game-stage h1 {
@@ -2461,7 +2467,6 @@ button.queue-row:focus-visible {
 }
 
 .game-stage.stage-compact {
-  --stage-lift: clamp(4px, 1vh, 14px);
   --stage-gap: clamp(6px, 1vh, 10px);
   --stage-prompt-font: clamp(24px, 4.2vh, 42px);
   --stage-soundmark-font: 16px;
@@ -2478,7 +2483,6 @@ button.queue-row:focus-visible {
 }
 
 .game-stage.stage-dense {
-  --stage-lift: 0px;
   --stage-gap: 5px;
   --stage-prompt-font: clamp(21px, 3.8vh, 34px);
   --stage-prompt-line-height: 1.14;
@@ -2497,10 +2501,8 @@ button.queue-row:focus-visible {
 }
 
 .game-stage.stage-ultra {
-  --stage-lift: 0px;
-  --stage-align: start;
   --stage-gap: 4px;
-  --stage-padding: 4px 10px 8px;
+  --stage-padding: 4px 10px 16px;
   --stage-prompt-font: clamp(19px, 3.2vh, 28px);
   --stage-prompt-line-height: 1.12;
   --stage-soundmark-font: 12px;
@@ -2518,10 +2520,8 @@ button.queue-row:focus-visible {
 }
 
 .game-stage.stage-micro {
-  --stage-lift: 0px;
-  --stage-align: start;
   --stage-gap: 3px;
-  --stage-padding: 3px 8px 5px;
+  --stage-padding: 3px 8px 16px;
   --stage-prompt-font: clamp(17px, 2.7vh, 22px);
   --stage-prompt-line-height: 1.1;
   --stage-soundmark-font: 11px;
@@ -2573,9 +2573,7 @@ button.queue-row:focus-visible {
   display: grid;
   justify-items: center;
   gap: clamp(10px, 2vh, 22px);
-  width: min(820px, 94vw);
-  max-height: min(100%, calc(100dvh - 230px - env(safe-area-inset-bottom)));
-  overflow: hidden;
+  width: min(820px, 100%);
 }
 
 .answer-breakdown.compact {
@@ -3638,7 +3636,6 @@ button.queue-row:focus-visible {
   }
 
   .game-stage {
-    --stage-lift: clamp(18px, 4vh, 34px);
     --stage-gap: 6px;
     --stage-padding: 2px 12px 22px;
   }
@@ -3886,7 +3883,6 @@ button.queue-row:focus-visible {
   }
 
   .game-stage {
-    --stage-lift: clamp(16px, 3.4vh, 34px);
     --stage-padding: clamp(6px, 1.6vh, 24px) 12px clamp(22px, 4vh, 58px);
   }
 
@@ -3961,15 +3957,10 @@ button.queue-row:focus-visible {
 }
 
 .game-page.keyboard-open .game-stage {
-  --stage-lift: 0px;
-  --stage-align: start;
   --stage-gap: 6px;
   --stage-padding: 0 12px 8px;
-  overflow: visible;
-}
-
-.game-page.keyboard-open .game-stage > * {
-  transform: none;
+  align-content: start;
+  overflow-y: auto;
 }
 
 .game-page.keyboard-open .game-stage h1 {
@@ -4003,12 +3994,12 @@ button.queue-row:focus-visible {
 
 .game-page.keyboard-open .game-stage.stage-ultra {
   --stage-gap: 3px;
-  --stage-padding: 0 7px 4px;
+  --stage-padding: 0 7px 16px;
 }
 
 .game-page.keyboard-open .game-stage.stage-micro {
   --stage-gap: 2px;
-  --stage-padding: 0 5px 3px;
+  --stage-padding: 0 5px 16px;
 }
 
 .game-page.keyboard-open .game-shortcuts {
