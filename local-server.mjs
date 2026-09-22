@@ -124,12 +124,14 @@ function normalizeCustomCourseItem(item) {
   const chinese = normalizeCustomCourseText(item.chinese, 600)
   if (!id || !english || !chinese) return null
   const wordCount = english.match(/[A-Za-z]+(?:'[A-Za-z]+)?/g)?.length || 0
+  const position = Number(item.position)
   return {
     id,
     english,
     chinese,
     soundmark: normalizeCustomCourseText(item.soundmark, 300),
     kind: item.kind === 'word' || wordCount === 1 ? 'word' : 'sentence',
+    ...(Number.isSafeInteger(position) && position > 0 ? { position } : {}),
     createdAt: item.createdAt || item.updatedAt || null,
     updatedAt: item.updatedAt || item.createdAt || null,
   }

@@ -498,12 +498,14 @@ function normalizeCustomCourseItem(item) {
   const chinese = normalizeCustomCourseText(item.chinese)
   if (!id || !english || !chinese) return null
   const wordCount = english.match(/[A-Za-z]+(?:'[A-Za-z]+)?/g)?.length || 0
+  const position = Number(item.position)
   return {
     id,
     english,
     chinese,
     soundmark: normalizeCustomCourseText(item.soundmark, 300),
     kind: item.kind === 'word' || wordCount === 1 ? 'word' : 'sentence',
+    ...(Number.isSafeInteger(position) && position > 0 ? { position } : {}),
     createdAt: item.createdAt || item.updatedAt || null,
     updatedAt: item.updatedAt || item.createdAt || null,
   }
@@ -1943,6 +1945,12 @@ function chooseCustomCourseSeed(items, anchorScores) {
 
 function sortCustomCourseItems(value) {
   const remaining = [...normalizeCustomCourse(value).items]
+  if (remaining.some((item) => Number.isSafeInteger(item.position))) {
+    return remaining.sort((a, b) =>
+      (a.position ?? Number.MAX_SAFE_INTEGER) - (b.position ?? Number.MAX_SAFE_INTEGER)
+      || customCourseItemOrder(a) - customCourseItemOrder(b)
+      || a.id.localeCompare(b.id))
+  }
   const featureById = new Map(remaining.map((item) => [item.id, customCourseSimilarityFeatures(item)]))
   const anchorScores = new Map(
     remaining
@@ -2018,7 +2026,7 @@ function buildCustomCourse(value) {
     tag: '我的内容',
     accent: 'blue',
     cover: 'Mine',
-    description: '添加自己的单词和句子，系统会自动整理学习顺序。',
+    description: '添加自己的单词和句子，新内容会按添加顺序排在后面。',
     currentLesson: '自动整理练习',
     statementTotal: statements.length,
     lessonSummaries: [lesson],
@@ -2498,6 +2506,7 @@ function App() {
 
   function addCustomCourseEntries(entries) {
     const current = normalizeCustomCourse(customCourseRef.current)
+    const existingItems = sortCustomCourseItems(current).map((item, index) => ({ ...item, position: index + 1 }))
     const firstUpdatedAt = nextCustomCourseUpdatedAt(current.updatedAt)
     const firstUpdatedTime = archiveTimestamp(firstUpdatedAt)
     const existingKeys = new Set(current.items.map((item) => normalizeAnswer(item.english)))
@@ -2522,6 +2531,7 @@ function App() {
         chinese,
         soundmark: normalizeCustomCourseText(entry?.soundmark, 300),
         kind: wordCount === 1 ? 'word' : 'sentence',
+        position: existingItems.length + addedItems.length + 1,
         createdAt: itemUpdatedAt,
         updatedAt: itemUpdatedAt,
       })
@@ -2531,7 +2541,7 @@ function App() {
 
     const nextCustomCourse = normalizeCustomCourse({
       ...current,
-      items: [...current.items, ...addedItems],
+      items: [...existingItems, ...addedItems],
       updatedAt: addedItems[addedItems.length - 1].updatedAt,
     })
     customCourseRef.current = nextCustomCourse
@@ -3409,10 +3419,10 @@ function CustomCourseDetail({ course, customCourse, loadingCourseId, onBack, onP
         text: entryMode === 'paragraph'
           ? result.skipped
             ? `已拆分 ${entries.length} 句，添加 ${result.added} 句，跳过 ${result.skipped} 句重复内容`
-            : `已拆分并添加 ${result.added} 句，已自动整理顺序`
+            : `已拆分并添加 ${result.added} 句，已按顺序排在后面`
           : result.skipped
             ? `已添加 ${result.added} 条，跳过 ${result.skipped} 条重复内容`
-            : `已添加 ${result.added} 条并自动整理顺序`,
+            : `已添加 ${result.added} 条，已按顺序排在后面`,
       })
     } catch (error) {
       setFormStatus({ type: 'error', text: error?.message || '自动翻译失败，请稍后重试' })
@@ -3543,7 +3553,7 @@ function CustomCourseDetail({ course, customCourse, loadingCourseId, onBack, onP
         <div className="section-heading compact">
           <div>
             <p className="eyebrow">学习顺序</p>
-            <h2>自动整理结果</h2>
+            <h2>添加顺序</h2>
           </div>
           <Sparkles size={20} />
         </div>
@@ -3568,7 +3578,7 @@ function CustomCourseDetail({ course, customCourse, loadingCourseId, onBack, onP
           <div className="empty-state custom-course-empty">
             <BookText size={30} />
             <h3>还没有自定义内容</h3>
-            <p>添加后会在这里显示整理好的学习顺序。</p>
+            <p>添加后会在这里按先后顺序显示。</p>
           </div>
         )}
       </section>
