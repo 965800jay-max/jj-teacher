@@ -34,6 +34,7 @@ import {
   SendHorizontal,
   Settings,
   ShieldCheck,
+  SpellCheck2,
   Sparkles,
   Star,
   Trash2,
@@ -1784,6 +1785,111 @@ function buildWordBreakdown(statement, lesson) {
   })
 }
 
+function buildCourseWordBank(course) {
+  const lessons = course?.lessonData || []
+  const singleWordLookup = new Map()
+
+  lessons.forEach((lesson) => {
+    ;(lesson.statements || []).forEach((statement) => {
+      const words = tokenizeEnglish(statement.english)
+      if (words.length !== 1) return
+      const normalized = normalizeWord(words[0])
+      if (!normalized) return
+      const existing = singleWordLookup.get(normalized)
+      const candidate = {
+        english: words[0],
+        chinese: cleanChinese(statement.chinese),
+        soundmark: splitSoundmarks(statement.soundmark || '')[0] || statement.soundmark?.trim() || '',
+        audioUrl: statement.audioUrl || lesson.audioByText?.[normalizeAnswer(words[0])] || '',
+      }
+      if (!existing || (!existing.chinese && candidate.chinese) || (!existing.soundmark && candidate.soundmark)) {
+        singleWordLookup.set(normalized, { ...existing, ...candidate })
+      }
+    })
+  })
+
+  const collected = new Map()
+  lessons.forEach((lesson) => {
+    ;(lesson.statements || []).forEach((statement) => {
+      const words = tokenizeEnglish(statement.english)
+      const soundmarks = splitSoundmarks(statement.soundmark || '')
+      words.forEach((word, wordIndex) => {
+        const normalized = normalizeWord(word)
+        if (!normalized) return
+        const direct = singleWordLookup.get(normalized) || {}
+        const fallback = wordFallbacks[normalized] || {}
+        const existing = collected.get(normalized)
+        const candidate = {
+          id: `course-word:${course.id}:${normalized}`,
+          english: direct.english || word,
+          chinese: direct.chinese || fallback.chinese || '',
+          soundmark: direct.soundmark || soundmarks[wordIndex] || '',
+          audioUrl: direct.audioUrl || lesson.audioByText?.[normalizeAnswer(word)] || '',
+          pos: classifyWord(word),
+          occurrences: (existing?.occurrences || 0) + 1,
+        }
+        collected.set(normalized, existing
+          ? {
+              ...existing,
+              chinese: existing.chinese || candidate.chinese,
+              soundmark: existing.soundmark || candidate.soundmark,
+              audioUrl: existing.audioUrl || candidate.audioUrl,
+              occurrences: candidate.occurrences,
+            }
+          : candidate)
+      })
+    })
+  })
+
+  return [...collected.values()]
+}
+
+function buildWordPracticeCourse(course, modeId = 'translate') {
+  const fullBank = buildCourseWordBank(course)
+  const bank = modeId === 'translate' ? fullBank.filter((item) => item.chinese) : fullBank
+  const statements = bank.map((item, index) => ({
+    id: item.id,
+    order: index + 1,
+    english: item.english,
+    chinese: item.chinese || '听音拼写',
+    soundmark: item.soundmark,
+    audioUrl: item.audioUrl,
+    wordOccurrences: item.occurrences,
+  }))
+  const lesson = {
+    id: `word-practice-lesson:${course.id}:${modeId}`,
+    order: 1,
+    title: modeId === 'dictation' ? '单词听写' : '单词拼写',
+    description: course.title,
+    statementCount: statements.length,
+    sentenceCount: statements.length,
+    statements,
+    sentences: statements.map((statement) => ({ content: statement.english })),
+    audioByText: Object.fromEntries(statements.filter((item) => item.audioUrl).map((item) => [normalizeAnswer(item.english), item.audioUrl])),
+  }
+
+  return {
+    id: `julebu-word-practice:${course.id}:${modeId}`,
+    isWordPractice: true,
+    sourceCourseId: course.id,
+    title: `${course.title} · 单词练习`,
+    subtitle: `${statements.length.toLocaleString('zh-CN')} 个单词`,
+    lessons: 1,
+    completed: 0,
+    minutes: 0,
+    level: modeId === 'dictation' ? '听音默写' : '中文拼写',
+    tag: '单词练习',
+    accent: course.accent || 'teal',
+    cover: 'Words',
+    description: course.title,
+    currentLesson: lesson.title,
+    statementTotal: statements.length,
+    lessonSummaries: [lesson],
+    lessonData: [lesson],
+    wordBank: fullBank,
+  }
+}
+
 function buildAiStatementPayload(statement, lesson) {
   if (!statement) return null
   return {
@@ -2109,6 +2215,7 @@ const navSections = [
     items: [
       { id: 'dashboard', label: '主页', icon: Home },
       { id: 'courses', label: '我的课程包', icon: LibraryBig },
+      { id: 'word-practice', label: '单词练习', icon: SpellCheck2 },
       { id: 'analytics', label: '成长分析', icon: BarChart3 },
     ],
   },
@@ -2599,6 +2706,48 @@ function App() {
     }
   }
 
+  async function prepareWordPracticeCourse(courseId, modeId) {
+    const course = courses.find((item) => item.id === courseId) || courses[0]
+    if (!course) throw new Error('没有可用课程')
+    setLoadingCourseId(course.id)
+    try {
+      const loadedCourse = await loadCoursePack(course)
+      setLoadedCourses((current) => ({
+        ...current,
+        [course.id]: {
+          lessonData: loadedCourse.lessonData,
+          lessons: loadedCourse.lessons,
+          statementTotal: loadedCourse.statementTotal,
+          subtitle: loadedCourse.subtitle,
+        },
+      }))
+      return buildWordPracticeCourse(loadedCourse, modeId)
+    } finally {
+      setLoadingCourseId(null)
+    }
+  }
+
+  function beginWordPractice(wordCourse, modeId) {
+    if (!wordCourse?.lessonData?.[0]?.statements?.length) return
+    unlockAudio()
+    const lesson = wordCourse.lessonData[0]
+    const saved = savedProgress[wordCourse.id] || {}
+    const lessonProgress = saved.lessonProgress?.[lesson.id] || {}
+    const totalStatements = lesson.statements.length
+    const completedStatements = Number(lessonProgress.completedStatements) || 0
+    const startIndex = completedStatements >= totalStatements ? 0 : Number(lessonProgress.statementIndex) || 0
+    setPractice({
+      course: wordCourse,
+      lesson: 1,
+      modeId,
+      statementIndex: Math.min(startIndex, Math.max(totalStatements - 1, 0)),
+    })
+    setSelectedCourseId(wordCourse.sourceCourseId)
+    setActiveView('practice')
+    setFeedback(null)
+    setAnswer('')
+  }
+
   function beginPractice(modeId) {
     unlockAudio()
     const target = modePicker || { course: selectedCourse, lesson: getContinueLesson(selectedCourse) }
@@ -2936,6 +3085,16 @@ function App() {
               onPractice={openPracticePicker}
             />
           )}
+          {activeView === 'word-practice' && (
+            <WordPracticeLibrary
+              courses={courses}
+              selectedCourseId={selectedCourseId}
+              loadingCourseId={loadingCourseId}
+              onSelectCourse={setSelectedCourseId}
+              onPrepare={prepareWordPracticeCourse}
+              onStart={beginWordPractice}
+            />
+          )}
           {activeView === 'course-detail' && (
             <CourseDetail
               course={selectedCourse}
@@ -2975,7 +3134,7 @@ function App() {
                 setPractice(null)
               }}
               onExitCourses={() => {
-                setActiveView('courses')
+                setActiveView(practice.course.isWordPractice ? 'word-practice' : 'courses')
                 setPractice(null)
               }}
               answerCount={globalStats.answerCount}
@@ -3266,6 +3425,116 @@ function CoursesView({ courses, query, loadingCourseId, onOpenCourse, onPractice
           />
         ))}
       </div>
+    </div>
+  )
+}
+
+function WordPracticeLibrary({ courses, selectedCourseId, loadingCourseId, onSelectCourse, onPrepare, onStart }) {
+  const initialCourseId = courses.some((course) => course.id === selectedCourseId) ? selectedCourseId : courses[0]?.id || ''
+  const [courseId, setCourseId] = useState(initialCourseId)
+  const [modeId, setModeId] = useState('translate')
+  const [wordCourse, setWordCourse] = useState(null)
+  const [error, setError] = useState('')
+  const [preparing, setPreparing] = useState(false)
+
+  useEffect(() => {
+    if (!courseId) return undefined
+    let cancelled = false
+    setPreparing(true)
+    setError('')
+    setWordCourse(null)
+    onPrepare(courseId, modeId)
+      .then((prepared) => {
+        if (!cancelled) setWordCourse(prepared)
+      })
+      .catch(() => {
+        if (!cancelled) setError('单词加载失败，请稍后重试')
+      })
+      .finally(() => {
+        if (!cancelled) setPreparing(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [courseId, modeId])
+
+  const words = wordCourse?.lessonData?.[0]?.statements || []
+  const totalCollected = wordCourse?.wordBank?.length || words.length
+  const sourceCourse = courses.find((course) => course.id === courseId)
+
+  function chooseCourse(nextCourseId) {
+    setCourseId(nextCourseId)
+    onSelectCourse(nextCourseId)
+  }
+
+  return (
+    <div className="page-stack word-practice-page page-enter">
+      <PageTitle eyebrow="专项练习" title="单词练习" meta={preparing ? '正在收集' : `${totalCollected.toLocaleString('zh-CN')} 个单词`} />
+
+      <section className="panel word-practice-setup">
+        <div className="word-practice-heading">
+          <div className="word-practice-mark"><SpellCheck2 size={28} /></div>
+          <div>
+            <span>当前课程</span>
+            <h2>{sourceCourse?.title || '选择课程'}</h2>
+          </div>
+          <strong>{words.length.toLocaleString('zh-CN')}</strong>
+        </div>
+
+        <label className="word-course-select">
+          <span>课程</span>
+          <select value={courseId} onChange={(event) => chooseCourse(event.target.value)}>
+            {courses.map((course) => <option value={course.id} key={course.id}>{course.title}</option>)}
+          </select>
+        </label>
+
+        <div className="word-mode-grid" role="group" aria-label="单词练习模式">
+          <button className={modeId === 'translate' ? 'active' : ''} type="button" onClick={() => setModeId('translate')}>
+            <Languages size={21} />
+            <span><strong>中文拼写</strong><small>看中文，写英文</small></span>
+          </button>
+          <button className={modeId === 'dictation' ? 'active' : ''} type="button" onClick={() => setModeId('dictation')}>
+            <Headphones size={21} />
+            <span><strong>听音默写</strong><small>听发音，写单词</small></span>
+          </button>
+        </div>
+
+        {error && <div className="word-practice-error">{error}</div>}
+        <button
+          className="primary-button word-practice-start"
+          type="button"
+          disabled={preparing || loadingCourseId === courseId || !words.length}
+          onClick={() => onStart(wordCourse, modeId)}
+        >
+          {preparing || loadingCourseId === courseId ? <Loader2 className="spin" size={19} /> : <Play size={19} />}
+          {preparing || loadingCourseId === courseId ? '正在收集单词' : '开始单词练习'}
+        </button>
+      </section>
+
+      <section className="panel word-bank-panel">
+        <div className="section-heading compact">
+          <div>
+            <span>已收集</span>
+            <h2>课程单词</h2>
+          </div>
+          <strong>{words.length.toLocaleString('zh-CN')}</strong>
+        </div>
+        {preparing ? (
+          <div className="word-bank-loading"><Loader2 className="spin" size={22} />正在整理课程单词</div>
+        ) : (
+          <div className="word-bank-grid">
+            {words.slice(0, 60).map((item) => (
+              <button type="button" key={item.id} onClick={() => speakText(item.english, { repeat: 1, fallbackAudioUrl: item.audioUrl })}>
+                <span>{item.soundmark || ' '}</span>
+                <strong>{item.english}</strong>
+                <small>{item.chinese}</small>
+                <Volume2 size={15} />
+              </button>
+            ))}
+          </div>
+        )}
+        {!preparing && words.length > 60 && <p className="word-bank-more">另外还有 {(words.length - 60).toLocaleString('zh-CN')} 个单词将在练习中出现</p>}
+      </section>
     </div>
   )
 }
@@ -4268,7 +4537,14 @@ function PracticeView({
           onClose={() => setAiPanelOpen(false)}
         />
       )}
-      {showExit && <ExitGameDialog onClose={() => setShowExit(false)} onExitHome={onExitHome} onExitCourses={onExitCourses} />}
+      {showExit && (
+        <ExitGameDialog
+          coursesLabel={practice.course.isWordPractice ? '返回单词练习' : '返回课程列表'}
+          onClose={() => setShowExit(false)}
+          onExitHome={onExitHome}
+          onExitCourses={onExitCourses}
+        />
+      )}
     </div>
   )
 }
@@ -4806,7 +5082,7 @@ function SpeechSettingsDialog({ settings, onChange, onPreview, onClose }) {
   )
 }
 
-function ExitGameDialog({ onClose, onExitHome, onExitCourses }) {
+function ExitGameDialog({ coursesLabel = '返回课程列表', onClose, onExitHome, onExitCourses }) {
   return (
     <div className="modal-layer" role="dialog" aria-modal="true">
       <section className="exit-dialog">
@@ -4822,7 +5098,7 @@ function ExitGameDialog({ onClose, onExitHome, onExitCourses }) {
           <ChevronRight size={18} />
         </button>
         <button className="ghost-button" type="button" onClick={onExitCourses}>
-          返回课程列表
+          {coursesLabel}
           <ChevronRight size={18} />
         </button>
         <button className="primary-button" type="button" onClick={onClose}>

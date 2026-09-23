@@ -4023,3 +4023,321 @@ button.queue-row:focus-visible {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+.word-practice-page {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.word-practice-setup {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(220px, 1.1fr) minmax(210px, 0.9fr);
+  gap: 18px 24px;
+  overflow: hidden;
+  border-color: #cdded8;
+  background:
+    linear-gradient(120deg, rgba(228, 246, 240, 0.96), rgba(255, 255, 255, 0.98) 48%, rgba(238, 242, 251, 0.96));
+}
+
+.word-practice-setup::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  background: linear-gradient(90deg, #168775, #4d7fbe 54%, #c08b3e);
+  content: "";
+}
+
+.word-practice-heading {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+}
+
+.word-practice-mark {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #168775, #4d7fbe);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(42, 112, 104, 0.18);
+}
+
+.word-practice-heading span,
+.word-course-select > span,
+.word-bank-panel .section-heading span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.word-practice-heading h2 {
+  margin: 4px 0 0;
+  font-size: 21px;
+}
+
+.word-practice-heading > strong {
+  color: var(--teal);
+  font-size: 26px;
+}
+
+.word-course-select {
+  display: grid;
+  gap: 7px;
+}
+
+.word-course-select select {
+  width: 100%;
+  height: 48px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  outline: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink);
+  padding: 0 12px;
+  font-weight: 800;
+}
+
+.word-course-select select:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(22, 135, 117, 0.12);
+}
+
+.word-mode-grid {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.word-mode-grid button {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--muted);
+  padding: 14px;
+  text-align: left;
+}
+
+.word-mode-grid button.active {
+  border-color: #51a395;
+  background: linear-gradient(115deg, #e0f4ee, #eef2fb);
+  color: #126f61;
+  box-shadow: inset 3px 0 0 #168775;
+}
+
+.word-mode-grid button span,
+.word-mode-grid button strong,
+.word-mode-grid button small {
+  display: block;
+}
+
+.word-mode-grid button strong {
+  color: var(--ink);
+  font-size: 15px;
+}
+
+.word-mode-grid button small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.word-practice-error {
+  grid-column: 1 / -1;
+  border: 1px solid #efc9bd;
+  border-radius: 8px;
+  background: var(--coral-soft);
+  color: #a84632;
+  padding: 10px 12px;
+  font-weight: 800;
+}
+
+.word-practice-start {
+  min-height: 50px;
+  grid-column: 1 / -1;
+  justify-self: stretch;
+}
+
+.word-bank-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.word-bank-panel .section-heading > strong {
+  color: var(--blue);
+  font-size: 22px;
+}
+
+.word-bank-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.word-bank-grid button {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 112px;
+  align-content: center;
+  gap: 4px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: linear-gradient(145deg, #fff 60%, #edf5f2);
+  color: var(--ink);
+  padding: 14px 34px 14px 14px;
+  text-align: left;
+}
+
+.word-bank-grid button:nth-child(3n + 2) {
+  background: linear-gradient(145deg, #fff 60%, #eef2fb);
+}
+
+.word-bank-grid button:nth-child(3n) {
+  background: linear-gradient(145deg, #fff 60%, #fff5e2);
+}
+
+.word-bank-grid button:hover,
+.word-bank-grid button:focus-visible {
+  border-color: #75a99f;
+  transform: translateY(-1px);
+}
+
+.word-bank-grid button > span {
+  min-height: 16px;
+  overflow: hidden;
+  color: var(--faint);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.word-bank-grid button > strong {
+  overflow: hidden;
+  font-size: 19px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.word-bank-grid button > small {
+  overflow: hidden;
+  color: var(--muted);
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.word-bank-grid button > svg {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  color: var(--teal);
+}
+
+.word-bank-loading {
+  display: flex;
+  min-height: 160px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.word-bank-more {
+  margin: 0;
+  color: var(--muted);
+  text-align: center;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.night-study .word-practice-setup,
+.night-study .word-bank-panel {
+  border-color: #292b2f;
+  background: #151517;
+}
+
+.night-study .word-mode-grid button,
+.night-study .word-course-select select,
+.night-study .word-bank-grid button {
+  border-color: #303238;
+  background: #191a1d;
+  color: #f4f4f5;
+}
+
+.night-study .word-mode-grid button.active {
+  border-color: #2dd4bf;
+  background: #123d37;
+  color: #70f3dd;
+}
+
+.night-study .word-mode-grid button strong {
+  color: #fafafa;
+}
+
+@media (max-width: 880px) {
+  .word-bank-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .word-practice-setup {
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
+
+  .word-practice-heading,
+  .word-course-select,
+  .word-mode-grid,
+  .word-practice-start {
+    grid-column: 1;
+  }
+
+  .word-practice-heading {
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+  }
+
+  .word-practice-mark {
+    width: 48px;
+    height: 48px;
+  }
+
+  .word-practice-heading h2 {
+    font-size: 17px;
+  }
+
+  .word-practice-heading > strong {
+    font-size: 21px;
+  }
+
+  .word-mode-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .word-mode-grid button {
+    grid-template-columns: 1fr;
+    gap: 7px;
+    padding: 12px;
+  }
+
+  .word-bank-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .word-bank-grid button {
+    min-height: 102px;
+  }
+}
