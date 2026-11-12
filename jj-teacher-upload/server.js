@@ -2779,6 +2779,15 @@ async function serveFile(request, response) {
 
 const server = http.createServer(async (request, response) => {
   try {
+    if (request.url === "/qingji" || request.url.startsWith("/qingji/")) {
+      try {
+        require("./qingji-sync.cjs").handle(request, response);
+      } catch (error) {
+        console.error("Qingji sync unavailable:", error.message);
+        sendJson(response, 503, { error: "清记同步服务暂不可用，请稍后重试。" });
+      }
+      return;
+    }
     if (request.method === "OPTIONS") {
       sendJson(response, 200, { ok: true });
       return;
