@@ -150,6 +150,9 @@ function entryForViewer(entry, viewerId, ownerName) {
   };
 }
 
+// src/domain/groups.ts
+var validMonth = (value) => typeof value === "string" && /^(20\d{2})-(0[1-9]|1[0-2])$/.test(value);
+
 // server/store.ts
 var scrypt = (0, import_node_util.promisify)(import_node_crypto.scrypt);
 var hash = (value) => (0, import_node_crypto.createHash)("sha256").update(value).digest("hex");
@@ -219,6 +222,15 @@ var SyncStore = class {
       CREATE INDEX IF NOT EXISTS entry_friendship ON entries(friendship_id);
       CREATE INDEX IF NOT EXISTS entry_owner ON entries(owner_id);
       CREATE INDEX IF NOT EXISTS session_user ON sessions(user_id);
+      CREATE TABLE IF NOT EXISTS shop_groups (
+        id TEXT PRIMARY KEY, name TEXT NOT NULL, owner_id TEXT NOT NULL REFERENCES users(id),
+        revision INTEGER NOT NULL DEFAULT 1, payload TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS shop_members (
+        group_id TEXT NOT NULL REFERENCES shop_groups(id), user_id TEXT NOT NULL REFERENCES users(id),
+        PRIMARY KEY(group_id,user_id)
+      );
+      CREATE INDEX IF NOT EXISTS shop_member_user ON shop_members(user_id);
     `);
     this.transaction(() => {
       if (!this.all("PRAGMA table_info(users)").some((column) => column.name === "public_id")) this.database.exec("ALTER TABLE users ADD COLUMN public_id TEXT");
@@ -359,7 +371,91 @@ var SyncStore = class {
       updatedAt: String(row.updated_at),
       revision: Number(row.revision)
     }, userId, String(row.owner_name)));
-    return { me, revision: Number(this.one("SELECT revision FROM users WHERE id=?", userId).revision), ledger: { version: 1, friends, entries } };
+    return { me, revision: Number(this.one("SELECT revision FROM users WHERE id=?", userId).revision), ledger: { version: 1, friends, entries }, groups: this.groups(userId) };
+  }
+  groups(userId) {
+    return this.all("SELECT g.* FROM shop_groups g JOIN shop_members m ON m.group_id=g.id WHERE m.user_id=? ORDER BY g.rowid", userId).map((row) => ({
+      ...JSON.parse(String(row.payload)),
+      id: String(row.id),
+      name: String(row.name),
+      ownerId: String(row.owner_id),
+      revision: Number(row.revision),
+      members: this.all("SELECT u.id,u.name,u.public_id FROM users u JOIN shop_members m ON m.user_id=u.id WHERE m.group_id=? ORDER BY m.rowid", String(row.id)).map((member) => ({ id: String(member.id), name: String(member.name), publicId: String(member.public_id) }))
+    }));
+  }
+  createGroup(userId, input) {
+    check(text(input.name, 40), "\u8BF7\u8F93\u5165 1\u201340 \u5B57\u7684\u5E97\u94FA\u6216\u7FA4\u540D\u79F0\u3002");
+    check(Number(this.one("SELECT COUNT(*) AS count FROM shop_members WHERE user_id=?", userId).count) < 100, "\u6700\u591A\u52A0\u5165 100 \u4E2A\u7FA4\u3002");
+    const id = (0, import_node_crypto.randomUUID)();
+    this.transaction(() => {
+      this.run("INSERT INTO shop_groups (id,name,owner_id,payload) VALUES (?,?,?,?)", id, input.name.toString().trim(), userId, JSON.stringify({ items: [], bills: [], months: [] }));
+      this.run("INSERT INTO shop_members VALUES (?,?)", id, userId);
+      this.changed([userId]);
+    });
+    this.publish([userId]);
+    return this.snapshot(userId);
+  }
+  groupAction(userId, groupId, action, input) {
+    const group = this.groups(userId).find((group2) => group2.id === groupId);
+    check(group, "\u4F60\u4E0D\u662F\u8BE5\u7FA4\u6210\u5458\u3002", 403);
+    check(input.revision === group.revision, "\u7FA4\u8D26\u5DF2\u66F4\u65B0\uFF0C\u8BF7\u67E5\u770B\u6700\u65B0\u5185\u5BB9\u540E\u91CD\u8BD5\u3002", 409);
+    const ownerActions = ["member", "item", "edit-item", "remove-item", "rename"];
+    check(!ownerActions.includes(action) || group.ownerId === userId, "\u53EA\u6709\u7FA4\u4E3B\u53EF\u4EE5\u7BA1\u7406\u6210\u5458\u548C\u56FA\u5B9A\u8D26\u3002", 403);
+    const affected = group.members.map((member) => member.id);
+    this.transaction(() => {
+      if (action === "member") {
+        check(typeof input.publicId === "string" && /^[1-9][0-9]{9}$/.test(input.publicId), "\u8BF7\u8F93\u5165 10 \u4F4D\u6570\u5B57 ID\u3002");
+        const peer = this.one("SELECT id FROM users WHERE public_id=?", input.publicId);
+        check(peer, "\u627E\u4E0D\u5230\u8BE5 ID\u3002", 404);
+        check(group.members.length < 50, "\u6BCF\u7FA4\u6700\u591A 50 \u4EBA\u3002");
+        check(Number(this.one("SELECT COUNT(*) AS count FROM shop_members WHERE user_id=?", String(peer.id)).count) < 100, "\u8BE5\u6210\u5458\u52A0\u5165\u7684\u7FA4\u8FC7\u591A\u3002");
+        this.run("INSERT OR IGNORE INTO shop_members VALUES (?,?)", groupId, String(peer.id));
+        affected.push(String(peer.id));
+      } else if (action === "rename") {
+        check(text(input.name, 40), "\u7FA4\u540D\u79F0\u9700\u4E3A 1\u201340 \u5B57\u3002");
+        this.run("UPDATE shop_groups SET name=? WHERE id=?", input.name.trim(), groupId);
+      } else if (action === "month") {
+        check(validMonth(input.month), "\u6708\u4EFD\u65E0\u6548\u3002");
+        if (!group.months.includes(input.month)) {
+          check(group.months.length < 120, "\u6BCF\u7FA4\u6700\u591A\u4FDD\u7559 120 \u4E2A\u8D26\u671F\u3002");
+          group.months.push(input.month);
+          for (const item of group.items) group.bills.push({ ...item, id: (0, import_node_crypto.randomUUID)(), itemId: item.id, month: input.month, settledBy: null, settledAt: null });
+        }
+      } else if (action === "item" || action === "edit-item") {
+        check(text(input.name, 40), "\u9879\u76EE\u540D\u79F0\u9700\u4E3A 1\u201340 \u5B57\u3002");
+        check(Number.isSafeInteger(input.amountCents) && Number(input.amountCents) > 0 && Number(input.amountCents) <= MAX_CENTS, "\u8BF7\u8F93\u5165\u6709\u6548\u91D1\u989D\uFF0C\u6700\u591A\u4E24\u4F4D\u5C0F\u6570\u3002");
+        check(validMonth(input.month), "\u6708\u4EFD\u65E0\u6548\u3002");
+        const existing = action === "edit-item" ? group.items.find((item) => item.id === input.itemId) : void 0;
+        check(action !== "edit-item" || existing, "\u56FA\u5B9A\u9879\u76EE\u4E0D\u5B58\u5728\u3002", 404);
+        const bill = existing && group.bills.find((bill2) => bill2.month === input.month && bill2.itemId === existing.id);
+        check(!bill?.settledBy, "\u8BE5\u6708\u9879\u76EE\u5DF2\u7ED3\u7B97\uFF1B\u9700\u5148\u53D6\u6D88\u52FE\u9009\u624D\u80FD\u4FEE\u6539\u3002");
+        if (existing) {
+          existing.name = input.name.trim();
+          existing.amountCents = Number(input.amountCents);
+        } else {
+          check(group.items.length < 100, "\u6BCF\u7FA4\u6700\u591A\u8BBE\u7F6E 100 \u4E2A\u56FA\u5B9A\u9879\u76EE\u3002");
+          const item = { id: (0, import_node_crypto.randomUUID)(), name: input.name.trim(), amountCents: Number(input.amountCents) };
+          group.items.push(item);
+          if (group.months.includes(input.month)) group.bills.push({ ...item, id: (0, import_node_crypto.randomUUID)(), itemId: item.id, month: input.month, settledBy: null, settledAt: null });
+        }
+        if (bill) {
+          bill.name = input.name.trim();
+          bill.amountCents = Number(input.amountCents);
+        }
+      } else if (action === "remove-item") {
+        check(group.items.some((item) => item.id === input.itemId), "\u56FA\u5B9A\u9879\u76EE\u4E0D\u5B58\u5728\u3002", 404);
+        group.items = group.items.filter((item) => item.id !== input.itemId);
+      } else if (action === "settle") {
+        const bill = group.bills.find((bill2) => bill2.id === input.billId);
+        check(bill && typeof input.settled === "boolean", "\u8D26\u76EE\u6216\u7ED3\u7B97\u72B6\u6001\u65E0\u6548\u3002");
+        bill.settledBy = input.settled ? userId : null;
+        bill.settledAt = input.settled ? this.timestamp() : null;
+      } else throw new ApiError(404, "\u7FA4\u64CD\u4F5C\u4E0D\u5B58\u5728\u3002");
+      this.run("UPDATE shop_groups SET payload=?,revision=revision+1 WHERE id=?", JSON.stringify({ items: group.items, bills: group.bills, months: group.months }), groupId);
+      this.changed(affected);
+    });
+    this.publish(affected);
+    return this.snapshot(userId);
   }
   addFriend(userId, invitation) {
     check(typeof invitation === "string", "\u8BF7\u8F93\u5165\u5BF9\u65B9\u7684\u56FA\u5B9A ID\u3002");
@@ -399,7 +495,8 @@ var SyncStore = class {
     const name = input.name.trim();
     const avatar = input.avatar;
     const peers = this.all("SELECT user_a,user_b FROM friendships WHERE user_a=? OR user_b=?", userId, userId);
-    const affected = [userId, ...peers.flatMap((row) => [String(row.user_a), String(row.user_b)])];
+    const groupPeers = this.all("SELECT DISTINCT peer.user_id FROM shop_members own JOIN shop_members peer ON own.group_id=peer.group_id WHERE own.user_id=?", userId);
+    const affected = [userId, ...peers.flatMap((row) => [String(row.user_a), String(row.user_b)]), ...groupPeers.map((row) => String(row.user_id))];
     this.transaction(() => {
       this.run("UPDATE users SET name=?,avatar=?,color=? WHERE id=?", name, avatar, COLORS[index], userId);
       this.changed(affected);
@@ -606,6 +703,15 @@ function createSyncServer(store, options = {}) {
       }
       if (request.method === "POST" && path.pathname === "/v1/friends") {
         send(response, 200, store.addFriend(userId, (await body(request)).code));
+        return;
+      }
+      if (request.method === "POST" && path.pathname === "/v1/groups") {
+        send(response, 200, store.createGroup(userId, await body(request)));
+        return;
+      }
+      const groupMatch = /^\/v1\/groups\/([a-zA-Z0-9_-]+)\/([a-z-]+)$/.exec(path.pathname);
+      if (request.method === "POST" && groupMatch) {
+        send(response, 200, store.groupAction(userId, groupMatch[1], groupMatch[2], await body(request)));
         return;
       }
       const friendMatch = /^\/v1\/friends\/([a-zA-Z0-9_-]+)$/.exec(path.pathname);
