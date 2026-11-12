@@ -231,6 +231,16 @@ var SyncStore = class {
         PRIMARY KEY(group_id,user_id)
       );
       CREATE INDEX IF NOT EXISTS shop_member_user ON shop_members(user_id);
+      CREATE TABLE IF NOT EXISTS shop_tasks (
+        id TEXT PRIMARY KEY, group_id TEXT NOT NULL REFERENCES shop_groups(id), name TEXT NOT NULL,
+        created_by TEXT NOT NULL REFERENCES users(id), starts_on TEXT NOT NULL, archived_on TEXT
+      );
+      CREATE TABLE IF NOT EXISTS shop_task_completions (
+        task_id TEXT NOT NULL REFERENCES shop_tasks(id), task_date TEXT NOT NULL, task_name TEXT NOT NULL,
+        completed_by TEXT NOT NULL REFERENCES users(id), completed_name TEXT NOT NULL, completed_at TEXT NOT NULL,
+        PRIMARY KEY(task_id,task_date)
+      );
+      CREATE INDEX IF NOT EXISTS shop_task_group ON shop_tasks(group_id);
     `);
     this.transaction(() => {
       if (!this.all("PRAGMA table_info(users)").some((column) => column.name === "public_id")) this.database.exec("ALTER TABLE users ADD COLUMN public_id TEXT");
@@ -380,7 +390,9 @@ var SyncStore = class {
       name: String(row.name),
       ownerId: String(row.owner_id),
       revision: Number(row.revision),
-      members: this.all("SELECT u.id,u.name,u.public_id FROM users u JOIN shop_members m ON m.user_id=u.id WHERE m.group_id=? ORDER BY m.rowid", String(row.id)).map((member) => ({ id: String(member.id), name: String(member.name), publicId: String(member.public_id) }))
+      members: this.all("SELECT u.id,u.name,u.public_id FROM users u JOIN shop_members m ON m.user_id=u.id WHERE m.group_id=? ORDER BY m.rowid", String(row.id)).map((member) => ({ id: String(member.id), name: String(member.name), publicId: String(member.public_id) })),
+      tasks: this.all("SELECT * FROM shop_tasks WHERE group_id=? ORDER BY rowid", String(row.id)).map((task) => ({ id: String(task.id), name: String(task.name), createdBy: String(task.created_by), startsOn: String(task.starts_on), archivedOn: task.archived_on === null ? null : String(task.archived_on) })),
+      taskCompletions: this.all("SELECT c.* FROM shop_task_completions c JOIN shop_tasks t ON t.id=c.task_id WHERE t.group_id=? ORDER BY c.task_date,c.task_id", String(row.id)).map((completion) => ({ taskId: String(completion.task_id), date: String(completion.task_date), taskName: String(completion.task_name), completedBy: String(completion.completed_by), completedName: String(completion.completed_name), completedAt: String(completion.completed_at) }))
     }));
   }
   createGroup(userId, input) {
@@ -414,6 +426,37 @@ var SyncStore = class {
       } else if (action === "rename") {
         check(text(input.name, 40), "\u7FA4\u540D\u79F0\u9700\u4E3A 1\u201340 \u5B57\u3002");
         this.run("UPDATE shop_groups SET name=? WHERE id=?", input.name.trim(), groupId);
+      } else if (action === "task") {
+        check(text(input.name, 60), "\u4EFB\u52A1\u540D\u79F0\u9700\u4E3A 1\u201360 \u5B57\u3002");
+        check(typeof input.date === "string" && isValidDate(input.date), "\u4EFB\u52A1\u65E5\u671F\u65E0\u6548\u3002");
+        check(group.tasks.filter((task) => !task.archivedOn).length < 100, "\u6BCF\u4E2A\u5E97\u94FA\u6700\u591A\u8BBE\u7F6E 100 \u4E2A\u4F7F\u7528\u4E2D\u7684\u6BCF\u65E5\u4EFB\u52A1\u3002");
+        this.run("INSERT INTO shop_tasks (id,group_id,name,created_by,starts_on) VALUES (?,?,?,?,?)", (0, import_node_crypto.randomUUID)(), groupId, input.name.trim(), userId, input.date);
+      } else if (["edit-task", "archive-task", "complete-task"].includes(action)) {
+        const task = group.tasks.find((task2) => task2.id === input.taskId);
+        check(task, "\u4EFB\u52A1\u4E0D\u5B58\u5728\u3002", 404);
+        check(typeof input.date === "string" && isValidDate(input.date) && input.date >= task.startsOn, "\u8BF7\u9009\u62E9\u4EFB\u52A1\u5F00\u59CB\u4E4B\u540E\u7684\u6709\u6548\u65E5\u671F\u3002");
+        if (action === "edit-task") {
+          check(task.createdBy === userId || group.ownerId === userId, "\u53EA\u6709\u4EFB\u52A1\u521B\u5EFA\u4EBA\u6216\u7FA4\u4E3B\u80FD\u4FEE\u6539\u4EFB\u52A1\u3002", 403);
+          check(text(input.name, 60), "\u4EFB\u52A1\u540D\u79F0\u9700\u4E3A 1\u201360 \u5B57\u3002");
+          check(!task.archivedOn, "\u5DF2\u505C\u7528\u7684\u4EFB\u52A1\u4E0D\u80FD\u4FEE\u6539\u3002");
+          this.run("UPDATE shop_tasks SET name=? WHERE id=?", input.name.trim(), task.id);
+        } else if (action === "archive-task") {
+          check(task.createdBy === userId || group.ownerId === userId, "\u53EA\u6709\u4EFB\u52A1\u521B\u5EFA\u4EBA\u6216\u7FA4\u4E3B\u80FD\u505C\u7528\u4EFB\u52A1\u3002", 403);
+          check(!task.archivedOn, "\u4EFB\u52A1\u5DF2\u7ECF\u505C\u7528\u3002");
+          this.run("UPDATE shop_tasks SET archived_on=? WHERE id=?", input.date, task.id);
+        } else {
+          check(typeof input.completed === "boolean", "\u5B8C\u6210\u72B6\u6001\u65E0\u6548\u3002");
+          const previous = this.one("SELECT completed_by FROM shop_task_completions WHERE task_id=? AND task_date=?", task.id, input.date);
+          if (input.completed) {
+            check(!task.archivedOn || input.date < task.archivedOn, "\u8BE5\u65E5\u671F\u7684\u4EFB\u52A1\u5DF2\u7ECF\u505C\u7528\u3002");
+            check(!previous, "\u8FD9\u9879\u4EFB\u52A1\u5DF2\u7531\u5176\u4ED6\u64CD\u4F5C\u5B8C\u6210\uFF0C\u8BF7\u67E5\u770B\u6700\u65B0\u5185\u5BB9\u3002", 409);
+            this.run("INSERT INTO shop_task_completions VALUES (?,?,?,?,?,?)", task.id, input.date, task.name, userId, this.account(userId).name, this.timestamp());
+          } else {
+            check(previous, "\u8BE5\u4EFB\u52A1\u5C1A\u672A\u5B8C\u6210\u3002", 409);
+            check(previous.completed_by === userId || group.ownerId === userId, "\u53EA\u6709\u5B8C\u6210\u4EBA\u6216\u7FA4\u4E3B\u80FD\u53D6\u6D88\u5B8C\u6210\u72B6\u6001\u3002", 403);
+            this.run("DELETE FROM shop_task_completions WHERE task_id=? AND task_date=?", task.id, input.date);
+          }
+        }
       } else if (action === "month") {
         check(validMonth(input.month), "\u6708\u4EFD\u65E0\u6548\u3002");
         if (!group.months.includes(input.month)) {
