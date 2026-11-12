@@ -220,6 +220,13 @@ var SyncStore = class {
       CREATE INDEX IF NOT EXISTS entry_owner ON entries(owner_id);
       CREATE INDEX IF NOT EXISTS session_user ON sessions(user_id);
     `);
+    this.transaction(() => {
+      if (!this.all("PRAGMA table_info(users)").some((column) => column.name === "public_id")) this.database.exec("ALTER TABLE users ADD COLUMN public_id TEXT");
+      this.database.exec("CREATE UNIQUE INDEX IF NOT EXISTS user_public_id ON users(public_id)");
+      for (const user of this.all("SELECT id FROM users WHERE public_id IS NULL")) {
+        this.run("UPDATE users SET public_id=?,revision=revision+1 WHERE id=?", this.newPublicId(), String(user.id));
+      }
+    });
     const latest = this.one("SELECT MAX(created_at) AS latest FROM entries");
     this.clock = latest?.latest ? Date.parse(String(latest.latest)) : 0;
     this.events.setMaxListeners(1e3);
@@ -254,6 +261,13 @@ var SyncStore = class {
   publish(userIds) {
     for (const userId of new Set(userIds)) this.events.emit(userId);
   }
+  newPublicId() {
+    let candidate;
+    do {
+      candidate = String((0, import_node_crypto.randomInt)(1e9, 1e10));
+    } while (this.one("SELECT id FROM users WHERE public_id=?", candidate));
+    return candidate;
+  }
   account(userId) {
     const row = this.one("SELECT * FROM users WHERE id=?", userId);
     check(row, "\u8D26\u53F7\u4E0D\u5B58\u5728\u3002", 401);
@@ -263,7 +277,8 @@ var SyncStore = class {
       name: String(row.name),
       avatar: String(row.avatar),
       color: String(row.color),
-      friendCode: String(row.friend_code)
+      friendCode: String(row.friend_code),
+      publicId: String(row.public_id)
     };
   }
   authenticate(token) {
@@ -288,7 +303,7 @@ var SyncStore = class {
     check(!this.one("SELECT id FROM users WHERE login=?", login), "\u8FD9\u4E2A\u8D26\u53F7\u5DF2\u88AB\u4F7F\u7528\uFF0C\u8BF7\u6362\u4E00\u4E2A\u3002", 409);
     const id = (0, import_node_crypto.randomUUID)();
     this.run(
-      "INSERT INTO users (id,login,password_hash,salt,name,avatar,color,friend_code,created_at) VALUES (?,?,?,?,?,?,?,?,?)",
+      "INSERT INTO users (id,login,password_hash,salt,name,avatar,color,friend_code,created_at,public_id) VALUES (?,?,?,?,?,?,?,?,?,?)",
       id,
       login,
       passwordHash,
@@ -297,7 +312,8 @@ var SyncStore = class {
       AVATARS[0],
       COLORS[0],
       code(),
-      this.timestamp()
+      this.timestamp(),
+      this.newPublicId()
     );
     return this.session(id);
   }
@@ -314,7 +330,7 @@ var SyncStore = class {
   snapshot(userId) {
     const me = this.account(userId);
     const relations = this.all(`SELECT f.*, u.id AS peer_id, u.name AS peer_name, u.login AS peer_login,
-      u.avatar AS peer_avatar,u.color AS peer_color FROM friendships f JOIN users u
+      u.avatar AS peer_avatar,u.color AS peer_color,u.public_id AS peer_public_id FROM friendships f JOIN users u
       ON u.id=CASE WHEN f.user_a=? THEN f.user_b ELSE f.user_a END
       WHERE (f.user_a=? OR f.user_b=?) AND (f.active=1 OR EXISTS(SELECT 1 FROM entries e WHERE e.friendship_id=f.id AND e.deleted_at IS NULL))`, userId, userId, userId);
     const friends = relations.map((row) => ({
@@ -323,7 +339,7 @@ var SyncStore = class {
       name: String(row.peer_name),
       avatar: String(row.peer_avatar),
       color: String(row.peer_color),
-      note: `\u8D26\u53F7\uFF1A${row.peer_login}${row.active ? "" : " \xB7 \u5DF2\u89E3\u9664\u597D\u53CB"}`,
+      note: `ID\uFF1A${row.peer_public_id}${row.active ? "" : " \xB7 \u5DF2\u89E3\u9664\u597D\u53CB"}`,
       connected: row.active === 1,
       createdAt: String(row.created_at)
     }));
@@ -346,11 +362,11 @@ var SyncStore = class {
     return { me, revision: Number(this.one("SELECT revision FROM users WHERE id=?", userId).revision), ledger: { version: 1, friends, entries } };
   }
   addFriend(userId, invitation) {
-    check(typeof invitation === "string", "\u8BF7\u8F93\u5165\u5BF9\u65B9\u5206\u4EAB\u7684\u597D\u53CB\u7801\u3002");
+    check(typeof invitation === "string", "\u8BF7\u8F93\u5165\u5BF9\u65B9\u7684\u56FA\u5B9A ID\u3002");
     const normalized = invitation.replace(/[\s-]/g, "").toUpperCase();
-    check(/^[A-F0-9]{20}$/.test(normalized), "\u597D\u53CB\u7801\u5E94\u4E3A 20 \u4F4D\u5B57\u6BCD\u548C\u6570\u5B57\u3002");
-    const target = this.one("SELECT id FROM users WHERE friend_code=?", normalized);
-    check(target && target.id !== userId, "\u597D\u53CB\u7801\u65E0\u6548\uFF0C\u6216\u662F\u4F60\u81EA\u5DF1\u7684\u597D\u53CB\u7801\u3002", 404);
+    check(/^[0-9]{10}$/.test(normalized) || /^[A-F0-9]{20}$/.test(normalized), "ID \u5E94\u4E3A\u7CFB\u7EDF\u751F\u6210\u7684 10 \u4F4D\u6570\u5B57\u3002");
+    const target = /^[0-9]{10}$/.test(normalized) ? this.one("SELECT id FROM users WHERE public_id=?", normalized) : this.one("SELECT id FROM users WHERE friend_code=?", normalized);
+    check(target && target.id !== userId, "ID \u4E0D\u5B58\u5728\uFF0C\u6216\u662F\u4F60\u81EA\u5DF1\u7684 ID\u3002", 404);
     const peerId = String(target.id);
     const [first = "", second = ""] = [userId, peerId].sort();
     this.transaction(() => {
@@ -629,7 +645,7 @@ function handle(request, response) {
     (0, import_node_fs.mkdirSync)((0, import_node_path.dirname)(databasePath), { recursive: true, mode: 448 });
     const store = new SyncStore(databasePath);
     mounted = createSyncServer(store, {
-      allowedOrigins: (process.env.QINGJI_ALLOWED_ORIGINS ?? "https://jj-teacher.onrender.com,http://localhost:8090,http://localhost:8093").split(",").map((origin) => origin.trim()).filter(Boolean),
+      allowedOrigins: String(process.env.QINGJI_ALLOWED_ORIGINS ?? "https://jj-teacher.onrender.com,http://localhost:8090,http://localhost:8093").split(",").map((origin) => origin.trim()).filter(Boolean),
       trustProxy: true
     });
   }
