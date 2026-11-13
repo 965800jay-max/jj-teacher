@@ -1,0 +1,1 @@
+if ('serviceWorker' in navigator) { window.addEventListener('load', function () { navigator.serviceWorker.register('/3628/service-worker.js', { scope: '/3628/' }).then(function (registration) { return registration.update(); }).catch(function () { console.warn('离线页面暂不可用，联网功能不受影响。'); }); }); }
