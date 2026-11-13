@@ -247,6 +247,12 @@ var SyncStore = class {
         PRIMARY KEY(task_id,task_date)
       );
       CREATE INDEX IF NOT EXISTS shop_task_group ON shop_tasks(group_id);
+      CREATE TABLE IF NOT EXISTS deletion_requests (
+        id TEXT PRIMARY KEY, scope TEXT NOT NULL, scope_id TEXT NOT NULL, target_id TEXT NOT NULL,
+        title TEXT NOT NULL, requested_by TEXT NOT NULL, required TEXT NOT NULL, approved TEXT NOT NULL,
+        action TEXT NOT NULL, input TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending', created_at TEXT NOT NULL
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS pending_deletion ON deletion_requests(scope,target_id) WHERE status='pending';
     `);
     this.transaction(() => {
       if (!this.all("PRAGMA table_info(shop_tasks)").some((column) => column.name === "frequency")) this.database.exec("ALTER TABLE shop_tasks ADD COLUMN frequency TEXT NOT NULL DEFAULT 'daily'");
@@ -388,7 +394,65 @@ var SyncStore = class {
       updatedAt: String(row.updated_at),
       revision: Number(row.revision)
     }, userId, String(row.owner_name)));
-    return { me, revision: Number(this.one("SELECT revision FROM users WHERE id=?", userId).revision), ledger: { version: 1, friends, entries }, groups: this.groups(userId) };
+    return { me, revision: Number(this.one("SELECT revision FROM users WHERE id=?", userId).revision), ledger: { version: 1, friends, entries }, groups: this.groups(userId), deletionRequests: this.pendingDeletions(userId) };
+  }
+  pendingDeletions(userId) {
+    return this.all("SELECT * FROM deletion_requests WHERE status='pending'").map((row) => ({ id: String(row.id), scope: row.scope, scopeId: String(row.scope_id), targetId: String(row.target_id), title: String(row.title), requestedBy: String(row.requested_by), required: JSON.parse(String(row.required)), approved: JSON.parse(String(row.approved)) })).filter((request) => request.required.some((member) => member.id === userId));
+  }
+  deletionPending(scope, targetId) {
+    return this.one("SELECT * FROM deletion_requests WHERE scope=? AND target_id=? AND status='pending'", scope, targetId);
+  }
+  requestDeletion(userId, scope, scopeId, targetId, title, members, action, input) {
+    let request = this.deletionPending(scope, targetId);
+    if (!request) {
+      const id = (0, import_node_crypto.randomUUID)();
+      this.transaction(() => {
+        this.run("INSERT INTO deletion_requests (id,scope,scope_id,target_id,title,requested_by,required,approved,action,input,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)", id, scope, scopeId, targetId, title, userId, JSON.stringify(members), JSON.stringify([userId]), action, JSON.stringify(input), this.timestamp());
+        this.changed(members.map((member) => member.id));
+      });
+      this.publish(members.map((member) => member.id));
+      request = this.deletionPending(scope, targetId);
+    }
+    const required = JSON.parse(String(request.required));
+    const approved = JSON.parse(String(request.approved));
+    return !required.every((member) => approved.includes(member.id));
+  }
+  voteDeletion(userId, id, input) {
+    const request = this.one("SELECT * FROM deletion_requests WHERE id=? AND status='pending'", id);
+    check(request, "\u8BE5\u5220\u9664\u7533\u8BF7\u5DF2\u5904\u7406\uFF0C\u8BF7\u5237\u65B0\u3002", 409);
+    const required = JSON.parse(String(request.required));
+    check(required.some((member) => member.id === userId), "\u65E0\u6743\u5904\u7406\u8BE5\u5220\u9664\u7533\u8BF7\u3002", 403);
+    check(typeof input.approved === "boolean", "\u540C\u610F\u72B6\u6001\u65E0\u6548\u3002");
+    const affected = required.map((member) => member.id);
+    const previous = String(request.approved);
+    this.transaction(() => {
+      const approved = new Set(JSON.parse(previous));
+      if (input.approved) approved.add(userId);
+      this.run("UPDATE deletion_requests SET approved=?,status=? WHERE id=?", JSON.stringify([...approved]), input.approved ? "pending" : "rejected", id);
+      this.changed(affected);
+    });
+    if (input.approved) {
+      const current = this.pendingDeletions(userId).find((item) => item.id === id);
+      if (current.required.every((member) => current.approved.includes(member.id))) {
+        try {
+          if (request.scope === "entry") {
+            const entry = this.one("SELECT revision FROM entries WHERE id=? AND deleted_at IS NULL", String(request.target_id));
+            check(entry, "\u8D26\u76EE\u5DF2\u4E0D\u5B58\u5728\u3002", 409);
+            this.writeEntry(String(request.requested_by), String(request.target_id), { revision: entry.revision }, "delete");
+          } else {
+            const group = this.groups(userId).find((group2) => group2.id === request.scope_id);
+            check(group, "\u7FA4\u5DF2\u4E0D\u5B58\u5728\u3002", 409);
+            this.groupAction(String(request.requested_by), group.id, String(request.action), { ...JSON.parse(String(request.input)), revision: group.revision });
+          }
+        } catch (cause) {
+          this.run("UPDATE deletion_requests SET approved=? WHERE id=?", previous, id);
+          this.publish(affected);
+          throw cause;
+        }
+      }
+    }
+    this.publish(affected);
+    return this.snapshot(userId);
   }
   groups(userId) {
     return this.all("SELECT g.* FROM shop_groups g JOIN shop_members m ON m.group_id=g.id WHERE m.user_id=? ORDER BY g.rowid", userId).map((row) => ({
@@ -421,6 +485,20 @@ var SyncStore = class {
     const ownerActions = ["member", "item", "edit-item", "remove-item", "rename"];
     check(!ownerActions.includes(action) || group.ownerId === userId, "\u53EA\u6709\u7FA4\u4E3B\u53EF\u4EE5\u7BA1\u7406\u6210\u5458\u548C\u56FA\u5B9A\u8D26\u3002", 403);
     const affected = group.members.map((member) => member.id);
+    if (action === "member") check(!this.pendingDeletions(userId).some((request) => request.scope === "group" && request.scopeId === groupId), "\u8BF7\u5148\u5904\u7406\u7FA4\u5185\u5220\u9664\u7533\u8BF7\uFF0C\u518D\u6DFB\u52A0\u6210\u5458\u3002");
+    const targetId = String(input.billId ?? input.taskId ?? input.itemId ?? "");
+    if (["delete-bill", "archive-task", "remove-item"].includes(action)) {
+      const target = action === "delete-bill" ? group.bills.find((item) => item.id === targetId) : action === "archive-task" ? group.tasks.find((item) => item.id === targetId) : group.items.find((item) => item.id === targetId);
+      check(target, "\u9879\u76EE\u4E0D\u5B58\u5728\u3002", 404);
+      if (action === "archive-task") check(typeof input.date === "string" && isValidDate(input.date) && "startsOn" in target && input.date >= String(target.startsOn) && "archivedOn" in target && !target.archivedOn, "\u4EFB\u52A1\u65E5\u671F\u65E0\u6548\u6216\u4EFB\u52A1\u5DF2\u505C\u7528\u3002");
+      check(group.ownerId === userId || "createdBy" in target && target.createdBy === userId, "\u53EA\u6709\u521B\u5EFA\u4EBA\u6216\u7FA4\u4E3B\u53EF\u53D1\u8D77\u5220\u9664\u3002", 403);
+      if ("settledBy" in target) check(!target.settledBy, "\u5DF2\u7ED3\u7B97\u8D26\u76EE\u9700\u5148\u53D6\u6D88\u52FE\u9009\u624D\u80FD\u4FEE\u6539\u6216\u5220\u9664\u3002");
+      const title = `${group.name} \xB7 ${target.name}${"amountCents" in target ? ` \xA5${(Number(target.amountCents) / 100).toFixed(2)}` : ""}${"occurredOn" in target ? ` \xB7 ${target.occurredOn}` : ""}`;
+      if (this.requestDeletion(userId, "group", groupId, targetId, title, group.members, action, input)) return this.snapshot(userId);
+    } else if (["edit-bill", "settle", "edit-task", "complete-task", "edit-item"].includes(action)) {
+      check(!this.deletionPending("group", targetId), "\u8BE5\u9879\u76EE\u6B63\u5728\u7533\u8BF7\u5220\u9664\uFF0C\u8BF7\u5148\u5904\u7406\u7533\u8BF7\u3002");
+      if (action === "edit-item") check(!group.bills.some((bill) => bill.itemId === targetId && bill.month === input.month && this.deletionPending("group", bill.id)), "\u8BE5\u9879\u76EE\u6B63\u5728\u7533\u8BF7\u5220\u9664\uFF0C\u8BF7\u5148\u5904\u7406\u7533\u8BF7\u3002");
+    }
     this.transaction(() => {
       if (action === "member") {
         check(typeof input.publicId === "string" && /^[1-9][0-9]{9}$/.test(input.publicId), "\u8BF7\u8F93\u5165 10 \u4F4D\u6570\u5B57 ID\u3002");
@@ -527,6 +605,7 @@ var SyncStore = class {
         bill.settledAt = input.settled ? this.timestamp() : null;
       } else throw new ApiError(404, "\u7FA4\u64CD\u4F5C\u4E0D\u5B58\u5728\u3002");
       this.run("UPDATE shop_groups SET payload=?,revision=revision+1 WHERE id=?", JSON.stringify({ items: group.items, bills: group.bills, months: group.months }), groupId);
+      if (["delete-bill", "archive-task", "remove-item"].includes(action)) this.run("UPDATE deletion_requests SET status='applied' WHERE scope='group' AND target_id=? AND status='pending'", targetId);
       this.changed(affected);
     });
     this.publish(affected);
@@ -593,6 +672,15 @@ var SyncStore = class {
       check(input.revision === existing.revision, "\u8D26\u76EE\u5DF2\u88AB\u5176\u4ED6\u8BBE\u5907\u4FEE\u6539\uFF0C\u8BF7\u5237\u65B0\u540E\u518D\u8BD5\u3002", 409);
     }
     const draft = action === "delete" ? void 0 : checkedDraft(input.draft);
+    if (action === "update") {
+      check(!this.deletionPending("entry", id), "\u8BE5\u8D26\u76EE\u6B63\u5728\u7533\u8BF7\u5220\u9664\uFF0C\u8BF7\u5148\u5904\u7406\u7533\u8BF7\u3002");
+      check(!existing?.friendship_id || draft?.friendId === existing.friendship_id, "\u5171\u4EAB\u8D26\u4E0D\u80FD\u53D6\u6D88\u6216\u66F4\u6362\u5173\u8054\u597D\u53CB\uFF0C\u8BF7\u53CC\u65B9\u540C\u610F\u5220\u9664\u540E\u91CD\u65B0\u8BB0\u8D26\u3002");
+    }
+    if (action === "delete" && existing?.friendship_id) {
+      const relation = this.relation(userId, String(existing.friendship_id));
+      const members = [String(relation.user_a), String(relation.user_b)].map((id2) => ({ id: id2, name: this.account(id2).name }));
+      if (this.requestDeletion(userId, "entry", String(existing.friendship_id), id, `${existing.reason} \xB7 \xA5${(Number(existing.amount_cents) / 100).toFixed(2)} \xB7 ${existing.occurred_on}`, members, "delete", input)) return this.snapshot(userId);
+    }
     if (action === "create" && existing) {
       const same = draft && existing.owner_id === userId && !existing.deleted_at && existing.kind === draft.kind && existing.amount_cents === draft.amountCents && existing.category === draft.category && existing.reason === draft.reason.trim() && existing.occurred_on === draft.occurredOn && existing.friendship_id === draft.friendId;
       check(same, "\u91CD\u590D\u8BF7\u6C42\u7684\u8D26\u76EE\u5185\u5BB9\u4E0D\u540C\uFF0C\u8BF7\u540C\u6B65\u540E\u91CD\u8BD5\u3002", 409);
@@ -638,6 +726,7 @@ var SyncStore = class {
           id
         );
       } else this.run("UPDATE entries SET deleted_at=?,updated_at=?,revision=revision+1 WHERE id=?", timestamp, timestamp, id);
+      if (action === "delete") this.run("UPDATE deletion_requests SET status='applied' WHERE scope='entry' AND target_id=? AND status='pending'", id);
       for (const viewer of affected) {
         try {
           validateLedger(this.snapshot(viewer).ledger);
@@ -803,6 +892,11 @@ function createSyncServer(store, options = {}) {
         return;
       }
       const entryMatch = /^\/v1\/entries\/([a-zA-Z0-9_-]+)$/.exec(path.pathname);
+      const deletionMatch = /^\/v1\/deletions\/([a-zA-Z0-9_-]+)$/.exec(path.pathname);
+      if (request.method === "POST" && deletionMatch) {
+        send(response, 200, store.voteDeletion(userId, deletionMatch[1], await body(request)));
+        return;
+      }
       if (entryMatch && ["POST", "PATCH", "DELETE"].includes(request.method ?? "")) {
         const action = request.method === "POST" ? "create" : request.method === "PATCH" ? "update" : "delete";
         send(response, 200, store.writeEntry(userId, entryMatch[1], await body(request), action));
