@@ -1,6 +1,6 @@
 const APP_ROOT = "/3628/";
-const CACHE = "3628-shell-4f65f4d6f488d98f";
-const FILES = ["/3628/_expo/static/js/web/index-6683891dca3e08e9eca19c75d8248bda.js","/3628/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Feather.ca4b48e04dc1ce10bfbddb262c8b835f.ttf","/3628/favicon.ico","/3628/icons/icon-180.png","/3628/icons/icon-192.png","/3628/icons/icon-512.png","/3628/manifest.webmanifest","/3628/metadata.json","/3628/register-pwa.js","/3628/"];
+const CACHE = "3628-shell-0890ff0720f2bf45";
+const FILES = ["/3628/_expo/static/js/web/index-9051d086ad13e872c783f4ce091b25b6.js","/3628/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Feather.ca4b48e04dc1ce10bfbddb262c8b835f.ttf","/3628/favicon.ico","/3628/icons/icon-180.png","/3628/icons/icon-192.png","/3628/icons/icon-512.png","/3628/manifest.webmanifest","/3628/metadata.json","/3628/register-pwa.js","/3628/"];
 const STATIC = new Set(FILES);
 
 self.addEventListener('install', event => {
