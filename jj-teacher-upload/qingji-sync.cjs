@@ -151,6 +151,12 @@ function entryForViewer(entry, viewerId, ownerName) {
 }
 
 // src/domain/groups.ts
+function billCategory(bill) {
+  const name = (bill.category ?? bill.name).trim();
+  if (/^(网络|网费|网络费|宽带|宽带费)$/.test(name)) return "\u7F51\u7EDC";
+  if (/^(房租|租金|店租)$/.test(name)) return "\u623F\u79DF";
+  return name;
+}
 var validMonth = (value) => typeof value === "string" && /^(20\d{2})-(0[1-9]|1[0-2])$/.test(value);
 
 // server/store.ts
@@ -465,6 +471,30 @@ var SyncStore = class {
           check(group.months.length < 120, "\u6BCF\u7FA4\u6700\u591A\u4FDD\u7559 120 \u4E2A\u8D26\u671F\u3002");
           group.months.push(input.month);
           for (const item of group.items) group.bills.push({ ...item, id: (0, import_node_crypto.randomUUID)(), itemId: item.id, month: input.month, settledBy: null, settledAt: null });
+        }
+      } else if (["bill", "edit-bill", "delete-bill"].includes(action)) {
+        const existing = group.bills.find((bill) => bill.id === input.billId);
+        if (action !== "bill") {
+          check(existing, "\u8D26\u76EE\u4E0D\u5B58\u5728\u3002", 404);
+          check(existing.createdBy === userId || group.ownerId === userId, "\u53EA\u6709\u8BB0\u8D26\u4EBA\u6216\u7FA4\u4E3B\u53EF\u4EE5\u4FEE\u6539\u6216\u5220\u9664\u8D26\u76EE\u3002", 403);
+          check(!existing.settledBy, "\u5DF2\u7ED3\u7B97\u8D26\u76EE\u9700\u5148\u53D6\u6D88\u52FE\u9009\u624D\u80FD\u4FEE\u6539\u6216\u5220\u9664\u3002");
+        }
+        if (action === "delete-bill") group.bills = group.bills.filter((bill) => bill.id !== input.billId);
+        else {
+          check(text(input.category, 40), "\u8BF7\u9009\u62E9\u6216\u8F93\u5165 1\u201340 \u5B57\u7684\u5206\u7C7B\u3002");
+          check(Number.isSafeInteger(input.amountCents) && Number(input.amountCents) > 0 && Number(input.amountCents) <= MAX_CENTS, "\u8BF7\u8F93\u5165\u6709\u6548\u91D1\u989D\u3002");
+          check(typeof input.occurredOn === "string" && isValidDate(input.occurredOn), "\u8BB0\u8D26\u65E5\u671F\u65E0\u6548\u3002");
+          check(typeof input.reason === "string" && input.reason.length <= 160, "\u5907\u6CE8\u6700\u591A 160 \u5B57\u3002");
+          const category = billCategory({ name: input.category.trim() });
+          const month = input.occurredOn.slice(0, 7);
+          const draft = { name: category, category, amountCents: Number(input.amountCents), reason: input.reason.trim(), occurredOn: input.occurredOn, month };
+          if (existing && action === "edit-bill") Object.assign(existing, draft);
+          else {
+            check(group.bills.length < 1e4, "\u6BCF\u7FA4\u6700\u591A\u4FDD\u7559 10,000 \u7B14\u8D26\u76EE\u3002");
+            const id = (0, import_node_crypto.randomUUID)();
+            group.bills.push({ ...draft, id, itemId: id, createdBy: userId, settledBy: null, settledAt: null });
+          }
+          if (!group.months.includes(month)) group.months.push(month);
         }
       } else if (action === "item" || action === "edit-item") {
         check(text(input.name, 40), "\u9879\u76EE\u540D\u79F0\u9700\u4E3A 1\u201340 \u5B57\u3002");
