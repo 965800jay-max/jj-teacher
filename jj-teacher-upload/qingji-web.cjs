@@ -42,7 +42,7 @@ function createWebHandler(directory) {
     try {
       const data = await fs.promises.readFile(file);
       const extension = path.extname(file);
-      const types = { ".html": "text/html; charset=utf-8", ".js": "application/javascript; charset=utf-8", ".json": "application/json; charset=utf-8", ".webmanifest": "application/manifest+json; charset=utf-8", ".png": "image/png", ".ico": "image/x-icon", ".ttf": "font/ttf", ".css": "text/css; charset=utf-8" };
+      const types = { ".html": "text/html; charset=utf-8", ".js": "application/javascript; charset=utf-8", ".json": "application/json; charset=utf-8", ".webmanifest": "application/manifest+json; charset=utf-8", ".png": "image/png", ".svg": "image/svg+xml", ".ico": "image/x-icon", ".ttf": "font/ttf", ".css": "text/css; charset=utf-8" };
       const immutable = /[.-][a-f0-9]{20,}\./.test(path.basename(file));
       const headers = { "Content-Type": types[extension] || "application/octet-stream", "Content-Length": data.length, "Cache-Control": immutable ? "public, max-age=31536000, immutable" : "no-cache", "X-Content-Type-Options": "nosniff", "Referrer-Policy": "same-origin" };
       if (file === path.join(root, "service-worker.js")) headers["Service-Worker-Allowed"] = "/3628/";

@@ -5,23 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f7f7f7">
   <meta name="robots" content="noindex,nofollow">
-  <title>3628 · Book an appointment</title>
+  <title>3628 New York · Book an appointment</title>
   <link rel="icon" href="/3628/icons/icon-180.png">
   <link rel="stylesheet" href="/3628/book/style.css">
   <link rel="stylesheet" href="/3628/book/access.css">
+  <link rel="stylesheet" href="/3628/book/brand.css">
   <script src="/3628/book/app.js" defer></script>
 </head>
 <body>
 <dialog id="access-dialog" aria-labelledby="access-title" open>
   <form id="access-form">
-    <p class="eyebrow">3628 · PRIVATE BOOKING</p><h2 id="access-title">Enter your customer ID</h2>
+    <img class="access-brand" src="/3628/book/logo.svg" alt="3628 New York" width="300" height="140">
+    <p class="eyebrow">PRIVATE BOOKING</p><h2 id="access-title">Enter your customer ID</h2>
     <p class="privacy">Please enter the customer ID provided by the shop owner to continue. No registration required.</p>
     <label for="customer-id">Customer ID</label><input id="customer-id" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="60" required autofocus placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX">
     <p id="access-error" role="alert"></p><button id="access-submit" type="submit">Done</button>
   </form>
 </dialog>
 <main id="content" hidden inert>
-  <header><a class="brand" href="/3628/book/">3628<span>APPOINTMENTS</span></a><span class="badge">NEW YORK</span></header>
+  <header><a class="brand" href="/3628/book/" aria-label="3628 New York"><img class="brand-logo" src="/3628/book/logo.svg" alt="3628 New York" width="300" height="140"></a><span class="badge">APPOINTMENTS</span></header>
   <section id="booking">
     <p class="eyebrow">A LITTLE TIME FOR YOURSELF</p>
     <h1>Book your<br>next visit.</h1>
@@ -44,6 +46,6 @@
   </section>
   <p id="message" role="alert"></p>
   <section id="success" class="card" hidden><div class="check">✓</div><p class="eyebrow">YOU'RE ALL SET</p><h1>See you soon.</h1><p id="confirmation"></p><p id="reference" class="hint"></p><p class="privacy">Save a screenshot of this confirmation. For changes or cancellation, contact the shop directly. No text or email will be sent.</p><button type="button" id="another">Book another appointment</button></section>
-  <footer>3628 · Simple, thoughtful appointments.</footer>
+  <footer>3628 New York · Simple, thoughtful appointments.</footer>
 </main>
 </body></html>
