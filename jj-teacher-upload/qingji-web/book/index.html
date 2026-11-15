@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f7f7">
+  <meta name="robots" content="noindex,nofollow">
+  <title>3628 · Book an appointment</title>
+  <link rel="icon" href="/3628/icons/icon-180.png">
+  <link rel="stylesheet" href="/3628/book/style.css">
+  <script src="/3628/book/app.js" defer></script>
+</head>
+<body>
+<main>
+  <header><a class="brand" href="/3628/book/">3628<span>APPOINTMENTS</span></a><span class="badge">NEW YORK</span></header>
+  <section id="booking">
+    <p class="eyebrow">A LITTLE TIME FOR YOURSELF</p>
+    <h1>Book your<br>next visit.</h1>
+    <p class="intro">Choose a service and a time that works for you.<br>No account needed.</p>
+    <form id="booking-form">
+      <fieldset id="fields" disabled>
+        <section class="card"><h2><span>01</span> Your service</h2><div id="services" class="services" role="group" aria-label="Choose a service"></div></section>
+        <section class="card"><h2><span>02</span> Your time</h2><label for="date">Date</label><input id="date" type="date" required><p class="hint">All times are in New York (America/New_York).<br>Daylight saving time is handled automatically.</p><div id="slots" class="slots" role="group" aria-label="Available appointment times"></div><p id="availability" role="status"></p></section>
+        <section class="card">
+          <h2><span>03</span> Your details</h2>
+          <label for="name">Full name</label><input id="name" autocomplete="name" maxlength="80" required placeholder="Your name">
+          <label for="phone">Phone number</label><input id="phone" type="tel" autocomplete="tel" minlength="7" maxlength="30" required placeholder="(212) 555-0123">
+          <label for="notes">Notes <span class="optional">(optional)</span></label><textarea id="notes" maxlength="500" rows="3" placeholder="Anything you would like us to know?"></textarea>
+          <div class="trap" aria-hidden="true"><label for="website">Leave blank</label><input id="website" tabindex="-1" autocomplete="off"></div>
+          <p class="privacy">Your contact details are visible only to the shop owner. They are used to manage your appointment, not displayed publicly. This page does not send SMS or email reminders.</p>
+        </section>
+        <section class="summary"><p id="summary">Choose a service and time to continue.</p><button type="submit" id="submit" disabled>Confirm appointment <span>↗</span></button><p class="hint">Submitting confirms your appointment immediately. For changes or cancellation, please contact the shop directly.</p></section>
+      </fieldset>
+    </form>
+  </section>
+  <p id="message" role="alert"></p>
+  <section id="success" class="card" hidden><div class="check">✓</div><p class="eyebrow">YOU'RE ALL SET</p><h1>See you soon.</h1><p id="confirmation"></p><p id="reference" class="hint"></p><p class="privacy">Save a screenshot of this confirmation. For changes or cancellation, contact the shop directly. No text or email will be sent.</p><button type="button" id="another">Book another appointment</button></section>
+  <footer>3628 · Simple, thoughtful appointments.</footer>
+</main>
+</body></html>

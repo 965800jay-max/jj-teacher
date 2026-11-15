@@ -755,6 +755,74 @@ var SyncStore = class {
   }
 };
 
+// server/booking/http.ts
+var connections = /* @__PURE__ */ new WeakMap();
+async function handleBooking(store, userId, request, response, url, body, send, authorizeSession) {
+  if (!url.pathname.startsWith("/v1/booking/")) return false;
+  store.authorize(userId);
+  if (url.pathname === "/v1/booking/snapshot" && request.method === "GET") {
+    const from = url.searchParams.get("from") ?? "";
+    const to = url.searchParams.get("to") ?? "";
+    const current = store.snapshot(userId, from, to);
+    const after = Number(url.searchParams.get("after") ?? -1);
+    const wait = Math.min(25e3, Math.max(0, Number(url.searchParams.get("wait") ?? 0) || 0));
+    if (current.revision !== after || !wait) {
+      send(200, current);
+      return true;
+    }
+    let waiting = connections.get(store);
+    if (!waiting) {
+      waiting = /* @__PURE__ */ new Map();
+      connections.set(store, waiting);
+    }
+    if ((waiting.get(userId) ?? 0) >= 4) throw new ApiError(429, "\u9884\u7EA6\u540C\u6B65\u8FDE\u63A5\u8FC7\u591A\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5\u3002");
+    waiting.set(userId, (waiting.get(userId) ?? 0) + 1);
+    let done = false;
+    const finish = (changed) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      store.events.off(userId, listener);
+      waiting.set(userId, Math.max(0, (waiting.get(userId) ?? 1) - 1));
+      if (!response.destroyed) {
+        try {
+          authorizeSession();
+          send(200, changed ? store.snapshot(userId, from, to) : { unchanged: true, revision: current.revision });
+        } catch (cause) {
+          send(cause instanceof ApiError ? cause.status : 500, { error: cause instanceof Error ? cause.message : "\u9884\u7EA6\u4F1A\u8BDD\u5DF2\u5931\u6548\u3002" });
+        }
+      }
+    };
+    const listener = () => finish(true);
+    const timer = setTimeout(() => finish(false), wait);
+    store.events.once(userId, listener);
+    response.once("close", () => {
+      if (!done) {
+        done = true;
+        clearTimeout(timer);
+        store.events.off(userId, listener);
+        waiting.set(userId, Math.max(0, (waiting.get(userId) ?? 1) - 1));
+      }
+    });
+    if (store.authorize(userId) !== after) listener();
+    return true;
+  }
+  if (request.method === "POST") {
+    const input = await body();
+    if (url.pathname === "/v1/booking/services") store.saveService(userId, input);
+    else if (url.pathname === "/v1/booking/hours") store.saveHours(userId, input);
+    else if (url.pathname === "/v1/booking/time-off") store.saveTimeOff(userId, input);
+    else {
+      const match = /^\/v1\/booking\/appointments\/([a-zA-Z0-9_-]{1,100})(\/cancel)?$/.exec(url.pathname);
+      if (!match) throw new ApiError(404, "\u9884\u7EA6\u63A5\u53E3\u4E0D\u5B58\u5728\u3002");
+      store.saveAppointment(userId, match[1], input, !!match[2]);
+    }
+    send(200, { ok: true, revision: store.authorize(userId) });
+    return true;
+  }
+  throw new ApiError(404, "\u9884\u7EA6\u63A5\u53E3\u4E0D\u5B58\u5728\u3002");
+}
+
 // server/http.ts
 function createSyncServer(store, options = {}) {
   const origins = new Set(options.allowedOrigins ?? []);
@@ -811,6 +879,24 @@ function createSyncServer(store, options = {}) {
       }
       const address = options.trustProxy ? String(request.headers["x-forwarded-for"] ?? request.socket.remoteAddress).split(",")[0].trim() : request.socket.remoteAddress ?? "unknown";
       if (options.rateLimit !== false) throttle(`ip:${address}`, 240);
+      const publicBooking = /^\/v1\/public-booking\/(\d{10})\/(catalog|slots|appointments)$/.exec(path.pathname);
+      if (publicBooking && options.booking) {
+        try {
+          if (options.rateLimit !== false) throttle(`booking-public:${request.method}:${address}`, request.method === "POST" ? 8 : 100);
+          const code2 = publicBooking[1];
+          if (request.method === "GET" && publicBooking[2] === "catalog") send(response, 200, options.booking.publicCatalog(code2));
+          else if (request.method === "GET" && publicBooking[2] === "slots") send(response, 200, options.booking.publicSlots(code2, path.searchParams.get("serviceId") ?? "", path.searchParams.get("date") ?? ""));
+          else if (request.method === "POST" && publicBooking[2] === "appointments") {
+            if (options.rateLimit !== false) throttle(`booking-submit:${address}`, 8);
+            send(response, 200, options.booking.publicBook(code2, await body(request)));
+          } else throw new ApiError(405, "Method not allowed.");
+        } catch (cause) {
+          const status = cause instanceof ApiError ? cause.status : 500;
+          const message = cause instanceof ApiError && /^[\x20-\x7e]+$/.test(cause.message) ? cause.message : status === 429 ? "Too many requests. Please try again in a minute." : status === 409 ? "This time is no longer available. Please refresh and choose another time." : status === 400 ? "Please check your name, phone number, service and time." : "Booking is temporarily unavailable. Please try again.";
+          send(response, status, { error: message });
+        }
+        return;
+      }
       if (request.method === "POST" && ["/v1/register", "/v1/login"].includes(path.pathname)) {
         const input = await body(request);
         if (options.rateLimit !== false) {
@@ -825,6 +911,9 @@ function createSyncServer(store, options = {}) {
       const token = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
       const userId = store.authenticate(token);
       if (options.rateLimit !== false) throttle(`user:${userId}`, 180);
+      if (options.booking && await handleBooking(options.booking, userId, request, response, path, () => body(request), (status, data) => send(response, status, data), () => {
+        store.authenticate(token);
+      })) return;
       if (path.pathname === "/v1/snapshot" && request.method === "GET") {
         const after = Number(path.searchParams.get("after") ?? -1);
         const wait = Math.min(25e3, Math.max(0, Number(path.searchParams.get("wait") ?? 0) || 0));
@@ -912,6 +1001,317 @@ function createSyncServer(store, options = {}) {
   return server;
 }
 
+// server/booking/store.ts
+var import_node_crypto2 = require("node:crypto");
+var import_node_events2 = require("node:events");
+
+// src/domain/booking.ts
+var BOOKING_ZONE = "America/New_York";
+var formatter = new Intl.DateTimeFormat("en-CA", { timeZone: BOOKING_ZONE, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+function nyParts(instant = Date.now()) {
+  const parts = Object.fromEntries(formatter.formatToParts(instant).map((part) => [part.type, part.value]));
+  return { date: `${parts.year}-${parts.month}-${parts.day}`, time: `${parts.hour}:${parts.minute}` };
+}
+function shiftBookingDate(date, days) {
+  const value = /* @__PURE__ */ new Date(`${date}T12:00:00Z`);
+  value.setUTCDate(value.getUTCDate() + days);
+  return value.toISOString().slice(0, 10);
+}
+function bookingWeekday(date) {
+  return (/* @__PURE__ */ new Date(`${date}T12:00:00Z`)).getUTCDay();
+}
+function nyInstant(date, time) {
+  if (!/^20\d{2}-\d{2}-\d{2}$/.test(date) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) throw new Error("\u8BF7\u8F93\u5165\u6709\u6548\u7684\u65E5\u671F\u53CA HH:mm \u65F6\u95F4\u3002");
+  const wall = Date.parse(`${date}T${time}:00Z`);
+  if (!Number.isFinite(wall) || new Date(wall).toISOString().slice(0, 10) !== date) throw new Error("\u65E5\u671F\u65E0\u6548\u3002");
+  const offsets = /* @__PURE__ */ new Set();
+  for (const hours of [-24, -12, 0, 12, 24]) {
+    const sample = wall + hours * 36e5;
+    const parts = nyParts(sample);
+    offsets.add(Date.parse(`${parts.date}T${parts.time}:00Z`) - sample);
+  }
+  const candidates = [...offsets].map((offset) => wall - offset).filter((instant) => {
+    const parts = nyParts(instant);
+    return parts.date === date && parts.time === time;
+  });
+  if (!candidates.length) throw new Error("\u8FD9\u4E2A\u7EBD\u7EA6\u65F6\u95F4\u56E0\u590F\u4EE4\u65F6\u4E0D\u5B58\u5728\uFF0C\u8BF7\u9009\u62E9\u5176\u4ED6\u65F6\u95F4\u3002");
+  if (candidates.length > 1) throw new Error("\u8FD9\u4E2A\u7EBD\u7EA6\u65F6\u95F4\u5728\u590F\u4EE4\u65F6\u5207\u6362\u65F6\u91CD\u590D\uFF0C\u8BF7\u9009\u62E9\u975E\u91CD\u590D\u65F6\u6BB5\u3002");
+  return candidates[0];
+}
+
+// server/booking/store.ts
+function check2(value, message, status = 400) {
+  if (!value) throw new ApiError(status, message);
+}
+var BookingStore = class {
+  constructor(db) {
+    this.db = db;
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+      CREATE TABLE IF NOT EXISTS booking_owners (user_id TEXT PRIMARY KEY REFERENCES users(id), revision INTEGER NOT NULL DEFAULT 1);
+      CREATE TABLE IF NOT EXISTS booking_services (id TEXT PRIMARY KEY, owner_id TEXT NOT NULL REFERENCES booking_owners(user_id), name TEXT NOT NULL,
+        price_cents INTEGER NOT NULL CHECK(price_cents>=0 AND price_cents<=999999999), duration_minutes INTEGER NOT NULL CHECK(duration_minutes BETWEEN 5 AND 720),
+        buffer_before INTEGER NOT NULL CHECK(buffer_before BETWEEN 0 AND 180), buffer_after INTEGER NOT NULL CHECK(buffer_after BETWEEN 0 AND 180), active INTEGER NOT NULL CHECK(active IN (0,1)), UNIQUE(id,owner_id));
+      CREATE TABLE IF NOT EXISTS booking_hours (owner_id TEXT NOT NULL REFERENCES booking_owners(user_id), weekday INTEGER NOT NULL CHECK(weekday BETWEEN 0 AND 6),
+        opens TEXT NOT NULL, closes TEXT NOT NULL, closed INTEGER NOT NULL CHECK(closed IN (0,1)), configured INTEGER NOT NULL CHECK(configured IN (0,1)), PRIMARY KEY(owner_id,weekday));
+      CREATE TABLE IF NOT EXISTS booking_appointments (id TEXT PRIMARY KEY, owner_id TEXT NOT NULL REFERENCES booking_owners(user_id), service_id TEXT NOT NULL,
+        service_name TEXT NOT NULL, customer_name TEXT NOT NULL, phone TEXT NOT NULL, starts_at INTEGER NOT NULL, ends_at INTEGER NOT NULL,
+        duration_minutes INTEGER NOT NULL CHECK(duration_minutes BETWEEN 5 AND 720), buffer_before INTEGER NOT NULL CHECK(buffer_before BETWEEN 0 AND 180), buffer_after INTEGER NOT NULL CHECK(buffer_after BETWEEN 0 AND 180),
+        occupied_start INTEGER GENERATED ALWAYS AS (starts_at-buffer_before*60000) STORED, occupied_end INTEGER GENERATED ALWAYS AS (ends_at+buffer_after*60000) STORED,
+        price_cents INTEGER NOT NULL CHECK(price_cents>=0 AND price_cents<=999999999), notes TEXT NOT NULL, status TEXT NOT NULL CHECK(status IN ('confirmed','completed','cancelled')),
+        revision INTEGER NOT NULL DEFAULT 1, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL,
+        CHECK(ends_at>starts_at AND ends_at-starts_at>=duration_minutes*60000), FOREIGN KEY(service_id,owner_id) REFERENCES booking_services(id,owner_id));
+      CREATE TABLE IF NOT EXISTS booking_time_off (id TEXT PRIMARY KEY, owner_id TEXT NOT NULL REFERENCES booking_owners(user_id), starts_at INTEGER NOT NULL, ends_at INTEGER NOT NULL CHECK(ends_at>starts_at), reason TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS booking_events (id INTEGER PRIMARY KEY, owner_id TEXT NOT NULL REFERENCES booking_owners(user_id), target_id TEXT NOT NULL, action TEXT NOT NULL, created_at INTEGER NOT NULL);
+      CREATE TABLE IF NOT EXISTS booking_submissions (owner_id TEXT NOT NULL REFERENCES booking_owners(user_id), request_id TEXT NOT NULL, fingerprint TEXT NOT NULL, appointment_id TEXT NOT NULL REFERENCES booking_appointments(id), PRIMARY KEY(owner_id,request_id));
+      CREATE INDEX IF NOT EXISTS booking_appointment_range ON booking_appointments(owner_id,starts_at,ends_at);
+      CREATE INDEX IF NOT EXISTS booking_time_off_range ON booking_time_off(owner_id,starts_at,ends_at);
+      DROP TRIGGER IF EXISTS booking_no_overlap_insert;
+      DROP TRIGGER IF EXISTS booking_no_overlap_update;
+      CREATE TRIGGER booking_no_overlap_insert BEFORE INSERT ON booking_appointments WHEN NEW.status!='cancelled' BEGIN
+        SELECT RAISE(ABORT,'BOOKING_CONFLICT') WHERE EXISTS(SELECT 1 FROM booking_appointments WHERE owner_id=NEW.owner_id AND status!='cancelled' AND occupied_start<NEW.ends_at+NEW.buffer_after*60000 AND occupied_end>NEW.starts_at-NEW.buffer_before*60000)
+          OR EXISTS(SELECT 1 FROM booking_time_off WHERE owner_id=NEW.owner_id AND starts_at<NEW.ends_at+NEW.buffer_after*60000 AND ends_at>NEW.starts_at-NEW.buffer_before*60000);
+      END;
+      CREATE TRIGGER booking_no_overlap_update BEFORE UPDATE ON booking_appointments WHEN NEW.status!='cancelled' BEGIN
+        SELECT RAISE(ABORT,'BOOKING_CONFLICT') WHERE EXISTS(SELECT 1 FROM booking_appointments WHERE id!=OLD.id AND owner_id=NEW.owner_id AND status!='cancelled' AND occupied_start<NEW.ends_at+NEW.buffer_after*60000 AND occupied_end>NEW.starts_at-NEW.buffer_before*60000)
+          OR EXISTS(SELECT 1 FROM booking_time_off WHERE owner_id=NEW.owner_id AND starts_at<NEW.ends_at+NEW.buffer_after*60000 AND ends_at>NEW.starts_at-NEW.buffer_before*60000);
+      END;
+      CREATE TRIGGER IF NOT EXISTS booking_time_off_insert BEFORE INSERT ON booking_time_off BEGIN
+        SELECT RAISE(ABORT,'BOOKING_CONFLICT') WHERE EXISTS(SELECT 1 FROM booking_appointments WHERE owner_id=NEW.owner_id AND status!='cancelled' AND occupied_start<NEW.ends_at AND occupied_end>NEW.starts_at);
+      END;
+      CREATE TRIGGER IF NOT EXISTS booking_time_off_update BEFORE UPDATE ON booking_time_off BEGIN
+        SELECT RAISE(ABORT,'BOOKING_CONFLICT') WHERE EXISTS(SELECT 1 FROM booking_appointments WHERE owner_id=NEW.owner_id AND status!='cancelled' AND occupied_start<NEW.ends_at AND occupied_end>NEW.starts_at);
+      END;
+    `);
+      db.exec("COMMIT");
+    } catch (cause) {
+      db.exec("ROLLBACK");
+      throw cause;
+    }
+    this.events.setMaxListeners(100);
+  }
+  db;
+  events = new import_node_events2.EventEmitter();
+  rows(sql, ...params) {
+    return this.db.prepare(sql).all(...params);
+  }
+  run(sql, ...params) {
+    return this.db.prepare(sql).run(...params);
+  }
+  transaction(action) {
+    this.db.exec("BEGIN IMMEDIATE");
+    try {
+      const result = action();
+      this.db.exec("COMMIT");
+      return result;
+    } catch (cause) {
+      this.db.exec("ROLLBACK");
+      if (cause instanceof Error && cause.message.includes("BOOKING_CONFLICT")) throw new ApiError(409, "\u8BE5\u65F6\u95F4\u4E0E\u5DF2\u6709\u9884\u7EA6\u6216\u4F11\u5047\u51B2\u7A81\uFF0C\u8BF7\u9009\u62E9\u5176\u4ED6\u65F6\u95F4\u3002");
+      throw cause;
+    }
+  }
+  authorize(owner) {
+    const row = this.rows("SELECT revision FROM booking_owners WHERE user_id=?", owner)[0];
+    check2(row, "\u6B64\u8D26\u53F7\u672A\u83B7\u5E97\u4E3B\u9884\u7EA6\u7BA1\u7406\u6743\u9650\uFF0C\u8BF7\u8054\u7CFB\u7BA1\u7406\u5458\u6388\u6743\u3002", 403);
+    return Number(row.revision);
+  }
+  grantOwner(owner) {
+    this.transaction(() => {
+      if (this.rows("SELECT 1 FROM booking_owners WHERE user_id=?", owner).length) return;
+      this.run("INSERT INTO booking_owners(user_id) VALUES (?)", owner);
+      for (const [name, price, duration] of [["Men\u2019s Haircut", 6e3, 60], ["Korean Perm", 15e3, 120]]) this.run("INSERT INTO booking_services VALUES (?,?,?,?,?,?,?,1)", (0, import_node_crypto2.randomUUID)(), owner, name, price, duration, 0, 0);
+      for (let weekday = 0; weekday < 7; weekday++) this.run("INSERT INTO booking_hours VALUES (?,?,?,?,?,?)", owner, weekday, "", "", 1, weekday === 1 ? 1 : 0);
+    });
+  }
+  changed(owner, target, action) {
+    this.run("UPDATE booking_owners SET revision=revision+1 WHERE user_id=?", owner);
+    this.run("INSERT INTO booking_events(owner_id,target_id,action,created_at) VALUES (?,?,?,?)", owner, target, action, Date.now());
+  }
+  revision(owner, revision) {
+    check2(revision === this.authorize(owner), "\u9884\u7EA6\u8BBE\u7F6E\u5DF2\u66F4\u65B0\uFF0C\u8BF7\u5237\u65B0\u540E\u91CD\u8BD5\u3002", 409);
+  }
+  snapshot(owner, from, to) {
+    const revision = this.authorize(owner);
+    const start = nyInstant(from, "00:00");
+    const end = nyInstant(to, "00:00");
+    check2(end > start && end - start <= 94 * 864e5, "\u67E5\u8BE2\u8303\u56F4\u9700\u4E3A 1\u201393 \u5929\u3002");
+    return {
+      revision,
+      services: this.rows("SELECT * FROM booking_services WHERE owner_id=? ORDER BY rowid", owner).map((row) => this.service(row)),
+      hours: this.rows("SELECT * FROM booking_hours WHERE owner_id=? ORDER BY weekday", owner).map((row) => ({ weekday: Number(row.weekday), opens: String(row.opens), closes: String(row.closes), closed: !!row.closed, configured: !!row.configured })),
+      timeOff: this.rows("SELECT * FROM booking_time_off WHERE owner_id=? AND starts_at<? AND ends_at>? ORDER BY starts_at", owner, end, start).map((row) => ({ id: String(row.id), startsAt: Number(row.starts_at), endsAt: Number(row.ends_at), reason: String(row.reason) })),
+      appointments: this.rows("SELECT * FROM booking_appointments WHERE owner_id=? AND starts_at<? AND ends_at>? ORDER BY starts_at", owner, end, start).map((row) => this.appointment(row))
+    };
+  }
+  service(row) {
+    return { id: String(row.id), name: String(row.name), priceCents: Number(row.price_cents), durationMinutes: Number(row.duration_minutes), bufferBefore: Number(row.buffer_before), bufferAfter: Number(row.buffer_after), active: !!row.active };
+  }
+  appointment(row) {
+    return { id: String(row.id), customerName: String(row.customer_name), phone: String(row.phone), serviceId: String(row.service_id), serviceName: String(row.service_name), startsAt: Number(row.starts_at), endsAt: Number(row.ends_at), priceCents: Number(row.price_cents), notes: String(row.notes), status: row.status, revision: Number(row.revision) };
+  }
+  saveService(owner, input) {
+    this.transaction(() => {
+      this.revision(owner, input.revision);
+      check2(typeof input.name === "string" && input.name.trim().length > 0 && input.name.length <= 80, "\u670D\u52A1\u540D\u79F0\u9700\u4E3A 1\u201380 \u5B57\u3002");
+      for (const [key, min, max] of [["priceCents", 0, 999999999], ["durationMinutes", 5, 720], ["bufferBefore", 0, 180], ["bufferAfter", 0, 180]]) check2(Number.isSafeInteger(input[key]) && Number(input[key]) >= min && Number(input[key]) <= max, "\u670D\u52A1\u4EF7\u683C\u3001\u65F6\u957F\u6216\u7F13\u51B2\u65F6\u95F4\u65E0\u6548\u3002");
+      check2(typeof input.active === "boolean", "\u670D\u52A1\u72B6\u6001\u65E0\u6548\u3002");
+      const id = typeof input.id === "string" ? input.id : (0, import_node_crypto2.randomUUID)();
+      if (input.id) check2(this.rows("SELECT id FROM booking_services WHERE id=? AND owner_id=?", id, owner).length, "\u670D\u52A1\u4E0D\u5B58\u5728\u3002", 404);
+      this.run("INSERT INTO booking_services VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,price_cents=excluded.price_cents,duration_minutes=excluded.duration_minutes,buffer_before=excluded.buffer_before,buffer_after=excluded.buffer_after,active=excluded.active", id, owner, input.name.trim(), Number(input.priceCents), Number(input.durationMinutes), Number(input.bufferBefore), Number(input.bufferAfter), input.active ? 1 : 0);
+      this.changed(owner, id, "service");
+    });
+    this.events.emit(owner);
+  }
+  saveHours(owner, input) {
+    this.transaction(() => {
+      this.revision(owner, input.revision);
+      check2(Number.isInteger(input.weekday) && Number(input.weekday) >= 0 && Number(input.weekday) <= 6 && typeof input.closed === "boolean", "\u8425\u4E1A\u65E5\u671F\u65E0\u6548\u3002");
+      check2(typeof input.opens === "string" && typeof input.closes === "string", "\u8425\u4E1A\u65F6\u95F4\u65E0\u6548\u3002");
+      if (!input.closed) check2(/^([01]\d|2[0-3]):[0-5]\d$/.test(input.opens) && /^([01]\d|2[0-3]):[0-5]\d$/.test(input.closes) && input.closes > input.opens, "\u8BF7\u8BBE\u7F6E\u540C\u4E00\u5929\u5185\u6709\u6548\u7684\u5F00\u59CB\u4E0E\u7ED3\u675F\u8425\u4E1A\u65F6\u95F4\u3002");
+      const pending = this.rows("SELECT * FROM booking_appointments WHERE owner_id=? AND status!='cancelled' AND ends_at>?", owner, Date.now());
+      for (const row of pending) {
+        const start = nyParts(Number(row.occupied_start));
+        const end = nyParts(Number(row.occupied_end));
+        if (bookingWeekday(start.date) === input.weekday) check2(!input.closed && start.date === end.date && start.time >= input.opens && end.time <= input.closes, "\u65B0\u8425\u4E1A\u65F6\u95F4\u4F1A\u8986\u76D6\u5DF2\u6709\u9884\u7EA6\uFF0C\u8BF7\u5148\u6539\u671F\u6216\u53D6\u6D88\u9884\u7EA6\u3002", 409);
+      }
+      this.run("UPDATE booking_hours SET opens=?,closes=?,closed=?,configured=1 WHERE owner_id=? AND weekday=?", input.opens, input.closes, input.closed ? 1 : 0, owner, Number(input.weekday));
+      this.changed(owner, String(input.weekday), "hours");
+    });
+    this.events.emit(owner);
+  }
+  saveTimeOff(owner, input) {
+    this.transaction(() => {
+      this.revision(owner, input.revision);
+      const target = typeof input.id === "string" ? input.id : (0, import_node_crypto2.randomUUID)();
+      if (input.remove === true) {
+        check2(typeof input.id === "string" && this.rows("SELECT id FROM booking_time_off WHERE id=? AND owner_id=?", input.id, owner).length, "\u4F11\u5047\u8BB0\u5F55\u4E0D\u5B58\u5728\u3002", 404);
+        this.run("DELETE FROM booking_time_off WHERE id=? AND owner_id=?", input.id, owner);
+      } else {
+        check2(Number.isSafeInteger(input.startsAt) && Number.isSafeInteger(input.endsAt) && Number(input.startsAt) >= Date.UTC(2e3, 0, 1) && Number(input.endsAt) < Date.UTC(2100, 0, 1) && Number(input.endsAt) > Number(input.startsAt) && Number(input.startsAt) % 6e4 === 0 && Number(input.endsAt) % 6e4 === 0, "\u4F11\u5047\u65F6\u95F4\u65E0\u6548\u3002");
+        nyParts(Number(input.startsAt));
+        check2(typeof input.reason === "string" && input.reason.trim().length > 0 && input.reason.length <= 160, "\u8BF7\u586B\u5199 1\u2013160 \u5B57\u4F11\u5047\u539F\u56E0\u3002");
+        this.run("INSERT INTO booking_time_off VALUES (?,?,?,?,?)", target, owner, Number(input.startsAt), Number(input.endsAt), input.reason.trim());
+      }
+      this.changed(owner, target, "time-off");
+    });
+    this.events.emit(owner);
+  }
+  saveAppointment(owner, id, raw, cancel = false) {
+    this.transaction(() => this.writeAppointment(owner, id, raw, cancel));
+    this.events.emit(owner);
+  }
+  writeAppointment(owner, id, raw, cancel = false) {
+    this.authorize(owner);
+    const old = this.rows("SELECT * FROM booking_appointments WHERE id=? AND owner_id=?", id, owner)[0];
+    if (raw.revision !== void 0 || cancel) check2(old && raw.revision === old.revision, "\u9884\u7EA6\u5DF2\u88AB\u4FEE\u6539\u6216\u4E0D\u5B58\u5728\uFF0C\u8BF7\u5237\u65B0\u91CD\u8BD5\u3002", 409);
+    else check2(!this.rows("SELECT id FROM booking_appointments WHERE id=?", id).length, "\u9884\u7EA6\u7F16\u53F7\u91CD\u590D\uFF0C\u8BF7\u5237\u65B0\u3002", 409);
+    if (cancel) {
+      this.run("UPDATE booking_appointments SET status='cancelled',revision=revision+1,updated_at=? WHERE id=? AND owner_id=?", Date.now(), id, owner);
+    } else {
+      const input = raw;
+      check2(typeof input.serviceId === "string", "\u8BF7\u9009\u62E9\u670D\u52A1\u3002");
+      check2(typeof input.customerName === "string" && input.customerName.trim().length > 0 && input.customerName.length <= 80, "\u8BF7\u586B\u5199\u5BA2\u6237\u59D3\u540D\uFF08\u6700\u591A80\u5B57\uFF09\u3002");
+      check2(typeof input.phone === "string" && /^[+\d() .-]{7,30}$/.test(input.phone) && input.phone.replace(/\D/g, "").length >= 7, "\u8BF7\u586B\u5199\u6709\u6548\u8054\u7CFB\u7535\u8BDD\u3002");
+      check2(typeof input.notes === "string" && input.notes.length <= 500, "\u5907\u6CE8\u6700\u591A500\u5B57\u3002");
+      check2(["confirmed", "completed"].includes(input.status), "\u8BF7\u4F7F\u7528\u53D6\u6D88\u64CD\u4F5C\u53D6\u6D88\u9884\u7EA6\u3002");
+      check2(Number.isSafeInteger(input.priceCents) && input.priceCents >= 0 && input.priceCents <= 999999999, "\u4EF7\u683C\u65E0\u6548\u3002");
+      check2(Number.isSafeInteger(input.startsAt) && Number.isSafeInteger(input.endsAt) && input.startsAt >= Date.UTC(2e3, 0, 1) && input.endsAt < Date.UTC(2100, 0, 1) && input.endsAt > input.startsAt && input.startsAt % 6e4 === 0 && input.endsAt % 6e4 === 0, "\u9884\u7EA6\u8D77\u6B62\u65F6\u95F4\u65E0\u6548\uFF0C\u987B\u7CBE\u786E\u5230\u5206\u949F\u3002");
+      const serviceRow = this.rows("SELECT * FROM booking_services WHERE owner_id=? AND id=?", owner, input.serviceId)[0];
+      check2(serviceRow && (serviceRow.active || old?.service_id === input.serviceId), "\u8BF7\u9009\u62E9\u53EF\u7528\u7684\u670D\u52A1\u3002");
+      const sameService = old?.service_id === input.serviceId;
+      const duration = Number(sameService ? old.duration_minutes : serviceRow.duration_minutes);
+      const before = Number(sameService ? old.buffer_before : serviceRow.buffer_before);
+      const after = Number(sameService ? old.buffer_after : serviceRow.buffer_after);
+      check2(input.endsAt - input.startsAt >= duration * 6e4 && input.endsAt - input.startsAt <= 864e5, `\u8BE5\u670D\u52A1\u81F3\u5C11\u9700\u8981 ${duration} \u5206\u949F\u3002`);
+      const start = nyParts(input.startsAt - before * 6e4);
+      const end = nyParts(input.endsAt + after * 6e4);
+      const hours = this.rows("SELECT * FROM booking_hours WHERE owner_id=? AND weekday=?", owner, bookingWeekday(start.date))[0];
+      check2(hours.configured && !hours.closed && start.date === end.date && start.time >= String(hours.opens) && end.time <= String(hours.closes), "\u8BE5\u65F6\u95F4\u4E0D\u5728\u5DF2\u8BBE\u7F6E\u7684\u8425\u4E1A\u65F6\u95F4\u5185\uFF08\u542B\u670D\u52A1\u7F13\u51B2\uFF09\u3002");
+      const args = [input.serviceId, sameService ? String(old.service_name) : String(serviceRow.name), input.customerName.trim(), input.phone.trim(), input.startsAt, input.endsAt, duration, before, after, input.priceCents, input.notes.trim(), input.status, Date.now()];
+      if (old) this.run("UPDATE booking_appointments SET service_id=?,service_name=?,customer_name=?,phone=?,starts_at=?,ends_at=?,duration_minutes=?,buffer_before=?,buffer_after=?,price_cents=?,notes=?,status=?,updated_at=?,revision=revision+1 WHERE id=? AND owner_id=?", ...args, id, owner);
+      else this.run("INSERT INTO booking_appointments(service_id,service_name,customer_name,phone,starts_at,ends_at,duration_minutes,buffer_before,buffer_after,price_cents,notes,status,updated_at,id,owner_id,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", ...args, id, owner, Date.now());
+    }
+    this.changed(owner, id, cancel ? "cancel" : old ? "update" : "create");
+  }
+  publicOwner(code2) {
+    check2(/^\d{10}$/.test(code2), "Booking page not found.", 404);
+    const row = this.rows("SELECT users.id FROM users JOIN booking_owners ON users.id=booking_owners.user_id WHERE public_id=?", code2)[0];
+    check2(row, "Booking page not found.", 404);
+    return String(row.id);
+  }
+  publicCatalog(code2) {
+    const owner = this.publicOwner(code2);
+    return {
+      name: "3628",
+      timezone: "America/New_York",
+      services: this.rows("SELECT * FROM booking_services WHERE owner_id=? AND active=1 ORDER BY rowid", owner).map((row) => this.service(row)),
+      hours: this.rows("SELECT weekday,opens,closes,closed,configured FROM booking_hours WHERE owner_id=? ORDER BY weekday", owner).map((row) => ({ weekday: Number(row.weekday), opens: String(row.opens), closes: String(row.closes), closed: !!row.closed, configured: !!row.configured })),
+      today: nyParts().date
+    };
+  }
+  publicSlots(code2, serviceId, date, now = Date.now()) {
+    const owner = this.publicOwner(code2);
+    nyInstant(date, "00:00");
+    check2(date >= nyParts(now).date && date <= shiftBookingDate(nyParts(now).date, 90), "Choose a date within the next 90 days.");
+    const service = this.rows("SELECT * FROM booking_services WHERE id=? AND owner_id=? AND active=1", serviceId, owner)[0];
+    check2(service, "Service is unavailable.", 404);
+    const hours = this.rows("SELECT * FROM booking_hours WHERE owner_id=? AND weekday=?", owner, bookingWeekday(date))[0];
+    const slots = [];
+    if (!hours.configured || hours.closed) return { date, slots };
+    const blocked = this.rows("SELECT occupied_start AS starts_at, occupied_end AS ends_at FROM booking_appointments WHERE owner_id=? AND status!='cancelled' AND occupied_start<? AND occupied_end>? UNION ALL SELECT starts_at,ends_at FROM booking_time_off WHERE owner_id=? AND starts_at<? AND ends_at>?", owner, nyInstant(shiftBookingDate(date, 1), "00:00"), nyInstant(date, "00:00"), owner, nyInstant(shiftBookingDate(date, 1), "00:00"), nyInstant(date, "00:00"));
+    const duration = Number(service.duration_minutes) * 6e4;
+    for (let minute = 0; minute < 1440; minute += 15) {
+      const time = `${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")}`;
+      if (time < String(hours.opens) || time >= String(hours.closes)) continue;
+      let startsAt;
+      try {
+        startsAt = nyInstant(date, time);
+      } catch {
+        continue;
+      }
+      const endsAt = startsAt + duration;
+      const occupiedStart = startsAt - Number(service.buffer_before) * 6e4;
+      const occupiedEnd = endsAt + Number(service.buffer_after) * 6e4;
+      const start = nyParts(occupiedStart);
+      const end = nyParts(occupiedEnd);
+      if (startsAt < now + 30 * 6e4 || start.date !== date || end.date !== date || start.time < String(hours.opens) || end.time > String(hours.closes)) continue;
+      if (blocked.some((row) => Number(row.starts_at) < occupiedEnd && Number(row.ends_at) > occupiedStart)) continue;
+      slots.push({ startsAt, endsAt, time });
+    }
+    return { date, slots };
+  }
+  publicBook(code2, input) {
+    const owner = this.publicOwner(code2);
+    check2(typeof input.requestId === "string" && /^[a-zA-Z0-9_-]{20,80}$/.test(input.requestId), "Invalid submission ID.");
+    check2(typeof input.customerName === "string" && typeof input.phone === "string" && typeof input.notes === "string" && typeof input.serviceId === "string" && Number.isSafeInteger(input.startsAt), "Please complete all required fields.");
+    const fingerprint = (0, import_node_crypto2.createHash)("sha256").update(JSON.stringify([input.serviceId, input.startsAt, input.customerName, input.phone, input.notes])).digest("hex");
+    const result = this.transaction(() => {
+      const previous = this.rows("SELECT * FROM booking_submissions WHERE owner_id=? AND request_id=?", owner, input.requestId)[0];
+      if (previous) {
+        check2(previous.fingerprint === fingerprint, "This submission ID has already been used.", 409);
+        return this.publicReceipt(owner, String(previous.appointment_id));
+      }
+      const startsAt = Number(input.startsAt);
+      const date = nyParts(startsAt).date;
+      const slot = this.publicSlots(code2, input.serviceId, date).slots.find((item) => item.startsAt === startsAt);
+      check2(slot, "This time is no longer available. Please choose another time.", 409);
+      const service = this.rows("SELECT * FROM booking_services WHERE id=? AND owner_id=? AND active=1", input.serviceId, owner)[0];
+      check2((input.expectedPriceCents === void 0 || input.expectedPriceCents === service.price_cents) && (input.expectedDurationMinutes === void 0 || input.expectedDurationMinutes === service.duration_minutes), "Service details have changed. Please reload this page before booking.", 409);
+      const id = (0, import_node_crypto2.randomUUID)();
+      this.writeAppointment(owner, id, { customerName: input.customerName, phone: input.phone, notes: input.notes, serviceId: input.serviceId, startsAt, endsAt: slot.endsAt, priceCents: Number(service.price_cents), status: "confirmed" });
+      this.run("INSERT INTO booking_submissions VALUES (?,?,?,?)", owner, input.requestId, fingerprint, id);
+      return this.publicReceipt(owner, id);
+    });
+    this.events.emit(owner);
+    return result;
+  }
+  publicReceipt(owner, id) {
+    const row = this.rows("SELECT service_name,starts_at,ends_at,price_cents,status FROM booking_appointments WHERE owner_id=? AND id=?", owner, id)[0];
+    return { ok: true, reference: id, serviceName: String(row.service_name), startsAt: Number(row.starts_at), endsAt: Number(row.ends_at), priceCents: Number(row.price_cents), status: String(row.status) };
+  }
+};
+
 // server/mount.ts
 var mounted;
 function handle(request, response) {
@@ -919,9 +1319,21 @@ function handle(request, response) {
     const databasePath = (0, import_node_path.resolve)(process.env.QINGJI_DATABASE_PATH ?? "/var/data/qingji/qingji.sqlite");
     (0, import_node_fs.mkdirSync)((0, import_node_path.dirname)(databasePath), { recursive: true, mode: 448 });
     const store = new SyncStore(databasePath);
+    if (!store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_submissions'").get()) {
+      const backup = `${databasePath}.before-booking-${Date.now()}.bak`;
+      store.database.exec(`VACUUM INTO '${backup.replaceAll("'", "''")}'`);
+      (0, import_node_fs.chmodSync)(backup, 384);
+      console.log("3628 booking: pre-migration database backup created.");
+    }
+    const booking = new BookingStore(store.database);
+    const ownerCode = process.env.QINGJI_BOOKING_OWNER_PUBLIC_ID ?? "7629297118";
+    const owner = store.database.prepare("SELECT id FROM users WHERE public_id=?").get(ownerCode);
+    if (owner) booking.grantOwner(String(owner.id));
+    console.log(`3628 booking: authorized owner configured=${!!owner}`);
     mounted = createSyncServer(store, {
       allowedOrigins: String(process.env.QINGJI_ALLOWED_ORIGINS ?? "https://jj-teacher.onrender.com,http://localhost:8090,http://localhost:8093").split(",").map((origin) => origin.trim()).filter(Boolean),
-      trustProxy: true
+      trustProxy: true,
+      booking
     });
   }
   request.url = (request.url ?? "/").slice("/qingji".length) || "/";

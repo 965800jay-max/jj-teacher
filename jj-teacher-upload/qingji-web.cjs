@@ -33,7 +33,8 @@ function createWebHandler(directory) {
       reply(404, "Not found");
       return;
     }
-    const file = path.resolve(root, pathname.slice("/3628/".length) || "index.html");
+    const publicPage = pathname === "/3628/book" || pathname === "/3628/book/";
+    const file = path.resolve(root, publicPage ? "book/index.html" : pathname.slice("/3628/".length) || "index.html");
     if (!file.startsWith(`${root}${path.sep}`)) {
       reply(403, "Forbidden");
       return;
@@ -45,6 +46,11 @@ function createWebHandler(directory) {
       const immutable = /[.-][a-f0-9]{20,}\./.test(path.basename(file));
       const headers = { "Content-Type": types[extension] || "application/octet-stream", "Content-Length": data.length, "Cache-Control": immutable ? "public, max-age=31536000, immutable" : "no-cache", "X-Content-Type-Options": "nosniff", "Referrer-Policy": "same-origin" };
       if (file === path.join(root, "service-worker.js")) headers["Service-Worker-Allowed"] = "/3628/";
+      if (pathname.startsWith("/3628/book")) {
+        headers["Referrer-Policy"] = "no-referrer";
+        headers["Cache-Control"] = "no-store";
+        headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'self'";
+      }
       response.writeHead(200, headers);
       response.end(request.method === "HEAD" ? void 0 : data);
     } catch {
