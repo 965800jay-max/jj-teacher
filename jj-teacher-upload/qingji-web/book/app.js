@@ -10,11 +10,18 @@ let slotsEpoch = 0;
 let submitting = false;
 let requestId = crypto.randomUUID();
 let previousPayload = '';
+let customerCredential = '';
+const accessDialog = element('access-dialog');
+accessDialog.removeAttribute('open');
+accessDialog.showModal();
+accessDialog.addEventListener('cancel', event => event.preventDefault());
 const money = cents => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
 const timeLabel = instant => new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit' }).format(instant);
 async function api(path, payload) {
-  const response = await fetch(base + path, { method: payload ? 'POST' : 'GET', headers: payload ? { 'Content-Type': 'application/json' } : {}, body: payload ? JSON.stringify(payload) : undefined, cache: 'no-store', credentials: 'omit' });
+  const credential = customerCredential;
+  const response = await fetch(base + path, { method: payload ? 'POST' : 'GET', headers: { ...(payload ? { 'Content-Type': 'application/json' } : {}), 'X-Booking-Customer-ID': customerCredential }, body: payload ? JSON.stringify(payload) : undefined, cache: 'no-store', credentials: 'omit' });
   const data = await response.json();
+  if (response.status === 401 && credential === customerCredential && !accessDialog.open) lockAccess();
   if (!response.ok) throw Object.assign(new Error(data.error || 'Please try again.'), { status: response.status });
   return data;
 }
@@ -80,6 +87,7 @@ element('another').addEventListener('click', () => {
 async function initialize() {
   try {
     catalog = await api('/catalog');
+    element('services').replaceChildren();
     element('date').min = catalog.today;
     const maximum = new Date(`${catalog.today}T12:00:00Z`); maximum.setUTCDate(maximum.getUTCDate() + 90);
     element('date').max = maximum.toISOString().slice(0, 10); element('date').value = catalog.today;
@@ -101,6 +109,26 @@ async function initialize() {
     else element('services').firstElementChild.click();
   } catch { element('message').textContent = 'Online booking is temporarily unavailable. Please contact the shop or try again later.'; }
 }
-void initialize();
+function lockAccess() {
+  customerCredential = ''; slotsEpoch++; service = undefined; selectedSlot = undefined;
+  element('fields').disabled = true; element('services').replaceChildren(); element('slots').replaceChildren();
+  element('name').value = ''; element('phone').value = ''; element('notes').value = '';
+  element('confirmation').textContent = ''; element('reference').textContent = '';
+  element('content').hidden = true; element('content').inert = true;
+  element('access-error').textContent = 'Please enter a valid customer ID from the shop owner.';
+  if (!accessDialog.open) accessDialog.showModal();
+}
+element('access-form').addEventListener('submit', async event => {
+  event.preventDefault(); element('access-submit').disabled = true; element('access-error').textContent = '';
+  customerCredential = element('customer-id').value.trim();
+  try {
+    await api('/access', {});
+    element('customer-id').value = ''; accessDialog.close();
+    element('content').hidden = false; element('content').inert = false;
+    element('booking').hidden = false; element('success').hidden = true;
+    requestId = crypto.randomUUID(); previousPayload = ''; await initialize();
+  } catch (error) { customerCredential = ''; element('access-error').textContent = error.message; }
+  finally { element('access-submit').disabled = false; }
+});
 window.addEventListener('focus', () => { if (service && !submitting && !element('booking').hidden) void loadSlots(true); });
 setInterval(() => { if (document.visibilityState === 'visible' && service && !submitting && !element('booking').hidden) void loadSlots(true); }, 20000);

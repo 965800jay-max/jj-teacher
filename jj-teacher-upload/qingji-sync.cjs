@@ -760,6 +760,19 @@ var connections = /* @__PURE__ */ new WeakMap();
 async function handleBooking(store, userId, request, response, url, body, send, authorizeSession) {
   if (!url.pathname.startsWith("/v1/booking/")) return false;
   store.authorize(userId);
+  if (request.method === "GET" && url.pathname === "/v1/booking/customers") {
+    send(200, { customers: store.customers(userId) });
+    return true;
+  }
+  if (request.method === "POST" && url.pathname === "/v1/booking/customers") {
+    send(200, store.createCustomer(userId, await body()));
+    return true;
+  }
+  if (request.method === "POST" && url.pathname === "/v1/booking/customers/revoke") {
+    store.revokeCustomer(userId, (await body()).id);
+    send(200, { ok: true });
+    return true;
+  }
   if (url.pathname === "/v1/booking/snapshot" && request.method === "GET") {
     const from = url.searchParams.get("from") ?? "";
     const to = url.searchParams.get("to") ?? "";
@@ -868,7 +881,7 @@ function createSyncServer(store, options = {}) {
         response.setHeader("Vary", "Origin");
       }
       if (request.method === "OPTIONS") {
-        response.writeHead(204, { "Access-Control-Allow-Methods": "GET,POST,PATCH,DELETE,OPTIONS", "Access-Control-Allow-Headers": "Authorization,Content-Type" });
+        response.writeHead(204, { "Access-Control-Allow-Methods": "GET,POST,PATCH,DELETE,OPTIONS", "Access-Control-Allow-Headers": "Authorization,Content-Type,X-Booking-Customer-ID" });
         response.end();
         return;
       }
@@ -879,16 +892,24 @@ function createSyncServer(store, options = {}) {
       }
       const address = options.trustProxy ? String(request.headers["x-forwarded-for"] ?? request.socket.remoteAddress).split(",")[0].trim() : request.socket.remoteAddress ?? "unknown";
       if (options.rateLimit !== false) throttle(`ip:${address}`, 240);
-      const publicBooking = /^\/v1\/public-booking\/(\d{10})\/(catalog|slots|appointments)$/.exec(path.pathname);
+      const publicBooking = /^\/v1\/public-booking\/(\d{10})\/(access|catalog|slots|appointments)$/.exec(path.pathname);
       if (publicBooking && options.booking) {
         try {
           if (options.rateLimit !== false) throttle(`booking-public:${request.method}:${address}`, request.method === "POST" ? 8 : 100);
           const code2 = publicBooking[1];
-          if (request.method === "GET" && publicBooking[2] === "catalog") send(response, 200, options.booking.publicCatalog(code2));
+          let customerId;
+          try {
+            customerId = options.booking.customerAccess(code2, request.headers["x-booking-customer-id"]);
+          } catch (cause) {
+            if (options.rateLimit !== false) throttle(`booking-id-fail:${address}`, 10);
+            throw cause;
+          }
+          if (request.method === "POST" && publicBooking[2] === "access") send(response, 200, { ok: true });
+          else if (request.method === "GET" && publicBooking[2] === "catalog") send(response, 200, options.booking.publicCatalog(code2));
           else if (request.method === "GET" && publicBooking[2] === "slots") send(response, 200, options.booking.publicSlots(code2, path.searchParams.get("serviceId") ?? "", path.searchParams.get("date") ?? ""));
           else if (request.method === "POST" && publicBooking[2] === "appointments") {
             if (options.rateLimit !== false) throttle(`booking-submit:${address}`, 8);
-            send(response, 200, options.booking.publicBook(code2, await body(request)));
+            send(response, 200, options.booking.publicBook(code2, await body(request), customerId));
           } else throw new ApiError(405, "Method not allowed.");
         } catch (cause) {
           const status = cause instanceof ApiError ? cause.status : 500;
@@ -1065,6 +1086,8 @@ var BookingStore = class {
       CREATE TABLE IF NOT EXISTS booking_time_off (id TEXT PRIMARY KEY, owner_id TEXT NOT NULL REFERENCES booking_owners(user_id), starts_at INTEGER NOT NULL, ends_at INTEGER NOT NULL CHECK(ends_at>starts_at), reason TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS booking_events (id INTEGER PRIMARY KEY, owner_id TEXT NOT NULL REFERENCES booking_owners(user_id), target_id TEXT NOT NULL, action TEXT NOT NULL, created_at INTEGER NOT NULL);
       CREATE TABLE IF NOT EXISTS booking_submissions (owner_id TEXT NOT NULL REFERENCES booking_owners(user_id), request_id TEXT NOT NULL, fingerprint TEXT NOT NULL, appointment_id TEXT NOT NULL REFERENCES booking_appointments(id), PRIMARY KEY(owner_id,request_id));
+      CREATE TABLE IF NOT EXISTS booking_customers (id TEXT PRIMARY KEY, owner_id TEXT NOT NULL REFERENCES booking_owners(user_id), name TEXT NOT NULL, code_hash TEXT NOT NULL UNIQUE, suffix TEXT NOT NULL, active INTEGER NOT NULL CHECK(active IN (0,1)), created_at INTEGER NOT NULL);
+      CREATE TABLE IF NOT EXISTS booking_customer_appointments (appointment_id TEXT PRIMARY KEY REFERENCES booking_appointments(id), customer_id TEXT NOT NULL REFERENCES booking_customers(id));
       CREATE INDEX IF NOT EXISTS booking_appointment_range ON booking_appointments(owner_id,starts_at,ends_at);
       CREATE INDEX IF NOT EXISTS booking_time_off_range ON booking_time_off(owner_id,starts_at,ends_at);
       DROP TRIGGER IF EXISTS booking_no_overlap_insert;
@@ -1281,14 +1304,16 @@ var BookingStore = class {
     }
     return { date, slots };
   }
-  publicBook(code2, input) {
+  publicBook(code2, input, customerId) {
     const owner = this.publicOwner(code2);
     check2(typeof input.requestId === "string" && /^[a-zA-Z0-9_-]{20,80}$/.test(input.requestId), "Invalid submission ID.");
     check2(typeof input.customerName === "string" && typeof input.phone === "string" && typeof input.notes === "string" && typeof input.serviceId === "string" && Number.isSafeInteger(input.startsAt), "Please complete all required fields.");
     const fingerprint = (0, import_node_crypto2.createHash)("sha256").update(JSON.stringify([input.serviceId, input.startsAt, input.customerName, input.phone, input.notes])).digest("hex");
     const result = this.transaction(() => {
+      check2(this.rows("SELECT id FROM booking_customers WHERE id=? AND owner_id=? AND active=1", customerId, owner).length, "Please enter a valid customer ID from the shop owner.", 401);
       const previous = this.rows("SELECT * FROM booking_submissions WHERE owner_id=? AND request_id=?", owner, input.requestId)[0];
       if (previous) {
+        check2(this.rows("SELECT 1 FROM booking_customer_appointments WHERE appointment_id=? AND customer_id=?", String(previous.appointment_id), customerId).length, "This submission ID has already been used.", 409);
         check2(previous.fingerprint === fingerprint, "This submission ID has already been used.", 409);
         return this.publicReceipt(owner, String(previous.appointment_id));
       }
@@ -1301,6 +1326,7 @@ var BookingStore = class {
       const id = (0, import_node_crypto2.randomUUID)();
       this.writeAppointment(owner, id, { customerName: input.customerName, phone: input.phone, notes: input.notes, serviceId: input.serviceId, startsAt, endsAt: slot.endsAt, priceCents: Number(service.price_cents), status: "confirmed" });
       this.run("INSERT INTO booking_submissions VALUES (?,?,?,?)", owner, input.requestId, fingerprint, id);
+      this.run("INSERT INTO booking_customer_appointments VALUES (?,?)", id, customerId);
       return this.publicReceipt(owner, id);
     });
     this.events.emit(owner);
@@ -1309,6 +1335,41 @@ var BookingStore = class {
   publicReceipt(owner, id) {
     const row = this.rows("SELECT service_name,starts_at,ends_at,price_cents,status FROM booking_appointments WHERE owner_id=? AND id=?", owner, id)[0];
     return { ok: true, reference: id, serviceName: String(row.service_name), startsAt: Number(row.starts_at), endsAt: Number(row.ends_at), priceCents: Number(row.price_cents), status: String(row.status) };
+  }
+  customerAccess(code2, credential) {
+    const owner = this.publicOwner(code2);
+    check2(typeof credential === "string" && credential.length <= 100, "Please enter a valid customer ID from the shop owner.", 401);
+    const normalized = credential.replace(/[\s-]/g, "").toUpperCase();
+    check2(/^[A-F0-9]{24}$/.test(normalized), "Please enter a valid customer ID from the shop owner.", 401);
+    const hash2 = (0, import_node_crypto2.createHash)("sha256").update(normalized).digest("hex");
+    const row = this.rows("SELECT id FROM booking_customers WHERE owner_id=? AND code_hash=? AND active=1", owner, hash2)[0];
+    check2(row, "Please enter a valid customer ID from the shop owner.", 401);
+    return String(row.id);
+  }
+  customers(owner) {
+    this.authorize(owner);
+    return this.rows("SELECT id,name,suffix,active,created_at FROM booking_customers WHERE owner_id=? ORDER BY created_at DESC", owner).map((row) => ({ id: String(row.id), name: String(row.name), suffix: String(row.suffix), active: !!row.active, createdAt: Number(row.created_at) }));
+  }
+  createCustomer(owner, input) {
+    const code2 = (0, import_node_crypto2.randomBytes)(12).toString("hex").toUpperCase();
+    const id = (0, import_node_crypto2.randomUUID)();
+    this.transaction(() => {
+      this.authorize(owner);
+      check2(typeof input.name === "string" && input.name.trim().length > 0 && input.name.length <= 80, "\u8BF7\u8F93\u5165\u5BA2\u6237\u540D\u79F0\uFF0C\u6700\u591A80\u5B57\u3002");
+      this.run("INSERT INTO booking_customers VALUES (?,?,?,?,?,1,?)", id, owner, input.name.trim(), (0, import_node_crypto2.createHash)("sha256").update(code2).digest("hex"), code2.slice(-4), Date.now());
+      this.changed(owner, id, "customer-created");
+    });
+    this.events.emit(owner);
+    return { id, code: code2.match(/.{4}/g).join("-") };
+  }
+  revokeCustomer(owner, id) {
+    this.transaction(() => {
+      this.authorize(owner);
+      check2(typeof id === "string" && this.rows("SELECT id FROM booking_customers WHERE id=? AND owner_id=?", id, owner).length, "\u5BA2\u6237\u4E0D\u5B58\u5728\u3002", 404);
+      this.run("UPDATE booking_customers SET active=0 WHERE id=? AND owner_id=?", id, owner);
+      this.changed(owner, id, "customer-revoked");
+    });
+    this.events.emit(owner);
   }
 };
 
@@ -1319,7 +1380,7 @@ function handle(request, response) {
     const databasePath = (0, import_node_path.resolve)(process.env.QINGJI_DATABASE_PATH ?? "/var/data/qingji/qingji.sqlite");
     (0, import_node_fs.mkdirSync)((0, import_node_path.dirname)(databasePath), { recursive: true, mode: 448 });
     const store = new SyncStore(databasePath);
-    if (!store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_submissions'").get()) {
+    if (!store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_customers'").get()) {
       const backup = `${databasePath}.before-booking-${Date.now()}.bak`;
       store.database.exec(`VACUUM INTO '${backup.replaceAll("'", "''")}'`);
       (0, import_node_fs.chmodSync)(backup, 384);

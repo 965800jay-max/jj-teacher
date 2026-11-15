@@ -8,10 +8,19 @@
   <title>3628 · Book an appointment</title>
   <link rel="icon" href="/3628/icons/icon-180.png">
   <link rel="stylesheet" href="/3628/book/style.css">
+  <link rel="stylesheet" href="/3628/book/access.css">
   <script src="/3628/book/app.js" defer></script>
 </head>
 <body>
-<main>
+<dialog id="access-dialog" aria-labelledby="access-title" open>
+  <form id="access-form">
+    <p class="eyebrow">3628 · PRIVATE BOOKING</p><h2 id="access-title">Enter your customer ID</h2>
+    <p class="privacy">Please enter the customer ID provided by the shop owner to continue. No registration required.</p>
+    <label for="customer-id">Customer ID</label><input id="customer-id" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="60" required autofocus placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX">
+    <p id="access-error" role="alert"></p><button id="access-submit" type="submit">Done</button>
+  </form>
+</dialog>
+<main id="content" hidden inert>
   <header><a class="brand" href="/3628/book/">3628<span>APPOINTMENTS</span></a><span class="badge">NEW YORK</span></header>
   <section id="booking">
     <p class="eyebrow">A LITTLE TIME FOR YOURSELF</p>
