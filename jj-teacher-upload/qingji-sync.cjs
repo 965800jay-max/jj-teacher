@@ -14795,7 +14795,7 @@ function confirmationHtml(mail) {
 <p style="margin:12px 0 5px;font-size:19px;line-height:1.45;font-weight:700;">${escapeHtml(date)}</p>
 <p style="margin:0;font-size:19px;line-height:1.5;">${escapeHtml(time)}</p>
 <p style="margin:5px 0 0;font-size:12px;line-height:1.6;color:#777777;">132-50 41st Ave, 5th Floor<br>Flushing, NY 11354</p>
-<p style="margin:12px 0 0;font-size:12px;line-height:1.7;color:#777777;">Note: There is a massage shop on the ground floor. Take the elevator in the lobby and press 5 to go directly to the fifth floor.</p>
+<p style="margin:12px 0 0;font-size:12px;line-height:1.7;color:#000000;font-weight:700;">Note: There is a massage shop on the ground floor. Take the elevator in the lobby and press 5 to go directly to the fifth floor.</p>
 </td></tr>
 <tr><td style="padding:0 20px 20px;">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-top:1px solid #dedede;"><tr>
