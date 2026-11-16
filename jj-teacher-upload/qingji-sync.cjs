@@ -897,6 +897,8 @@ function createSyncServer(store, options = {}) {
         try {
           if (options.rateLimit !== false) throttle(`booking-public:${request.method}:${address}`, request.method === "POST" ? 8 : 100);
           const code2 = publicBooking[1];
+          const failedIds = attempts.get(`booking-id-fail:${address}`);
+          if (options.rateLimit !== false && failedIds && failedIds.until > Date.now() && failedIds.count >= 10) throw new ApiError(429, "Too many ID attempts. Please try again in a minute.");
           let customerId;
           try {
             customerId = options.booking.customerAccess(code2, request.headers["x-booking-customer-id"]);
@@ -1340,7 +1342,7 @@ var BookingStore = class {
     const owner = this.publicOwner(code2);
     check2(typeof credential === "string" && credential.length <= 100, "Please enter a valid customer ID from the shop owner.", 401);
     const normalized = credential.replace(/[\s-]/g, "").toUpperCase();
-    check2(/^[A-F0-9]{24}$/.test(normalized), "Please enter a valid customer ID from the shop owner.", 401);
+    check2(/^(?:[A-Z0-9]{4,20}|[A-F0-9]{24})$/.test(normalized), "Please enter a valid customer ID from the shop owner.", 401);
     const hash2 = (0, import_node_crypto2.createHash)("sha256").update(normalized).digest("hex");
     const row = this.rows("SELECT id FROM booking_customers WHERE owner_id=? AND code_hash=? AND active=1", owner, hash2)[0];
     check2(row, "Please enter a valid customer ID from the shop owner.", 401);
@@ -1351,16 +1353,20 @@ var BookingStore = class {
     return this.rows("SELECT id,name,suffix,active,created_at FROM booking_customers WHERE owner_id=? ORDER BY created_at DESC", owner).map((row) => ({ id: String(row.id), name: String(row.name), suffix: String(row.suffix), active: !!row.active, createdAt: Number(row.created_at) }));
   }
   createCustomer(owner, input) {
-    const code2 = (0, import_node_crypto2.randomBytes)(12).toString("hex").toUpperCase();
+    const manual = input.code !== void 0;
+    const code2 = manual && typeof input.code === "string" ? input.code.trim().toUpperCase() : (0, import_node_crypto2.randomBytes)(12).toString("hex").toUpperCase();
     const id = (0, import_node_crypto2.randomUUID)();
     this.transaction(() => {
       this.authorize(owner);
-      check2(typeof input.name === "string" && input.name.trim().length > 0 && input.name.length <= 80, "\u8BF7\u8F93\u5165\u5BA2\u6237\u540D\u79F0\uFF0C\u6700\u591A80\u5B57\u3002");
-      this.run("INSERT INTO booking_customers VALUES (?,?,?,?,?,1,?)", id, owner, input.name.trim(), (0, import_node_crypto2.createHash)("sha256").update(code2).digest("hex"), code2.slice(-4), Date.now());
+      check2(!manual || typeof input.code === "string" && /^[A-Z0-9]{4,20}$/.test(code2), "\u5BA2\u6237 ID \u8BF7\u586B\u51994\u201320\u4F4D\u6570\u5B57\u6216\u82F1\u6587\u5B57\u6BCD\u3002");
+      check2(input.name === void 0 || typeof input.name === "string" && input.name.length <= 80, "\u5BA2\u6237\u540D\u79F0\u6700\u591A80\u5B57\u3002");
+      const hash2 = (0, import_node_crypto2.createHash)("sha256").update(code2).digest("hex");
+      check2(!this.rows("SELECT id FROM booking_customers WHERE code_hash=?", hash2).length, "\u6B64 ID \u5DF2\u88AB\u4F7F\u7528\uFF0C\u8BF7\u6362\u4E00\u4E2A\u3002", 409);
+      this.run("INSERT INTO booking_customers VALUES (?,?,?,?,?,1,?)", id, owner, typeof input.name === "string" && input.name.trim() ? input.name.trim() : "\u672A\u547D\u540D\u5BA2\u6237", hash2, code2.slice(-4), Date.now());
       this.changed(owner, id, "customer-created");
     });
     this.events.emit(owner);
-    return { id, code: code2.match(/.{4}/g).join("-") };
+    return { id, code: manual ? code2 : code2.match(/.{4}/g).join("-") };
   }
   revokeCustomer(owner, id) {
     this.transaction(() => {
