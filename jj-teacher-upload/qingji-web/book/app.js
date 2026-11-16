@@ -115,7 +115,7 @@ async function initialize(preloaded) {
 function lockAccess() {
   customerCredential = ''; slotsEpoch++; service = undefined; selectedSlot = undefined;
   element('fields').disabled = true; element('services').replaceChildren(); element('slots').replaceChildren();
-  customerName = ''; element('customer-name').textContent = '';
+  customerName = '';
   element('email').value = ''; element('phone').value = ''; element('notes').value = '';
   element('email-status').textContent = '';
   element('confirmation').textContent = ''; element('reference').textContent = '';
@@ -130,7 +130,6 @@ element('access-form').addEventListener('submit', async event => {
     if (!/^(?:[A-Z0-9]{4,20}|[A-F0-9]{24})$/.test(customerCredential)) throw new Error('Please enter the customer ID provided by your shop.');
     const access = await api('/access', {});
     customerName = access.customerName || 'Customer';
-    element('customer-name').textContent = `Booking for ${customerName}`;
     const initialCatalog = await api('/catalog');
     await initialize(initialCatalog);
     element('customer-id').value = ''; accessDialog.close();

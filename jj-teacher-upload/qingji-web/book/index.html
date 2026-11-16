@@ -25,23 +25,20 @@
 <main id="content" hidden inert>
   <header><a class="brand" href="/3628/book/" aria-label="3628 New York"><img class="brand-logo" src="/3628/book/logo.svg" alt="3628 New York" width="300" height="140"></a><span class="badge">APPOINTMENTS</span></header>
   <section id="booking">
-    <p class="eyebrow">A LITTLE TIME FOR YOURSELF</p>
     <h1>Book your<br>next visit.</h1>
-    <p class="intro">Choose a service and a time that works for you.<br>No account needed.</p>
+    <p class="intro">Choose a service and a time that works for you.</p>
     <form id="booking-form">
       <fieldset id="fields" disabled>
         <section class="card"><h2><span>01</span> Your service</h2><div id="services" class="services" role="group" aria-label="Choose a service"></div></section>
-        <section class="card"><h2><span>02</span> Your time</h2><label for="date">Date</label><input id="date" type="date" required><p class="hint">All times are in New York (America/New_York).<br>Daylight saving time is handled automatically.</p><div id="slots" class="slots" role="group" aria-label="Available appointment times"></div><p id="availability" role="status"></p></section>
+        <section class="card"><h2><span>02</span> Your time</h2><label for="date">Date</label><input id="date" type="date" required><div id="slots" class="slots" role="group" aria-label="Available appointment times"></div><p id="availability" role="status"></p></section>
         <section class="card">
           <h2><span>03</span> Your details</h2>
-          <p id="customer-name" class="privacy"></p>
           <label for="email">Email address</label><input id="email" type="email" autocomplete="email" maxlength="254" required placeholder="you@example.com">
           <label for="phone">Phone number</label><input id="phone" type="tel" autocomplete="tel" minlength="7" maxlength="30" required placeholder="(212) 555-0123">
           <label for="notes">Notes <span class="optional">(optional)</span></label><textarea id="notes" maxlength="500" rows="3" placeholder="Anything you would like us to know?"></textarea>
           <div class="trap" aria-hidden="true"><label for="website">Leave blank</label><input id="website" tabindex="-1" autocomplete="off"></div>
-          <p class="privacy">Your name comes from your customer ID. Your email and phone are used only to manage this booking. Confirmation email is sent when the shop's email service is connected. No SMS is sent.</p>
         </section>
-        <section class="summary"><p id="summary">Choose a service and time to continue.</p><button type="submit" id="submit" disabled>Confirm appointment <span>↗</span></button><p class="hint">Submitting confirms your appointment immediately. For changes or cancellation, please contact the shop directly.</p></section>
+        <section class="summary"><p id="summary">Choose a service and time to continue.</p><button type="submit" id="submit" disabled>Confirm appointment <span>↗</span></button></section>
       </fieldset>
     </form>
   </section>
