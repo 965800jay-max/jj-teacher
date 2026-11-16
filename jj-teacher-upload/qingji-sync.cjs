@@ -771,7 +771,24 @@ async function handleBooking(store, userId, request, response, url, body, send, 
   if (!url.pathname.startsWith("/v1/booking/")) return false;
   store.authorize(userId);
   if (request.method === "GET" && url.pathname === "/v1/booking/customers") {
-    send(200, { customers: store.customers(userId) });
+    send(200, { customers: store.customers(userId, "", url.searchParams.get("deleted") === "1") });
+    return true;
+  }
+  if (request.method === "POST" && url.pathname === "/v1/booking/customers/search") {
+    const input = await body();
+    if (typeof input.query !== "string" || typeof input.deleted !== "boolean") throw new ApiError(400, "\u641C\u7D22\u53C2\u6570\u65E0\u6548\u3002");
+    send(200, { customers: store.customers(userId, input.query, input.deleted) });
+    return true;
+  }
+  if (request.method === "POST" && url.pathname === "/v1/booking/customers/channel") {
+    store.setCustomerChannel(userId, await body());
+    send(200, { ok: true });
+    return true;
+  }
+  const customerState = /^\/v1\/booking\/customers\/(disable|enable|delete|restore)$/.exec(url.pathname);
+  if (request.method === "POST" && customerState) {
+    store.setCustomerState(userId, (await body()).id, customerState[1]);
+    send(200, { ok: true });
     return true;
   }
   if (request.method === "POST" && url.pathname === "/v1/booking/customers") {
@@ -1199,6 +1216,9 @@ var BookingStore = class {
       END;
     `);
       if (!db.prepare("PRAGMA table_info(booking_customers)").all().some((column) => column.name === "encrypted_code")) db.exec("ALTER TABLE booking_customers ADD COLUMN encrypted_code TEXT NOT NULL DEFAULT ''");
+      const customerColumns = db.prepare("PRAGMA table_info(booking_customers)").all().map((column) => column.name);
+      if (!customerColumns.includes("channel")) db.exec("ALTER TABLE booking_customers ADD COLUMN channel TEXT NOT NULL DEFAULT '' CHECK(channel IN ('','wechat','ins'))");
+      if (!customerColumns.includes("deleted_at")) db.exec("ALTER TABLE booking_customers ADD COLUMN deleted_at INTEGER NOT NULL DEFAULT 0");
       db.exec("COMMIT");
     } catch (cause) {
       db.exec("ROLLBACK");
@@ -1269,7 +1289,7 @@ var BookingStore = class {
   appointment(row) {
     const customer = this.rows("SELECT c.* FROM booking_customers c JOIN booking_customer_appointments a ON a.customer_id=c.id WHERE a.appointment_id=? AND c.owner_id=?", String(row.id), String(row.owner_id))[0];
     const customerCode = customer ? this.vault.open(String(customer.encrypted_code), `${customer.owner_id}:${customer.id}`) : void 0;
-    return { id: String(row.id), customerName: customer ? String(customer.name) : String(row.customer_name), customerRecordId: customer ? String(customer.id) : void 0, customerCode, customerCodeSuffix: customer ? String(customer.suffix) : void 0, phone: String(row.phone), serviceId: String(row.service_id), serviceName: String(row.service_name), startsAt: Number(row.starts_at), endsAt: Number(row.ends_at), priceCents: Number(row.price_cents), notes: String(row.notes), status: row.status, revision: Number(row.revision), email: String(this.rows("SELECT email FROM booking_contacts WHERE appointment_id=?", String(row.id))[0]?.email ?? ""), emailStatus: this.emailStatus(String(row.id)) };
+    return { id: String(row.id), customerName: customer ? String(customer.name) : String(row.customer_name), customerChannel: customer ? customer.channel : void 0, customerRecordId: customer ? String(customer.id) : void 0, customerCode, customerCodeSuffix: customer ? String(customer.suffix) : void 0, phone: String(row.phone), serviceId: String(row.service_id), serviceName: String(row.service_name), startsAt: Number(row.starts_at), endsAt: Number(row.ends_at), priceCents: Number(row.price_cents), notes: String(row.notes), status: row.status, revision: Number(row.revision), email: String(this.rows("SELECT email FROM booking_contacts WHERE appointment_id=?", String(row.id))[0]?.email ?? ""), emailStatus: this.emailStatus(String(row.id)) };
   }
   saveService(owner, input) {
     this.transaction(() => {
@@ -1410,7 +1430,7 @@ var BookingStore = class {
     const email = this.validEmail(input.email);
     const fingerprint = (0, import_node_crypto3.createHash)("sha256").update(JSON.stringify([input.serviceId, input.startsAt, customerId, input.phone, email, input.notes])).digest("hex");
     const result = this.transaction(() => {
-      const customer = this.rows("SELECT id,name FROM booking_customers WHERE id=? AND owner_id=? AND active=1", customerId, owner)[0];
+      const customer = this.rows("SELECT id,name FROM booking_customers WHERE id=? AND owner_id=? AND active=1 AND deleted_at=0", customerId, owner)[0];
       check2(customer, "Please enter a valid customer ID from the shop owner.", 401);
       const previous = this.rows("SELECT * FROM booking_submissions WHERE owner_id=? AND request_id=?", owner, input.requestId)[0];
       if (previous) {
@@ -1439,7 +1459,7 @@ var BookingStore = class {
   }
   customerAppointment(code2, customerId, id) {
     const owner = this.publicOwner(code2);
-    check2(this.rows("SELECT 1 FROM booking_customers WHERE id=? AND owner_id=? AND active=1", customerId, owner).length, "Please enter a valid customer ID from the shop owner.", 401);
+    check2(this.rows("SELECT 1 FROM booking_customers WHERE id=? AND owner_id=? AND active=1 AND deleted_at=0", customerId, owner).length, "Please enter a valid customer ID from the shop owner.", 401);
     const row = this.rows("SELECT booking_appointments.* FROM booking_appointments JOIN booking_customer_appointments ON appointment_id=id WHERE id=? AND owner_id=? AND customer_id=?", id, owner, customerId)[0];
     check2(row, "Appointment not found.", 404);
     return row;
@@ -1498,7 +1518,7 @@ var BookingStore = class {
     return value.trim().toLowerCase();
   }
   customerProfile(code2, customerId) {
-    const row = this.rows("SELECT name FROM booking_customers WHERE owner_id=? AND id=? AND active=1", this.publicOwner(code2), customerId)[0];
+    const row = this.rows("SELECT name FROM booking_customers WHERE owner_id=? AND id=? AND active=1 AND deleted_at=0", this.publicOwner(code2), customerId)[0];
     check2(row, "Please enter a valid customer ID from the shop owner.", 401);
     return { customerName: row.name === "\u672A\u547D\u540D\u5BA2\u6237" ? "Customer" : String(row.name), emailEnabled: this.emailEnabled };
   }
@@ -1545,7 +1565,9 @@ var BookingStore = class {
       this.authorize(owner);
       check2(typeof input.id === "string" && this.rows("SELECT 1 FROM booking_customers WHERE id=? AND owner_id=?", input.id, owner).length, "\u5BA2\u6237\u4E0D\u5B58\u5728\u3002", 404);
       check2(typeof input.name === "string" && input.name.trim().length > 0 && input.name.length <= 80, "\u8BF7\u586B\u5199\u5BA2\u6237\u59D3\u540D\uFF0C\u6700\u591A80\u5B57\u3002");
+      check2(input.channel === void 0 || ["wechat", "ins"].includes(String(input.channel)), "\u8BF7\u9009\u62E9\u5FAE\u4FE1\u6216 INS \u6E20\u9053\u3002");
       this.run("UPDATE booking_customers SET name=? WHERE owner_id=? AND id=?", input.name.trim(), owner, input.id);
+      if (input.channel !== void 0) this.run("UPDATE booking_customers SET channel=? WHERE owner_id=? AND id=?", String(input.channel), owner, input.id);
       this.changed(owner, input.id, "customer-renamed");
     });
     this.events.emit(owner);
@@ -1569,7 +1591,7 @@ var BookingStore = class {
     const normalized2 = credential.normalize("NFKC").replace(/[\s-]/g, "").toUpperCase();
     check2(/^(?:[A-Z0-9]{4,20}|[A-F0-9]{24})$/.test(normalized2), "Please enter a valid customer ID from the shop owner.", 401);
     const hash2 = (0, import_node_crypto3.createHash)("sha256").update(normalized2).digest("hex");
-    const row = this.rows("SELECT id,encrypted_code FROM booking_customers WHERE owner_id=? AND code_hash=? AND active=1", owner, hash2)[0];
+    const row = this.rows("SELECT id,encrypted_code FROM booking_customers WHERE owner_id=? AND code_hash=? AND active=1 AND deleted_at=0", owner, hash2)[0];
     check2(row, "Please enter a valid customer ID from the shop owner.", 401);
     if (!row.encrypted_code) {
       this.transaction(() => {
@@ -1580,9 +1602,37 @@ var BookingStore = class {
     }
     return String(row.id);
   }
-  customers(owner) {
+  customers(owner, query = "", deleted = false) {
     this.authorize(owner);
-    return this.rows("SELECT id,name,suffix,active,created_at FROM booking_customers WHERE owner_id=? ORDER BY created_at DESC", owner).map((row) => ({ id: String(row.id), name: String(row.name), suffix: String(row.suffix), active: !!row.active, createdAt: Number(row.created_at) }));
+    check2(query.length <= 80, "\u641C\u7D22\u5185\u5BB9\u6700\u591A80\u5B57\u3002");
+    const normalized2 = query.normalize("NFKC").trim().toUpperCase();
+    const codeQuery = normalized2.replace(/[\s-]/g, "");
+    const codeHash = (0, import_node_crypto3.createHash)("sha256").update(codeQuery).digest("hex");
+    return this.rows(`SELECT * FROM booking_customers WHERE owner_id=? AND deleted_at${deleted ? ">" : "="}0 ORDER BY created_at DESC`, owner).filter((row) => !normalized2 || String(row.name).toUpperCase().includes(normalized2) || String(row.suffix).includes(normalized2) || codeQuery && (row.code_hash === codeHash || this.vault.open(String(row.encrypted_code), `${owner}:${row.id}`).includes(codeQuery))).map((row) => ({ id: String(row.id), name: String(row.name), suffix: String(row.suffix), channel: String(row.channel), active: !!row.active, createdAt: Number(row.created_at), deletedAt: Number(row.deleted_at) }));
+  }
+  setCustomerChannel(owner, input) {
+    this.transaction(() => {
+      this.authorize(owner);
+      check2(typeof input.id === "string" && this.rows("SELECT 1 FROM booking_customers WHERE owner_id=? AND id=? AND deleted_at=0", owner, input.id).length, "\u5BA2\u6237\u4E0D\u5B58\u5728\u3002", 404);
+      check2(["wechat", "ins"].includes(String(input.channel)), "\u8BF7\u9009\u62E9\u5FAE\u4FE1\u6216 INS \u6E20\u9053\u3002");
+      this.run("UPDATE booking_customers SET channel=? WHERE owner_id=? AND id=?", String(input.channel), owner, input.id);
+      this.changed(owner, input.id, "customer-channel");
+    });
+    this.events.emit(owner);
+  }
+  setCustomerState(owner, id, action) {
+    this.transaction(() => {
+      this.authorize(owner);
+      check2(typeof id === "string", "\u5BA2\u6237\u4E0D\u5B58\u5728\u3002", 404);
+      const row = this.rows("SELECT deleted_at FROM booking_customers WHERE owner_id=? AND id=?", owner, id)[0];
+      check2(row, "\u5BA2\u6237\u4E0D\u5B58\u5728\u3002", 404);
+      check2(action === "restore" || !row.deleted_at, "\u5BA2\u6237\u5DF2\u5220\u9664\uFF0C\u8BF7\u5148\u6062\u590D\u3002", 409);
+      if (action === "delete") this.run("UPDATE booking_customers SET active=0,deleted_at=? WHERE owner_id=? AND id=?", Date.now(), owner, id);
+      else if (action === "restore") this.run("UPDATE booking_customers SET active=0,deleted_at=0 WHERE owner_id=? AND id=?", owner, id);
+      else this.run("UPDATE booking_customers SET active=? WHERE owner_id=? AND id=?", action === "enable" ? 1 : 0, owner, id);
+      this.changed(owner, id, `customer-${action}`);
+    });
+    this.events.emit(owner);
   }
   createCustomer(owner, input) {
     const manual = input.code !== void 0;
@@ -1592,9 +1642,11 @@ var BookingStore = class {
       this.authorize(owner);
       check2(!manual || typeof input.code === "string" && /^[A-Z0-9]{4,20}$/.test(code2), "\u5BA2\u6237 ID \u8BF7\u586B\u51994\u201320\u4F4D\u6570\u5B57\u6216\u82F1\u6587\u5B57\u6BCD\u3002");
       check2(input.name === void 0 || typeof input.name === "string" && input.name.length <= 80, "\u5BA2\u6237\u540D\u79F0\u6700\u591A80\u5B57\u3002");
+      check2(input.channel === void 0 || ["wechat", "ins"].includes(String(input.channel)), "\u8BF7\u9009\u62E9\u5FAE\u4FE1\u6216 INS \u6E20\u9053\u3002");
       const hash2 = (0, import_node_crypto3.createHash)("sha256").update(code2).digest("hex");
       check2(!this.rows("SELECT id FROM booking_customers WHERE code_hash=?", hash2).length, "\u6B64 ID \u5DF2\u88AB\u4F7F\u7528\uFF0C\u8BF7\u6362\u4E00\u4E2A\u3002", 409);
       this.run("INSERT INTO booking_customers(id,owner_id,name,code_hash,suffix,active,created_at,encrypted_code) VALUES (?,?,?,?,?,1,?,?)", id, owner, typeof input.name === "string" && input.name.trim() ? input.name.trim() : "\u672A\u547D\u540D\u5BA2\u6237", hash2, code2.slice(-4), Date.now(), this.vault.seal(code2, `${owner}:${id}`));
+      if (input.channel !== void 0) this.run("UPDATE booking_customers SET channel=? WHERE id=?", String(input.channel), id);
       this.changed(owner, id, "customer-created");
     });
     this.events.emit(owner);
@@ -15007,7 +15059,8 @@ function handle(request, response) {
     const databasePath = (0, import_node_path3.resolve)(process.env.QINGJI_DATABASE_PATH ?? "/var/data/qingji/qingji.sqlite");
     (0, import_node_fs5.mkdirSync)((0, import_node_path3.dirname)(databasePath), { recursive: true, mode: 448 });
     const store = new SyncStore(databasePath);
-    const hasCustomerCodes = store.database.prepare("PRAGMA table_info(booking_customers)").all().some((column) => column.name === "encrypted_code");
+    const customerColumns = store.database.prepare("PRAGMA table_info(booking_customers)").all().map((column) => column.name);
+    const hasCustomerCodes = ["encrypted_code", "channel", "deleted_at"].every((column) => customerColumns.includes(column));
     if (!store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_mail_outbox'").get() || !hasCustomerCodes) {
       const backup = `${databasePath}.before-booking-${Date.now()}.bak`;
       store.database.exec(`VACUUM INTO '${backup.replaceAll("'", "''")}'`);
