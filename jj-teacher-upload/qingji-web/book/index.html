@@ -22,6 +22,12 @@
     <p id="access-error" role="alert"></p><button id="access-submit" type="submit">Done</button>
   </form>
 </dialog>
+<dialog id="policy-dialog" aria-labelledby="policy-title" aria-describedby="policy-description">
+  <h2 id="policy-title" tabindex="-1">Before you confirm</h2>
+  <p id="policy-description">If you need to reschedule or request a cancellation, please let us know at least <strong>24 hours before your appointment</strong>. Changes cannot be made with less than 24 hours’ notice. Thank you for your understanding.</p>
+  <button type="button" id="policy-confirm">I confirm!</button>
+  <button type="button" id="policy-back">Go back</button>
+</dialog>
 <main id="content" hidden inert>
   <header><a class="brand" href="/3628/book/" aria-label="3628 New York"><img class="brand-logo" src="/3628/book/logo.svg" alt="3628 New York" width="300" height="140"></a><span class="badge">APPOINTMENTS</span></header>
   <section class="card" id="my-bookings" hidden><h2>My appointments <span id="booking-count"></span></h2><p class="hint">Up to 3 upcoming appointments per ID. Changes require at least 24 hours’ notice.</p><div id="my-appointments"></div><p id="booking-limit" role="status"></p></section>

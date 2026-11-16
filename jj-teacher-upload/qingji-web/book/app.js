@@ -15,6 +15,7 @@ let customerName = '';
 let editingAppointment;
 let upcomingCount = 0;
 const accessDialog = element('access-dialog');
+const policyDialog = element('policy-dialog');
 accessDialog.removeAttribute('open');
 accessDialog.showModal();
 accessDialog.addEventListener('cancel', event => event.preventDefault());
@@ -63,11 +64,23 @@ async function loadSlots(preserve = false) {
   } catch (error) { if (epoch === slotsEpoch) element('availability').textContent = error.message; }
 }
 element('date').addEventListener('change', () => void loadSlots());
-element('booking-form').addEventListener('submit', async event => {
+element('booking-form').addEventListener('submit', event => {
   event.preventDefault();
-  if (submitting || !service || !selectedSlot) return;
-  if (element('website').value) return;
-  if (!/^[+\d() .-]{7,30}$/.test(element('phone').value) || element('phone').value.replace(/\D/g, '').length < 7) { element('message').textContent = 'Please enter a valid phone number.'; return; }
+  if (!readyToSubmit() || policyDialog.open) return;
+  policyDialog.showModal(); element('policy-title').focus();
+});
+element('policy-back').addEventListener('click', () => policyDialog.close());
+element('policy-confirm').addEventListener('click', () => {
+  if (!policyDialog.open || submitting) return;
+  policyDialog.close(); void submitBooking();
+});
+function readyToSubmit() {
+  if (submitting || !service || !selectedSlot || !customerCredential || (!editingAppointment && upcomingCount >= 3) || element('website').value || !element('booking-form').reportValidity()) return false;
+  if (!/^[+\d() .-]{7,30}$/.test(element('phone').value) || element('phone').value.replace(/\D/g, '').length < 7) { element('message').textContent = 'Please enter a valid phone number.'; return false; }
+  return true;
+}
+async function submitBooking() {
+  if (!readyToSubmit()) return;
   const payload = { serviceId: service.id, startsAt: selectedSlot.startsAt, email: element('email').value.trim(), phone: element('phone').value.trim(), notes: element('notes').value.trim(), expectedPriceCents: service.priceCents, expectedDurationMinutes: service.durationMinutes };
   const serialized = JSON.stringify(payload);
   if (previousPayload && previousPayload !== serialized) requestId = crypto.randomUUID();
@@ -87,7 +100,7 @@ element('booking-form').addEventListener('submit', async event => {
     element('message').textContent = error.status ? error.message : 'Connection interrupted. Your appointment may already be confirmed. Retry without changing your details to avoid a duplicate.';
     if (error.status === 409) { await refreshAppointments().catch(() => {}); await loadSlots(); }
   } finally { submitting = false; element('fields').disabled = false; summary(); }
-});
+}
 function newBooking() {
   if (submitting) return;
   editingAppointment = undefined;
@@ -161,6 +174,7 @@ async function initialize(preloaded) {
   } catch (error) { element('message').textContent = 'Online booking is temporarily unavailable. Please contact the shop or try again later.'; throw error; }
 }
 function lockAccess() {
+  if (policyDialog.open) policyDialog.close();
   customerCredential = ''; slotsEpoch++; service = undefined; selectedSlot = undefined;
   element('fields').disabled = true; element('services').replaceChildren(); element('slots').replaceChildren();
   customerName = '';
