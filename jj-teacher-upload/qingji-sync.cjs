@@ -1151,6 +1151,11 @@ var CustomerVault = class {
 
 // src/domain/booking.ts
 var BOOKING_ZONE = "America/New_York";
+function normalizeCustomerCredential(value) {
+  const normalized2 = value.normalize("NFKC").replace(/\s/g, "").toUpperCase();
+  const legacy = normalized2.replace(/-/g, "");
+  return /^[A-F0-9]{24}$/.test(legacy) ? legacy : normalized2;
+}
 var formatter = new Intl.DateTimeFormat("en-CA", { timeZone: BOOKING_ZONE, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
 function nyParts(instant = Date.now()) {
   const parts = Object.fromEntries(formatter.formatToParts(instant).map((part) => [part.type, part.value]));
@@ -1666,7 +1671,7 @@ var BookingStore = class {
       check2(typeof input.id === "string" && typeof input.code === "string" && input.code.length <= 100, "\u8BF7\u586B\u5199\u539F\u5BA2\u6237 ID\u3002");
       const row = this.rows("SELECT id,code_hash FROM booking_customers WHERE owner_id=? AND id=?", owner, input.id)[0];
       check2(row, "\u5BA2\u6237\u4E0D\u5B58\u5728\u3002", 404);
-      const code2 = input.code.normalize("NFKC").replace(/[\s-]/g, "").toUpperCase();
+      const code2 = normalizeCustomerCredential(input.code);
       check2((0, import_node_crypto3.createHash)("sha256").update(code2).digest("hex") === row.code_hash, "\u6B64\u53F7\u7801\u4E0E\u539F\u5BA2\u6237 ID \u4E0D\u5339\u914D\uFF0C\u672A\u4F5C\u4EFB\u4F55\u4FEE\u6539\u3002");
       this.run("UPDATE booking_customers SET encrypted_code=? WHERE owner_id=? AND id=?", this.vault.seal(code2, `${owner}:${row.id}`), owner, input.id);
       this.changed(owner, input.id, "customer-id-restored");
@@ -1676,8 +1681,8 @@ var BookingStore = class {
   customerAccess(code2, credential) {
     const owner = this.publicOwner(code2);
     check2(typeof credential === "string" && credential.length <= 100, "Please enter a valid customer ID from the shop owner.", 401);
-    const normalized2 = credential.normalize("NFKC").replace(/[\s-]/g, "").toUpperCase();
-    check2(/^(?:[A-Z0-9_]{4,20}|[A-F0-9]{24})$/.test(normalized2), "Please enter a valid customer ID from the shop owner.", 401);
+    const normalized2 = normalizeCustomerCredential(credential);
+    check2(/^(?:[A-Z0-9_-]{4,20}|[A-F0-9]{24})$/.test(normalized2), "Please enter a valid customer ID from the shop owner.", 401);
     const hash2 = (0, import_node_crypto3.createHash)("sha256").update(normalized2).digest("hex");
     const row = this.rows("SELECT id,encrypted_code FROM booking_customers WHERE owner_id=? AND code_hash=? AND active=1 AND deleted_at=0", owner, hash2)[0];
     check2(row, "Please enter a valid customer ID from the shop owner.", 401);
@@ -1694,7 +1699,7 @@ var BookingStore = class {
     this.authorize(owner);
     check2(query.length <= 80, "\u641C\u7D22\u5185\u5BB9\u6700\u591A80\u5B57\u3002");
     const normalized2 = query.normalize("NFKC").trim().toUpperCase();
-    const codeQuery = normalized2.replace(/[\s-]/g, "");
+    const codeQuery = normalizeCustomerCredential(normalized2);
     const codeHash = (0, import_node_crypto3.createHash)("sha256").update(codeQuery).digest("hex");
     return this.rows(`SELECT * FROM booking_customers WHERE owner_id=? AND deleted_at${deleted ? ">" : "="}0 ORDER BY created_at DESC`, owner).filter((row) => !normalized2 || String(row.name).toUpperCase().includes(normalized2) || String(row.suffix).includes(normalized2) || codeQuery && (row.code_hash === codeHash || this.vault.open(String(row.encrypted_code), `${owner}:${row.id}`).includes(codeQuery))).map((row) => ({ id: String(row.id), name: String(row.name), suffix: String(row.suffix), channel: String(row.channel), active: !!row.active, createdAt: Number(row.created_at), deletedAt: Number(row.deleted_at) }));
   }
@@ -1728,7 +1733,7 @@ var BookingStore = class {
     const id = (0, import_node_crypto3.randomUUID)();
     this.transaction(() => {
       this.authorize(owner);
-      check2(!manual || typeof input.code === "string" && /^[A-Z0-9_]{4,20}$/.test(code2), "\u5BA2\u6237 ID \u8BF7\u586B\u51994\u201320\u4F4D\u6570\u5B57\u3001\u82F1\u6587\u5B57\u6BCD\u6216\u4E0B\u5212\u7EBF\uFF08_\uFF09\u3002");
+      check2(!manual || typeof input.code === "string" && /^[A-Z0-9_-]{4,20}$/.test(code2), "\u5BA2\u6237 ID \u8BF7\u586B\u51994\u201320\u4F4D\u6570\u5B57\u3001\u82F1\u6587\u5B57\u6BCD\u3001\u4E0B\u5212\u7EBF\uFF08_\uFF09\u6216\u77ED\u6A2A\u7EBF\uFF08-\uFF09\u3002");
       check2(input.name === void 0 || typeof input.name === "string" && input.name.length <= 80, "\u5BA2\u6237\u540D\u79F0\u6700\u591A80\u5B57\u3002");
       check2(input.channel === void 0 || ["wechat", "ins"].includes(String(input.channel)), "\u8BF7\u9009\u62E9 WeChat \u6216 instagram \u6E20\u9053\u3002");
       const hash2 = (0, import_node_crypto3.createHash)("sha256").update(code2).digest("hex");

@@ -242,9 +242,11 @@ async function unlockCustomer(code) {
   if (unlocking) return;
   unlocking = true;
   element('access-submit').disabled = true; element('customer-id').disabled = true; element('access-error').textContent = '';
-  customerCredential = code.normalize('NFKC').replace(/[\s-]/g, '').toUpperCase();
+  customerCredential = code.normalize('NFKC').replace(/\s/g, '').toUpperCase();
+  const legacyCredential = customerCredential.replace(/-/g, '');
+  if (/^[A-F0-9]{24}$/.test(legacyCredential)) customerCredential = legacyCredential;
   try {
-    if (!/^(?:[A-Z0-9_]{4,20}|[A-F0-9]{24})$/.test(customerCredential)) throw new Error('Please enter the customer ID provided by your shop.');
+    if (!/^(?:[A-Z0-9_-]{4,20}|[A-F0-9]{24})$/.test(customerCredential)) throw new Error('Please enter the customer ID provided by your shop.');
     const access = await api('/access', {});
     customerName = access.customerName || 'Customer';
     const initialCatalog = await api('/catalog');
