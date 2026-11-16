@@ -395,7 +395,8 @@ var SyncStore = class {
       AND (e.owner_id=? OR f.user_a=? OR f.user_b=?) ORDER BY e.created_at`, userId, userId, userId);
     const bookingIncome = this.one("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_income'") ? new Map(this.all("SELECT b.entry_id,b.appointment_id FROM booking_income b JOIN entries e ON e.id=b.entry_id WHERE e.owner_id=?", userId).map((row) => [String(row.entry_id), String(row.appointment_id)])) : /* @__PURE__ */ new Map();
     const entries = rows.map((row) => entryForViewer({
-      ...bookingIncome.has(String(row.id)) ? { currency: "USD", bookingAppointmentId: bookingIncome.get(String(row.id)) } : {},
+      currency: "USD",
+      ...bookingIncome.has(String(row.id)) ? { bookingAppointmentId: bookingIncome.get(String(row.id)) } : {},
       id: String(row.id),
       ownerId: String(row.owner_id),
       kind: row.kind,
@@ -411,7 +412,7 @@ var SyncStore = class {
     return { me, revision: Number(this.one("SELECT revision FROM users WHERE id=?", userId).revision), ledger: { version: 1, friends, entries }, groups: this.groups(userId), deletionRequests: this.pendingDeletions(userId) };
   }
   pendingDeletions(userId) {
-    return this.all("SELECT * FROM deletion_requests WHERE status='pending'").map((row) => ({ id: String(row.id), scope: row.scope, scopeId: String(row.scope_id), targetId: String(row.target_id), title: String(row.title), requestedBy: String(row.requested_by), required: JSON.parse(String(row.required)), approved: JSON.parse(String(row.approved)) })).filter((request) => request.required.some((member) => member.id === userId));
+    return this.all("SELECT * FROM deletion_requests WHERE status='pending'").map((row) => ({ id: String(row.id), scope: row.scope, scopeId: String(row.scope_id), targetId: String(row.target_id), title: String(row.title).replace(/[¥￥]/g, "$"), requestedBy: String(row.requested_by), required: JSON.parse(String(row.required)), approved: JSON.parse(String(row.approved)) })).filter((request) => request.required.some((member) => member.id === userId));
   }
   deletionPending(scope, targetId) {
     return this.one("SELECT * FROM deletion_requests WHERE scope=? AND target_id=? AND status='pending'", scope, targetId);
@@ -507,7 +508,7 @@ var SyncStore = class {
       if (action === "archive-task") check(typeof input.date === "string" && isValidDate(input.date) && "startsOn" in target && input.date >= String(target.startsOn) && "archivedOn" in target && !target.archivedOn, "\u4EFB\u52A1\u65E5\u671F\u65E0\u6548\u6216\u4EFB\u52A1\u5DF2\u505C\u7528\u3002");
       check(group.ownerId === userId || "createdBy" in target && target.createdBy === userId, "\u53EA\u6709\u521B\u5EFA\u4EBA\u6216\u7FA4\u4E3B\u53EF\u53D1\u8D77\u5220\u9664\u3002", 403);
       if ("settledBy" in target) check(!target.settledBy, "\u5DF2\u7ED3\u7B97\u8D26\u76EE\u9700\u5148\u53D6\u6D88\u52FE\u9009\u624D\u80FD\u4FEE\u6539\u6216\u5220\u9664\u3002");
-      const title = `${group.name} \xB7 ${target.name}${"amountCents" in target ? ` \xA5${(Number(target.amountCents) / 100).toFixed(2)}` : ""}${"occurredOn" in target ? ` \xB7 ${target.occurredOn}` : ""}`;
+      const title = `${group.name} \xB7 ${target.name}${"amountCents" in target ? ` $${(Number(target.amountCents) / 100).toFixed(2)}` : ""}${"occurredOn" in target ? ` \xB7 ${target.occurredOn}` : ""}`;
       if (this.requestDeletion(userId, "group", groupId, targetId, title, group.members, action, input)) return this.snapshot(userId);
     } else if (["edit-bill", "settle", "edit-task", "complete-task", "edit-item"].includes(action)) {
       check(!this.deletionPending("group", targetId), "\u8BE5\u9879\u76EE\u6B63\u5728\u7533\u8BF7\u5220\u9664\uFF0C\u8BF7\u5148\u5904\u7406\u7533\u8BF7\u3002");
@@ -694,7 +695,7 @@ var SyncStore = class {
     if (action === "delete" && existing?.friendship_id) {
       const relation = this.relation(userId, String(existing.friendship_id));
       const members = [String(relation.user_a), String(relation.user_b)].map((id2) => ({ id: id2, name: this.account(id2).name }));
-      if (this.requestDeletion(userId, "entry", String(existing.friendship_id), id, `${existing.reason} \xB7 \xA5${(Number(existing.amount_cents) / 100).toFixed(2)} \xB7 ${existing.occurred_on}`, members, "delete", input)) return this.snapshot(userId);
+      if (this.requestDeletion(userId, "entry", String(existing.friendship_id), id, `${existing.reason} \xB7 $${(Number(existing.amount_cents) / 100).toFixed(2)} \xB7 ${existing.occurred_on}`, members, "delete", input)) return this.snapshot(userId);
     }
     if (action === "create" && existing) {
       const same = draft && existing.owner_id === userId && !existing.deleted_at && existing.kind === draft.kind && existing.amount_cents === draft.amountCents && existing.category === draft.category && existing.reason === draft.reason.trim() && existing.occurred_on === draft.occurredOn && existing.friendship_id === draft.friendId;
