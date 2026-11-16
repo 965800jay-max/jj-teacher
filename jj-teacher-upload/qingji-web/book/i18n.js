@@ -1,6 +1,7 @@
 'use strict';
 (() => {
   const phrases = {
+    'You’ll receive a confirmation email once your appointment is booked.': '预约成功后，您将收到预约确认邮件。',
     'Cancel appointment': '取消预约',
     'Cancellation closed · less than 24 hours': '不可取消 · 距开始不足 24 小时',
     'Cancel this appointment?': '确定取消此预约吗？',

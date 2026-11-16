@@ -1409,6 +1409,7 @@ var BookingStore = class {
     const duration = Number(service.duration_minutes) * 6e4;
     for (let minute = 0; minute < 1440; minute += 60) {
       const time = `${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")}`;
+      if (time === "11:00" && now >= nyInstant(shiftBookingDate(date, -1), "21:00")) continue;
       if (time < String(hours.opens) || time >= String(hours.closes)) continue;
       let startsAt;
       try {
@@ -1421,7 +1422,7 @@ var BookingStore = class {
       const occupiedEnd = endsAt + Number(service.buffer_after) * 6e4;
       const start = nyParts(occupiedStart);
       const end = nyParts(occupiedEnd);
-      if (startsAt < now + 30 * 6e4 || start.date !== date || end.date !== date || start.time < String(hours.opens) || end.time > String(hours.closes)) continue;
+      if (startsAt < now + 180 * 6e4 || start.date !== date || end.date !== date || start.time < String(hours.opens) || end.time > String(hours.closes)) continue;
       if (blocked.some((row) => Number(row.starts_at) < occupiedEnd && Number(row.ends_at) > occupiedStart)) continue;
       slots.push({ startsAt, endsAt, time });
     }
