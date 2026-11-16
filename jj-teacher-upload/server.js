@@ -2779,6 +2779,7 @@ async function serveFile(request, response) {
 
 const server = http.createServer(async (request, response) => {
   try {
+    if (require("./qingji-web.cjs").redirectBookingHome(request, response)) return;
     if (/^\/3628(?:\/|\?|$)/.test(request.url)) {
       await require("./qingji-web.cjs").handle(request, response);
       return;

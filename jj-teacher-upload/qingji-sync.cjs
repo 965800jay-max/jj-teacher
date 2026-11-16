@@ -14937,7 +14937,7 @@ function handle(request, response) {
     if (owner) booking.grantOwner(String(owner.id));
     console.log(`3628 booking: authorized owner configured=${!!owner}`);
     mounted = createSyncServer(store, {
-      allowedOrigins: String(process.env.QINGJI_ALLOWED_ORIGINS ?? "https://jj-teacher.onrender.com,http://localhost:8090,http://localhost:8093").split(",").map((origin) => origin.trim()).filter(Boolean),
+      allowedOrigins: String(process.env.QINGJI_ALLOWED_ORIGINS ?? "https://jj-teacher.onrender.com,https://3628newyork.com,https://www.3628newyork.com,http://localhost:8090,http://localhost:8093").split(",").map((origin) => origin.trim()).filter(Boolean),
       trustProxy: true,
       booking
     });

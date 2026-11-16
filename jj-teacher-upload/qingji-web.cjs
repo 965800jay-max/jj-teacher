@@ -3,6 +3,25 @@
 // server/web.cjs
 var fs = require("node:fs");
 var path = require("node:path");
+function redirectBookingHome(request, response) {
+  const hostname = String(request.headers.host || "").split(":")[0].toLowerCase();
+  if (!["3628newyork.com", "www.3628newyork.com"].includes(hostname)) return false;
+  let url;
+  try {
+    url = new URL(request.url, "http://localhost");
+  } catch {
+    return false;
+  }
+  if (!["/", "/index.html"].includes(url.pathname)) return false;
+  if (!["GET", "HEAD"].includes(request.method)) {
+    response.writeHead(405, { Allow: "GET, HEAD" });
+    response.end();
+    return true;
+  }
+  response.writeHead(308, { Location: `/3628/book/${url.search}`, "Cache-Control": "no-store" });
+  response.end();
+  return true;
+}
 function createWebHandler(directory, options = {}) {
   const root = path.resolve(directory);
   return async function handle(request, response) {
@@ -61,4 +80,4 @@ function createWebHandler(directory, options = {}) {
     }
   };
 }
-module.exports = { createWebHandler, handle: createWebHandler(process.env.QINGJI_WEB_DIR || path.join(__dirname, "qingji-web")) };
+module.exports = { createWebHandler, redirectBookingHome, handle: createWebHandler(process.env.QINGJI_WEB_DIR || path.join(__dirname, "qingji-web")) };
