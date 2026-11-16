@@ -15,13 +15,14 @@
   <script src="/3628/book/app.js" defer></script>
 </head>
 <body>
-<dialog id="access-dialog" aria-labelledby="access-title" open>
+<dialog id="access-dialog" aria-labelledby="access-title" aria-describedby="access-note" open>
   <form id="access-form">
     <button type="button" class="language-toggle" aria-label="Switch to Chinese">中文</button>
     <img class="access-brand" src="/3628/book/logo.svg" alt="3628 New York" width="300" height="140">
     <p class="eyebrow">PRIVATE BOOKING</p><h2 id="access-title" tabindex="-1" autofocus>Enter your customer ID</h2>
     <p class="access-caption">A private invitation. Your next visit.</p>
-    <label for="customer-id">Customer ID</label><input id="customer-id" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="60" required placeholder="Your customer ID">
+    <p class="access-note" id="access-note">To help prevent unauthorized bookings and ensure a smooth experience for all clients, a Customer ID is required. Please contact Jay to obtain your Customer ID. Thank you for your understanding.</p>
+    <label for="customer-id">Customer ID</label><input id="customer-id" aria-describedby="access-note" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="60" required placeholder="Your customer ID">
     <p id="access-error" role="alert"></p><button id="access-submit" type="submit">Done</button>
   </form>
 </dialog>

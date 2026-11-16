@@ -17,3 +17,4 @@
 #access-dialog{aspect-ratio:1;min-height:340px}
 #access-dialog[open]{display:grid;align-content:center}
 @media(max-height:480px){#access-dialog{aspect-ratio:auto;min-height:0}}
+#access-dialog{aspect-ratio:auto;overflow-y:auto}
