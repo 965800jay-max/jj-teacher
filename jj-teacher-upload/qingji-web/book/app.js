@@ -11,6 +11,7 @@ let submitting = false;
 let requestId = crypto.randomUUID();
 let previousPayload = '';
 let customerCredential = '';
+let customerName = '';
 const accessDialog = element('access-dialog');
 accessDialog.removeAttribute('open');
 accessDialog.showModal();
@@ -64,8 +65,7 @@ element('booking-form').addEventListener('submit', async event => {
   if (submitting || !service || !selectedSlot) return;
   if (element('website').value) return;
   if (!/^[+\d() .-]{7,30}$/.test(element('phone').value) || element('phone').value.replace(/\D/g, '').length < 7) { element('message').textContent = 'Please enter a valid phone number.'; return; }
-  if (!element('name').value.trim()) { element('message').textContent = 'Please enter your full name.'; return; }
-  const payload = { serviceId: service.id, startsAt: selectedSlot.startsAt, customerName: element('name').value.trim(), phone: element('phone').value.trim(), notes: element('notes').value.trim(), expectedPriceCents: service.priceCents, expectedDurationMinutes: service.durationMinutes };
+  const payload = { serviceId: service.id, startsAt: selectedSlot.startsAt, email: element('email').value.trim(), phone: element('phone').value.trim(), notes: element('notes').value.trim(), expectedPriceCents: service.priceCents, expectedDurationMinutes: service.durationMinutes };
   const serialized = JSON.stringify(payload);
   if (previousPayload && previousPayload !== serialized) requestId = crypto.randomUUID();
   previousPayload = serialized;
@@ -73,9 +73,10 @@ element('booking-form').addEventListener('submit', async event => {
   try {
     const result = await api('/appointments', { ...payload, requestId });
     element('booking').hidden = true; element('success').hidden = false; element('message').textContent = '';
-    element('confirmation').textContent = `${payload.customerName}\n${result.serviceName} · ${money(result.priceCents)}\n${element('date').value}\n${timeLabel(result.startsAt)} – ${timeLabel(result.endsAt)} · New York\nStatus: ${result.status}`;
+    element('confirmation').textContent = `${result.customerName || customerName}\n${result.serviceName} · ${money(result.priceCents)}\n${element('date').value}\n${timeLabel(result.startsAt)} – ${timeLabel(result.endsAt)} · New York\nStatus: ${result.status}`;
     element('reference').textContent = `Confirmation: ${result.reference}`;
-    element('name').value = ''; element('phone').value = ''; element('notes').value = '';
+    element('email-status').textContent = result.emailStatus === 'sent' ? 'Your confirmation email has been submitted to the mail server. Please check your inbox and spam folder.' : result.emailStatus === 'queued' ? 'Your booking is confirmed. Your confirmation email is queued for sending.' : result.emailStatus === 'failed' ? 'Your booking is confirmed, but the confirmation email could not be sent. Please save this confirmation.' : 'Your booking is confirmed. The shop has not connected email sending yet; no email has been sent. Please save this confirmation.';
+    element('email').value = ''; element('phone').value = ''; element('notes').value = '';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (error) {
     element('message').textContent = error.status ? error.message : 'Connection interrupted. Your appointment may already be confirmed. Retry without changing your details to avoid a duplicate.';
@@ -114,7 +115,9 @@ async function initialize(preloaded) {
 function lockAccess() {
   customerCredential = ''; slotsEpoch++; service = undefined; selectedSlot = undefined;
   element('fields').disabled = true; element('services').replaceChildren(); element('slots').replaceChildren();
-  element('name').value = ''; element('phone').value = ''; element('notes').value = '';
+  customerName = ''; element('customer-name').textContent = '';
+  element('email').value = ''; element('phone').value = ''; element('notes').value = '';
+  element('email-status').textContent = '';
   element('confirmation').textContent = ''; element('reference').textContent = '';
   element('content').hidden = true; element('content').inert = true;
   element('access-error').textContent = 'Please enter a valid customer ID from the shop owner.';
@@ -125,7 +128,9 @@ element('access-form').addEventListener('submit', async event => {
   customerCredential = element('customer-id').value.normalize('NFKC').replace(/[\s-]/g, '').toUpperCase();
   try {
     if (!/^(?:[A-Z0-9]{4,20}|[A-F0-9]{24})$/.test(customerCredential)) throw new Error('Please enter the customer ID provided by your shop.');
-    await api('/access', {});
+    const access = await api('/access', {});
+    customerName = access.customerName || 'Customer';
+    element('customer-name').textContent = `Booking for ${customerName}`;
     const initialCatalog = await api('/catalog');
     await initialize(initialCatalog);
     element('customer-id').value = ''; accessDialog.close();
