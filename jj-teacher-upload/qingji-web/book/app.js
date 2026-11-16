@@ -12,6 +12,8 @@ let requestId = crypto.randomUUID();
 let previousPayload = '';
 let customerCredential = '';
 let customerName = '';
+let editingAppointment;
+let upcomingCount = 0;
 const accessDialog = element('access-dialog');
 accessDialog.removeAttribute('open');
 accessDialog.showModal();
@@ -29,7 +31,8 @@ async function api(path, payload) {
   return data;
 }
 function summary() {
-  element('submit').disabled = !service || !selectedSlot || submitting;
+  element('submit').disabled = !service || !selectedSlot || submitting || (!editingAppointment && upcomingCount >= 3);
+  element('submit').textContent = editingAppointment ? 'Save appointment changes ↗' : 'Confirm appointment ↗';
   element('summary').textContent = service && selectedSlot ? `${service.name} · ${money(service.priceCents)}\n${element('date').value} · ${timeLabel(selectedSlot.startsAt)} – ${timeLabel(selectedSlot.endsAt)} (New York)` : 'Choose a service and time to continue.';
 }
 async function loadSlots(preserve = false) {
@@ -41,7 +44,7 @@ async function loadSlots(preserve = false) {
   summary();
   if (!service || !element('date').value) return;
   try {
-    const result = await api(`/slots?serviceId=${encodeURIComponent(service.id)}&date=${encodeURIComponent(element('date').value)}`);
+    const result = await api(`/slots?serviceId=${encodeURIComponent(service.id)}&date=${encodeURIComponent(element('date').value)}${editingAppointment ? `&appointmentId=${encodeURIComponent(editingAppointment.reference)}` : ''}`);
     if (epoch !== slotsEpoch) return;
     element('availability').textContent = result.slots.length ? 'Appointments start on the hour. Choose a start time; availability is checked again when you confirm.' : 'No available times on this date. Please choose another day. The shop may be closed or fully booked.';
     for (const slot of result.slots) {
@@ -71,30 +74,75 @@ element('booking-form').addEventListener('submit', async event => {
   previousPayload = serialized;
   submitting = true; element('fields').disabled = true; element('message').textContent = 'Confirming your appointment…'; summary();
   try {
-    const result = await api('/appointments', { ...payload, requestId });
+    const result = await api(editingAppointment ? '/change' : '/appointments', { ...payload, requestId, ...(editingAppointment ? { appointmentId: editingAppointment.reference, revision: editingAppointment.revision } : {}) });
+    editingAppointment = undefined;
     element('booking').hidden = true; element('success').hidden = false; element('message').textContent = '';
     element('confirmation').textContent = `${result.customerName || customerName}\n${result.serviceName} · ${money(result.priceCents)}\n${element('date').value}\n${timeLabel(result.startsAt)} – ${timeLabel(result.endsAt)} · New York\nStatus: ${result.status}`;
     element('reference').textContent = `Confirmation: ${result.reference}`;
     element('email-status').textContent = result.emailStatus === 'sent' ? 'Your confirmation email has been submitted to the mail server. Please check your inbox and spam folder.' : result.emailStatus === 'queued' ? 'Your booking is confirmed. Your confirmation email is queued for sending.' : result.emailStatus === 'failed' ? 'Your booking is confirmed, but the confirmation email could not be sent. Please save this confirmation.' : 'Your booking is confirmed. The shop has not connected email sending yet; no email has been sent. Please save this confirmation.';
     element('email').value = ''; element('phone').value = ''; element('notes').value = '';
+    await refreshAppointments().catch(() => {});
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (error) {
     element('message').textContent = error.status ? error.message : 'Connection interrupted. Your appointment may already be confirmed. Retry without changing your details to avoid a duplicate.';
-    if (error.status === 409) await loadSlots();
+    if (error.status === 409) { await refreshAppointments().catch(() => {}); await loadSlots(); }
   } finally { submitting = false; element('fields').disabled = false; summary(); }
 });
-element('another').addEventListener('click', () => {
+function newBooking() {
+  if (submitting) return;
+  editingAppointment = undefined;
+  element('booking-title').textContent = 'Book your next visit.'; element('cancel-edit').hidden = true;
+  element('email').value = ''; element('phone').value = ''; element('notes').value = '';
   element('booking').hidden = false; element('success').hidden = true; element('confirmation').textContent = ''; element('reference').textContent = '';
-  requestId = crypto.randomUUID(); previousPayload = ''; void loadSlots();
-});
+  element('message').textContent = '';
+  requestId = crypto.randomUUID(); previousPayload = ''; void initialize(catalog);
+}
+element('another').addEventListener('click', newBooking);
+element('cancel-edit').addEventListener('click', newBooking);
+async function refreshAppointments() {
+  const credential = customerCredential;
+  const data = await api('/my-appointments');
+  if (credential !== customerCredential || !customerCredential) return;
+  upcomingCount = data.upcomingCount;
+  element('my-bookings').hidden = false;
+  element('booking-count').textContent = `${upcomingCount} / 3`;
+  element('booking-limit').textContent = upcomingCount >= 3 ? 'Your ID has reached the limit of 3 upcoming appointments. You can change an existing appointment below.' : '';
+  element('my-appointments').replaceChildren();
+  for (const appointment of data.appointments) {
+    const card = document.createElement('div'); card.className = 'my-appointment';
+    const details = document.createElement('p');
+    const date = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' }).format(appointment.startsAt);
+    details.textContent = `${appointment.serviceName} · ${money(appointment.priceCents)}\n${date} · ${timeLabel(appointment.startsAt)} – ${timeLabel(appointment.endsAt)}`;
+    const button = document.createElement('button'); button.type = 'button'; button.textContent = appointment.canChange ? 'Change appointment' : 'Changes closed · less than 24 hours'; button.disabled = !appointment.canChange;
+    button.addEventListener('click', () => {
+      if (submitting) return;
+      editingAppointment = appointment; requestId = crypto.randomUUID(); previousPayload = '';
+      element('booking-title').textContent = 'Change your appointment.'; element('cancel-edit').hidden = false;
+      element('booking').hidden = false; element('success').hidden = true; element('message').textContent = '';
+      element('email').value = appointment.email; element('phone').value = appointment.phone; element('notes').value = appointment.notes;
+      void initialize(catalog);
+      element('booking').scrollIntoView({ behavior: 'smooth' });
+    });
+    card.append(details, button); element('my-appointments').append(card);
+  }
+  summary();
+}
+async function refreshVisible() {
+  if (!customerCredential || accessDialog.open || submitting) return;
+  try { await refreshAppointments(); if (service && !element('booking').hidden) await loadSlots(true); }
+  catch { if (customerCredential) element('message').textContent = 'Could not refresh your appointments. Please try again.'; }
+}
 async function initialize(preloaded) {
   try {
     catalog = preloaded || await api('/catalog');
     element('services').replaceChildren();
     element('date').min = catalog.today;
     const maximum = new Date(`${catalog.today}T12:00:00Z`); maximum.setUTCDate(maximum.getUTCDate() + 90);
-    element('date').max = maximum.toISOString().slice(0, 10); element('date').value = catalog.today;
-    for (const item of catalog.services) {
+    element('date').max = maximum.toISOString().slice(0, 10);
+    const editingDate = editingAppointment ? new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' }).format(editingAppointment.startsAt) : catalog.today;
+    element('date').value = editingDate;
+    const services = editingAppointment ? [{ id: editingAppointment.serviceId, name: editingAppointment.serviceName, priceCents: editingAppointment.priceCents, durationMinutes: editingAppointment.durationMinutes }] : catalog.services;
+    for (const item of services) {
       const button = document.createElement('button'); button.type = 'button'; button.className = 'service'; button.setAttribute('aria-pressed', 'false');
       const title = document.createElement('span'); title.textContent = item.name;
       const detail = document.createElement('small'); detail.textContent = `${item.durationMinutes} min`; title.append(detail);
@@ -108,7 +156,7 @@ async function initialize(preloaded) {
       element('services').append(button);
     }
     element('fields').disabled = false;
-    if (!catalog.services.length) element('message').textContent = 'Online booking is not yet available. Please contact the shop.';
+    if (!services.length) element('message').textContent = 'Online booking is not yet available. Please contact the shop.';
     else element('services').firstElementChild.click();
   } catch (error) { element('message').textContent = 'Online booking is temporarily unavailable. Please contact the shop or try again later.'; throw error; }
 }
@@ -116,6 +164,8 @@ function lockAccess() {
   customerCredential = ''; slotsEpoch++; service = undefined; selectedSlot = undefined;
   element('fields').disabled = true; element('services').replaceChildren(); element('slots').replaceChildren();
   customerName = '';
+  editingAppointment = undefined; upcomingCount = 0; element('my-appointments').replaceChildren(); element('my-bookings').hidden = true;
+  element('booking-title').textContent = 'Book your next visit.'; element('cancel-edit').hidden = true; element('booking-limit').textContent = '';
   element('email').value = ''; element('phone').value = ''; element('notes').value = '';
   element('email-status').textContent = '';
   element('confirmation').textContent = ''; element('reference').textContent = '';
@@ -132,6 +182,7 @@ element('access-form').addEventListener('submit', async event => {
     customerName = access.customerName || 'Customer';
     const initialCatalog = await api('/catalog');
     await initialize(initialCatalog);
+    await refreshAppointments();
     element('customer-id').value = ''; accessDialog.close();
     element('content').hidden = false; element('content').inert = false;
     element('booking').hidden = false; element('success').hidden = true;
@@ -140,5 +191,5 @@ element('access-form').addEventListener('submit', async event => {
   } catch (error) { customerCredential = ''; element('access-error').textContent = error.message; }
   finally { element('access-submit').disabled = false; }
 });
-window.addEventListener('focus', () => { if (service && !submitting && !element('booking').hidden) void loadSlots(true); });
-setInterval(() => { if (document.visibilityState === 'visible' && service && !submitting && !element('booking').hidden) void loadSlots(true); }, 20000);
+window.addEventListener('focus', () => void refreshVisible());
+setInterval(() => { if (document.visibilityState === 'visible') void refreshVisible(); }, 20000);

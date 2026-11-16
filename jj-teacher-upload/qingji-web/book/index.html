@@ -24,8 +24,10 @@
 </dialog>
 <main id="content" hidden inert>
   <header><a class="brand" href="/3628/book/" aria-label="3628 New York"><img class="brand-logo" src="/3628/book/logo.svg" alt="3628 New York" width="300" height="140"></a><span class="badge">APPOINTMENTS</span></header>
+  <section class="card" id="my-bookings" hidden><h2>My appointments <span id="booking-count"></span></h2><p class="hint">Up to 3 upcoming appointments per ID. Changes require at least 24 hours’ notice.</p><div id="my-appointments"></div><p id="booking-limit" role="status"></p></section>
   <section id="booking">
-    <h1>Book your<br>next visit.</h1>
+    <h1 id="booking-title">Book your<br>next visit.</h1>
+    <button type="button" id="cancel-edit" hidden>Back to new booking</button>
     <p class="intro">Choose a service and a time that works for you.</p>
     <form id="booking-form">
       <fieldset id="fields" disabled>
@@ -43,7 +45,7 @@
     </form>
   </section>
   <p id="message" role="alert"></p>
-  <section id="success" class="card" hidden><div class="check">✓</div><p class="eyebrow">YOU'RE ALL SET</p><h1>See you soon.</h1><p id="confirmation"></p><p id="reference" class="hint"></p><p id="email-status" class="privacy" role="status"></p><p class="privacy">Save this confirmation. For changes or cancellation, contact the shop directly.</p><button type="button" id="another">Book another appointment</button></section>
+  <section id="success" class="card" hidden><div class="check">✓</div><p class="eyebrow">YOU'RE ALL SET</p><h1>See you soon.</h1><p id="confirmation"></p><p id="reference" class="hint"></p><p id="email-status" class="privacy" role="status"></p><p class="privacy">Manage your booking in My appointments above. Changes close 24 hours before your appointment.</p><button type="button" id="another">Book another appointment</button></section>
   <footer>3628 New York · Simple, thoughtful appointments.</footer>
 </main>
 </body></html>
