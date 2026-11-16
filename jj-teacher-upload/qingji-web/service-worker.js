@@ -1,6 +1,6 @@
 const APP_ROOT = "/3628/";
-const CACHE = "3628-shell-e019befdabcb9385";
-const FILES = ["/3628/_expo/static/js/web/index-b48f73873114cef31b6bd149597e607b.js","/3628/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Feather.ca4b48e04dc1ce10bfbddb262c8b835f.ttf","/3628/book/access.css","/3628/book/app.js","/3628/book/brand.css","/3628/book/display.js","/3628/book/i18n.js","/3628/book/logo.svg","/3628/book/style.css","/3628/favicon.ico","/3628/icons/icon-180.png","/3628/icons/icon-192.png","/3628/icons/icon-512.png","/3628/manifest.webmanifest","/3628/metadata.json","/3628/register-pwa.js","/3628/"];
+const CACHE = "3628-shell-83a5d2a8bd59857a";
+const FILES = ["/3628/_expo/static/js/web/index-fb76614b178d7e2d48b440dd8d7f3356.js","/3628/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Feather.ca4b48e04dc1ce10bfbddb262c8b835f.ttf","/3628/book/access.css","/3628/book/app.js","/3628/book/brand.css","/3628/book/display.js","/3628/book/i18n.js","/3628/book/logo.svg","/3628/book/style.css","/3628/favicon.ico","/3628/icons/icon-180.png","/3628/icons/icon-192.png","/3628/icons/icon-512.png","/3628/manifest.webmanifest","/3628/metadata.json","/3628/register-pwa.js","/3628/"];
 const STATIC = new Set(FILES);
 
 self.addEventListener('install', event => {

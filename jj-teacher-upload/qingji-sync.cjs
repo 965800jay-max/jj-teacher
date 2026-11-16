@@ -1302,7 +1302,7 @@ var BookingStore = class {
       services: this.rows("SELECT * FROM booking_services WHERE owner_id=? ORDER BY rowid", owner).map((row) => this.service(row)),
       hours: this.rows("SELECT * FROM booking_hours WHERE owner_id=? ORDER BY weekday", owner).map((row) => ({ weekday: Number(row.weekday), opens: String(row.opens), closes: String(row.closes), closed: !!row.closed, configured: !!row.configured })),
       timeOff: this.rows("SELECT * FROM booking_time_off WHERE owner_id=? AND starts_at<? AND ends_at>? ORDER BY starts_at", owner, end, start).map((row) => ({ id: String(row.id), startsAt: Number(row.starts_at), endsAt: Number(row.ends_at), reason: String(row.reason) })),
-      appointments: this.rows("SELECT * FROM booking_appointments WHERE owner_id=? AND starts_at<? AND ends_at>? ORDER BY starts_at", owner, end, start).map((row) => ({ ...this.appointment(row), incomeRecorded: this.incomeRecorded(String(row.id)) }))
+      appointments: this.rows("SELECT * FROM booking_appointments WHERE owner_id=? AND starts_at<? AND ends_at>? ORDER BY starts_at", owner, end, start).map((row) => ({ ...this.appointment(row), bufferBefore: Number(row.buffer_before), bufferAfter: Number(row.buffer_after), incomeRecorded: this.incomeRecorded(String(row.id)) }))
     };
   }
   service(row) {
