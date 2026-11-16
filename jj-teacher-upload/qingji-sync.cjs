@@ -1314,7 +1314,7 @@ var BookingStore = class {
     if (!hours.configured || hours.closed) return { date, slots };
     const blocked = this.rows("SELECT occupied_start AS starts_at, occupied_end AS ends_at FROM booking_appointments WHERE owner_id=? AND status!='cancelled' AND occupied_start<? AND occupied_end>? UNION ALL SELECT starts_at,ends_at FROM booking_time_off WHERE owner_id=? AND starts_at<? AND ends_at>?", owner, nyInstant(shiftBookingDate(date, 1), "00:00"), nyInstant(date, "00:00"), owner, nyInstant(shiftBookingDate(date, 1), "00:00"), nyInstant(date, "00:00"));
     const duration = Number(service.duration_minutes) * 6e4;
-    for (let minute = 0; minute < 1440; minute += 15) {
+    for (let minute = 0; minute < 1440; minute += 60) {
       const time = `${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")}`;
       if (time < String(hours.opens) || time >= String(hours.closes)) continue;
       let startsAt;

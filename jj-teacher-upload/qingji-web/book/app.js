@@ -43,7 +43,7 @@ async function loadSlots(preserve = false) {
   try {
     const result = await api(`/slots?serviceId=${encodeURIComponent(service.id)}&date=${encodeURIComponent(element('date').value)}`);
     if (epoch !== slotsEpoch) return;
-    element('availability').textContent = result.slots.length ? 'Choose a start time. Availability is checked again when you confirm.' : 'No available times on this date. Please choose another day. The shop may be closed or fully booked.';
+    element('availability').textContent = result.slots.length ? 'Appointments start on the hour. Choose a start time; availability is checked again when you confirm.' : 'No available times on this date. Please choose another day. The shop may be closed or fully booked.';
     for (const slot of result.slots) {
       const button = document.createElement('button');
       button.type = 'button'; button.textContent = timeLabel(slot.startsAt); button.setAttribute('aria-pressed', 'false');
