@@ -1565,7 +1565,7 @@ var BookingStore = class {
       this.authorize(owner);
       check2(typeof input.id === "string" && this.rows("SELECT 1 FROM booking_customers WHERE id=? AND owner_id=?", input.id, owner).length, "\u5BA2\u6237\u4E0D\u5B58\u5728\u3002", 404);
       check2(typeof input.name === "string" && input.name.trim().length > 0 && input.name.length <= 80, "\u8BF7\u586B\u5199\u5BA2\u6237\u59D3\u540D\uFF0C\u6700\u591A80\u5B57\u3002");
-      check2(input.channel === void 0 || ["wechat", "ins"].includes(String(input.channel)), "\u8BF7\u9009\u62E9\u5FAE\u4FE1\u6216 INS \u6E20\u9053\u3002");
+      check2(input.channel === void 0 || ["wechat", "ins"].includes(String(input.channel)), "\u8BF7\u9009\u62E9 WeChat \u6216 instagram \u6E20\u9053\u3002");
       this.run("UPDATE booking_customers SET name=? WHERE owner_id=? AND id=?", input.name.trim(), owner, input.id);
       if (input.channel !== void 0) this.run("UPDATE booking_customers SET channel=? WHERE owner_id=? AND id=?", String(input.channel), owner, input.id);
       this.changed(owner, input.id, "customer-renamed");
@@ -1614,7 +1614,7 @@ var BookingStore = class {
     this.transaction(() => {
       this.authorize(owner);
       check2(typeof input.id === "string" && this.rows("SELECT 1 FROM booking_customers WHERE owner_id=? AND id=? AND deleted_at=0", owner, input.id).length, "\u5BA2\u6237\u4E0D\u5B58\u5728\u3002", 404);
-      check2(["wechat", "ins"].includes(String(input.channel)), "\u8BF7\u9009\u62E9\u5FAE\u4FE1\u6216 INS \u6E20\u9053\u3002");
+      check2(["wechat", "ins"].includes(String(input.channel)), "\u8BF7\u9009\u62E9 WeChat \u6216 instagram \u6E20\u9053\u3002");
       this.run("UPDATE booking_customers SET channel=? WHERE owner_id=? AND id=?", String(input.channel), owner, input.id);
       this.changed(owner, input.id, "customer-channel");
     });
@@ -1642,7 +1642,7 @@ var BookingStore = class {
       this.authorize(owner);
       check2(!manual || typeof input.code === "string" && /^[A-Z0-9]{4,20}$/.test(code2), "\u5BA2\u6237 ID \u8BF7\u586B\u51994\u201320\u4F4D\u6570\u5B57\u6216\u82F1\u6587\u5B57\u6BCD\u3002");
       check2(input.name === void 0 || typeof input.name === "string" && input.name.length <= 80, "\u5BA2\u6237\u540D\u79F0\u6700\u591A80\u5B57\u3002");
-      check2(input.channel === void 0 || ["wechat", "ins"].includes(String(input.channel)), "\u8BF7\u9009\u62E9\u5FAE\u4FE1\u6216 INS \u6E20\u9053\u3002");
+      check2(input.channel === void 0 || ["wechat", "ins"].includes(String(input.channel)), "\u8BF7\u9009\u62E9 WeChat \u6216 instagram \u6E20\u9053\u3002");
       const hash2 = (0, import_node_crypto3.createHash)("sha256").update(code2).digest("hex");
       check2(!this.rows("SELECT id FROM booking_customers WHERE code_hash=?", hash2).length, "\u6B64 ID \u5DF2\u88AB\u4F7F\u7528\uFF0C\u8BF7\u6362\u4E00\u4E2A\u3002", 409);
       this.run("INSERT INTO booking_customers(id,owner_id,name,code_hash,suffix,active,created_at,encrypted_code) VALUES (?,?,?,?,?,1,?,?)", id, owner, typeof input.name === "string" && input.name.trim() ? input.name.trim() : "\u672A\u547D\u540D\u5BA2\u6237", hash2, code2.slice(-4), Date.now(), this.vault.seal(code2, `${owner}:${id}`));
