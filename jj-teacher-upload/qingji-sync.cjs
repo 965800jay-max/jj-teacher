@@ -14756,7 +14756,9 @@ Your appointment with 3628 New York is confirmed.
 
 Service: ${mail.serviceName}
 Date: ${start.date}
-Time: ${start.time}\u2013${end.time} (America/New_York)
+Time: ${start.time}\u2013${end.time} (New York time)
+Location: 132-50 41st Ave, 5th Floor
+Flushing, NY 11354
 Price: ${usd(mail.priceCents)} USD
 Confirmation: ${mail.id}
 
@@ -14771,7 +14773,6 @@ function escapeHtml(value) {
 function confirmationHtml(mail) {
   const date = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "long", month: "long", day: "numeric", year: "numeric" }).format(mail.startsAt);
   const formatTime = (instant) => new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" }).format(instant);
-  const zone = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", timeZoneName: "short" }).formatToParts(mail.startsAt).find((part) => part.type === "timeZoneName").value;
   const time = `${formatTime(mail.startsAt)} \u2013 ${formatTime(mail.endsAt)}`;
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>Your appointment is confirmed \xB7 3628 New York</title></head>
@@ -14782,7 +14783,6 @@ function confirmationHtml(mail) {
 <tr><td align="center" style="padding:34px 24px 28px;border-bottom:1px solid #eeeeee;">
 <div style="font-family:Georgia,'Times New Roman',serif;font-size:46px;font-style:italic;letter-spacing:-3px;line-height:1;">3628</div>
 <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-style:italic;letter-spacing:-1px;line-height:1.3;">New York</div>
-<div style="margin-top:16px;font-size:9px;letter-spacing:3px;color:#777777;">A LITTLE TIME FOR YOURSELF</div>
 </td></tr>
 <tr><td style="padding:32px 28px 14px;">
 <span style="display:inline-block;background-color:#161616;color:#ffffff;border-radius:20px;padding:8px 13px;font-size:10px;letter-spacing:2px;">&#10003; CONFIRMED</span>
@@ -14795,7 +14795,7 @@ function confirmationHtml(mail) {
 <div style="font-size:10px;letter-spacing:2px;color:#777777;">YOUR VISIT</div>
 <p style="margin:12px 0 5px;font-size:19px;line-height:1.45;font-weight:700;">${escapeHtml(date)}</p>
 <p style="margin:0;font-size:19px;line-height:1.5;">${escapeHtml(time)}</p>
-<p style="margin:5px 0 0;font-size:12px;line-height:1.6;color:#777777;">New York \xB7 ${escapeHtml(zone)}<br>America/New_York</p>
+<p style="margin:5px 0 0;font-size:12px;line-height:1.6;color:#777777;">132-50 41st Ave, 5th Floor<br>Flushing, NY 11354</p>
 </td></tr>
 <tr><td style="padding:0 20px 20px;">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-top:1px solid #dedede;"><tr>
