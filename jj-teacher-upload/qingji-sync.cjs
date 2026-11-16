@@ -14765,6 +14765,53 @@ To change or cancel your appointment, please contact your stylist directly.
 See you soon,
 3628 New York`;
 }
+function escapeHtml(value) {
+  return value.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
+}
+function confirmationHtml(mail) {
+  const date = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "long", month: "long", day: "numeric", year: "numeric" }).format(mail.startsAt);
+  const formatTime = (instant) => new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" }).format(instant);
+  const zone = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", timeZoneName: "short" }).formatToParts(mail.startsAt).find((part) => part.type === "timeZoneName").value;
+  const time = `${formatTime(mail.startsAt)} \u2013 ${formatTime(mail.endsAt)}`;
+  return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>Your appointment is confirmed \xB7 3628 New York</title></head>
+<body style="margin:0;padding:0;background-color:#f3f3f3;color:#161616;font-family:Arial,Helvetica,sans-serif;-webkit-text-size-adjust:100%;">
+<div style="display:none;font-size:1px;color:#f3f3f3;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">Your appointment is confirmed. ${escapeHtml(date)} \xB7 ${escapeHtml(time)} \xB7 New York.</div>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f3f3f3;"><tr><td align="center" style="padding:32px 12px;">
+<table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:560px;background-color:#ffffff;border:1px solid #e4e4e4;border-radius:24px;">
+<tr><td align="center" style="padding:34px 24px 28px;border-bottom:1px solid #eeeeee;">
+<div style="font-family:Georgia,'Times New Roman',serif;font-size:46px;font-style:italic;letter-spacing:-3px;line-height:1;">3628</div>
+<div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-style:italic;letter-spacing:-1px;line-height:1.3;">New York</div>
+<div style="margin-top:16px;font-size:9px;letter-spacing:3px;color:#777777;">A LITTLE TIME FOR YOURSELF</div>
+</td></tr>
+<tr><td style="padding:32px 28px 14px;">
+<span style="display:inline-block;background-color:#161616;color:#ffffff;border-radius:20px;padding:8px 13px;font-size:10px;letter-spacing:2px;">&#10003; CONFIRMED</span>
+<h1 style="margin:20px 0 12px;font-size:36px;line-height:1.1;letter-spacing:-1.5px;font-weight:700;">You're booked.</h1>
+<p style="margin:0;font-size:15px;line-height:1.7;color:#626262;">Hi ${escapeHtml(mail.customerName)},<br>Your appointment is confirmed. We look forward to seeing you.</p>
+</td></tr>
+<tr><td style="padding:14px 28px 24px;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f7f7f7;border:1px solid #ededed;border-radius:16px;">
+<tr><td style="padding:22px 20px 18px;">
+<div style="font-size:10px;letter-spacing:2px;color:#777777;">YOUR VISIT</div>
+<p style="margin:12px 0 5px;font-size:19px;line-height:1.45;font-weight:700;">${escapeHtml(date)}</p>
+<p style="margin:0;font-size:19px;line-height:1.5;">${escapeHtml(time)}</p>
+<p style="margin:5px 0 0;font-size:12px;line-height:1.6;color:#777777;">New York \xB7 ${escapeHtml(zone)}<br>America/New_York</p>
+</td></tr>
+<tr><td style="padding:0 20px 20px;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-top:1px solid #dedede;"><tr>
+<td valign="top" style="padding-top:17px;padding-right:12px;font-size:15px;line-height:1.6;font-weight:700;overflow-wrap:anywhere;">${escapeHtml(mail.serviceName)}</td>
+<td align="right" valign="top" style="padding-top:17px;font-size:15px;line-height:1.6;white-space:nowrap;">${escapeHtml(usd(mail.priceCents))}<br><span style="font-size:10px;letter-spacing:1px;color:#777777;">USD</span></td>
+</tr></table></td></tr>
+</table>
+<p style="margin:22px 0 0;font-size:13px;line-height:1.8;color:#626262;">Need to change or cancel?<br>Please contact your stylist directly.</p>
+<p style="margin:20px 0 0;font-size:10px;line-height:1.8;color:#888888;letter-spacing:1px;">CONFIRMATION REFERENCE</p>
+<p style="margin:3px 0 0;font-size:11px;line-height:1.8;color:#777777;overflow-wrap:anywhere;word-break:break-all;">${escapeHtml(mail.id)}</p>
+</td></tr>
+<tr><td align="center" style="padding:22px 28px 26px;border-top:1px solid #eeeeee;"><p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:19px;font-style:italic;">See you soon.</p><p style="margin:9px 0 0;font-size:10px;color:#888888;letter-spacing:2px;">3628 NEW YORK</p></td></tr>
+</table>
+<p style="margin:18px 0 0;font-size:10px;line-height:1.7;color:#888888;">Appointment confirmation \xB7 Please keep this email for your records.</p>
+</td></tr></table></body></html>`;
+}
 function smtpSender(env) {
   const host = env.BOOKING_SMTP_HOST;
   const user = env.BOOKING_SMTP_USER;
@@ -14774,7 +14821,7 @@ function smtpSender(env) {
   if (!host || !user || !password || !from || !/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(from) || ![465, 587].includes(port)) return null;
   const transport = nodemailer_default.createTransport({ host, port, secure: port === 465, requireTLS: true, auth: { user, pass: password }, connectionTimeout: 15e3, greetingTimeout: 15e3, socketTimeout: 3e4, disableFileAccess: true, disableUrlAccess: true, logger: false, debug: false });
   return async (mail) => {
-    const result = await transport.sendMail({ from: { name: "3628 New York", address: from }, to: mail.email, subject: "3628 New York \u2014 Appointment confirmed", text: confirmationText(mail), messageId: `<booking-${mail.id}@${from.split("@")[1]}>` });
+    const result = await transport.sendMail({ from: { name: "3628 New York", address: from }, to: mail.email, subject: "3628 New York \u2014 Appointment confirmed", text: confirmationText(mail), html: confirmationHtml(mail), messageId: `<booking-${mail.id}@${from.split("@")[1]}>` });
     if (!result.accepted?.length || result.rejected?.length) throw new Error("SMTP_RECIPIENT_REJECTED");
   };
 }
