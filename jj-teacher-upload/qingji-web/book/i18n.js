@@ -83,7 +83,7 @@
   function translate(text) {
     const trimmed = text.trim();
     if (Object.hasOwn(phrases, trimmed)) return text.replace(trimmed, phrases[trimmed]);
-    if (/^\d+ min$/.test(trimmed)) return text.replace(' min', ' 分钟');
+    if (/^\d+(?:–\d+)? min$/.test(trimmed)) return text.replace(' min', ' 分钟');
     if (text.startsWith('Confirmation: ')) return text.replace('Confirmation: ', '预约编号：');
     return text.replace(/\(New York\)$/gm, '（纽约时间）').replace(/ · New York$/gm, ' · 纽约时间').replace(/^Status: confirmed$/gm, '状态：已确认');
   }

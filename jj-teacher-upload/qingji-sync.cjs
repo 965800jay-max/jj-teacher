@@ -1272,7 +1272,7 @@ var BookingStore = class {
       const input = raw;
       check2(typeof input.serviceId === "string", "\u8BF7\u9009\u62E9\u670D\u52A1\u3002");
       check2(typeof input.customerName === "string" && input.customerName.trim().length > 0 && input.customerName.length <= 80, "\u8BF7\u586B\u5199\u5BA2\u6237\u59D3\u540D\uFF08\u6700\u591A80\u5B57\uFF09\u3002");
-      check2(typeof input.phone === "string" && /^[+\d() .-]{7,30}$/.test(input.phone) && input.phone.replace(/\D/g, "").length >= 7, "\u8BF7\u586B\u5199\u6709\u6548\u8054\u7CFB\u7535\u8BDD\u3002");
+      check2(typeof input.phone === "string" && (input.phone.trim() === "" || /^[+\d() .-]{7,30}$/.test(input.phone) && input.phone.replace(/\D/g, "").length >= 7), "\u8BF7\u586B\u5199\u6709\u6548\u8054\u7CFB\u7535\u8BDD\u3002");
       check2(typeof input.notes === "string" && input.notes.length <= 500, "\u5907\u6CE8\u6700\u591A500\u5B57\u3002");
       check2(["confirmed", "completed"].includes(input.status), "\u8BF7\u4F7F\u7528\u53D6\u6D88\u64CD\u4F5C\u53D6\u6D88\u9884\u7EA6\u3002");
       check2(Number.isSafeInteger(input.priceCents) && input.priceCents >= 0 && input.priceCents <= 999999999, "\u4EF7\u683C\u65E0\u6548\u3002");
@@ -1342,6 +1342,7 @@ var BookingStore = class {
     return { date, slots };
   }
   publicBook(code2, input, customerId) {
+    input = { ...input, phone: input.phone === void 0 ? "" : input.phone };
     const owner = this.publicOwner(code2);
     check2(typeof input.requestId === "string" && /^[a-zA-Z0-9_-]{20,80}$/.test(input.requestId), "Invalid submission ID.");
     check2(typeof input.phone === "string" && typeof input.notes === "string" && typeof input.serviceId === "string" && Number.isSafeInteger(input.startsAt), "Please complete all required fields.");
@@ -1397,6 +1398,7 @@ var BookingStore = class {
     return { date, slots: this.publicSlots(code2, String(row.service_id), date, now, row).slots.filter((slot) => slot.startsAt - now >= 864e5) };
   }
   publicChange(code2, customerId, id, input) {
+    input = { ...input, phone: input.phone === void 0 ? "" : input.phone };
     check2(typeof input.requestId === "string" && /^[a-zA-Z0-9_-]{20,80}$/.test(input.requestId), "Invalid submission ID.");
     check2(Number.isSafeInteger(input.startsAt) && Number.isSafeInteger(input.revision), "Please refresh your appointment before changing it.");
     const email = this.validEmail(input.email);

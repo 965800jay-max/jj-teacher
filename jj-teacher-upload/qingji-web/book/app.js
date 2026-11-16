@@ -76,7 +76,8 @@ element('policy-confirm').addEventListener('click', () => {
 });
 function readyToSubmit() {
   if (submitting || !service || !selectedSlot || !customerCredential || (!editingAppointment && upcomingCount >= 3) || element('website').value || !element('booking-form').reportValidity()) return false;
-  if (!/^[+\d() .-]{7,30}$/.test(element('phone').value) || element('phone').value.replace(/\D/g, '').length < 7) { element('message').textContent = 'Please enter a valid phone number.'; return false; }
+  const phone = element('phone').value.trim();
+  if (phone && (!/^[+\d() .-]{7,30}$/.test(phone) || phone.replace(/\D/g, '').length < 7)) { element('message').textContent = 'Please enter a valid phone number.'; return false; }
   return true;
 }
 async function submitBooking() {
@@ -158,7 +159,7 @@ async function initialize(preloaded) {
     for (const item of services) {
       const button = document.createElement('button'); button.type = 'button'; button.className = 'service'; button.setAttribute('aria-pressed', 'false');
       const title = document.createElement('span'); title.textContent = item.name;
-      const detail = document.createElement('small'); detail.textContent = `${item.durationMinutes} min`; title.append(detail);
+      const detail = document.createElement('small'); detail.textContent = window.BookingDisplay.serviceDurationLabel(item); title.append(detail);
       const price = document.createElement('span'); price.textContent = money(item.priceCents); button.append(title, price);
       button.addEventListener('click', () => {
         if (submitting) return;

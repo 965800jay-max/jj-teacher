@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="/3628/book/access.css">
   <link rel="stylesheet" href="/3628/book/brand.css">
   <script src="/3628/book/i18n.js" defer></script>
+  <script src="/3628/book/display.js" defer></script>
   <script src="/3628/book/app.js" defer></script>
 </head>
 <body>
@@ -44,7 +45,7 @@
         <section class="card">
           <h2><span>03</span> Your details</h2>
           <label for="email">Email address</label><input id="email" type="email" autocomplete="email" maxlength="254" required placeholder="you@example.com">
-          <label for="phone">Phone number</label><input id="phone" type="tel" autocomplete="tel" minlength="7" maxlength="30" required placeholder="(212) 555-0123">
+          <label for="phone">Phone number <span class="optional">(optional)</span></label><input id="phone" type="tel" autocomplete="tel" minlength="7" maxlength="30" placeholder="(212) 555-0123">
           <label for="notes">Notes <span class="optional">(optional)</span></label><textarea id="notes" maxlength="500" rows="3" placeholder="Anything you would like us to know?"></textarea>
           <div class="trap" aria-hidden="true"><label for="website">Leave blank</label><input id="website" tabindex="-1" autocomplete="off"></div>
         </section>
