@@ -1,4 +1,6 @@
 'use strict';
+const invitation = new URLSearchParams(location.hash.slice(1)).get('customerId');
+if (invitation !== null) history.replaceState(null, '', location.pathname + location.search);
 const element = id => document.getElementById(id);
 const shop = new URLSearchParams(location.search).get('shop') || '7629297118';
 document.querySelector('.brand').href = `/3628/book/?shop=${encodeURIComponent(shop)}`;
@@ -235,9 +237,12 @@ function lockAccess() {
   element('access-error').textContent = 'Please enter a valid customer ID from the shop owner.';
   if (!accessDialog.open) accessDialog.showModal();
 }
-element('access-form').addEventListener('submit', async event => {
-  event.preventDefault(); element('access-submit').disabled = true; element('access-error').textContent = '';
-  customerCredential = element('customer-id').value.normalize('NFKC').replace(/[\s-]/g, '').toUpperCase();
+let unlocking = false;
+async function unlockCustomer(code) {
+  if (unlocking) return;
+  unlocking = true;
+  element('access-submit').disabled = true; element('customer-id').disabled = true; element('access-error').textContent = '';
+  customerCredential = code.normalize('NFKC').replace(/[\s-]/g, '').toUpperCase();
   try {
     if (!/^(?:[A-Z0-9_]{4,20}|[A-F0-9]{24})$/.test(customerCredential)) throw new Error('Please enter the customer ID provided by your shop.');
     const access = await api('/access', {});
@@ -251,7 +256,11 @@ element('access-form').addEventListener('submit', async event => {
     element('message').textContent = '';
     requestId = crypto.randomUUID(); previousPayload = '';
   } catch (error) { customerCredential = ''; element('access-error').textContent = error.message; }
-  finally { element('access-submit').disabled = false; }
+  finally { unlocking = false; element('access-submit').disabled = false; element('customer-id').disabled = false; }
+}
+element('access-form').addEventListener('submit', event => {
+  event.preventDefault(); void unlockCustomer(element('customer-id').value);
 });
+if (invitation !== null) void unlockCustomer(invitation);
 window.addEventListener('focus', () => void refreshVisible());
 setInterval(() => { if (document.visibilityState === 'visible') void refreshVisible(); }, 20000);
