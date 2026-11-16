@@ -122,6 +122,8 @@ function validateLedger(value) {
     assert(entry.ownerName === void 0 || shortText(entry.ownerName, 24), "\u8D26\u76EE\u4E0A\u4F20\u8005\u59D3\u540D\u65E0\u6548\u3002");
     assert(entry.revision === void 0 || typeof entry.revision === "number" && Number.isSafeInteger(entry.revision) && entry.revision > 0, "\u8D26\u76EE\u7248\u672C\u65E0\u6548\u3002");
     assert(entry.sharedOnly === void 0 || typeof entry.sharedOnly === "boolean", "\u8D26\u76EE\u5206\u4EAB\u6807\u8BB0\u65E0\u6548\u3002");
+    assert(entry.currency === void 0 || entry.currency === "USD", "\u8D26\u76EE\u5E01\u79CD\u65E0\u6548\u3002");
+    assert(entry.bookingAppointmentId === void 0 || validId(entry.bookingAppointmentId) && entry.currency === "USD" && entry.kind === "income" && entry.friendId === null, "\u9884\u7EA6\u6536\u5165\u5173\u8054\u65E0\u6548\u3002");
     entryIds.add(entry.id);
   }
   const ledger = value;
@@ -391,7 +393,9 @@ var SyncStore = class {
     const rows = this.all(`SELECT e.*,u.name AS owner_name FROM entries e JOIN users u ON u.id=e.owner_id
       LEFT JOIN friendships f ON f.id=e.friendship_id WHERE e.deleted_at IS NULL
       AND (e.owner_id=? OR f.user_a=? OR f.user_b=?) ORDER BY e.created_at`, userId, userId, userId);
+    const bookingIncome = this.one("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_income'") ? new Map(this.all("SELECT b.entry_id,b.appointment_id FROM booking_income b JOIN entries e ON e.id=b.entry_id WHERE e.owner_id=?", userId).map((row) => [String(row.entry_id), String(row.appointment_id)])) : /* @__PURE__ */ new Map();
     const entries = rows.map((row) => entryForViewer({
+      ...bookingIncome.has(String(row.id)) ? { currency: "USD", bookingAppointmentId: bookingIncome.get(String(row.id)) } : {},
       id: String(row.id),
       ownerId: String(row.owner_id),
       kind: row.kind,
@@ -676,6 +680,7 @@ var SyncStore = class {
   writeEntry(userId, id, input, action) {
     check(/^[a-zA-Z0-9_-]{1,100}$/.test(id), "\u8D26\u76EE\u7F16\u53F7\u65E0\u6548\u3002");
     const existing = this.one("SELECT * FROM entries WHERE id=?", id);
+    if (this.one("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_income'")) check(!this.one("SELECT 1 FROM booking_income WHERE entry_id=?", id), "\u9884\u7EA6\u6536\u5165\u8BF7\u5230\u9884\u7EA6\u65E5\u5386\u53D6\u6D88\u6536\u6B3E\u52FE\u9009\u6216\u4FEE\u6539\uFF0C\u4E0D\u80FD\u5728\u8D26\u672C\u4E2D\u76F4\u63A5\u6539\u52A8\u3002", 409);
     if (action !== "create") {
       check(existing && !existing.deleted_at, "\u8FD9\u7B14\u8D26\u76EE\u5DF2\u4E0D\u5B58\u5728\uFF0C\u8BF7\u540C\u6B65\u540E\u91CD\u8BD5\u3002", 404);
       check(existing.owner_id === userId, "\u53EA\u80FD\u4FEE\u6539\u6216\u5220\u9664\u81EA\u5DF1\u4E0A\u4F20\u7684\u8D26\u76EE\u3002", 403);
@@ -767,9 +772,17 @@ var SyncStore = class {
 
 // server/booking/http.ts
 var connections = /* @__PURE__ */ new WeakMap();
-async function handleBooking(store, userId, request, response, url, body, send, authorizeSession) {
+async function handleBooking(store, userId, request, response, url, body, send, authorizeSession, notifyIncome = () => {
+}) {
   if (!url.pathname.startsWith("/v1/booking/")) return false;
   store.authorize(userId);
+  const income = /^\/v1\/booking\/appointments\/([a-zA-Z0-9_-]{1,100})\/income$/.exec(url.pathname);
+  if (request.method === "POST" && income) {
+    store.recordIncome(userId, income[1], await body());
+    notifyIncome();
+    send(200, { ok: true });
+    return true;
+  }
   if (request.method === "GET" && url.pathname === "/v1/booking/customers") {
     send(200, { customers: store.customers(userId, "", url.searchParams.get("deleted") === "1") });
     return true;
@@ -990,6 +1003,8 @@ function createSyncServer(store, options = {}) {
       if (options.rateLimit !== false) throttle(`user:${userId}`, 180);
       if (options.booking && await handleBooking(options.booking, userId, request, response, path3, () => body(request), (status, data) => send(response, status, data), () => {
         store.authenticate(token);
+      }, () => {
+        store.events.emit(userId);
       })) return;
       if (path3.pathname === "/v1/snapshot" && request.method === "GET") {
         const after = Number(path3.searchParams.get("after") ?? -1);
@@ -1202,6 +1217,7 @@ var BookingStore = class {
       CREATE TABLE IF NOT EXISTS booking_mail_outbox (appointment_id TEXT PRIMARY KEY REFERENCES booking_appointments(id), state TEXT NOT NULL CHECK(state IN ('pending','sending','sent','failed','cancelled')), attempts INTEGER NOT NULL DEFAULT 0, next_at INTEGER NOT NULL, created_at INTEGER NOT NULL, error TEXT NOT NULL DEFAULT '');
       CREATE INDEX IF NOT EXISTS booking_appointment_range ON booking_appointments(owner_id,starts_at,ends_at);
       CREATE INDEX IF NOT EXISTS booking_customer_lookup ON booking_customer_appointments(customer_id,appointment_id);
+      CREATE TABLE IF NOT EXISTS booking_income (appointment_id TEXT PRIMARY KEY REFERENCES booking_appointments(id), entry_id TEXT NOT NULL UNIQUE REFERENCES entries(id));
       CREATE INDEX IF NOT EXISTS booking_time_off_range ON booking_time_off(owner_id,starts_at,ends_at);
       DROP TRIGGER IF EXISTS booking_no_overlap_insert;
       DROP TRIGGER IF EXISTS booking_no_overlap_update;
@@ -1285,7 +1301,7 @@ var BookingStore = class {
       services: this.rows("SELECT * FROM booking_services WHERE owner_id=? ORDER BY rowid", owner).map((row) => this.service(row)),
       hours: this.rows("SELECT * FROM booking_hours WHERE owner_id=? ORDER BY weekday", owner).map((row) => ({ weekday: Number(row.weekday), opens: String(row.opens), closes: String(row.closes), closed: !!row.closed, configured: !!row.configured })),
       timeOff: this.rows("SELECT * FROM booking_time_off WHERE owner_id=? AND starts_at<? AND ends_at>? ORDER BY starts_at", owner, end, start).map((row) => ({ id: String(row.id), startsAt: Number(row.starts_at), endsAt: Number(row.ends_at), reason: String(row.reason) })),
-      appointments: this.rows("SELECT * FROM booking_appointments WHERE owner_id=? AND starts_at<? AND ends_at>? ORDER BY starts_at", owner, end, start).map((row) => this.appointment(row))
+      appointments: this.rows("SELECT * FROM booking_appointments WHERE owner_id=? AND starts_at<? AND ends_at>? ORDER BY starts_at", owner, end, start).map((row) => ({ ...this.appointment(row), incomeRecorded: this.incomeRecorded(String(row.id)) }))
     };
   }
   service(row) {
@@ -1295,6 +1311,40 @@ var BookingStore = class {
     const customer = this.rows("SELECT c.* FROM booking_customers c JOIN booking_customer_appointments a ON a.customer_id=c.id WHERE a.appointment_id=? AND c.owner_id=?", String(row.id), String(row.owner_id))[0];
     const customerCode = customer ? this.vault.open(String(customer.encrypted_code), `${customer.owner_id}:${customer.id}`) : void 0;
     return { id: String(row.id), customerName: customer ? String(customer.name) : String(row.customer_name), customerChannel: customer ? customer.channel : void 0, customerRecordId: customer ? String(customer.id) : void 0, customerCode, customerCodeSuffix: customer ? String(customer.suffix) : void 0, phone: String(row.phone), serviceId: String(row.service_id), serviceName: String(row.service_name), startsAt: Number(row.starts_at), endsAt: Number(row.ends_at), priceCents: Number(row.price_cents), notes: String(row.notes), status: row.status, revision: Number(row.revision), email: String(this.rows("SELECT email FROM booking_contacts WHERE appointment_id=?", String(row.id))[0]?.email ?? ""), emailStatus: this.emailStatus(String(row.id)) };
+  }
+  incomeRecorded(id) {
+    return !!this.rows("SELECT 1 FROM booking_income b JOIN entries e ON e.id=b.entry_id WHERE b.appointment_id=? AND e.deleted_at IS NULL", id).length;
+  }
+  recordIncome(owner, id, input) {
+    this.transaction(() => {
+      this.authorize(owner);
+      check2(typeof input.received === "boolean", "\u6536\u6B3E\u72B6\u6001\u65E0\u6548\u3002");
+      const row = this.rows("SELECT * FROM booking_appointments WHERE id=? AND owner_id=?", id, owner)[0];
+      check2(row, "\u9884\u7EA6\u4E0D\u5B58\u5728\u3002", 404);
+      if (this.incomeRecorded(id) === input.received) return;
+      check2(input.revision === row.revision, "\u9884\u7EA6\u5DF2\u66F4\u65B0\uFF0C\u8BF7\u5237\u65B0\u540E\u518D\u64CD\u4F5C\u3002", 409);
+      check2(row.status !== "cancelled", "\u5DF2\u53D6\u6D88\u7684\u9884\u7EA6\u4E0D\u80FD\u8BB0\u5165\u6536\u5165\u3002");
+      check2(Number(row.price_cents) > 0, "\u514D\u8D39\u9879\u76EE\u65E0\u9700\u8BB0\u5165\u6536\u5165\u3002");
+      const timestamp = (/* @__PURE__ */ new Date()).toISOString();
+      const previous = this.rows("SELECT entry_id FROM booking_income WHERE appointment_id=?", id)[0];
+      const entryId = previous ? String(previous.entry_id) : (0, import_node_crypto3.randomUUID)();
+      if (input.received) {
+        const appointment = this.appointment(row);
+        const reason = `\u9884\u7EA6\u6536\u5165 \xB7 ${appointment.serviceName} \xB7 ${appointment.customerName}`.slice(0, 80);
+        if (previous) this.run("UPDATE entries SET amount_cents=?,reason=?,occurred_on=?,updated_at=?,deleted_at=NULL,revision=revision+1 WHERE id=?", Number(row.price_cents), reason, nyParts(Number(row.starts_at)).date, timestamp, entryId);
+        else {
+          check2(Number(this.rows("SELECT count(*) AS count FROM entries WHERE owner_id=? AND deleted_at IS NULL", owner)[0].count) < 5e4, "\u8D26\u76EE\u6570\u91CF\u5DF2\u8FBE\u4E0A\u9650\u3002");
+          this.run("INSERT INTO entries(id,owner_id,friendship_id,kind,amount_cents,category,reason,occurred_on,created_at,updated_at) VALUES (?,?,NULL,'income',?,'\u5176\u4ED6',?,?,?,?)", entryId, owner, Number(row.price_cents), reason, nyParts(Number(row.starts_at)).date, timestamp, timestamp);
+          this.run("INSERT INTO booking_income(appointment_id,entry_id) VALUES (?,?)", id, entryId);
+        }
+      } else this.run("UPDATE entries SET deleted_at=?,updated_at=?,revision=revision+1 WHERE id=?", timestamp, timestamp, entryId);
+      const revision = Number(this.rows("SELECT revision FROM entries WHERE id=?", entryId)[0].revision);
+      this.run("INSERT INTO audit(actor_id,entry_id,action,revision,payload,created_at) VALUES (?,?,?,?,?,?)", owner, entryId, input.received ? "booking-income" : "booking-income-reversed", revision, JSON.stringify({ appointmentId: id, currency: "USD", amountCents: row.price_cents }), timestamp);
+      this.run("UPDATE booking_appointments SET revision=revision+1,updated_at=? WHERE id=?", Date.now(), id);
+      this.run("UPDATE users SET revision=revision+1 WHERE id=?", owner);
+      this.changed(owner, id, "income");
+    });
+    this.events.emit(owner);
   }
   saveService(owner, input) {
     this.transaction(() => {
@@ -1350,6 +1400,7 @@ var BookingStore = class {
   writeAppointment(owner, id, raw, cancel = false) {
     this.authorize(owner);
     const old = this.rows("SELECT * FROM booking_appointments WHERE id=? AND owner_id=?", id, owner)[0];
+    check2(!old || !this.incomeRecorded(id), "\u6B64\u9884\u7EA6\u5DF2\u8BB0\u5165\u6536\u5165\uFF0C\u8BF7\u5148\u53D6\u6D88\u6536\u6B3E\u52FE\u9009\u518D\u4FEE\u6539\u6216\u53D6\u6D88\u3002", 409);
     if (raw.revision !== void 0 || cancel) check2(old && raw.revision === old.revision, "\u9884\u7EA6\u5DF2\u88AB\u4FEE\u6539\u6216\u4E0D\u5B58\u5728\uFF0C\u8BF7\u5237\u65B0\u91CD\u8BD5\u3002", 409);
     else check2(!this.rows("SELECT id FROM booking_appointments WHERE id=?", id).length, "\u9884\u7EA6\u7F16\u53F7\u91CD\u590D\uFF0C\u8BF7\u5237\u65B0\u3002", 409);
     if (cancel) {
@@ -15097,7 +15148,7 @@ function handle(request, response) {
     const store = new SyncStore(databasePath);
     const customerColumns = store.database.prepare("PRAGMA table_info(booking_customers)").all().map((column) => column.name);
     const hasCustomerCodes = ["encrypted_code", "channel", "deleted_at"].every((column) => customerColumns.includes(column));
-    if (!store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_mail_outbox'").get() || !hasCustomerCodes) {
+    if (!store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_mail_outbox'").get() || !hasCustomerCodes || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_income'").get()) {
       const backup = `${databasePath}.before-booking-${Date.now()}.bak`;
       store.database.exec(`VACUUM INTO '${backup.replaceAll("'", "''")}'`);
       (0, import_node_fs5.chmodSync)(backup, 384);
