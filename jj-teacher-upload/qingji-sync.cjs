@@ -33,7 +33,7 @@ __export(mount_exports, {
   handle: () => handle
 });
 module.exports = __toCommonJS(mount_exports);
-var import_node_fs4 = require("node:fs");
+var import_node_fs5 = require("node:fs");
 var import_node_path3 = require("node:path");
 
 // server/http.ts
@@ -788,6 +788,11 @@ async function handleBooking(store, userId, request, response, url, body, send, 
     send(200, { ok: true });
     return true;
   }
+  if (request.method === "POST" && url.pathname === "/v1/booking/customers/code") {
+    store.restoreCustomerCode(userId, await body());
+    send(200, { ok: true });
+    return true;
+  }
   const mailRetry = /^\/v1\/booking\/appointments\/([a-zA-Z0-9_-]{1,100})\/email-retry$/.exec(url.pathname);
   if (request.method === "POST" && mailRetry) {
     store.retryMail(userId, mailRetry[1]);
@@ -1052,8 +1057,59 @@ function createSyncServer(store, options = {}) {
 }
 
 // server/booking/store.ts
-var import_node_crypto2 = require("node:crypto");
+var import_node_crypto3 = require("node:crypto");
 var import_node_events2 = require("node:events");
+
+// server/booking/customer-vault.ts
+var import_node_crypto2 = require("node:crypto");
+var import_node_fs = require("node:fs");
+var memoryKeys = /* @__PURE__ */ new WeakMap();
+var CustomerVault = class {
+  constructor(db) {
+    this.db = db;
+  }
+  db;
+  key;
+  getKey() {
+    if (this.key) return this.key;
+    const file = String(this.db.prepare("PRAGMA database_list").get().file || "");
+    if (!file) {
+      let key2 = memoryKeys.get(this.db);
+      if (!key2) {
+        key2 = (0, import_node_crypto2.randomBytes)(32);
+        memoryKeys.set(this.db, key2);
+      }
+      return this.key = key2;
+    }
+    const path3 = `${file}.booking-key`;
+    if (!(0, import_node_fs.existsSync)(path3)) {
+      if (this.db.prepare("SELECT 1 FROM booking_customers WHERE encrypted_code!='' LIMIT 1").get()) throw new Error("\u5BA2\u6237 ID \u52A0\u5BC6\u5BC6\u94A5\u7F3A\u5931\uFF0C\u8BF7\u6062\u590D\u539F\u5BC6\u94A5\u6587\u4EF6\u3002");
+      try {
+        (0, import_node_fs.writeFileSync)(path3, (0, import_node_crypto2.randomBytes)(32), { flag: "wx", mode: 384 });
+      } catch (error2) {
+        if (error2.code !== "EEXIST") throw error2;
+      }
+    }
+    const key = (0, import_node_fs.readFileSync)(path3);
+    if (key.length !== 32) throw new Error("\u5BA2\u6237 ID \u52A0\u5BC6\u5BC6\u94A5\u65E0\u6548\u3002");
+    return this.key = key;
+  }
+  seal(code2, context) {
+    const nonce = (0, import_node_crypto2.randomBytes)(12);
+    const cipher = (0, import_node_crypto2.createCipheriv)("aes-256-gcm", this.getKey(), nonce);
+    cipher.setAAD(Buffer.from(context));
+    const encrypted = Buffer.concat([cipher.update(code2, "utf8"), cipher.final()]);
+    return Buffer.concat([nonce, cipher.getAuthTag(), encrypted]).toString("base64");
+  }
+  open(value, context) {
+    if (!value) return "";
+    const data = Buffer.from(value, "base64");
+    const decipher = (0, import_node_crypto2.createDecipheriv)("aes-256-gcm", this.getKey(), data.subarray(0, 12));
+    decipher.setAAD(Buffer.from(context));
+    decipher.setAuthTag(data.subarray(12, 28));
+    return Buffer.concat([decipher.update(data.subarray(28)), decipher.final()]).toString("utf8");
+  }
+};
 
 // src/domain/booking.ts
 var BOOKING_ZONE = "America/New_York";
@@ -1142,14 +1198,17 @@ var BookingStore = class {
         SELECT RAISE(ABORT,'BOOKING_CONFLICT') WHERE EXISTS(SELECT 1 FROM booking_appointments WHERE owner_id=NEW.owner_id AND status!='cancelled' AND occupied_start<NEW.ends_at AND occupied_end>NEW.starts_at);
       END;
     `);
+      if (!db.prepare("PRAGMA table_info(booking_customers)").all().some((column) => column.name === "encrypted_code")) db.exec("ALTER TABLE booking_customers ADD COLUMN encrypted_code TEXT NOT NULL DEFAULT ''");
       db.exec("COMMIT");
     } catch (cause) {
       db.exec("ROLLBACK");
       throw cause;
     }
+    this.vault = new CustomerVault(db);
     this.events.setMaxListeners(100);
   }
   db;
+  vault;
   events = new import_node_events2.EventEmitter();
   emailEnabled = false;
   rows(sql, ...params) {
@@ -1179,7 +1238,7 @@ var BookingStore = class {
     this.transaction(() => {
       if (this.rows("SELECT 1 FROM booking_owners WHERE user_id=?", owner).length) return;
       this.run("INSERT INTO booking_owners(user_id) VALUES (?)", owner);
-      for (const [name2, price, duration] of [["Men\u2019s Haircut", 6e3, 60], ["Korean Perm", 15e3, 120]]) this.run("INSERT INTO booking_services VALUES (?,?,?,?,?,?,?,1)", (0, import_node_crypto2.randomUUID)(), owner, name2, price, duration, 0, 0);
+      for (const [name2, price, duration] of [["Men\u2019s Haircut", 6e3, 60], ["Korean Perm", 15e3, 120]]) this.run("INSERT INTO booking_services VALUES (?,?,?,?,?,?,?,1)", (0, import_node_crypto3.randomUUID)(), owner, name2, price, duration, 0, 0);
       for (let weekday = 0; weekday < 7; weekday++) this.run("INSERT INTO booking_hours VALUES (?,?,?,?,?,?)", owner, weekday, "", "", 1, weekday === 1 ? 1 : 0);
     });
   }
@@ -1208,7 +1267,9 @@ var BookingStore = class {
     return { id: String(row.id), name: String(row.name), priceCents: Number(row.price_cents), durationMinutes: Number(row.duration_minutes), bufferBefore: Number(row.buffer_before), bufferAfter: Number(row.buffer_after), active: !!row.active };
   }
   appointment(row) {
-    return { id: String(row.id), customerName: String(row.customer_name), phone: String(row.phone), serviceId: String(row.service_id), serviceName: String(row.service_name), startsAt: Number(row.starts_at), endsAt: Number(row.ends_at), priceCents: Number(row.price_cents), notes: String(row.notes), status: row.status, revision: Number(row.revision), email: String(this.rows("SELECT email FROM booking_contacts WHERE appointment_id=?", String(row.id))[0]?.email ?? ""), emailStatus: this.emailStatus(String(row.id)) };
+    const customer = this.rows("SELECT c.* FROM booking_customers c JOIN booking_customer_appointments a ON a.customer_id=c.id WHERE a.appointment_id=? AND c.owner_id=?", String(row.id), String(row.owner_id))[0];
+    const customerCode = customer ? this.vault.open(String(customer.encrypted_code), `${customer.owner_id}:${customer.id}`) : void 0;
+    return { id: String(row.id), customerName: customer ? String(customer.name) : String(row.customer_name), customerRecordId: customer ? String(customer.id) : void 0, customerCode, customerCodeSuffix: customer ? String(customer.suffix) : void 0, phone: String(row.phone), serviceId: String(row.service_id), serviceName: String(row.service_name), startsAt: Number(row.starts_at), endsAt: Number(row.ends_at), priceCents: Number(row.price_cents), notes: String(row.notes), status: row.status, revision: Number(row.revision), email: String(this.rows("SELECT email FROM booking_contacts WHERE appointment_id=?", String(row.id))[0]?.email ?? ""), emailStatus: this.emailStatus(String(row.id)) };
   }
   saveService(owner, input) {
     this.transaction(() => {
@@ -1216,7 +1277,7 @@ var BookingStore = class {
       check2(typeof input.name === "string" && input.name.trim().length > 0 && input.name.length <= 80, "\u670D\u52A1\u540D\u79F0\u9700\u4E3A 1\u201380 \u5B57\u3002");
       for (const [key, min, max] of [["priceCents", 0, 999999999], ["durationMinutes", 5, 720], ["bufferBefore", 0, 180], ["bufferAfter", 0, 180]]) check2(Number.isSafeInteger(input[key]) && Number(input[key]) >= min && Number(input[key]) <= max, "\u670D\u52A1\u4EF7\u683C\u3001\u65F6\u957F\u6216\u7F13\u51B2\u65F6\u95F4\u65E0\u6548\u3002");
       check2(typeof input.active === "boolean", "\u670D\u52A1\u72B6\u6001\u65E0\u6548\u3002");
-      const id = typeof input.id === "string" ? input.id : (0, import_node_crypto2.randomUUID)();
+      const id = typeof input.id === "string" ? input.id : (0, import_node_crypto3.randomUUID)();
       if (input.id) check2(this.rows("SELECT id FROM booking_services WHERE id=? AND owner_id=?", id, owner).length, "\u670D\u52A1\u4E0D\u5B58\u5728\u3002", 404);
       this.run("INSERT INTO booking_services VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,price_cents=excluded.price_cents,duration_minutes=excluded.duration_minutes,buffer_before=excluded.buffer_before,buffer_after=excluded.buffer_after,active=excluded.active", id, owner, input.name.trim(), Number(input.priceCents), Number(input.durationMinutes), Number(input.bufferBefore), Number(input.bufferAfter), input.active ? 1 : 0);
       this.changed(owner, id, "service");
@@ -1243,7 +1304,7 @@ var BookingStore = class {
   saveTimeOff(owner, input) {
     this.transaction(() => {
       this.revision(owner, input.revision);
-      const target = typeof input.id === "string" ? input.id : (0, import_node_crypto2.randomUUID)();
+      const target = typeof input.id === "string" ? input.id : (0, import_node_crypto3.randomUUID)();
       if (input.remove === true) {
         check2(typeof input.id === "string" && this.rows("SELECT id FROM booking_time_off WHERE id=? AND owner_id=?", input.id, owner).length, "\u4F11\u5047\u8BB0\u5F55\u4E0D\u5B58\u5728\u3002", 404);
         this.run("DELETE FROM booking_time_off WHERE id=? AND owner_id=?", input.id, owner);
@@ -1347,7 +1408,7 @@ var BookingStore = class {
     check2(typeof input.requestId === "string" && /^[a-zA-Z0-9_-]{20,80}$/.test(input.requestId), "Invalid submission ID.");
     check2(typeof input.phone === "string" && typeof input.notes === "string" && typeof input.serviceId === "string" && Number.isSafeInteger(input.startsAt), "Please complete all required fields.");
     const email = this.validEmail(input.email);
-    const fingerprint = (0, import_node_crypto2.createHash)("sha256").update(JSON.stringify([input.serviceId, input.startsAt, customerId, input.phone, email, input.notes])).digest("hex");
+    const fingerprint = (0, import_node_crypto3.createHash)("sha256").update(JSON.stringify([input.serviceId, input.startsAt, customerId, input.phone, email, input.notes])).digest("hex");
     const result = this.transaction(() => {
       const customer = this.rows("SELECT id,name FROM booking_customers WHERE id=? AND owner_id=? AND active=1", customerId, owner)[0];
       check2(customer, "Please enter a valid customer ID from the shop owner.", 401);
@@ -1365,7 +1426,7 @@ var BookingStore = class {
       check2(slot, "This time is no longer available. Please choose another time.", 409);
       const service = this.rows("SELECT * FROM booking_services WHERE id=? AND owner_id=? AND active=1", input.serviceId, owner)[0];
       check2((input.expectedPriceCents === void 0 || input.expectedPriceCents === service.price_cents) && (input.expectedDurationMinutes === void 0 || input.expectedDurationMinutes === service.duration_minutes), "Service details have changed. Please reload this page before booking.", 409);
-      const id = (0, import_node_crypto2.randomUUID)();
+      const id = (0, import_node_crypto3.randomUUID)();
       this.writeAppointment(owner, id, { customerName: customer.name === "\u672A\u547D\u540D\u5BA2\u6237" ? "Customer" : customer.name, phone: input.phone, notes: input.notes, serviceId: input.serviceId, startsAt, endsAt: slot.endsAt, priceCents: Number(service.price_cents), status: "confirmed" });
       this.run("INSERT INTO booking_contacts VALUES (?,?)", id, email);
       this.run("INSERT INTO booking_mail_outbox(appointment_id,state,next_at,created_at) VALUES (?,'pending',?,?)", id, Date.now(), Date.now());
@@ -1402,7 +1463,7 @@ var BookingStore = class {
     check2(typeof input.requestId === "string" && /^[a-zA-Z0-9_-]{20,80}$/.test(input.requestId), "Invalid submission ID.");
     check2(Number.isSafeInteger(input.startsAt) && Number.isSafeInteger(input.revision), "Please refresh your appointment before changing it.");
     const email = this.validEmail(input.email);
-    const fingerprint = (0, import_node_crypto2.createHash)("sha256").update(JSON.stringify(["change", id, customerId, input.revision, input.startsAt, email, input.phone, input.notes])).digest("hex");
+    const fingerprint = (0, import_node_crypto3.createHash)("sha256").update(JSON.stringify(["change", id, customerId, input.revision, input.startsAt, email, input.phone, input.notes])).digest("hex");
     const result = this.transaction(() => {
       const row = this.customerAppointment(code2, customerId, id);
       const owner = String(row.owner_id);
@@ -1489,14 +1550,34 @@ var BookingStore = class {
     });
     this.events.emit(owner);
   }
+  restoreCustomerCode(owner, input) {
+    this.transaction(() => {
+      this.authorize(owner);
+      check2(typeof input.id === "string" && typeof input.code === "string" && input.code.length <= 100, "\u8BF7\u586B\u5199\u539F\u5BA2\u6237 ID\u3002");
+      const row = this.rows("SELECT id,code_hash FROM booking_customers WHERE owner_id=? AND id=?", owner, input.id)[0];
+      check2(row, "\u5BA2\u6237\u4E0D\u5B58\u5728\u3002", 404);
+      const code2 = input.code.normalize("NFKC").replace(/[\s-]/g, "").toUpperCase();
+      check2((0, import_node_crypto3.createHash)("sha256").update(code2).digest("hex") === row.code_hash, "\u6B64\u53F7\u7801\u4E0E\u539F\u5BA2\u6237 ID \u4E0D\u5339\u914D\uFF0C\u672A\u4F5C\u4EFB\u4F55\u4FEE\u6539\u3002");
+      this.run("UPDATE booking_customers SET encrypted_code=? WHERE owner_id=? AND id=?", this.vault.seal(code2, `${owner}:${row.id}`), owner, input.id);
+      this.changed(owner, input.id, "customer-id-restored");
+    });
+    this.events.emit(owner);
+  }
   customerAccess(code2, credential) {
     const owner = this.publicOwner(code2);
     check2(typeof credential === "string" && credential.length <= 100, "Please enter a valid customer ID from the shop owner.", 401);
     const normalized2 = credential.normalize("NFKC").replace(/[\s-]/g, "").toUpperCase();
     check2(/^(?:[A-Z0-9]{4,20}|[A-F0-9]{24})$/.test(normalized2), "Please enter a valid customer ID from the shop owner.", 401);
-    const hash2 = (0, import_node_crypto2.createHash)("sha256").update(normalized2).digest("hex");
-    const row = this.rows("SELECT id FROM booking_customers WHERE owner_id=? AND code_hash=? AND active=1", owner, hash2)[0];
+    const hash2 = (0, import_node_crypto3.createHash)("sha256").update(normalized2).digest("hex");
+    const row = this.rows("SELECT id,encrypted_code FROM booking_customers WHERE owner_id=? AND code_hash=? AND active=1", owner, hash2)[0];
     check2(row, "Please enter a valid customer ID from the shop owner.", 401);
+    if (!row.encrypted_code) {
+      this.transaction(() => {
+        this.run("UPDATE booking_customers SET encrypted_code=? WHERE id=? AND owner_id=? AND encrypted_code=''", this.vault.seal(normalized2, `${owner}:${row.id}`), String(row.id), owner);
+        this.changed(owner, String(row.id), "customer-id-restored");
+      });
+      this.events.emit(owner);
+    }
     return String(row.id);
   }
   customers(owner) {
@@ -1505,15 +1586,15 @@ var BookingStore = class {
   }
   createCustomer(owner, input) {
     const manual = input.code !== void 0;
-    const code2 = manual && typeof input.code === "string" ? input.code.normalize("NFKC").trim().toUpperCase() : (0, import_node_crypto2.randomBytes)(12).toString("hex").toUpperCase();
-    const id = (0, import_node_crypto2.randomUUID)();
+    const code2 = manual && typeof input.code === "string" ? input.code.normalize("NFKC").trim().toUpperCase() : (0, import_node_crypto3.randomBytes)(12).toString("hex").toUpperCase();
+    const id = (0, import_node_crypto3.randomUUID)();
     this.transaction(() => {
       this.authorize(owner);
       check2(!manual || typeof input.code === "string" && /^[A-Z0-9]{4,20}$/.test(code2), "\u5BA2\u6237 ID \u8BF7\u586B\u51994\u201320\u4F4D\u6570\u5B57\u6216\u82F1\u6587\u5B57\u6BCD\u3002");
       check2(input.name === void 0 || typeof input.name === "string" && input.name.length <= 80, "\u5BA2\u6237\u540D\u79F0\u6700\u591A80\u5B57\u3002");
-      const hash2 = (0, import_node_crypto2.createHash)("sha256").update(code2).digest("hex");
+      const hash2 = (0, import_node_crypto3.createHash)("sha256").update(code2).digest("hex");
       check2(!this.rows("SELECT id FROM booking_customers WHERE code_hash=?", hash2).length, "\u6B64 ID \u5DF2\u88AB\u4F7F\u7528\uFF0C\u8BF7\u6362\u4E00\u4E2A\u3002", 409);
-      this.run("INSERT INTO booking_customers VALUES (?,?,?,?,?,1,?)", id, owner, typeof input.name === "string" && input.name.trim() ? input.name.trim() : "\u672A\u547D\u540D\u5BA2\u6237", hash2, code2.slice(-4), Date.now());
+      this.run("INSERT INTO booking_customers(id,owner_id,name,code_hash,suffix,active,created_at,encrypted_code) VALUES (?,?,?,?,?,1,?,?)", id, owner, typeof input.name === "string" && input.name.trim() ? input.name.trim() : "\u672A\u547D\u540D\u5BA2\u6237", hash2, code2.slice(-4), Date.now(), this.vault.seal(code2, `${owner}:${id}`));
       this.changed(owner, id, "customer-created");
     });
     this.events.emit(owner);
@@ -1882,7 +1963,7 @@ var resolve = (from, to) => {
 
 // node_modules/nodemailer/dist/esm/shared/index.js
 var import_node_util2 = __toESM(require("node:util"), 1);
-var import_node_fs = __toESM(require("node:fs"), 1);
+var import_node_fs2 = __toESM(require("node:fs"), 1);
 
 // node_modules/nodemailer/dist/esm/fetch/index.js
 var import_node_http2 = __toESM(require("node:http"), 1);
@@ -2894,7 +2975,7 @@ function resolveContentValue(data, key, options, callback) {
         });
         return;
       }
-      return resolveStream(import_node_fs.default.createReadStream(content.path), callback);
+      return resolveStream(import_node_fs2.default.createReadStream(content.path), callback);
     }
   }
   if (typeof data[key].content === "string" && !["utf8", "usascii", "ascii"].includes(encoding)) {
@@ -5153,8 +5234,8 @@ function detectExtension(mimeType) {
 }
 
 // node_modules/nodemailer/dist/esm/mime-node/index.js
-var import_node_crypto3 = __toESM(require("node:crypto"), 1);
-var import_node_fs2 = __toESM(require("node:fs"), 1);
+var import_node_crypto4 = __toESM(require("node:crypto"), 1);
+var import_node_fs3 = __toESM(require("node:fs"), 1);
 var import_node_stream8 = require("node:stream");
 
 // node_modules/nodemailer/dist/esm/base64/index.js
@@ -7006,7 +7087,7 @@ var MimeNode = class _MimeNode {
   constructor(contentType, options) {
     this.nodeCounter = 0;
     options = options || {};
-    this.baseBoundary = _stripBoundaryControls(options.baseBoundary || import_node_crypto3.default.randomBytes(8).toString("hex"));
+    this.baseBoundary = _stripBoundaryControls(options.baseBoundary || import_node_crypto4.default.randomBytes(8).toString("hex"));
     this.boundaryPrefix = _stripBoundaryControls(options.boundaryPrefix || "--_NmP");
     this.disableFileAccess = !!options.disableFileAccess;
     this.disableUrlAccess = !!options.disableUrlAccess;
@@ -7781,7 +7862,7 @@ var MimeNode = class _MimeNode {
         });
         return contentStream;
       }
-      return import_node_fs2.default.createReadStream(content.path);
+      return import_node_fs3.default.createReadStream(content.path);
     }
     if (content && typeof content.href === "string") {
       if (this._accessDisabled("disableUrlAccess")) {
@@ -8183,8 +8264,8 @@ var MimeNode = class _MimeNode {
   _generateMessageId() {
     return "<" + [2, 2, 2, 6].reduce(
       // crux to generate UUID-like random strings
-      (prev, len) => prev + "-" + import_node_crypto3.default.randomBytes(len).toString("hex"),
-      import_node_crypto3.default.randomBytes(4).toString("hex")
+      (prev, len) => prev + "-" + import_node_crypto4.default.randomBytes(len).toString("hex"),
+      import_node_crypto4.default.randomBytes(4).toString("hex")
     ) + "@" + // try to use the domain of the FROM address or fallback to server hostname
     (this.getEnvelope().from || this.hostname || "localhost").split("@").pop() + ">";
   }
@@ -8872,7 +8953,7 @@ var message_parser_default = MessageParser;
 
 // node_modules/nodemailer/dist/esm/dkim/relaxed-body.js
 var import_node_stream10 = require("node:stream");
-var import_node_crypto4 = __toESM(require("node:crypto"), 1);
+var import_node_crypto5 = __toESM(require("node:crypto"), 1);
 var CHAR_CR = 13;
 var CHAR_LF = 10;
 var CHAR_SPACE = 32;
@@ -8883,7 +8964,7 @@ var RelaxedBody = class extends import_node_stream10.Transform {
   constructor(options) {
     super();
     options = options || {};
-    this.bodyHash = import_node_crypto4.default.createHash(options.hashAlgo || "sha256");
+    this.bodyHash = import_node_crypto5.default.createHash(options.hashAlgo || "sha256");
     this.byteLength = 0;
     this.debug = options.debug;
     this._debugBody = options.debug ? [] : false;
@@ -8993,7 +9074,7 @@ var RelaxedBody = class extends import_node_stream10.Transform {
 var relaxed_body_default = RelaxedBody;
 
 // node_modules/nodemailer/dist/esm/dkim/sign.js
-var import_node_crypto5 = __toESM(require("node:crypto"), 1);
+var import_node_crypto6 = __toESM(require("node:crypto"), 1);
 function unsupportedHashAlgoError(hashAlgo) {
   const err = new Error('Unsupported DKIM hash algorithm "' + hashAlgo + '"');
   err.code = ECONFIG;
@@ -9008,7 +9089,7 @@ function sign(headers, hashAlgo, bodyHash, options) {
   canonicalizedHeaderData.headers += "dkim-signature:" + relaxedHeaderLine(dkimHeader);
   let signer;
   try {
-    signer = import_node_crypto5.default.createSign(("rsa-" + hashAlgo).toUpperCase());
+    signer = import_node_crypto6.default.createSign(("rsa-" + hashAlgo).toUpperCase());
   } catch (_E) {
     throw unsupportedHashAlgoError(hashAlgo);
   }
@@ -9073,9 +9154,9 @@ function relaxedHeaderLine(line) {
 
 // node_modules/nodemailer/dist/esm/dkim/index.js
 var import_node_stream11 = require("node:stream");
-var import_node_fs3 = __toESM(require("node:fs"), 1);
+var import_node_fs4 = __toESM(require("node:fs"), 1);
 var import_node_path2 = __toESM(require("node:path"), 1);
-var import_node_crypto6 = __toESM(require("node:crypto"), 1);
+var import_node_crypto7 = __toESM(require("node:crypto"), 1);
 var DKIM_ALGO = "sha256";
 var MAX_MESSAGE_SIZE = 10 * 1024 * 1024;
 var DKIMSigner = class {
@@ -9088,7 +9169,7 @@ var DKIMSigner = class {
     this.chunks = [];
     this.chunklen = 0;
     this.readPos = 0;
-    this.cachePath = this.cacheDir ? import_node_path2.default.join(this.cacheDir, "message." + Date.now() + "-" + import_node_crypto6.default.randomBytes(14).toString("hex")) : false;
+    this.cachePath = this.cacheDir ? import_node_path2.default.join(this.cacheDir, "message." + Date.now() + "-" + import_node_crypto7.default.randomBytes(14).toString("hex")) : false;
     this.cache = false;
     this.headers = false;
     this.bodyHash = false;
@@ -9124,10 +9205,10 @@ var DKIMSigner = class {
     const cache = this.cache;
     this.cache = false;
     cache.destroy();
-    import_node_fs3.default.unlink(this.cachePath, () => false);
+    import_node_fs4.default.unlink(this.cachePath, () => false);
   }
   createReadCache() {
-    this.cache = import_node_fs3.default.createReadStream(this.cachePath);
+    this.cache = import_node_fs4.default.createReadStream(this.cachePath);
     this.cache.once("error", (err) => this.fail(err));
     this.cache.once("close", () => {
       this.cleanup();
@@ -9190,7 +9271,7 @@ var DKIMSigner = class {
   }
   createWriteCache() {
     this.output.usingCache = true;
-    this.cache = import_node_fs3.default.createWriteStream(this.cachePath, { mode: 384 });
+    this.cache = import_node_fs4.default.createWriteStream(this.cachePath, { mode: 384 });
     this.cache.once("error", (err) => {
       this.relaxedBody.unpipe(this.cache);
       this.relaxedBody.on("readable", () => {
@@ -9698,7 +9779,7 @@ var MailMessage = class {
 // node_modules/nodemailer/dist/esm/mailer/index.js
 var import_node_net6 = __toESM(require("node:net"), 1);
 var import_node_dns2 = __toESM(require("node:dns"), 1);
-var import_node_crypto7 = __toESM(require("node:crypto"), 1);
+var import_node_crypto8 = __toESM(require("node:crypto"), 1);
 var DEFAULT_MAX_RECIPIENTS = 1e5;
 function isAbortSignal(value) {
   return typeof value === "object" && value !== null && "aborted" in value && typeof value.addEventListener === "function" && typeof value.removeEventListener === "function";
@@ -10058,7 +10139,7 @@ var Mail = class extends import_node_events3.EventEmitter {
       }
       let cidCounter = 0;
       html = (html || "").toString().replace(/(<img\b[^<>]{0,1024} src\s{0,20}=[\s"']{0,20})(data:([^;"'<>\s]{1,255});[^"'>\s]+)/gi, (match, prefix, dataUri, mimeType) => {
-        const cid = import_node_crypto7.default.randomBytes(10).toString("hex") + "@localhost";
+        const cid = import_node_crypto8.default.randomBytes(10).toString("hex") + "@localhost";
         if (!mail.data.attachments) {
           mail.data.attachments = [];
         }
@@ -10093,7 +10174,7 @@ var import_node_events4 = require("node:events");
 var import_node_net7 = __toESM(require("node:net"), 1);
 var import_node_tls2 = __toESM(require("node:tls"), 1);
 var import_node_os2 = __toESM(require("node:os"), 1);
-var import_node_crypto8 = __toESM(require("node:crypto"), 1);
+var import_node_crypto9 = __toESM(require("node:crypto"), 1);
 
 // node_modules/nodemailer/dist/esm/smtp-connection/data-stream.js
 var import_node_stream12 = require("node:stream");
@@ -10258,7 +10339,7 @@ function maskAuthCommand(cmd) {
 var SMTPConnection = class extends import_node_events4.EventEmitter {
   constructor(options) {
     super(options);
-    this.id = import_node_crypto8.default.randomBytes(8).toString("base64").replace(/\W/g, "");
+    this.id = import_node_crypto9.default.randomBytes(8).toString("base64").replace(/\W/g, "");
     this.stage = "init";
     this.options = options || {};
     if (this.options.requireTLS && (this.options.ignoreTLS || this.options.opportunisticTLS)) {
@@ -11614,7 +11695,7 @@ var SMTPConnection = class extends import_node_events4.EventEmitter {
       return callback(this._formatError("Invalid login sequence while waiting for server challenge string", "EAUTH", str, "AUTH CRAM-MD5"));
     }
     const base64decoded = Buffer.from(challengeMatch[1], "base64").toString("ascii");
-    const hmacMD5 = import_node_crypto8.default.createHmac("md5", this._auth.credentials.pass);
+    const hmacMD5 = import_node_crypto9.default.createHmac("md5", this._auth.credentials.pass);
     hmacMD5.update(base64decoded);
     const prepended = this._auth.credentials.user + " " + hmacMD5.digest("hex");
     this._responseActions.push((str2) => {
@@ -11948,7 +12029,7 @@ var smtp_connection_default = SMTPConnection;
 
 // node_modules/nodemailer/dist/esm/xoauth2/index.js
 var import_node_stream14 = require("node:stream");
-var import_node_crypto9 = __toESM(require("node:crypto"), 1);
+var import_node_crypto10 = __toESM(require("node:crypto"), 1);
 var XOAuth2 = class extends import_node_stream14.Stream {
   constructor(options, logger) {
     super();
@@ -12271,7 +12352,7 @@ var XOAuth2 = class extends import_node_stream14.Stream {
    */
   jwtSignRS256(payload) {
     const signedPayload = ['{"alg":"RS256","typ":"JWT"}', JSON.stringify(payload)].map((val) => this.toBase64URL(val)).join(".");
-    const signature = import_node_crypto9.default.createSign("RSA-SHA256").update(signedPayload).sign(this.options.privateKey);
+    const signature = import_node_crypto10.default.createSign("RSA-SHA256").update(signedPayload).sign(this.options.privateKey);
     return signedPayload + "." + this.toBase64URL(signature);
   }
 };
@@ -14924,12 +15005,13 @@ var mounted;
 function handle(request, response) {
   if (!mounted) {
     const databasePath = (0, import_node_path3.resolve)(process.env.QINGJI_DATABASE_PATH ?? "/var/data/qingji/qingji.sqlite");
-    (0, import_node_fs4.mkdirSync)((0, import_node_path3.dirname)(databasePath), { recursive: true, mode: 448 });
+    (0, import_node_fs5.mkdirSync)((0, import_node_path3.dirname)(databasePath), { recursive: true, mode: 448 });
     const store = new SyncStore(databasePath);
-    if (!store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_mail_outbox'").get()) {
+    const hasCustomerCodes = store.database.prepare("PRAGMA table_info(booking_customers)").all().some((column) => column.name === "encrypted_code");
+    if (!store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_mail_outbox'").get() || !hasCustomerCodes) {
       const backup = `${databasePath}.before-booking-${Date.now()}.bak`;
       store.database.exec(`VACUUM INTO '${backup.replaceAll("'", "''")}'`);
-      (0, import_node_fs4.chmodSync)(backup, 384);
+      (0, import_node_fs5.chmodSync)(backup, 384);
       console.log("3628 booking: pre-migration database backup created.");
     }
     const booking = new BookingStore(store.database);
