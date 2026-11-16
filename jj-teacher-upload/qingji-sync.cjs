@@ -935,7 +935,7 @@ function createSyncServer(store, options = {}) {
       }
       const address = options.trustProxy ? String(request.headers["x-forwarded-for"] ?? request.socket.remoteAddress).split(",")[0].trim() : request.socket.remoteAddress ?? "unknown";
       if (options.rateLimit !== false) throttle(`ip:${address}`, 240);
-      const publicBooking = /^\/v1\/public-booking\/(\d{10})\/(access|catalog|slots|appointments|my-appointments|change)$/.exec(path3.pathname);
+      const publicBooking = /^\/v1\/public-booking\/(\d{10})\/(access|catalog|slots|appointments|my-appointments|change|cancel)$/.exec(path3.pathname);
       if (publicBooking && options.booking) {
         try {
           if (options.rateLimit !== false) throttle(`booking-public:${publicBooking[2]}:${request.method}:${address}`, publicBooking[2] === "appointments" && request.method === "POST" ? 8 : 100);
@@ -952,8 +952,13 @@ function createSyncServer(store, options = {}) {
           if (request.method === "POST" && publicBooking[2] === "access") send(response, 200, { ok: true, ...options.booking.customerProfile(code2, customerId) });
           else if (request.method === "GET" && publicBooking[2] === "catalog") send(response, 200, options.booking.publicCatalog(code2));
           else if (request.method === "GET" && publicBooking[2] === "my-appointments") send(response, 200, options.booking.publicAppointments(code2, customerId));
-          else if (request.method === "GET" && publicBooking[2] === "slots") send(response, 200, path3.searchParams.has("appointmentId") ? options.booking.publicChangeSlots(code2, customerId, path3.searchParams.get("appointmentId"), path3.searchParams.get("date") ?? "") : options.booking.publicSlots(code2, path3.searchParams.get("serviceId") ?? "", path3.searchParams.get("date") ?? ""));
-          else if (request.method === "POST" && publicBooking[2] === "change") {
+          else if (request.method === "GET" && publicBooking[2] === "slots") send(response, 200, path3.searchParams.has("appointmentId") ? options.booking.publicChangeSlots(code2, customerId, path3.searchParams.get("appointmentId"), path3.searchParams.get("date") ?? "", Date.now(), path3.searchParams.get("serviceId") ?? void 0) : options.booking.publicSlots(code2, path3.searchParams.get("serviceId") ?? "", path3.searchParams.get("date") ?? ""));
+          else if (request.method === "POST" && publicBooking[2] === "cancel") {
+            if (options.rateLimit !== false) throttle(`booking-submit:${address}`, 8);
+            const input = await body(request);
+            if (typeof input.appointmentId !== "string") throw new ApiError(400, "Appointment not found.");
+            send(response, 200, options.booking.publicCancel(code2, customerId, input.appointmentId, input));
+          } else if (request.method === "POST" && publicBooking[2] === "change") {
             if (options.rateLimit !== false) throttle(`booking-submit:${address}`, 8);
             const input = await body(request);
             if (typeof input.appointmentId !== "string") throw new ApiError(400, "Appointment not found.");
@@ -1391,11 +1396,11 @@ var BookingStore = class {
       today: nyParts().date
     };
   }
-  publicSlots(code2, serviceId, date, now = Date.now(), excludedAppointment) {
+  publicSlots(code2, serviceId, date, now = Date.now(), excludedAppointment, currentService = false) {
     const owner = this.publicOwner(code2);
     nyInstant(date, "00:00");
     check2(date >= nyParts(now).date && date <= shiftBookingDate(nyParts(now).date, 90), "Choose a date within the next 90 days.");
-    const service = excludedAppointment ?? this.rows("SELECT * FROM booking_services WHERE id=? AND owner_id=? AND active=1", serviceId, owner)[0];
+    const service = excludedAppointment && !currentService ? excludedAppointment : this.rows("SELECT * FROM booking_services WHERE id=? AND owner_id=? AND active=1", serviceId, owner)[0];
     check2(service, "Service is unavailable.", 404);
     const hours = this.rows("SELECT * FROM booking_hours WHERE owner_id=? AND weekday=?", owner, bookingWeekday(date))[0];
     const slots = [];
@@ -1473,20 +1478,23 @@ var BookingStore = class {
     const rows = this.rows("SELECT booking_appointments.*,email FROM booking_appointments JOIN booking_customer_appointments ON appointment_id=id LEFT JOIN booking_contacts USING(appointment_id) WHERE customer_id=? AND owner_id=? AND status='confirmed' AND starts_at>? ORDER BY starts_at", customerId, owner, now);
     return { limit: 3, upcomingCount: rows.length, appointments: rows.map((row) => ({ ...this.publicReceipt(owner, String(row.id)), revision: Number(row.revision), serviceId: String(row.service_id), durationMinutes: Number(row.duration_minutes), phone: String(row.phone), email: String(row.email ?? ""), notes: String(row.notes), canChange: Number(row.starts_at) - now >= 864e5, changeDeadline: Number(row.starts_at) - 864e5 })) };
   }
-  publicChangeSlots(code2, customerId, id, date, now = Date.now()) {
+  publicChangeSlots(code2, customerId, id, date, now = Date.now(), serviceId) {
     const row = this.customerAppointment(code2, customerId, id);
     this.checkCustomerChange(row, now);
-    return { date, slots: this.publicSlots(code2, String(row.service_id), date, now, row).slots.filter((slot) => slot.startsAt - now >= 864e5) };
+    const target = serviceId ?? String(row.service_id);
+    return { date, slots: this.publicSlots(code2, target, date, now, row, target !== row.service_id).slots.filter((slot) => slot.startsAt - now >= 864e5) };
   }
   publicChange(code2, customerId, id, input) {
     input = { ...input, phone: input.phone === void 0 ? "" : input.phone };
     check2(typeof input.requestId === "string" && /^[a-zA-Z0-9_-]{20,80}$/.test(input.requestId), "Invalid submission ID.");
     check2(Number.isSafeInteger(input.startsAt) && Number.isSafeInteger(input.revision), "Please refresh your appointment before changing it.");
     const email = this.validEmail(input.email);
-    const fingerprint = (0, import_node_crypto3.createHash)("sha256").update(JSON.stringify(["change", id, customerId, input.revision, input.startsAt, email, input.phone, input.notes])).digest("hex");
     const result = this.transaction(() => {
       const row = this.customerAppointment(code2, customerId, id);
       const owner = String(row.owner_id);
+      check2(input.serviceId === void 0 || typeof input.serviceId === "string", "Service is unavailable.", 404);
+      const targetServiceId = input.serviceId === void 0 ? String(row.service_id) : input.serviceId;
+      const fingerprint = (0, import_node_crypto3.createHash)("sha256").update(JSON.stringify(["change", id, customerId, input.revision, input.startsAt, email, input.phone, input.notes, targetServiceId])).digest("hex");
       const previous = this.rows("SELECT * FROM booking_submissions WHERE owner_id=? AND request_id=?", owner, input.requestId)[0];
       if (previous) {
         check2(previous.appointment_id === id && previous.fingerprint === fingerprint, "This submission ID has already been used.", 409);
@@ -1498,11 +1506,38 @@ var BookingStore = class {
       check2(Number(input.startsAt) - now >= 864e5, "Please choose a new time at least 24 hours from now.", 409);
       const job = this.rows("SELECT state FROM booking_mail_outbox WHERE appointment_id=?", id)[0];
       check2(job?.state !== "sending", "Your confirmation email is being sent. Please try again shortly.", 409);
-      const slot = this.publicSlots(code2, String(row.service_id), nyParts(Number(input.startsAt)).date, now, row).slots.find((item) => item.startsAt === input.startsAt);
+      const switched = targetServiceId !== row.service_id;
+      const targetService = switched ? this.rows("SELECT * FROM booking_services WHERE id=? AND owner_id=? AND active=1", targetServiceId, owner)[0] : row;
+      check2(targetService, "Service is unavailable.", 404);
+      check2((input.expectedPriceCents === void 0 || input.expectedPriceCents === targetService.price_cents) && (input.expectedDurationMinutes === void 0 || input.expectedDurationMinutes === targetService.duration_minutes), "Service details have changed. Please reload this page before booking.", 409);
+      const slot = this.publicSlots(code2, targetServiceId, nyParts(Number(input.startsAt)).date, now, row, switched).slots.find((item) => item.startsAt === input.startsAt);
       check2(slot, "This time is no longer available. Please choose another time.", 409);
-      this.writeAppointment(owner, id, { customerName: String(row.customer_name), serviceId: String(row.service_id), phone: input.phone, notes: input.notes, startsAt: slot.startsAt, endsAt: slot.endsAt, priceCents: Number(row.price_cents), status: "confirmed", revision: Number(row.revision) });
+      this.writeAppointment(owner, id, { customerName: String(row.customer_name), serviceId: targetServiceId, phone: input.phone, notes: input.notes, startsAt: slot.startsAt, endsAt: slot.endsAt, priceCents: Number(targetService.price_cents), status: "confirmed", revision: Number(row.revision) });
       this.run("INSERT INTO booking_contacts VALUES (?,?) ON CONFLICT(appointment_id) DO UPDATE SET email=excluded.email", id, email);
       this.run("INSERT INTO booking_mail_outbox(appointment_id,state,next_at,created_at) VALUES (?,'pending',?,?) ON CONFLICT(appointment_id) DO UPDATE SET state='pending',attempts=0,next_at=excluded.next_at,created_at=excluded.created_at,error=''", id, now, now);
+      this.run("INSERT INTO booking_submissions VALUES (?,?,?,?)", owner, input.requestId, fingerprint, id);
+      return this.publicReceipt(owner, id);
+    });
+    this.events.emit(this.publicOwner(code2));
+    return result;
+  }
+  publicCancel(code2, customerId, id, input) {
+    check2(typeof input.requestId === "string" && /^[a-zA-Z0-9_-]{20,80}$/.test(input.requestId) && Number.isSafeInteger(input.revision), "Please refresh your appointment before changing it.");
+    const result = this.transaction(() => {
+      const row = this.customerAppointment(code2, customerId, id);
+      const owner = String(row.owner_id);
+      const fingerprint = (0, import_node_crypto3.createHash)("sha256").update(JSON.stringify(["cancel", id, customerId, input.revision])).digest("hex");
+      const previous = this.rows("SELECT * FROM booking_submissions WHERE owner_id=? AND request_id=?", owner, input.requestId)[0];
+      if (previous) {
+        check2(previous.appointment_id === id && previous.fingerprint === fingerprint, "This submission ID has already been used.", 409);
+        return this.publicReceipt(owner, id);
+      }
+      const now = Date.now();
+      check2(row.status === "confirmed" && Number(row.starts_at) - now >= 864e5, "Appointments can only be cancelled at least 24 hours before their start time.", 409);
+      check2(input.revision === row.revision, "This appointment has changed. Please refresh and try again.", 409);
+      check2(this.rows("SELECT state FROM booking_mail_outbox WHERE appointment_id=?", id)[0]?.state !== "sending", "Your confirmation email is being sent. Please try again shortly.", 409);
+      this.writeAppointment(owner, id, { revision: Number(row.revision) }, true);
+      this.run("UPDATE booking_mail_outbox SET state='cancelled',error='' WHERE appointment_id=?", id);
       this.run("INSERT INTO booking_submissions VALUES (?,?,?,?)", owner, input.requestId, fingerprint, id);
       return this.publicReceipt(owner, id);
     });

@@ -1,6 +1,17 @@
 'use strict';
 (() => {
   const phrases = {
+    'Cancel appointment': '取消预约',
+    'Cancellation closed · less than 24 hours': '不可取消 · 距开始不足 24 小时',
+    'Cancel this appointment?': '确定取消此预约吗？',
+    'Cancellations must be completed at least 24 hours before your appointment. Your time slot will be released once you confirm.': '取消操作须在预约开始前至少 24 小时完成。确认取消后，该时段将释放给其他客人。',
+    'Yes, cancel appointment': '确定取消预约',
+    'Keep appointment': '保留预约',
+    'Cancelling your appointment…': '正在取消您的预约…',
+    'Your appointment has been cancelled. We hope to see you another time.': '您的预约已取消，期待下次为您服务。',
+    'Connection interrupted. Your appointment may already be cancelled. Please retry to check.': '连接中断，您的预约可能已取消，请重试以核实。',
+    'Appointments can only be cancelled at least 24 hours before their start time.': '预约只能在开始前至少 24 小时取消。',
+    'Up to 3 upcoming appointments per ID. Changes and cancellations require at least 24 hours’ notice.': '每个 ID 最多可预约 3 个时段。修改或取消均须提前至少 24 小时。',
     'Booking page not found.': '未找到预约页面。',
     'Choose a date within the next 90 days.': '请选择未来 90 天内的日期。',
     'Service is unavailable.': '此服务暂不可用。',
@@ -60,7 +71,7 @@
     'Go back': '返回',
     "YOU'RE ALL SET": '预约已确认',
     'See you soon.': '期待与您见面。',
-    'Manage your booking in My appointments above. Changes close 24 hours before your appointment.': '可在上方“我的预约”中管理预约。距离预约开始不足 24 小时将无法修改。',
+    'Manage your booking in My appointments above. Changes and cancellations close 24 hours before your appointment.': '可在上方“我的预约”中管理预约。距离预约开始不足 24 小时将无法修改或取消。',
     'Book another appointment': '继续预约',
     '3628 New York · Simple, thoughtful appointments.': '3628 New York · 简单预约，用心服务。',
     'Your ID has reached the limit of 3 upcoming appointments. You can change an existing appointment below.': '您的 ID 已有 3 笔待到店预约。您可以修改下方的已有预约。',

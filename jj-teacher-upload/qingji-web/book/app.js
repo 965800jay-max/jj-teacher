@@ -7,6 +7,7 @@ let catalog;
 let service;
 let selectedSlot;
 let slotsEpoch = 0;
+let initializationEpoch = 0;
 let submitting = false;
 let requestId = crypto.randomUUID();
 let previousPayload = '';
@@ -16,6 +17,11 @@ let editingAppointment;
 let upcomingCount = 0;
 const accessDialog = element('access-dialog');
 const policyDialog = element('policy-dialog');
+const cancelDialog = element('cancel-dialog');
+let pendingCancellation;
+cancelDialog.addEventListener('cancel', event => { if (submitting) event.preventDefault(); });
+element('cancel-back').addEventListener('click', () => { if (!submitting) { cancelDialog.close(); pendingCancellation = undefined; } });
+element('cancel-confirm').addEventListener('click', () => void cancelAppointment());
 accessDialog.removeAttribute('open');
 accessDialog.showModal();
 accessDialog.addEventListener('cancel', event => event.preventDefault());
@@ -109,7 +115,7 @@ function newBooking() {
   element('email').value = ''; element('phone').value = ''; element('notes').value = '';
   element('booking').hidden = false; element('success').hidden = true; element('confirmation').textContent = ''; element('reference').textContent = '';
   element('message').textContent = '';
-  requestId = crypto.randomUUID(); previousPayload = ''; void initialize(catalog);
+  requestId = crypto.randomUUID(); previousPayload = ''; void initialize(catalog).catch(() => {});
 }
 element('another').addEventListener('click', newBooking);
 element('cancel-edit').addEventListener('click', newBooking);
@@ -123,7 +129,7 @@ async function refreshAppointments() {
   element('booking-limit').textContent = upcomingCount >= 3 ? 'Your ID has reached the limit of 3 upcoming appointments. You can change an existing appointment below.' : '';
   element('my-appointments').replaceChildren();
   for (const appointment of data.appointments) {
-    const card = document.createElement('div'); card.className = 'my-appointment';
+    const card = document.createElement('div'); card.className = 'my-appointment'; card.dataset.appointmentId = appointment.reference;
     const details = document.createElement('p');
     const date = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' }).format(appointment.startsAt);
     details.textContent = `${appointment.serviceName} · ${money(appointment.priceCents)}\n${date} · ${timeLabel(appointment.startsAt)} – ${timeLabel(appointment.endsAt)}`;
@@ -134,28 +140,43 @@ async function refreshAppointments() {
       element('booking-title').textContent = 'Change your appointment.'; element('cancel-edit').hidden = false;
       element('booking').hidden = false; element('success').hidden = true; element('message').textContent = '';
       element('email').value = appointment.email; element('phone').value = appointment.phone; element('notes').value = appointment.notes;
-      void initialize(catalog);
+      void initialize().catch(() => {});
       element('booking').scrollIntoView({ behavior: 'smooth' });
     });
-    card.append(details, button); element('my-appointments').append(card);
+    const cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'cancel-appointment';
+    cancel.textContent = appointment.canChange ? 'Cancel appointment' : 'Cancellation closed · less than 24 hours'; cancel.disabled = !appointment.canChange;
+    cancel.addEventListener('click', () => {
+      if (submitting || cancelDialog.open) return;
+      pendingCancellation = { appointment, requestId: crypto.randomUUID() };
+      element('cancel-details').textContent = details.textContent;
+      element('cancel-error').textContent = '';
+      cancelDialog.showModal(); element('cancel-title').focus();
+    });
+    const actions = document.createElement('div'); actions.className = 'appointment-actions'; actions.append(button, cancel);
+    card.append(details, actions); element('my-appointments').append(card);
   }
   summary();
 }
 async function refreshVisible() {
-  if (!customerCredential || accessDialog.open || submitting) return;
+  if (!customerCredential || accessDialog.open || cancelDialog.open || policyDialog.open || submitting) return;
   try { await refreshAppointments(); if (service && !element('booking').hidden) await loadSlots(true); }
   catch { if (customerCredential) element('message').textContent = 'Could not refresh your appointments. Please try again.'; }
 }
 async function initialize(preloaded) {
+  const epoch = ++initializationEpoch;
+  service = undefined; selectedSlot = undefined; slotsEpoch++;
+  element('fields').disabled = true; summary();
   try {
-    catalog = preloaded || await api('/catalog');
+    const result = preloaded || await api('/catalog');
+    if (epoch !== initializationEpoch) return;
+    catalog = result;
     element('services').replaceChildren();
     element('date').min = catalog.today;
     const maximum = new Date(`${catalog.today}T12:00:00Z`); maximum.setUTCDate(maximum.getUTCDate() + 90);
     element('date').max = maximum.toISOString().slice(0, 10);
     const editingDate = editingAppointment ? new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' }).format(editingAppointment.startsAt) : catalog.today;
     element('date').value = editingDate;
-    const services = editingAppointment ? [{ id: editingAppointment.serviceId, name: editingAppointment.serviceName, priceCents: editingAppointment.priceCents, durationMinutes: editingAppointment.durationMinutes }] : catalog.services;
+    const services = editingAppointment ? [{ id: editingAppointment.serviceId, name: editingAppointment.serviceName, priceCents: editingAppointment.priceCents, durationMinutes: editingAppointment.durationMinutes }, ...catalog.services.filter(item => item.id !== editingAppointment.serviceId)] : catalog.services;
     for (const item of services) {
       const button = document.createElement('button'); button.type = 'button'; button.className = 'service'; button.setAttribute('aria-pressed', 'false');
       const title = document.createElement('span'); title.textContent = item.name;
@@ -172,10 +193,36 @@ async function initialize(preloaded) {
     element('fields').disabled = false;
     if (!services.length) element('message').textContent = 'Online booking is not yet available. Please contact the shop.';
     else element('services').firstElementChild.click();
-  } catch (error) { element('message').textContent = 'Online booking is temporarily unavailable. Please contact the shop or try again later.'; throw error; }
+  } catch (error) { if (epoch === initializationEpoch) { element('message').textContent = 'Online booking is temporarily unavailable. Please contact the shop or try again later.'; throw error; } }
+}
+async function cancelAppointment() {
+  if (!pendingCancellation || !cancelDialog.open || submitting || !customerCredential) return;
+  const pending = pendingCancellation;
+  submitting = true; element('fields').disabled = true; element('cancel-confirm').disabled = true; element('cancel-back').disabled = true;
+  element('cancel-error').textContent = 'Cancelling your appointment…'; summary();
+  let resetForm = false;
+  try {
+    const result = await api('/cancel', { appointmentId: pending.appointment.reference, revision: pending.appointment.revision, requestId: pending.requestId });
+    if (!customerCredential) return;
+    if (result.status !== 'cancelled') throw new Error('Please try again.');
+    cancelDialog.close(); pendingCancellation = undefined;
+    resetForm = editingAppointment?.reference === pending.appointment.reference || element('reference').textContent.endsWith(pending.appointment.reference);
+    for (const card of element('my-appointments').children) if (card.dataset.appointmentId === pending.appointment.reference) card.remove();
+    upcomingCount = Math.max(0, upcomingCount - 1); element('booking-count').textContent = `${upcomingCount} / 3`; element('booking-limit').textContent = '';
+    await refreshAppointments().catch(() => {});
+    element('message').textContent = 'Your appointment has been cancelled. We hope to see you another time.';
+  } catch (error) {
+    element('cancel-error').textContent = error.status ? error.message : 'Connection interrupted. Your appointment may already be cancelled. Please retry to check.';
+  } finally {
+    submitting = false; element('fields').disabled = !customerCredential; element('cancel-confirm').disabled = false; element('cancel-back').disabled = false;
+    if (customerCredential && resetForm) { newBooking(); element('message').textContent = 'Your appointment has been cancelled. We hope to see you another time.'; }
+    else if (customerCredential && !cancelDialog.open && service && !element('booking').hidden) await loadSlots(true);
+    summary();
+  }
 }
 function lockAccess() {
   if (policyDialog.open) policyDialog.close();
+  if (cancelDialog.open) cancelDialog.close(); pendingCancellation = undefined; initializationEpoch++;
   customerCredential = ''; slotsEpoch++; service = undefined; selectedSlot = undefined;
   element('fields').disabled = true; element('services').replaceChildren(); element('slots').replaceChildren();
   customerName = '';
