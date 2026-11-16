@@ -239,7 +239,7 @@ element('access-form').addEventListener('submit', async event => {
   event.preventDefault(); element('access-submit').disabled = true; element('access-error').textContent = '';
   customerCredential = element('customer-id').value.normalize('NFKC').replace(/[\s-]/g, '').toUpperCase();
   try {
-    if (!/^(?:[A-Z0-9]{4,20}|[A-F0-9]{24})$/.test(customerCredential)) throw new Error('Please enter the customer ID provided by your shop.');
+    if (!/^(?:[A-Z0-9_]{4,20}|[A-F0-9]{24})$/.test(customerCredential)) throw new Error('Please enter the customer ID provided by your shop.');
     const access = await api('/access', {});
     customerName = access.customerName || 'Customer';
     const initialCatalog = await api('/catalog');

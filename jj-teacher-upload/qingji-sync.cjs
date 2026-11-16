@@ -1677,7 +1677,7 @@ var BookingStore = class {
     const owner = this.publicOwner(code2);
     check2(typeof credential === "string" && credential.length <= 100, "Please enter a valid customer ID from the shop owner.", 401);
     const normalized2 = credential.normalize("NFKC").replace(/[\s-]/g, "").toUpperCase();
-    check2(/^(?:[A-Z0-9]{4,20}|[A-F0-9]{24})$/.test(normalized2), "Please enter a valid customer ID from the shop owner.", 401);
+    check2(/^(?:[A-Z0-9_]{4,20}|[A-F0-9]{24})$/.test(normalized2), "Please enter a valid customer ID from the shop owner.", 401);
     const hash2 = (0, import_node_crypto3.createHash)("sha256").update(normalized2).digest("hex");
     const row = this.rows("SELECT id,encrypted_code FROM booking_customers WHERE owner_id=? AND code_hash=? AND active=1 AND deleted_at=0", owner, hash2)[0];
     check2(row, "Please enter a valid customer ID from the shop owner.", 401);
@@ -1728,7 +1728,7 @@ var BookingStore = class {
     const id = (0, import_node_crypto3.randomUUID)();
     this.transaction(() => {
       this.authorize(owner);
-      check2(!manual || typeof input.code === "string" && /^[A-Z0-9]{4,20}$/.test(code2), "\u5BA2\u6237 ID \u8BF7\u586B\u51994\u201320\u4F4D\u6570\u5B57\u6216\u82F1\u6587\u5B57\u6BCD\u3002");
+      check2(!manual || typeof input.code === "string" && /^[A-Z0-9_]{4,20}$/.test(code2), "\u5BA2\u6237 ID \u8BF7\u586B\u51994\u201320\u4F4D\u6570\u5B57\u3001\u82F1\u6587\u5B57\u6BCD\u6216\u4E0B\u5212\u7EBF\uFF08_\uFF09\u3002");
       check2(input.name === void 0 || typeof input.name === "string" && input.name.length <= 80, "\u5BA2\u6237\u540D\u79F0\u6700\u591A80\u5B57\u3002");
       check2(input.channel === void 0 || ["wechat", "ins"].includes(String(input.channel)), "\u8BF7\u9009\u62E9 WeChat \u6216 instagram \u6E20\u9053\u3002");
       const hash2 = (0, import_node_crypto3.createHash)("sha256").update(code2).digest("hex");
