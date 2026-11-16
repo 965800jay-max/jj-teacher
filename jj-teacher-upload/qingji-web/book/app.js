@@ -20,7 +20,9 @@ const timeLabel = instant => new Intl.DateTimeFormat('en-US', { timeZone: 'Ameri
 async function api(path, payload) {
   const credential = customerCredential;
   const response = await fetch(base + path, { method: payload ? 'POST' : 'GET', headers: { ...(payload ? { 'Content-Type': 'application/json' } : {}), 'X-Booking-Customer-ID': customerCredential }, body: payload ? JSON.stringify(payload) : undefined, cache: 'no-store', credentials: 'omit' });
-  const data = await response.json();
+  let data;
+  try { data = await response.json(); }
+  catch { throw new Error('Connection unavailable. Please try again.'); }
   if (response.status === 401 && credential === customerCredential && !accessDialog.open) lockAccess();
   if (!response.ok) throw Object.assign(new Error(data.error || 'Please try again.'), { status: response.status });
   return data;
@@ -84,9 +86,9 @@ element('another').addEventListener('click', () => {
   element('booking').hidden = false; element('success').hidden = true; element('confirmation').textContent = ''; element('reference').textContent = '';
   requestId = crypto.randomUUID(); previousPayload = ''; void loadSlots();
 });
-async function initialize() {
+async function initialize(preloaded) {
   try {
-    catalog = await api('/catalog');
+    catalog = preloaded || await api('/catalog');
     element('services').replaceChildren();
     element('date').min = catalog.today;
     const maximum = new Date(`${catalog.today}T12:00:00Z`); maximum.setUTCDate(maximum.getUTCDate() + 90);
@@ -107,7 +109,7 @@ async function initialize() {
     element('fields').disabled = false;
     if (!catalog.services.length) element('message').textContent = 'Online booking is not yet available. Please contact the shop.';
     else element('services').firstElementChild.click();
-  } catch { element('message').textContent = 'Online booking is temporarily unavailable. Please contact the shop or try again later.'; }
+  } catch (error) { element('message').textContent = 'Online booking is temporarily unavailable. Please contact the shop or try again later.'; throw error; }
 }
 function lockAccess() {
   customerCredential = ''; slotsEpoch++; service = undefined; selectedSlot = undefined;
@@ -120,13 +122,17 @@ function lockAccess() {
 }
 element('access-form').addEventListener('submit', async event => {
   event.preventDefault(); element('access-submit').disabled = true; element('access-error').textContent = '';
-  customerCredential = element('customer-id').value.trim();
+  customerCredential = element('customer-id').value.normalize('NFKC').replace(/[\s-]/g, '').toUpperCase();
   try {
+    if (!/^(?:[A-Z0-9]{4,20}|[A-F0-9]{24})$/.test(customerCredential)) throw new Error('Please enter the customer ID provided by your shop.');
     await api('/access', {});
+    const initialCatalog = await api('/catalog');
+    await initialize(initialCatalog);
     element('customer-id').value = ''; accessDialog.close();
     element('content').hidden = false; element('content').inert = false;
     element('booking').hidden = false; element('success').hidden = true;
-    requestId = crypto.randomUUID(); previousPayload = ''; await initialize();
+    element('message').textContent = '';
+    requestId = crypto.randomUUID(); previousPayload = '';
   } catch (error) { customerCredential = ''; element('access-error').textContent = error.message; }
   finally { element('access-submit').disabled = false; }
 });

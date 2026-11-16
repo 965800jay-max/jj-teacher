@@ -1,1 +1,19 @@
-dialog{border:1px solid #e5e5e5;border-radius:24px;padding:28px;width:calc(100% - 40px);max-width:420px;color:#111;background:#fff;box-shadow:0 24px 80px #00000020}dialog::backdrop{background:#f7f7f7}dialog h2{font-size:24px;margin:18px 0}dialog input{font-size:15px;letter-spacing:1px}#access-submit{width:100%;background:#111;color:#fff;border:0;margin-top:16px}#access-error{font-size:12px;line-height:1.6;color:#555}
+#access-dialog{box-sizing:border-box;width:calc(100% - 40px);max-width:364px;max-height:calc(100dvh - 32px);margin:auto;padding:26px 26px 22px;border:1px solid #ffffffb0;border-radius:34px;color:#171717;background:linear-gradient(140deg,#fffffff0,#ffffffb5);box-shadow:0 32px 90px #00000030,inset 0 1px 0 #fff,inset 0 -1px 0 #ffffff55;-webkit-backdrop-filter:blur(28px) saturate(0);backdrop-filter:blur(28px) saturate(0);overflow:auto;outline:none}
+#access-dialog::backdrop{background:radial-gradient(ellipse at 12% 10%,#ffffffd9,transparent 52%),radial-gradient(ellipse at 95% 95%,#111111c0,transparent 60%),linear-gradient(130deg,#d7d7d7,#858585 55%,#bdbdbd)}
+#access-dialog .access-brand{display:block;width:140px;max-width:100%;height:auto;margin:0 auto 12px;filter:drop-shadow(0 1px 0 #ffffff99)}
+#access-dialog #access-form>.eyebrow,#access-dialog .access-caption{display:none}
+#access-dialog h2{font-size:20px;line-height:24px;letter-spacing:-.7px;font-weight:550;text-align:center;margin:0 0 14px;outline:none}
+#access-dialog label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#access-dialog input{min-height:52px;border:1px solid #ffffffbd;border-radius:16px;background:#ffffff78;box-shadow:inset 0 2px 6px #00000005,0 1px 0 #ffffff6b;text-align:center;font-size:16px;letter-spacing:1.5px;padding:15px 12px;transition:background .2s,box-shadow .2s}
+#access-dialog input::placeholder{color:#858585;font-size:13px;letter-spacing:.5px}
+#access-dialog input:focus-visible{outline:none;background:#ffffffc9;box-shadow:0 0 0 3px #ffffff4d,inset 0 0 0 1px #77777740}
+#access-submit{display:flex;align-items:center;justify-content:center;width:100%;min-height:48px;margin-top:12px;border:1px solid #ffffff29;border-radius:16px;background:linear-gradient(#303030,#111);color:#fff;font-size:13px;letter-spacing:1px;box-shadow:0 5px 14px #00000015,inset 0 1px 0 #ffffff20}
+#access-submit:focus-visible{outline:2px solid #555;outline-offset:3px}
+#access-submit:disabled{opacity:.55}
+#access-error{font-size:11px;text-align:center;line-height:1.6;color:#444;margin:12px 0 0}
+#access-error:empty{display:none}
+@media(prefers-reduced-transparency:reduce){#access-dialog{background:#f2f2f2}}
+@media(max-height:480px){#access-dialog{padding:18px 24px;border-radius:26px}#access-dialog .access-brand{width:125px}#access-dialog #access-form>.eyebrow{margin-bottom:10px}#access-dialog .access-caption{margin-bottom:12px}}
+#access-dialog{aspect-ratio:1;min-height:340px}
+#access-dialog[open]{display:grid;align-content:center}
+@media(max-height:480px){#access-dialog{aspect-ratio:auto;min-height:0}}

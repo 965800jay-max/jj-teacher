@@ -1,6 +1,6 @@
 const APP_ROOT = "/3628/";
-const CACHE = "3628-shell-7fc8d30f228dd866";
-const FILES = ["/3628/_expo/static/js/web/index-485c3e60b51f1b91fd33d3a199554f08.js","/3628/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Feather.ca4b48e04dc1ce10bfbddb262c8b835f.ttf","/3628/book/access.css","/3628/book/app.js","/3628/book/brand.css","/3628/book/logo.svg","/3628/book/style.css","/3628/favicon.ico","/3628/icons/icon-180.png","/3628/icons/icon-192.png","/3628/icons/icon-512.png","/3628/manifest.webmanifest","/3628/metadata.json","/3628/register-pwa.js","/3628/"];
+const CACHE = "3628-shell-4213c3b3ff5a3201";
+const FILES = ["/3628/_expo/static/js/web/index-e0eadade30d1f79a08b4944cbc76a37d.js","/3628/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Feather.ca4b48e04dc1ce10bfbddb262c8b835f.ttf","/3628/book/access.css","/3628/book/app.js","/3628/book/brand.css","/3628/book/logo.svg","/3628/book/style.css","/3628/favicon.ico","/3628/icons/icon-180.png","/3628/icons/icon-192.png","/3628/icons/icon-512.png","/3628/manifest.webmanifest","/3628/metadata.json","/3628/register-pwa.js","/3628/"];
 const STATIC = new Set(FILES);
 
 self.addEventListener('install', event => {

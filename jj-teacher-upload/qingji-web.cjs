@@ -3,7 +3,7 @@
 // server/web.cjs
 var fs = require("node:fs");
 var path = require("node:path");
-function createWebHandler(directory) {
+function createWebHandler(directory, options = {}) {
   const root = path.resolve(directory);
   return async function handle(request, response) {
     const reply = (status, message) => {
@@ -34,8 +34,11 @@ function createWebHandler(directory) {
       return;
     }
     const publicPage = pathname === "/3628/book" || pathname === "/3628/book/";
-    const file = path.resolve(root, publicPage ? "book/index.html" : pathname.slice("/3628/".length) || "index.html");
-    if (!file.startsWith(`${root}${path.sep}`)) {
+    const bookingPath = publicPage || pathname.startsWith("/3628/book/");
+    const fileRoot = bookingPath && options.bookingDirectory ? path.resolve(options.bookingDirectory) : root;
+    const relative = bookingPath && options.bookingDirectory ? publicPage ? "index.html" : pathname.slice("/3628/book/".length) : publicPage ? "book/index.html" : pathname.slice("/3628/".length) || "index.html";
+    const file = path.resolve(fileRoot, relative);
+    if (!file.startsWith(`${fileRoot}${path.sep}`)) {
       reply(403, "Forbidden");
       return;
     }

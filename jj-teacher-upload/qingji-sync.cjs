@@ -895,7 +895,7 @@ function createSyncServer(store, options = {}) {
       const publicBooking = /^\/v1\/public-booking\/(\d{10})\/(access|catalog|slots|appointments)$/.exec(path.pathname);
       if (publicBooking && options.booking) {
         try {
-          if (options.rateLimit !== false) throttle(`booking-public:${request.method}:${address}`, request.method === "POST" ? 8 : 100);
+          if (options.rateLimit !== false) throttle(`booking-public:${publicBooking[2]}:${request.method}:${address}`, publicBooking[2] === "appointments" && request.method === "POST" ? 8 : 100);
           const code2 = publicBooking[1];
           const failedIds = attempts.get(`booking-id-fail:${address}`);
           if (options.rateLimit !== false && failedIds && failedIds.until > Date.now() && failedIds.count >= 10) throw new ApiError(429, "Too many ID attempts. Please try again in a minute.");
@@ -1341,7 +1341,7 @@ var BookingStore = class {
   customerAccess(code2, credential) {
     const owner = this.publicOwner(code2);
     check2(typeof credential === "string" && credential.length <= 100, "Please enter a valid customer ID from the shop owner.", 401);
-    const normalized = credential.replace(/[\s-]/g, "").toUpperCase();
+    const normalized = credential.normalize("NFKC").replace(/[\s-]/g, "").toUpperCase();
     check2(/^(?:[A-Z0-9]{4,20}|[A-F0-9]{24})$/.test(normalized), "Please enter a valid customer ID from the shop owner.", 401);
     const hash2 = (0, import_node_crypto2.createHash)("sha256").update(normalized).digest("hex");
     const row = this.rows("SELECT id FROM booking_customers WHERE owner_id=? AND code_hash=? AND active=1", owner, hash2)[0];
@@ -1354,7 +1354,7 @@ var BookingStore = class {
   }
   createCustomer(owner, input) {
     const manual = input.code !== void 0;
-    const code2 = manual && typeof input.code === "string" ? input.code.trim().toUpperCase() : (0, import_node_crypto2.randomBytes)(12).toString("hex").toUpperCase();
+    const code2 = manual && typeof input.code === "string" ? input.code.normalize("NFKC").trim().toUpperCase() : (0, import_node_crypto2.randomBytes)(12).toString("hex").toUpperCase();
     const id = (0, import_node_crypto2.randomUUID)();
     this.transaction(() => {
       this.authorize(owner);
