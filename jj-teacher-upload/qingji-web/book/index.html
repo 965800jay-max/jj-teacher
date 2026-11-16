@@ -10,11 +10,13 @@
   <link rel="stylesheet" href="/3628/book/style.css">
   <link rel="stylesheet" href="/3628/book/access.css">
   <link rel="stylesheet" href="/3628/book/brand.css">
+  <script src="/3628/book/i18n.js" defer></script>
   <script src="/3628/book/app.js" defer></script>
 </head>
 <body>
 <dialog id="access-dialog" aria-labelledby="access-title" open>
   <form id="access-form">
+    <button type="button" class="language-toggle" aria-label="Switch to Chinese">中文</button>
     <img class="access-brand" src="/3628/book/logo.svg" alt="3628 New York" width="300" height="140">
     <p class="eyebrow">PRIVATE BOOKING</p><h2 id="access-title" tabindex="-1" autofocus>Enter your customer ID</h2>
     <p class="access-caption">A private invitation. Your next visit.</p>
@@ -29,7 +31,7 @@
   <button type="button" id="policy-back">Go back</button>
 </dialog>
 <main id="content" hidden inert>
-  <header><a class="brand" href="/3628/book/" aria-label="3628 New York"><img class="brand-logo" src="/3628/book/logo.svg" alt="3628 New York" width="300" height="140"></a><span class="badge">APPOINTMENTS</span></header>
+  <header><a class="brand" href="/3628/book/" aria-label="3628 New York"><img class="brand-logo" src="/3628/book/logo.svg" alt="3628 New York" width="300" height="140"></a><div class="header-actions"><span class="badge">APPOINTMENTS</span><button type="button" class="language-toggle" aria-label="Switch to Chinese">中文</button></div></header>
   <section class="card" id="my-bookings" hidden><h2>My appointments <span id="booking-count"></span></h2><p class="hint">Up to 3 upcoming appointments per ID. Changes require at least 24 hours’ notice.</p><div id="my-appointments"></div><p id="booking-limit" role="status"></p></section>
   <section id="booking">
     <h1 id="booking-title">Book your<br>next visit.</h1>
