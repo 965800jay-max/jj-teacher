@@ -4,7 +4,7 @@ if (invitation !== null) history.replaceState(null, '', location.pathname + loca
 const element = id => document.getElementById(id);
 const kirsSite = location.hostname.toLowerCase() === 'kirs.3628newyork.com';
 const shop = kirsSite ? '3552330955' : new URLSearchParams(location.search).get('shop') || '7629297118';
-if (kirsSite) element('access-note').textContent = 'To help prevent unauthorized bookings and ensure a smooth experience for all clients, a Customer ID is required. Please contact Kirs to obtain your Customer ID. Thank you for your understanding.';
+if (shop === '3552330955') element('access-note').textContent = 'To help prevent unauthorized bookings and ensure a smooth experience for all clients, a Customer ID is required. Please contact Kirs to obtain your Customer ID. Thank you for your understanding.';
 document.querySelector('.brand').href = `/3628/book/?shop=${encodeURIComponent(shop)}`;
 const base = `/qingji/v1/public-booking/${encodeURIComponent(shop)}`;
 let catalog;
