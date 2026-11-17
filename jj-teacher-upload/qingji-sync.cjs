@@ -943,6 +943,7 @@ function createSyncServer(store, options = {}) {
         return;
       }
       const path3 = new URL(request.url ?? "/", "http://localhost");
+      const hostOwner = options.bookingHostOwners?.[String(request.headers.host ?? "").split(":")[0].toLowerCase()];
       if (path3.pathname === "/health" && request.method === "GET") {
         send(response, 200, { ok: true, service: "qingji-sync", version: 1 });
         return;
@@ -951,6 +952,7 @@ function createSyncServer(store, options = {}) {
       if (options.rateLimit !== false) throttle(`ip:${address}`, 240);
       const publicBooking = /^\/v1\/public-booking\/(\d{10})\/(access|catalog|slots|appointments|my-appointments|change|cancel)$/.exec(path3.pathname);
       if (publicBooking && options.booking) {
+        if (hostOwner && publicBooking[1] !== hostOwner) throw new ApiError(404, "Booking page not found.");
         try {
           if (options.rateLimit !== false) throttle(`booking-public:${publicBooking[2]}:${request.method}:${address}`, publicBooking[2] === "appointments" && request.method === "POST" ? 8 : 100);
           const code2 = publicBooking[1];
@@ -1001,6 +1003,7 @@ function createSyncServer(store, options = {}) {
       const authorization = request.headers.authorization ?? "";
       const token = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
       const userId = store.authenticate(token);
+      if (hostOwner && path3.pathname.startsWith("/v1/booking/") && store.snapshot(userId).me.publicId !== hostOwner) throw new ApiError(403, "\u6B64\u9884\u7EA6\u540E\u53F0\u4EC5\u9650\u5BF9\u5E94\u5E97\u4E3B\u8D26\u53F7\u4F7F\u7528\u3002");
       if (options.rateLimit !== false) throttle(`user:${userId}`, 180);
       if (options.booking && await handleBooking(options.booking, userId, request, response, path3, () => body(request), (status, data) => send(response, status, data), () => {
         store.authenticate(token);
@@ -1148,6 +1151,11 @@ var CustomerVault = class {
     return Buffer.concat([decipher.update(data.subarray(28)), decipher.final()]).toString("utf8");
   }
 };
+
+// src/domain/bookingSites.ts
+var KIRS_PUBLIC_ID = "3552330955";
+var KIRS_HOST = "kirs.3628newyork.com";
+var BOOKING_HOST_OWNERS = { [KIRS_HOST]: KIRS_PUBLIC_ID };
 
 // src/domain/booking.ts
 var BOOKING_ZONE = "America/New_York";
@@ -15163,11 +15171,14 @@ function handle(request, response) {
     const booking = new BookingStore(store.database);
     startBookingMailer(booking);
     const ownerCode = process.env.QINGJI_BOOKING_OWNER_PUBLIC_ID ?? "7629297118";
-    const owner = store.database.prepare("SELECT id FROM users WHERE public_id=?").get(ownerCode);
-    if (owner) booking.grantOwner(String(owner.id));
-    console.log(`3628 booking: authorized owner configured=${!!owner}`);
+    for (const code2 of /* @__PURE__ */ new Set([ownerCode, KIRS_PUBLIC_ID])) {
+      const owner = store.database.prepare("SELECT id FROM users WHERE public_id=?").get(code2);
+      if (owner) booking.grantOwner(String(owner.id));
+      console.log(`3628 booking: owner ${code2} configured=${!!owner}`);
+    }
     mounted = createSyncServer(store, {
-      allowedOrigins: String(process.env.QINGJI_ALLOWED_ORIGINS ?? "https://jj-teacher.onrender.com,https://3628newyork.com,https://www.3628newyork.com,http://localhost:8090,http://localhost:8093").split(",").map((origin) => origin.trim()).filter(Boolean),
+      allowedOrigins: [...String(process.env.QINGJI_ALLOWED_ORIGINS ?? "https://jj-teacher.onrender.com,https://3628newyork.com,https://www.3628newyork.com,http://localhost:8090,http://localhost:8093").split(",").map((origin) => origin.trim()).filter(Boolean), `https://${KIRS_HOST}`],
+      bookingHostOwners: BOOKING_HOST_OWNERS,
       trustProxy: true,
       booking
     });

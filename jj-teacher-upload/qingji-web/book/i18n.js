@@ -1,6 +1,7 @@
 'use strict';
 (() => {
   const phrases = {
+    'To help prevent unauthorized bookings and ensure a smooth experience for all clients, a Customer ID is required. Please contact Kirs to obtain your Customer ID. Thank you for your understanding.': '为减少无效预约并保障每位客户的预约体验，预约前需输入客户 ID。请联系 Kirs 获取您的 Customer ID。感谢您的理解与配合。',
     'To help prevent unauthorized bookings and ensure a smooth experience for all clients, a Customer ID is required. Please contact Jay to obtain your Customer ID. Thank you for your understanding.': '为减少无效预约并保障每位客户的预约体验，预约前需输入客户 ID。请联系 Jay 获取您的 Customer ID。感谢您的理解与配合。',
     'You’ll receive a confirmation email once your appointment is booked.': '预约成功后，您将收到预约确认邮件。',
     'Cancel appointment': '取消预约',
