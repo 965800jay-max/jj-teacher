@@ -777,6 +777,18 @@ async function handleBooking(store, userId, request, response, url, body, send, 
 }) {
   if (!url.pathname.startsWith("/v1/booking/")) return false;
   store.authorize(userId);
+  const card = /^\/v1\/booking\/customers\/([a-zA-Z0-9_-]{1,100})\/(card|photos|photos\/delete)$/.exec(url.pathname);
+  if (card) {
+    if (request.method === "GET" && card[2] === "card") send(200, store.customerCard(userId, card[1]));
+    else if (request.method === "POST") send(200, card[2] === "card" ? store.saveCustomerCard(userId, card[1], await body()) : store.customerPhoto(userId, card[1], await body(), card[2] === "photos/delete"));
+    else throw new ApiError(405, "\u64CD\u4F5C\u4E0D\u652F\u6301\u3002");
+    return true;
+  }
+  const appointmentCard = /^\/v1\/booking\/appointments\/([a-zA-Z0-9_-]{1,100})\/customer$/.exec(url.pathname);
+  if (request.method === "POST" && appointmentCard) {
+    send(200, store.appointmentCustomer(userId, appointmentCard[1], await body()));
+    return true;
+  }
   const income = /^\/v1\/booking\/appointments\/([a-zA-Z0-9_-]{1,100})\/income$/.exec(url.pathname);
   if (request.method === "POST" && income) {
     store.recordIncome(userId, income[1], await body());
@@ -916,9 +928,10 @@ function createSyncServer(store, options = {}) {
   const body = async (request) => {
     const chunks = [];
     let size = 0;
+    const limit = /^\/v1\/booking\/customers\/[a-zA-Z0-9_-]{1,100}\/photos$/.test(new URL(request.url ?? "/", "http://localhost").pathname) ? 5e5 : 65536;
     for await (const chunk of request) {
       size += chunk.length;
-      if (size > 65536) throw new ApiError(413, "\u8BF7\u6C42\u5185\u5BB9\u8FC7\u5927\u3002");
+      if (size > limit) throw new ApiError(413, "\u8BF7\u6C42\u5185\u5BB9\u8FC7\u5927\u3002");
       chunks.push(Buffer.from(chunk));
     }
     try {
@@ -1152,6 +1165,19 @@ var CustomerVault = class {
   }
 };
 
+// server/booking/customer-image.ts
+function validateCustomerImage(value) {
+  if (typeof value !== "string" || value.length > 48e4) throw new ApiError(400, "\u56FE\u7247\u8FC7\u5927\uFF0C\u8BF7\u9009\u62E9\u8F83\u5C0F\u7684\u56FE\u7247\u3002");
+  const match = /^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+/]+={0,2})$/.exec(value);
+  if (!match) throw new ApiError(400, "\u4EC5\u652F\u6301 JPG\u3001PNG \u6216 WebP \u56FE\u7247\u3002");
+  const bytes = Buffer.from(match[2], "base64");
+  const jpeg = bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255;
+  const png = bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+  const webp = bytes.toString("ascii", 0, 4) === "RIFF" && bytes.toString("ascii", 8, 12) === "WEBP";
+  if (bytes.length < 20 || bytes.length > 35e4 || bytes.toString("base64") !== match[2] || !(match[1] === "jpeg" ? jpeg : match[1] === "png" ? png : webp)) throw new ApiError(400, "\u56FE\u7247\u683C\u5F0F\u65E0\u6548\u6216\u8D85\u8FC7 350 KB\uFF0C\u8BF7\u91CD\u65B0\u9009\u62E9\u3002");
+  return value;
+}
+
 // src/domain/bookingSites.ts
 var KIRS_PUBLIC_ID = "3552330955";
 var KIRS_HOST = "kirs.3628newyork.com";
@@ -1232,6 +1258,9 @@ var BookingStore = class {
       CREATE INDEX IF NOT EXISTS booking_appointment_range ON booking_appointments(owner_id,starts_at,ends_at);
       CREATE INDEX IF NOT EXISTS booking_customer_lookup ON booking_customer_appointments(customer_id,appointment_id);
       CREATE TABLE IF NOT EXISTS booking_income (appointment_id TEXT PRIMARY KEY REFERENCES booking_appointments(id), entry_id TEXT NOT NULL UNIQUE REFERENCES entries(id));
+      CREATE TABLE IF NOT EXISTS booking_customer_cards (customer_id TEXT PRIMARY KEY REFERENCES booking_customers(id), owner_id TEXT NOT NULL REFERENCES booking_owners(user_id), notes TEXT NOT NULL DEFAULT '', no_show_count INTEGER NOT NULL DEFAULT 0 CHECK(no_show_count BETWEEN 0 AND 9999), revision INTEGER NOT NULL DEFAULT 0);
+      CREATE TABLE IF NOT EXISTS booking_customer_photos (id TEXT PRIMARY KEY, customer_id TEXT NOT NULL REFERENCES booking_customers(id), owner_id TEXT NOT NULL REFERENCES booking_owners(user_id), data_url TEXT NOT NULL, created_at INTEGER NOT NULL);
+      CREATE INDEX IF NOT EXISTS booking_customer_photo_lookup ON booking_customer_photos(owner_id,customer_id);
       CREATE INDEX IF NOT EXISTS booking_time_off_range ON booking_time_off(owner_id,starts_at,ends_at);
       DROP TRIGGER IF EXISTS booking_no_overlap_insert;
       DROP TRIGGER IF EXISTS booking_no_overlap_update;
@@ -1408,10 +1437,10 @@ var BookingStore = class {
     this.events.emit(owner);
   }
   saveAppointment(owner, id, raw, cancel = false) {
-    this.transaction(() => this.writeAppointment(owner, id, raw, cancel));
+    this.transaction(() => this.writeAppointment(owner, id, raw, cancel, true));
     this.events.emit(owner);
   }
-  writeAppointment(owner, id, raw, cancel = false) {
+  writeAppointment(owner, id, raw, cancel = false, manual = false) {
     this.authorize(owner);
     const old = this.rows("SELECT * FROM booking_appointments WHERE id=? AND owner_id=?", id, owner)[0];
     check2(!old || !this.incomeRecorded(id), "\u6B64\u9884\u7EA6\u5DF2\u8BB0\u5165\u6536\u5165\uFF0C\u8BF7\u5148\u53D6\u6D88\u6536\u6B3E\u52FE\u9009\u518D\u4FEE\u6539\u6216\u53D6\u6D88\u3002", 409);
@@ -1438,7 +1467,7 @@ var BookingStore = class {
       const start = nyParts(input.startsAt - before * 6e4);
       const end = nyParts(input.endsAt + after * 6e4);
       const hours = this.rows("SELECT * FROM booking_hours WHERE owner_id=? AND weekday=?", owner, bookingWeekday(start.date))[0];
-      check2(hours.configured && !hours.closed && start.date === end.date && start.time >= String(hours.opens) && end.time <= String(hours.closes), "\u8BE5\u65F6\u95F4\u4E0D\u5728\u5DF2\u8BBE\u7F6E\u7684\u8425\u4E1A\u65F6\u95F4\u5185\uFF08\u542B\u670D\u52A1\u7F13\u51B2\uFF09\u3002");
+      check2(manual || hours.configured && !hours.closed && start.date === end.date && start.time >= String(hours.opens) && end.time <= String(hours.closes), "\u8BE5\u65F6\u95F4\u4E0D\u5728\u5DF2\u8BBE\u7F6E\u7684\u8425\u4E1A\u65F6\u95F4\u5185\uFF08\u542B\u670D\u52A1\u7F13\u51B2\uFF09\u3002");
       const args = [input.serviceId, sameService ? String(old.service_name) : String(serviceRow.name), input.customerName.trim(), input.phone.trim(), input.startsAt, input.endsAt, duration, before, after, input.priceCents, input.notes.trim(), input.status, Date.now()];
       if (old) this.run("UPDATE booking_appointments SET service_id=?,service_name=?,customer_name=?,phone=?,starts_at=?,ends_at=?,duration_minutes=?,buffer_before=?,buffer_after=?,price_cents=?,notes=?,status=?,updated_at=?,revision=revision+1 WHERE id=? AND owner_id=?", ...args, id, owner);
       else this.run("INSERT INTO booking_appointments(service_id,service_name,customer_name,phone,starts_at,ends_at,duration_minutes,buffer_before,buffer_after,price_cents,notes,status,updated_at,id,owner_id,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", ...args, id, owner, Date.now());
@@ -1752,6 +1781,69 @@ var BookingStore = class {
     });
     this.events.emit(owner);
     return { id, code: manual ? code2 : code2.match(/.{4}/g).join("-") };
+  }
+  customerCard(owner, id) {
+    this.authorize(owner);
+    const customer = this.rows("SELECT * FROM booking_customers WHERE id=? AND owner_id=?", id, owner)[0];
+    check2(customer, "\u5BA2\u6237\u4E0D\u5B58\u5728\u3002", 404);
+    const card = this.rows("SELECT * FROM booking_customer_cards WHERE customer_id=? AND owner_id=?", id, owner)[0];
+    return { id, name: String(customer.name), code: this.vault.open(String(customer.encrypted_code), `${owner}:${id}`), suffix: String(customer.suffix), notes: String(card?.notes ?? ""), noShowCount: Number(card?.no_show_count ?? 0), revision: Number(card?.revision ?? 0), photos: this.rows("SELECT id,data_url,created_at FROM booking_customer_photos WHERE customer_id=? AND owner_id=? ORDER BY created_at,id", id, owner).map((photo) => ({ id: String(photo.id), dataUrl: String(photo.data_url), createdAt: Number(photo.created_at) })) };
+  }
+  saveCustomerCard(owner, id, input) {
+    this.transaction(() => {
+      const card = this.customerCard(owner, id);
+      check2(input.revision === card.revision, "\u540D\u7247\u5DF2\u66F4\u65B0\uFF0C\u8BF7\u91CD\u65B0\u6253\u5F00\u540E\u518D\u4FDD\u5B58\u3002", 409);
+      check2(typeof input.notes === "string" && input.notes.length <= 4e3, "\u5BA2\u6237\u5907\u6CE8\u6700\u591A4000\u5B57\u3002");
+      check2(Number.isSafeInteger(input.noShowCount) && Number(input.noShowCount) >= 0 && Number(input.noShowCount) <= 9999, "\u723D\u7EA6\u6B21\u6570\u65E0\u6548\u3002");
+      this.run("INSERT INTO booking_customer_cards(customer_id,owner_id,notes,no_show_count,revision) VALUES (?,?,?,?,1) ON CONFLICT(customer_id) DO UPDATE SET notes=excluded.notes,no_show_count=excluded.no_show_count,revision=booking_customer_cards.revision+1", id, owner, input.notes, Number(input.noShowCount));
+      this.changed(owner, id, "customer-card");
+    });
+    this.events.emit(owner);
+    return this.customerCard(owner, id);
+  }
+  customerPhoto(owner, id, input, remove = false) {
+    this.transaction(() => {
+      this.customerCard(owner, id);
+      if (remove) {
+        check2(typeof input.photoId === "string" && this.rows("SELECT id FROM booking_customer_photos WHERE id=? AND owner_id=? AND customer_id=?", input.photoId, owner, id).length, "\u56FE\u7247\u4E0D\u5B58\u5728\u3002", 404);
+        this.run("DELETE FROM booking_customer_photos WHERE id=? AND owner_id=? AND customer_id=?", input.photoId, owner, id);
+      } else {
+        check2(this.rows("SELECT id FROM booking_customer_photos WHERE customer_id=? AND owner_id=?", id, owner).length < 4, "\u6BCF\u4F4D\u5BA2\u6237\u6700\u591A\u4FDD\u5B584\u5F20\u56FE\u7247\u3002");
+        const dataUrl = validateCustomerImage(input.dataUrl);
+        this.run("INSERT INTO booking_customer_photos VALUES (?,?,?,?,?)", (0, import_node_crypto3.randomUUID)(), id, owner, dataUrl, Date.now());
+      }
+      this.run("INSERT INTO booking_customer_cards(customer_id,owner_id,revision) VALUES (?,?,1) ON CONFLICT(customer_id) DO UPDATE SET revision=booking_customer_cards.revision+1", id, owner);
+      this.changed(owner, id, remove ? "customer-photo-removed" : "customer-photo-added");
+    });
+    this.events.emit(owner);
+    return this.customerCard(owner, id);
+  }
+  appointmentCustomer(owner, appointmentId, input = {}) {
+    let customerId = "";
+    this.transaction(() => {
+      this.authorize(owner);
+      const appointment = this.rows("SELECT * FROM booking_appointments WHERE id=? AND owner_id=?", appointmentId, owner)[0];
+      check2(appointment, "\u9884\u7EA6\u4E0D\u5B58\u5728\u3002", 404);
+      const linked = this.rows("SELECT customer_id FROM booking_customer_appointments WHERE appointment_id=?", appointmentId)[0];
+      if (linked) {
+        customerId = String(linked.customer_id);
+        return;
+      }
+      if (input.customerId !== void 0) {
+        check2(typeof input.customerId === "string" && this.rows("SELECT id FROM booking_customers WHERE id=? AND owner_id=? AND deleted_at=0", input.customerId, owner).length, "\u5BA2\u6237\u4E0D\u5B58\u5728\u3002", 404);
+        customerId = input.customerId;
+        this.run("INSERT INTO booking_customer_appointments VALUES (?,?)", appointmentId, customerId);
+        this.changed(owner, appointmentId, "customer-card-linked");
+        return;
+      }
+      customerId = (0, import_node_crypto3.randomUUID)();
+      const code2 = (0, import_node_crypto3.randomBytes)(12).toString("hex").toUpperCase();
+      this.run("INSERT INTO booking_customers(id,owner_id,name,code_hash,suffix,active,created_at,encrypted_code) VALUES (?,?,?,?,?,1,?,?)", customerId, owner, String(appointment.customer_name), (0, import_node_crypto3.createHash)("sha256").update(code2).digest("hex"), code2.slice(-4), Date.now(), this.vault.seal(code2, `${owner}:${customerId}`));
+      this.run("INSERT INTO booking_customer_appointments VALUES (?,?)", appointmentId, customerId);
+      this.changed(owner, appointmentId, "customer-card-linked");
+    });
+    this.events.emit(owner);
+    return { customerId };
   }
   revokeCustomer(owner, id) {
     this.transaction(() => {
@@ -15162,7 +15254,7 @@ function handle(request, response) {
     const store = new SyncStore(databasePath);
     const customerColumns = store.database.prepare("PRAGMA table_info(booking_customers)").all().map((column) => column.name);
     const hasCustomerCodes = ["encrypted_code", "channel", "deleted_at"].every((column) => customerColumns.includes(column));
-    if (!store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_mail_outbox'").get() || !hasCustomerCodes || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_income'").get()) {
+    if (!store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_customer_cards'").get() || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_mail_outbox'").get() || !hasCustomerCodes || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_income'").get()) {
       const backup = `${databasePath}.before-booking-${Date.now()}.bak`;
       store.database.exec(`VACUUM INTO '${backup.replaceAll("'", "''")}'`);
       (0, import_node_fs5.chmodSync)(backup, 384);

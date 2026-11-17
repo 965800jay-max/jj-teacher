@@ -86,6 +86,7 @@ element('policy-confirm').addEventListener('click', () => {
 });
 function readyToSubmit() {
   if (submitting || !service || !selectedSlot || !customerCredential || (!editingAppointment && upcomingCount >= 3) || element('website').value || !element('booking-form').reportValidity()) return false;
+  if (element('email').value.trim().toLowerCase() !== element('email-confirm').value.trim().toLowerCase()) { element('message').textContent = 'The email addresses do not match. Please check and try again.'; element('email-confirm').focus(); return false; }
   const phone = element('phone').value.trim();
   if (phone && (!/^[+\d() .-]{7,30}$/.test(phone) || phone.replace(/\D/g, '').length < 7)) { element('message').textContent = 'Please enter a valid phone number.'; return false; }
   return true;
@@ -104,9 +105,9 @@ async function submitBooking() {
     element('confirmation').textContent = `${result.customerName || customerName}\n${result.serviceName} · ${money(result.priceCents)}\n${element('date').value}\n${timeLabel(result.startsAt)} – ${timeLabel(result.endsAt)} · New York\nStatus: ${result.status}`;
     element('reference').textContent = `Confirmation: ${result.reference}`;
     element('email-status').textContent = result.emailStatus === 'sent' ? 'Your confirmation email has been submitted to the mail server. Please check your inbox and spam folder.' : result.emailStatus === 'queued' ? 'Your booking is confirmed. Your confirmation email is queued for sending.' : result.emailStatus === 'failed' ? 'Your booking is confirmed, but the confirmation email could not be sent. Please save this confirmation.' : 'Your booking is confirmed. The shop has not connected email sending yet; no email has been sent. Please save this confirmation.';
-    element('email').value = ''; element('phone').value = ''; element('notes').value = '';
+    element('email').value = ''; element('email-confirm').value = ''; element('phone').value = ''; element('notes').value = '';
     await refreshAppointments().catch(() => {});
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    element('success').scrollIntoView({ block: 'start', behavior: 'smooth' });
   } catch (error) {
     element('message').textContent = error.status ? error.message : 'Connection interrupted. Your appointment may already be confirmed. Retry without changing your details to avoid a duplicate.';
     if (error.status === 409) { await refreshAppointments().catch(() => {}); await loadSlots(); }
@@ -116,7 +117,7 @@ function newBooking() {
   if (submitting) return;
   editingAppointment = undefined;
   element('booking-title').textContent = 'Book your next visit.'; element('cancel-edit').hidden = true;
-  element('email').value = ''; element('phone').value = ''; element('notes').value = '';
+  element('email').value = ''; element('email-confirm').value = ''; element('phone').value = ''; element('notes').value = '';
   element('booking').hidden = false; element('success').hidden = true; element('confirmation').textContent = ''; element('reference').textContent = '';
   element('message').textContent = '';
   requestId = crypto.randomUUID(); previousPayload = ''; void initialize(catalog).catch(() => {});
@@ -143,7 +144,7 @@ async function refreshAppointments() {
       editingAppointment = appointment; requestId = crypto.randomUUID(); previousPayload = '';
       element('booking-title').textContent = 'Change your appointment.'; element('cancel-edit').hidden = false;
       element('booking').hidden = false; element('success').hidden = true; element('message').textContent = '';
-      element('email').value = appointment.email; element('phone').value = appointment.phone; element('notes').value = appointment.notes;
+      element('email').value = appointment.email; element('email-confirm').value = ''; element('phone').value = appointment.phone; element('notes').value = appointment.notes;
       void initialize().catch(() => {});
       element('booking').scrollIntoView({ behavior: 'smooth' });
     });
@@ -232,7 +233,7 @@ function lockAccess() {
   customerName = '';
   editingAppointment = undefined; upcomingCount = 0; element('my-appointments').replaceChildren(); element('my-bookings').hidden = true;
   element('booking-title').textContent = 'Book your next visit.'; element('cancel-edit').hidden = true; element('booking-limit').textContent = '';
-  element('email').value = ''; element('phone').value = ''; element('notes').value = '';
+  element('email').value = ''; element('email-confirm').value = ''; element('phone').value = ''; element('notes').value = '';
   element('email-status').textContent = '';
   element('confirmation').textContent = ''; element('reference').textContent = '';
   element('content').hidden = true; element('content').inert = true;

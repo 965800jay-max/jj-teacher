@@ -1,6 +1,11 @@
 'use strict';
 (() => {
   const phrases = {
+    'Confirm email address': '再次确认邮箱',
+    'Enter your email again': '请再次输入邮箱',
+    'The email addresses do not match. Please check and try again.': '两次输入的邮箱不一致，请核对后重试。',
+    'Find us': '店铺地址',
+    'Note: There is a massage shop on the ground floor. Take the elevator in the lobby and press 5 to go directly to the fifth floor.': '到店指引：大楼一层是按摩店，大厅有直达电梯，请按 5 层。',
     'To help prevent unauthorized bookings and ensure a smooth experience for all clients, a Customer ID is required. Please contact Kirs to obtain your Customer ID. Thank you for your understanding.': '为减少无效预约并保障每位客户的预约体验，预约前需输入客户 ID。请联系 Kirs 获取您的 Customer ID。感谢您的理解与配合。',
     'To help prevent unauthorized bookings and ensure a smooth experience for all clients, a Customer ID is required. Please contact Jay to obtain your Customer ID. Thank you for your understanding.': '为减少无效预约并保障每位客户的预约体验，预约前需输入客户 ID。请联系 Jay 获取您的 Customer ID。感谢您的理解与配合。',
     'You’ll receive a confirmation email once your appointment is booked.': '预约成功后，您将收到预约确认邮件。',
