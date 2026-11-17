@@ -1,0 +1,37 @@
+:root{--glass:rgba(255,255,255,.62);--glass-edge:rgba(255,255,255,.88);--glass-shadow:0 18px 48px rgba(30,32,36,.065),inset 0 1px 0 rgba(255,255,255,.95);background:#e9e9eb;color:#1d1d1f;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif}
+body{min-height:100vh;isolation:isolate;position:relative;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 7% 9%,#fff 0,transparent 40%),radial-gradient(ellipse at 96% 36%,#c3c4c7 0,transparent 43%),radial-gradient(ellipse at 12% 88%,#cccdd0 0,transparent 46%),linear-gradient(135deg,#f4f4f6,#e4e4e7 55%,#f8f8fa)}
+main{padding-top:24px;max-width:690px}
+header,.card,.summary{background:var(--glass);border:1px solid var(--glass-edge);box-shadow:var(--glass-shadow);-webkit-backdrop-filter:blur(22px) saturate(115%);backdrop-filter:blur(22px) saturate(115%)}
+header{border-radius:30px;padding:13px 17px;margin-bottom:36px;gap:10px}
+.brand-logo{width:clamp(130px,30vw,178px)}
+.header-actions{gap:6px}.badge{border-color:#ffffffc7;background:#ffffff35;color:#636367;padding:8px 10px;font-size:8px}
+h1{font-weight:650;letter-spacing:-2.4px;color:#202023}h2{color:#29292c}.intro{color:#626269}
+.card{border-radius:29px;padding:24px;margin:18px 0}.card h2 span{color:#717178}
+button{border-color:#ffffffd9;border-radius:18px;background:#ffffff70;box-shadow:inset 0 1px 0 #ffffffb3,0 3px 10px #00000003;min-height:48px;color:#29292d;transition:background .18s ease,box-shadow .18s ease,transform .18s ease;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button:hover:not(:disabled){background:#ffffffb5;box-shadow:inset 0 1px 0 #fff,0 5px 15px #00000006}button:active:not(:disabled){transform:scale(.98)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #6b6b73;outline-offset:3px}
+button:disabled{opacity:.38}.language-toggle{border-radius:999px;background:#ffffff78;min-height:38px;padding:9px 13px;color:#44444b}
+.service{padding:17px 15px;border-radius:21px;min-height:82px}.service small{color:#69696f}
+.selected,.selected:hover:not(:disabled),#submit,#another,#policy-confirm,#cancel-confirm,#access-submit{background:linear-gradient(160deg,#444448,#232326);border-color:#ffffff40;color:#fff;box-shadow:inset 0 1px 0 #ffffff30,0 8px 20px #00000012}
+.selected small{color:#dfdfe3}.slots{gap:9px;margin-top:16px}.slots button{min-height:48px;border-radius:17px;font-weight:550}
+label{color:#55555d;font-weight:550}input,textarea{border:1px solid #ffffffd9;border-radius:18px;background:#ffffff64;color:#242428;box-shadow:inset 0 1px 4px #00000003;min-height:52px;padding:15px}input::placeholder,textarea::placeholder{color:#7b7b83}textarea{min-height:98px}
+.hint,.privacy,#availability{color:#66666e;line-height:1.8}.summary{padding:20px;border-radius:28px;margin-top:22px}.summary>p:first-child{margin-top:0;white-space:pre-line;color:#414147}#submit,#another{border-radius:20px;min-height:55px}
+.my-appointment{border-color:#ffffffd9;padding:17px 0}.my-appointment:first-child{border-top:0}.my-appointment p{color:#424248}.appointment-actions{gap:10px}.cancel-appointment{background:#ffffff45;color:#585860}
+.visit-address{background:#ffffff4d;border:1px solid #ffffffd9;border-radius:21px;box-shadow:inset 0 1px 0 #ffffffb3}.visit-address p{color:#505057}.visit-address .directions{color:#44444b}.check{background:linear-gradient(135deg,#48484d,#252528);box-shadow:inset 0 1px 0 #ffffff40,0 8px 20px #0000000d}
+#access-dialog,#policy-dialog,#cancel-dialog,#date-dialog{background:rgba(250,250,252,.78);border:1px solid #ffffffe6;box-shadow:0 28px 90px #00000020,inset 0 1px 0 #fff,inset 0 -1px 0 #ffffff7a;-webkit-backdrop-filter:blur(34px) saturate(115%);backdrop-filter:blur(34px) saturate(115%);border-radius:32px;color:#252529}
+#access-dialog::backdrop,#policy-dialog::backdrop,#cancel-dialog::backdrop,#date-dialog::backdrop{background:rgba(108,110,115,.25);-webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px)}
+#access-dialog{max-width:374px;padding:28px;min-height:0}#access-dialog input{border-radius:18px;background:#ffffff6e;border-color:#ffffffde}#access-dialog .access-note{color:#5c5c64}#access-dialog .language-toggle{margin-bottom:10px}#access-submit{border-radius:18px;min-height:50px}
+#policy-dialog,#cancel-dialog{padding:28px;max-width:400px}#policy-back,#cancel-back{background:transparent;border-color:transparent;box-shadow:none;color:#62626b}
+#date-trigger{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:54px;text-align:left;font-size:16px;padding:15px 16px;gap:12px}#date-trigger svg{color:#65656e;flex-shrink:0}
+#date-dialog{box-sizing:border-box;width:calc(100% - 32px);max-width:390px;max-height:calc(100dvh - 32px);overflow-y:auto;margin:auto;padding:22px;outline:none}
+.date-toolbar,.date-tools,.date-navigation{display:flex;align-items:center;justify-content:space-between;gap:8px}.date-toolbar h2{font-size:18px;margin:0;font-weight:650;letter-spacing:-.4px}.date-tools{gap:5px}#date-close{width:38px;min-height:38px;border-radius:50%;padding:0;font-size:24px;font-weight:300;line-height:1}
+.date-navigation{margin:22px 0 16px}#date-month{font-size:18px;font-weight:650;margin:0;text-align:center;flex:1;letter-spacing:-.4px}#date-previous,#date-next{width:40px;min-height:40px;border-radius:50%;padding:0;font-size:27px;font-weight:300}
+.date-weekdays,.date-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.date-weekdays{margin-bottom:8px;text-align:center;color:#72727a;font-size:10px;font-weight:600}.date-weekdays span{padding:4px 0}
+.date-days button{aspect-ratio:1;min-height:0;padding:0;border-radius:50%;font-size:14px;border:1px solid transparent;background:transparent;box-shadow:none;position:relative}.date-days button.today-date{border-color:#6b6b733d;background:#ffffff70}.date-days button[aria-pressed="true"]{background:linear-gradient(145deg,#48484e,#252529);color:#fff;border-color:#ffffff6b;box-shadow:inset 0 1px 0 #ffffff38,0 4px 12px #00000012}.date-days button.adjacent-date:not([aria-pressed="true"]){color:#797981}.date-days button:disabled{opacity:.22}
+#date-today{display:block;margin:18px auto 0;border-radius:999px;min-height:40px;padding:9px 26px;font-size:12px}
+footer{color:#72727a;margin-top:30px}#success{scroll-margin-top:20px}
+@media(max-width:420px){main{padding:18px 16px max(28px,env(safe-area-inset-bottom))}header{padding:12px 15px;margin-bottom:32px;border-radius:26px}.header-actions .badge{display:none}.card{padding:21px;border-radius:27px}h1{font-size:48px}.service{padding:16px 13px}.summary{padding:18px}.date-toolbar h2{font-size:17px}#date-dialog{padding:20px}}
+@media(prefers-reduced-motion:reduce){button{transition:none!important;transform:none!important}html{scroll-behavior:auto}}
+@media(prefers-reduced-transparency:reduce){header,.card,.summary,#access-dialog,#policy-dialog,#cancel-dialog,#date-dialog{background:#f5f5f7;-webkit-backdrop-filter:none;backdrop-filter:none}button,input,textarea{background:#fff}#access-dialog::backdrop,#policy-dialog::backdrop,#cancel-dialog::backdrop,#date-dialog::backdrop{background:#929297b3;-webkit-backdrop-filter:none;backdrop-filter:none}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){header,.card,.summary,#access-dialog,#policy-dialog,#cancel-dialog,#date-dialog{background:#f5f5f7}}

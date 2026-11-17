@@ -10,8 +10,10 @@
   <link rel="stylesheet" href="/3628/book/style.css">
   <link rel="stylesheet" href="/3628/book/access.css">
   <link rel="stylesheet" href="/3628/book/brand.css">
+  <link rel="stylesheet" href="/3628/book/glass.css">
   <script src="/3628/book/i18n.js" defer></script>
   <script src="/3628/book/display.js" defer></script>
+  <script src="/3628/book/calendar.js" defer></script>
   <script src="/3628/book/app.js" defer></script>
 </head>
 <body>
@@ -40,6 +42,13 @@
   <button type="button" id="cancel-confirm">Yes, cancel appointment</button>
   <button type="button" id="cancel-back">Keep appointment</button>
 </dialog>
+<dialog id="date-dialog" aria-labelledby="date-title">
+  <div class="date-toolbar"><h2 id="date-title">Choose a date</h2><div class="date-tools"><button type="button" class="language-toggle" aria-label="Switch to Chinese">中文</button><button type="button" id="date-close" aria-label="Close calendar">×</button></div></div>
+  <div class="date-navigation"><button type="button" id="date-previous" aria-label="Previous month">‹</button><p id="date-month" aria-live="polite"></p><button type="button" id="date-next" aria-label="Next month">›</button></div>
+  <div id="date-weekdays" class="date-weekdays" aria-hidden="true"></div>
+  <div id="date-days" class="date-days" role="group" aria-label="Available dates"></div>
+  <button type="button" id="date-today">Today</button>
+</dialog>
 <main id="content" hidden inert>
   <header><a class="brand" href="/3628/book/" aria-label="3628 New York"><img class="brand-logo" src="/3628/book/logo.svg" alt="3628 New York" width="300" height="140"></a><div class="header-actions"><span class="badge">APPOINTMENTS</span><button type="button" class="language-toggle" aria-label="Switch to Chinese">中文</button></div></header>
   <section class="card" id="my-bookings" hidden><h2>My appointments <span id="booking-count"></span></h2><p class="hint">Up to 3 upcoming appointments per ID. Changes and cancellations require at least 24 hours’ notice.</p><div id="my-appointments"></div><p id="booking-limit" role="status"></p></section>
@@ -50,7 +59,7 @@
     <form id="booking-form">
       <fieldset id="fields" disabled>
         <section class="card"><h2><span>01</span> Your service</h2><div id="services" class="services" role="group" aria-label="Choose a service"></div></section>
-        <section class="card"><h2><span>02</span> Your time</h2><label for="date">Date</label><input id="date" type="date" required><div id="slots" class="slots" role="group" aria-label="Available appointment times"></div><p id="availability" role="status"></p></section>
+        <section class="card"><h2><span>02</span> Your time</h2><label for="date-trigger">Date</label><input id="date" type="hidden"><button type="button" id="date-trigger" aria-haspopup="dialog" aria-controls="date-dialog"><span id="date-display">Select a date</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="4"/><path d="M7 3v4m10-4v4M3 11h18"/></svg></button><div id="slots" class="slots" role="group" aria-label="Available appointment times"></div><p id="availability" role="status"></p></section>
         <section class="card">
           <h2><span>03</span> Your details</h2>
           <label for="email">Email address</label><input id="email" type="email" autocomplete="email" maxlength="254" required placeholder="you@example.com">

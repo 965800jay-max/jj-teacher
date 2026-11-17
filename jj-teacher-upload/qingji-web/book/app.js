@@ -181,6 +181,7 @@ async function initialize(preloaded) {
     element('date').max = maximum.toISOString().slice(0, 10);
     const editingDate = editingAppointment ? new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' }).format(editingAppointment.startsAt) : catalog.today;
     element('date').value = editingDate;
+    window.BookingDatePicker.refresh();
     const services = editingAppointment ? [{ id: editingAppointment.serviceId, name: editingAppointment.serviceName, priceCents: editingAppointment.priceCents, durationMinutes: editingAppointment.durationMinutes }, ...catalog.services.filter(item => item.id !== editingAppointment.serviceId)] : catalog.services;
     for (const item of services) {
       const button = document.createElement('button'); button.type = 'button'; button.className = 'service'; button.setAttribute('aria-pressed', 'false');
@@ -226,6 +227,7 @@ async function cancelAppointment() {
   }
 }
 function lockAccess() {
+  window.BookingDatePicker.close();
   if (policyDialog.open) policyDialog.close();
   if (cancelDialog.open) cancelDialog.close(); pendingCancellation = undefined; initializationEpoch++;
   customerCredential = ''; slotsEpoch++; service = undefined; selectedSlot = undefined;

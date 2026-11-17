@@ -1,6 +1,13 @@
 'use strict';
 (() => {
   const phrases = {
+    'Choose a date': '选择日期',
+    'Select a date': '请选择日期',
+    'Close calendar': '关闭日历',
+    'Previous month': '上个月',
+    'Next month': '下个月',
+    'Available dates': '可选日期',
+    'Today': '今天',
     'Confirm email address': '再次确认邮箱',
     'Enter your email again': '请再次输入邮箱',
     'The email addresses do not match. Please check and try again.': '两次输入的邮箱不一致，请核对后重试。',
@@ -142,6 +149,6 @@
     }
     observer.observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['placeholder', 'aria-label'] });
   }
-  for (const button of document.querySelectorAll('.language-toggle')) button.addEventListener('click', () => { language = language === 'en' ? 'zh' : 'en'; render(); });
+  for (const button of document.querySelectorAll('.language-toggle')) button.addEventListener('click', () => { language = language === 'en' ? 'zh' : 'en'; render(); document.dispatchEvent(new Event('booking-language-change')); });
   render();
 })();
