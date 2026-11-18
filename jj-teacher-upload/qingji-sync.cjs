@@ -5,6 +5,13 @@ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __commonJS = (cb, mod) => function __require() {
+  try {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  } catch (e) {
+    throw mod = 0, e;
+  }
+};
 var __export = (target, all) => {
   for (var name2 in all)
     __defProp(target, name2, { get: all[name2], enumerable: true });
@@ -26,6 +33,26 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// public-booking/customer-id.js
+var require_customer_id = __commonJS({
+  "public-booking/customer-id.js"(exports2, module2) {
+    "use strict";
+    (function() {
+      function normalize(value) {
+        const normalized2 = value.normalize("NFKC").trim().toUpperCase();
+        const legacy = normalized2.replace(/[\s-]/g, "");
+        return /^[A-F0-9]{24}$/.test(legacy) ? legacy : normalized2;
+      }
+      function validText(value) {
+        return typeof value === "string" && value.trim().length > 0 && [...value].length <= 256 && !/[\p{Cc}\p{Cs}\u2028\u2029]/u.test(value);
+      }
+      const api = { normalize, validText };
+      if (typeof module2 !== "undefined" && module2.exports) module2.exports = api;
+      else window.BookingCustomerId = api;
+    })();
+  }
+});
 
 // server/mount.ts
 var mount_exports = {};
@@ -970,7 +997,7 @@ function createSyncServer(store, options = {}) {
         response.setHeader("Vary", "Origin");
       }
       if (request.method === "OPTIONS") {
-        response.writeHead(204, { "Access-Control-Allow-Methods": "GET,POST,PATCH,DELETE,OPTIONS", "Access-Control-Allow-Headers": "Authorization,Content-Type,X-Booking-Customer-ID" });
+        response.writeHead(204, { "Access-Control-Allow-Methods": "GET,POST,PATCH,DELETE,OPTIONS", "Access-Control-Allow-Headers": "Authorization,Content-Type,X-Booking-Customer-ID,X-Booking-Customer-ID-Encoding" });
         response.end();
         return;
       }
@@ -992,7 +1019,17 @@ function createSyncServer(store, options = {}) {
           if (options.rateLimit !== false && failedIds && failedIds.until > Date.now() && failedIds.count >= 10) throw new ApiError(429, "Too many ID attempts. Please try again in a minute.");
           let customerId;
           try {
-            customerId = options.booking.customerAccess(code2, request.headers["x-booking-customer-id"]);
+            let credential = request.headers["x-booking-customer-id"];
+            const encoding = request.headers["x-booking-customer-id-encoding"];
+            if (encoding !== void 0) {
+              if (encoding !== "uri" || typeof credential !== "string" || credential.length > 8192) throw new ApiError(401, "Please enter a valid customer ID from the shop owner.");
+              try {
+                credential = decodeURIComponent(credential);
+              } catch {
+                throw new ApiError(401, "Please enter a valid customer ID from the shop owner.");
+              }
+            }
+            customerId = options.booking.customerAccess(code2, credential);
           } catch (cause) {
             if (options.rateLimit !== false) throttle(`booking-id-fail:${address}`, 10);
             throw cause;
@@ -1204,10 +1241,10 @@ var BOOKING_HOST_OWNERS = { [KIRS_HOST]: KIRS_PUBLIC_ID };
 
 // src/domain/booking.ts
 var BOOKING_ZONE = "America/New_York";
+var customerIdText = require_customer_id();
+var validCustomerText = customerIdText.validText;
 function normalizeCustomerCredential(value) {
-  const normalized2 = value.normalize("NFKC").replace(/\s/g, "").toUpperCase();
-  const legacy = normalized2.replace(/-/g, "");
-  return /^[A-F0-9]{24}$/.test(legacy) ? legacy : normalized2;
+  return customerIdText.normalize(value);
 }
 var formatter = new Intl.DateTimeFormat("en-CA", { timeZone: BOOKING_ZONE, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
 function nyParts(instant = Date.now()) {
@@ -1499,7 +1536,7 @@ var BookingStore = class {
     } else {
       const input = raw;
       check2(typeof input.serviceId === "string", "\u8BF7\u9009\u62E9\u670D\u52A1\u3002");
-      check2(typeof input.customerName === "string" && input.customerName.trim().length > 0 && input.customerName.length <= 80, "\u8BF7\u586B\u5199\u5BA2\u6237\u59D3\u540D\uFF08\u6700\u591A80\u5B57\uFF09\u3002");
+      check2(typeof input.customerName === "string" && validCustomerText(input.customerName), "\u8BF7\u586B\u5199\u5BA2\u6237\u59D3\u540D\uFF08\u6700\u591A256\u4E2A\u5B57\u7B26\uFF0C\u4E0D\u542B\u6362\u884C\u6216\u63A7\u5236\u5B57\u7B26\uFF09\u3002");
       check2(typeof input.phone === "string" && (input.phone.trim() === "" || /^[+\d() .-]{7,30}$/.test(input.phone) && input.phone.replace(/\D/g, "").length >= 7), "\u8BF7\u586B\u5199\u6709\u6548\u8054\u7CFB\u7535\u8BDD\u3002");
       check2(typeof input.notes === "string" && input.notes.length <= 500, "\u5907\u6CE8\u6700\u591A500\u5B57\u3002");
       check2(["confirmed", "completed"].includes(input.status), "\u8BF7\u4F7F\u7528\u53D6\u6D88\u64CD\u4F5C\u53D6\u6D88\u9884\u7EA6\u3002");
@@ -1742,7 +1779,7 @@ var BookingStore = class {
     this.transaction(() => {
       this.authorize(owner);
       check2(typeof input.id === "string" && this.rows("SELECT 1 FROM booking_customers WHERE id=? AND owner_id=?", input.id, owner).length, "\u5BA2\u6237\u4E0D\u5B58\u5728\u3002", 404);
-      check2(typeof input.name === "string" && input.name.trim().length > 0 && input.name.length <= 80, "\u8BF7\u586B\u5199\u5BA2\u6237\u59D3\u540D\uFF0C\u6700\u591A80\u5B57\u3002");
+      check2(typeof input.name === "string" && validCustomerText(input.name), "\u8BF7\u586B\u5199\u5BA2\u6237\u59D3\u540D\uFF0C\u6700\u591A256\u4E2A\u5B57\u7B26\uFF0C\u4E0D\u542B\u6362\u884C\u6216\u63A7\u5236\u5B57\u7B26\u3002");
       check2(input.channel === void 0 || ["wechat", "ins"].includes(String(input.channel)), "\u8BF7\u9009\u62E9 WeChat \u6216 instagram \u6E20\u9053\u3002");
       this.run("UPDATE booking_customers SET name=? WHERE owner_id=? AND id=?", input.name.trim(), owner, input.id);
       if (input.channel !== void 0) this.run("UPDATE booking_customers SET channel=? WHERE owner_id=? AND id=?", String(input.channel), owner, input.id);
@@ -1753,7 +1790,7 @@ var BookingStore = class {
   restoreCustomerCode(owner, input) {
     this.transaction(() => {
       this.authorize(owner);
-      check2(typeof input.id === "string" && typeof input.code === "string" && input.code.length <= 100, "\u8BF7\u586B\u5199\u539F\u5BA2\u6237 ID\u3002");
+      check2(typeof input.id === "string" && typeof input.code === "string" && validCustomerText(input.code), "\u8BF7\u586B\u5199\u539F\u5BA2\u6237 ID\u3002");
       const row = this.rows("SELECT id,code_hash FROM booking_customers WHERE owner_id=? AND id=?", owner, input.id)[0];
       check2(row, "\u5BA2\u6237\u4E0D\u5B58\u5728\u3002", 404);
       const code2 = normalizeCustomerCredential(input.code);
@@ -1765,9 +1802,9 @@ var BookingStore = class {
   }
   customerAccess(code2, credential) {
     const owner = this.publicOwner(code2);
-    check2(typeof credential === "string" && credential.length <= 100, "Please enter a valid customer ID from the shop owner.", 401);
+    check2(typeof credential === "string" && validCustomerText(credential), "Please enter a valid customer ID from the shop owner.", 401);
     const normalized2 = normalizeCustomerCredential(credential);
-    check2(/^(?:[A-Z0-9_-]{4,20}|[A-F0-9]{24})$/.test(normalized2), "Please enter a valid customer ID from the shop owner.", 401);
+    check2(validCustomerText(normalized2), "Please enter a valid customer ID from the shop owner.", 401);
     const hash2 = (0, import_node_crypto3.createHash)("sha256").update(normalized2).digest("hex");
     const row = this.rows("SELECT id,encrypted_code FROM booking_customers WHERE owner_id=? AND code_hash=? AND active=1 AND deleted_at=0", owner, hash2)[0];
     check2(row, "Please enter a valid customer ID from the shop owner.", 401);
@@ -1782,11 +1819,11 @@ var BookingStore = class {
   }
   customers(owner, query = "", deleted = false) {
     this.authorize(owner);
-    check2(query.length <= 80, "\u641C\u7D22\u5185\u5BB9\u6700\u591A80\u5B57\u3002");
+    check2(query.trim() === "" || validCustomerText(query), "\u641C\u7D22\u5185\u5BB9\u6700\u591A256\u4E2A\u5B57\u7B26\u3002");
     const normalized2 = query.normalize("NFKC").trim().toUpperCase();
     const codeQuery = normalizeCustomerCredential(normalized2);
     const codeHash = (0, import_node_crypto3.createHash)("sha256").update(codeQuery).digest("hex");
-    return this.rows(`SELECT * FROM booking_customers WHERE owner_id=? AND deleted_at${deleted ? ">" : "="}0 ORDER BY created_at DESC`, owner).filter((row) => !normalized2 || String(row.name).toUpperCase().includes(normalized2) || String(row.suffix).includes(normalized2) || codeQuery && (row.code_hash === codeHash || this.vault.open(String(row.encrypted_code), `${owner}:${row.id}`).includes(codeQuery))).map((row) => ({ id: String(row.id), name: String(row.name), suffix: String(row.suffix), channel: String(row.channel), active: !!row.active, createdAt: Number(row.created_at), deletedAt: Number(row.deleted_at) }));
+    return this.rows(`SELECT * FROM booking_customers WHERE owner_id=? AND deleted_at${deleted ? ">" : "="}0 ORDER BY created_at DESC`, owner).filter((row) => !normalized2 || String(row.name).normalize("NFKC").toUpperCase().includes(normalized2) || String(row.suffix).includes(normalized2) || codeQuery && (row.code_hash === codeHash || this.vault.open(String(row.encrypted_code), `${owner}:${row.id}`).includes(codeQuery))).map((row) => ({ id: String(row.id), name: String(row.name), suffix: String(row.suffix), channel: String(row.channel), active: !!row.active, createdAt: Number(row.created_at), deletedAt: Number(row.deleted_at) }));
   }
   setCustomerChannel(owner, input) {
     this.transaction(() => {
@@ -1815,16 +1852,16 @@ var BookingStore = class {
   }
   createCustomer(owner, input) {
     const manual = input.code !== void 0;
-    const code2 = manual && typeof input.code === "string" ? input.code.normalize("NFKC").trim().toUpperCase() : (0, import_node_crypto3.randomBytes)(12).toString("hex").toUpperCase();
+    const code2 = manual && typeof input.code === "string" ? normalizeCustomerCredential(input.code) : (0, import_node_crypto3.randomBytes)(12).toString("hex").toUpperCase();
     const id = (0, import_node_crypto3.randomUUID)();
     this.transaction(() => {
       this.authorize(owner);
-      check2(!manual || typeof input.code === "string" && /^[A-Z0-9_-]{4,20}$/.test(code2), "\u5BA2\u6237 ID \u8BF7\u586B\u51994\u201320\u4F4D\u6570\u5B57\u3001\u82F1\u6587\u5B57\u6BCD\u3001\u4E0B\u5212\u7EBF\uFF08_\uFF09\u6216\u77ED\u6A2A\u7EBF\uFF08-\uFF09\u3002");
-      check2(input.name === void 0 || typeof input.name === "string" && input.name.length <= 80, "\u5BA2\u6237\u540D\u79F0\u6700\u591A80\u5B57\u3002");
+      check2(!manual || typeof input.code === "string" && validCustomerText(input.code) && validCustomerText(code2), "\u5BA2\u6237 ID \u8BF7\u586B\u51991\u2013256\u4E2A\u5B57\u7B26\uFF0C\u4E0D\u542B\u6362\u884C\u6216\u63A7\u5236\u5B57\u7B26\u3002");
+      check2(input.name === void 0 || input.name === "" || typeof input.name === "string" && validCustomerText(input.name), "\u5BA2\u6237\u540D\u79F0\u6700\u591A256\u4E2A\u5B57\u7B26\uFF0C\u4E0D\u542B\u6362\u884C\u6216\u63A7\u5236\u5B57\u7B26\u3002");
       check2(input.channel === void 0 || ["wechat", "ins"].includes(String(input.channel)), "\u8BF7\u9009\u62E9 WeChat \u6216 instagram \u6E20\u9053\u3002");
       const hash2 = (0, import_node_crypto3.createHash)("sha256").update(code2).digest("hex");
       check2(!this.rows("SELECT id FROM booking_customers WHERE code_hash=?", hash2).length, "\u6B64 ID \u5DF2\u88AB\u4F7F\u7528\uFF0C\u8BF7\u6362\u4E00\u4E2A\u3002", 409);
-      this.run("INSERT INTO booking_customers(id,owner_id,name,code_hash,suffix,active,created_at,encrypted_code) VALUES (?,?,?,?,?,1,?,?)", id, owner, typeof input.name === "string" && input.name.trim() ? input.name.trim() : "\u672A\u547D\u540D\u5BA2\u6237", hash2, code2.slice(-4), Date.now(), this.vault.seal(code2, `${owner}:${id}`));
+      this.run("INSERT INTO booking_customers(id,owner_id,name,code_hash,suffix,active,created_at,encrypted_code) VALUES (?,?,?,?,?,1,?,?)", id, owner, typeof input.name === "string" && input.name.trim() ? input.name.trim() : "\u672A\u547D\u540D\u5BA2\u6237", hash2, [...code2].slice(-4).join(""), Date.now(), this.vault.seal(code2, `${owner}:${id}`));
       if (input.channel !== void 0) this.run("UPDATE booking_customers SET channel=? WHERE id=?", String(input.channel), id);
       this.changed(owner, id, "customer-created");
     });
@@ -9731,11 +9768,11 @@ function httpProxyClient(proxyUrl, destinationPort, destinationHost, tlsOptions,
     if (finished3) {
       return;
     }
-    const window = tail + chunk.toString("binary");
-    const windowEnd = window.indexOf("\r\n\r\n");
+    const window2 = tail + chunk.toString("binary");
+    const windowEnd = window2.indexOf("\r\n\r\n");
     chunks.push(chunk);
     received += chunk.length;
-    tail = window.slice(-3);
+    tail = window2.slice(-3);
     if (windowEnd < 0) {
       if (received > MAX_RESPONSE_HEADER_BYTES) {
         const err = new Error("Proxy response headers too large");
@@ -9746,7 +9783,7 @@ function httpProxyClient(proxyUrl, destinationPort, destinationHost, tlsOptions,
     }
     socket.removeListener("data", onSocketData);
     socket.pause();
-    const headerEnd = received - window.length + windowEnd;
+    const headerEnd = received - window2.length + windowEnd;
     const response = Buffer.concat(chunks, received);
     if (response.length > headerEnd + 4) {
       socket.unshift(response.subarray(headerEnd + 4));

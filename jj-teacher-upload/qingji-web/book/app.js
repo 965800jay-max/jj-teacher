@@ -33,7 +33,7 @@ const money = cents => new Intl.NumberFormat('en-US', { style: 'currency', curre
 const timeLabel = instant => new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit' }).format(instant);
 async function api(path, payload) {
   const credential = customerCredential;
-  const response = await fetch(base + path, { method: payload ? 'POST' : 'GET', headers: { ...(payload ? { 'Content-Type': 'application/json' } : {}), 'X-Booking-Customer-ID': customerCredential }, body: payload ? JSON.stringify(payload) : undefined, cache: 'no-store', credentials: 'omit' });
+  const response = await fetch(base + path, { method: payload ? 'POST' : 'GET', headers: { ...(payload ? { 'Content-Type': 'application/json' } : {}), 'X-Booking-Customer-ID': encodeURIComponent(customerCredential), 'X-Booking-Customer-ID-Encoding': 'uri' }, body: payload ? JSON.stringify(payload) : undefined, cache: 'no-store', credentials: 'omit' });
   let data;
   try { data = await response.json(); }
   catch { throw new Error('Connection unavailable. Please try again.'); }
@@ -247,11 +247,9 @@ async function unlockCustomer(code) {
   if (unlocking) return;
   unlocking = true;
   element('access-submit').disabled = true; element('customer-id').disabled = true; element('access-error').textContent = '';
-  customerCredential = code.normalize('NFKC').replace(/\s/g, '').toUpperCase();
-  const legacyCredential = customerCredential.replace(/-/g, '');
-  if (/^[A-F0-9]{24}$/.test(legacyCredential)) customerCredential = legacyCredential;
+  customerCredential = window.BookingCustomerId.normalize(code);
   try {
-    if (!/^(?:[A-Z0-9_-]{4,20}|[A-F0-9]{24})$/.test(customerCredential)) throw new Error('Please enter the customer ID provided by your shop.');
+    if (!window.BookingCustomerId.validText(code) || !window.BookingCustomerId.validText(customerCredential)) throw new Error('Please enter the customer ID provided by your shop.');
     const access = await api('/access', {});
     customerName = access.customerName || 'Customer';
     const initialCatalog = await api('/catalog');
