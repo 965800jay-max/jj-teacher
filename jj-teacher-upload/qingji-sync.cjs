@@ -613,6 +613,14 @@ var SyncStore = class {
       } else if (action === "remove-item") {
         check(group.items.some((item) => item.id === input.itemId), "\u56FA\u5B9A\u9879\u76EE\u4E0D\u5B58\u5728\u3002", 404);
         group.items = group.items.filter((item) => item.id !== input.itemId);
+      } else if (action === "settle-batch") {
+        check(Array.isArray(input.billIds) && input.billIds.length > 0 && input.billIds.length <= 1e3 && new Set(input.billIds).size === input.billIds.length, "\u8BF7\u9009\u62E9\u5F85\u7ED3\u7B97\u8D26\u76EE\u3002");
+        const selected = input.billIds.map((id) => group.bills.find((bill) => bill.id === id));
+        check(selected.every((bill) => bill && !bill.settledBy && bill.createdBy && group.members.some((member) => member.id === bill.createdBy) && !this.deletionPending("group", bill.id)), "\u8D26\u76EE\u5DF2\u53D8\u5316\u3001\u4E0A\u4F20\u4EBA\u4E0D\u660E\u6216\u6B63\u5728\u7533\u8BF7\u5220\u9664\uFF0C\u8BF7\u5237\u65B0\u540E\u91CD\u8BD5\u3002", 409);
+        for (const bill of selected) {
+          bill.settledBy = userId;
+          bill.settledAt = this.timestamp();
+        }
       } else if (action === "settle") {
         const bill = group.bills.find((bill2) => bill2.id === input.billId);
         check(bill && typeof input.settled === "boolean", "\u8D26\u76EE\u6216\u7ED3\u7B97\u72B6\u6001\u65E0\u6548\u3002");
@@ -777,6 +785,17 @@ async function handleBooking(store, userId, request, response, url, body, send, 
 }) {
   if (!url.pathname.startsWith("/v1/booking/")) return false;
   store.authorize(userId);
+  const incomeTip = /^\/v1\/booking\/appointments\/([a-zA-Z0-9_-]{1,100})\/income-detail$/.exec(url.pathname);
+  if (incomeTip && request.method === "GET") {
+    send(200, store.incomeDetail(userId, incomeTip[1]));
+    return true;
+  }
+  if (incomeTip && request.method === "POST") {
+    store.saveIncomeTip(userId, incomeTip[1], await body());
+    notifyIncome();
+    send(200, { ok: true });
+    return true;
+  }
   const card = /^\/v1\/booking\/customers\/([a-zA-Z0-9_-]{1,100})\/(card|photos|photos\/delete)$/.exec(url.pathname);
   if (card) {
     if (request.method === "GET" && card[2] === "card") send(200, store.customerCard(userId, card[1]));
@@ -1258,6 +1277,7 @@ var BookingStore = class {
       CREATE INDEX IF NOT EXISTS booking_appointment_range ON booking_appointments(owner_id,starts_at,ends_at);
       CREATE INDEX IF NOT EXISTS booking_customer_lookup ON booking_customer_appointments(customer_id,appointment_id);
       CREATE TABLE IF NOT EXISTS booking_income (appointment_id TEXT PRIMARY KEY REFERENCES booking_appointments(id), entry_id TEXT NOT NULL UNIQUE REFERENCES entries(id));
+      CREATE TABLE IF NOT EXISTS booking_income_tips (appointment_id TEXT PRIMARY KEY REFERENCES booking_income(appointment_id), amount_cents INTEGER NOT NULL CHECK(amount_cents BETWEEN 0 AND 999999999));
       CREATE TABLE IF NOT EXISTS booking_customer_cards (customer_id TEXT PRIMARY KEY REFERENCES booking_customers(id), owner_id TEXT NOT NULL REFERENCES booking_owners(user_id), notes TEXT NOT NULL DEFAULT '', no_show_count INTEGER NOT NULL DEFAULT 0 CHECK(no_show_count BETWEEN 0 AND 9999), revision INTEGER NOT NULL DEFAULT 0);
       CREATE TABLE IF NOT EXISTS booking_customer_photos (id TEXT PRIMARY KEY, customer_id TEXT NOT NULL REFERENCES booking_customers(id), owner_id TEXT NOT NULL REFERENCES booking_owners(user_id), data_url TEXT NOT NULL, created_at INTEGER NOT NULL);
       CREATE INDEX IF NOT EXISTS booking_customer_photo_lookup ON booking_customer_photos(owner_id,customer_id);
@@ -1358,6 +1378,28 @@ var BookingStore = class {
   incomeRecorded(id) {
     return !!this.rows("SELECT 1 FROM booking_income b JOIN entries e ON e.id=b.entry_id WHERE b.appointment_id=? AND e.deleted_at IS NULL", id).length;
   }
+  incomeDetail(owner, id) {
+    this.authorize(owner);
+    const row = this.rows("SELECT a.*,e.revision AS entry_revision,e.amount_cents AS total_cents FROM booking_appointments a JOIN booking_income b ON b.appointment_id=a.id JOIN entries e ON e.id=b.entry_id WHERE a.id=? AND a.owner_id=? AND e.owner_id=? AND e.deleted_at IS NULL", id, owner, owner)[0];
+    check2(row, "\u9884\u7EA6\u6536\u6B3E\u4E0D\u5B58\u5728\u6216\u5DF2\u64A4\u9500\u3002", 404);
+    const appointment = this.appointment(row);
+    return { customerName: appointment.customerName, serviceName: appointment.serviceName, startsAt: appointment.startsAt, endsAt: appointment.endsAt, priceCents: Number(row.price_cents), totalCents: Number(row.total_cents), tipCents: Number(this.rows("SELECT amount_cents FROM booking_income_tips WHERE appointment_id=?", id)[0]?.amount_cents ?? 0), revision: Number(row.entry_revision) };
+  }
+  saveIncomeTip(owner, id, input) {
+    this.transaction(() => {
+      const detail = this.incomeDetail(owner, id);
+      check2(input.revision === detail.revision, "\u6536\u5165\u5DF2\u66F4\u65B0\uFF0C\u8BF7\u91CD\u65B0\u6253\u5F00\u540E\u64CD\u4F5C\u3002", 409);
+      check2(Number.isSafeInteger(input.tipCents) && Number(input.tipCents) >= 0 && detail.priceCents + Number(input.tipCents) <= 999999999, "\u5C0F\u8D39\u91D1\u989D\u65E0\u6548\u3002");
+      const tip = Number(input.tipCents);
+      this.run("INSERT INTO booking_income_tips VALUES (?,?) ON CONFLICT(appointment_id) DO UPDATE SET amount_cents=excluded.amount_cents", id, tip);
+      const timestamp = (/* @__PURE__ */ new Date()).toISOString();
+      this.run("UPDATE entries SET amount_cents=?,updated_at=?,revision=revision+1 WHERE id=(SELECT entry_id FROM booking_income WHERE appointment_id=?)", detail.priceCents + tip, timestamp, id);
+      this.run("INSERT INTO audit(actor_id,entry_id,action,revision,payload,created_at) SELECT ?,entry_id,?,?,?,? FROM booking_income WHERE appointment_id=?", owner, "booking-tip", detail.revision + 1, JSON.stringify({ tipCents: tip, amountCents: detail.priceCents + tip }), timestamp, id);
+      this.run("UPDATE users SET revision=revision+1 WHERE id=?", owner);
+      this.changed(owner, id, "tip");
+    });
+    this.events.emit(owner);
+  }
   recordIncome(owner, id, input) {
     this.transaction(() => {
       this.authorize(owner);
@@ -1371,10 +1413,12 @@ var BookingStore = class {
       const timestamp = (/* @__PURE__ */ new Date()).toISOString();
       const previous = this.rows("SELECT entry_id FROM booking_income WHERE appointment_id=?", id)[0];
       const entryId = previous ? String(previous.entry_id) : (0, import_node_crypto3.randomUUID)();
+      const receivedCents = Number(row.price_cents) + Number(this.rows("SELECT amount_cents FROM booking_income_tips WHERE appointment_id=?", id)[0]?.amount_cents ?? 0);
+      check2(receivedCents <= 999999999, "\u6536\u5165\u603B\u91D1\u989D\u8D85\u51FA\u9650\u5236\u3002");
       if (input.received) {
         const appointment = this.appointment(row);
         const reason = `\u9884\u7EA6\u6536\u5165 \xB7 ${appointment.serviceName} \xB7 ${appointment.customerName}`.slice(0, 80);
-        if (previous) this.run("UPDATE entries SET amount_cents=?,reason=?,occurred_on=?,updated_at=?,deleted_at=NULL,revision=revision+1 WHERE id=?", Number(row.price_cents), reason, nyParts(Number(row.starts_at)).date, timestamp, entryId);
+        if (previous) this.run("UPDATE entries SET amount_cents=?,reason=?,occurred_on=?,updated_at=?,deleted_at=NULL,revision=revision+1 WHERE id=?", receivedCents, reason, nyParts(Number(row.starts_at)).date, timestamp, entryId);
         else {
           check2(Number(this.rows("SELECT count(*) AS count FROM entries WHERE owner_id=? AND deleted_at IS NULL", owner)[0].count) < 5e4, "\u8D26\u76EE\u6570\u91CF\u5DF2\u8FBE\u4E0A\u9650\u3002");
           this.run("INSERT INTO entries(id,owner_id,friendship_id,kind,amount_cents,category,reason,occurred_on,created_at,updated_at) VALUES (?,?,NULL,'income',?,'\u5176\u4ED6',?,?,?,?)", entryId, owner, Number(row.price_cents), reason, nyParts(Number(row.starts_at)).date, timestamp, timestamp);
@@ -1382,7 +1426,7 @@ var BookingStore = class {
         }
       } else this.run("UPDATE entries SET deleted_at=?,updated_at=?,revision=revision+1 WHERE id=?", timestamp, timestamp, entryId);
       const revision = Number(this.rows("SELECT revision FROM entries WHERE id=?", entryId)[0].revision);
-      this.run("INSERT INTO audit(actor_id,entry_id,action,revision,payload,created_at) VALUES (?,?,?,?,?,?)", owner, entryId, input.received ? "booking-income" : "booking-income-reversed", revision, JSON.stringify({ appointmentId: id, currency: "USD", amountCents: row.price_cents }), timestamp);
+      this.run("INSERT INTO audit(actor_id,entry_id,action,revision,payload,created_at) VALUES (?,?,?,?,?,?)", owner, entryId, input.received ? "booking-income" : "booking-income-reversed", revision, JSON.stringify({ appointmentId: id, currency: "USD", amountCents: receivedCents }), timestamp);
       this.run("UPDATE booking_appointments SET revision=revision+1,updated_at=? WHERE id=?", Date.now(), id);
       this.run("UPDATE users SET revision=revision+1 WHERE id=?", owner);
       this.changed(owner, id, "income");
@@ -15254,7 +15298,7 @@ function handle(request, response) {
     const store = new SyncStore(databasePath);
     const customerColumns = store.database.prepare("PRAGMA table_info(booking_customers)").all().map((column) => column.name);
     const hasCustomerCodes = ["encrypted_code", "channel", "deleted_at"].every((column) => customerColumns.includes(column));
-    if (!store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_customer_cards'").get() || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_mail_outbox'").get() || !hasCustomerCodes || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_income'").get()) {
+    if (!store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_income_tips'").get() || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_customer_cards'").get() || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_mail_outbox'").get() || !hasCustomerCodes || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_income'").get()) {
       const backup = `${databasePath}.before-booking-${Date.now()}.bak`;
       store.database.exec(`VACUUM INTO '${backup.replaceAll("'", "''")}'`);
       (0, import_node_fs5.chmodSync)(backup, 384);
