@@ -1303,6 +1303,10 @@ var BookingStore = class {
       const customerColumns = db.prepare("PRAGMA table_info(booking_customers)").all().map((column) => column.name);
       if (!customerColumns.includes("channel")) db.exec("ALTER TABLE booking_customers ADD COLUMN channel TEXT NOT NULL DEFAULT '' CHECK(channel IN ('','wechat','ins'))");
       if (!customerColumns.includes("deleted_at")) db.exec("ALTER TABLE booking_customers ADD COLUMN deleted_at INTEGER NOT NULL DEFAULT 0");
+      if (!db.prepare("PRAGMA table_info(booking_customer_cards)").all().some((column) => column.name === "unlocked_count")) {
+        db.exec("ALTER TABLE booking_customer_cards ADD COLUMN unlocked_count INTEGER NOT NULL DEFAULT 0");
+        db.exec("UPDATE booking_customers SET active=0 WHERE id IN (SELECT customer_id FROM booking_customer_cards WHERE no_show_count>=3)");
+      }
       db.exec("COMMIT");
     } catch (cause) {
       db.exec("ROLLBACK");
@@ -1804,6 +1808,7 @@ var BookingStore = class {
       if (action === "delete") this.run("UPDATE booking_customers SET active=0,deleted_at=? WHERE owner_id=? AND id=?", Date.now(), owner, id);
       else if (action === "restore") this.run("UPDATE booking_customers SET active=0,deleted_at=0 WHERE owner_id=? AND id=?", owner, id);
       else this.run("UPDATE booking_customers SET active=? WHERE owner_id=? AND id=?", action === "enable" ? 1 : 0, owner, id);
+      if (action === "enable") this.run("UPDATE booking_customer_cards SET unlocked_count=no_show_count,revision=revision+1 WHERE customer_id=? AND owner_id=?", id, owner);
       this.changed(owner, id, `customer-${action}`);
     });
     this.events.emit(owner);
@@ -1831,7 +1836,7 @@ var BookingStore = class {
     const customer = this.rows("SELECT * FROM booking_customers WHERE id=? AND owner_id=?", id, owner)[0];
     check2(customer, "\u5BA2\u6237\u4E0D\u5B58\u5728\u3002", 404);
     const card = this.rows("SELECT * FROM booking_customer_cards WHERE customer_id=? AND owner_id=?", id, owner)[0];
-    return { id, name: String(customer.name), code: this.vault.open(String(customer.encrypted_code), `${owner}:${id}`), suffix: String(customer.suffix), notes: String(card?.notes ?? ""), noShowCount: Number(card?.no_show_count ?? 0), revision: Number(card?.revision ?? 0), photos: this.rows("SELECT id,data_url,created_at FROM booking_customer_photos WHERE customer_id=? AND owner_id=? ORDER BY created_at,id", id, owner).map((photo) => ({ id: String(photo.id), dataUrl: String(photo.data_url), createdAt: Number(photo.created_at) })) };
+    return { id, name: String(customer.name), active: !!customer.active, deleted: !!customer.deleted_at, code: this.vault.open(String(customer.encrypted_code), `${owner}:${id}`), suffix: String(customer.suffix), notes: String(card?.notes ?? ""), noShowCount: Number(card?.no_show_count ?? 0), revision: Number(card?.revision ?? 0), photos: this.rows("SELECT id,data_url,created_at FROM booking_customer_photos WHERE customer_id=? AND owner_id=? ORDER BY created_at,id", id, owner).map((photo) => ({ id: String(photo.id), dataUrl: String(photo.data_url), createdAt: Number(photo.created_at) })) };
   }
   saveCustomerCard(owner, id, input) {
     this.transaction(() => {
@@ -1840,6 +1845,10 @@ var BookingStore = class {
       check2(typeof input.notes === "string" && input.notes.length <= 4e3, "\u5BA2\u6237\u5907\u6CE8\u6700\u591A4000\u5B57\u3002");
       check2(Number.isSafeInteger(input.noShowCount) && Number(input.noShowCount) >= 0 && Number(input.noShowCount) <= 9999, "\u723D\u7EA6\u6B21\u6570\u65E0\u6548\u3002");
       this.run("INSERT INTO booking_customer_cards(customer_id,owner_id,notes,no_show_count,revision) VALUES (?,?,?,?,1) ON CONFLICT(customer_id) DO UPDATE SET notes=excluded.notes,no_show_count=excluded.no_show_count,revision=booking_customer_cards.revision+1", id, owner, input.notes, Number(input.noShowCount));
+      this.run("UPDATE booking_customer_cards SET unlocked_count=MIN(unlocked_count,no_show_count) WHERE customer_id=? AND owner_id=?", id, owner);
+      if (Number(input.noShowCount) >= 3 && Number(input.noShowCount) > Number(this.rows("SELECT unlocked_count FROM booking_customer_cards WHERE customer_id=?", id)[0].unlocked_count)) {
+        this.run("UPDATE booking_customers SET active=0 WHERE id=? AND owner_id=?", id, owner);
+      }
       this.changed(owner, id, "customer-card");
     });
     this.events.emit(owner);
@@ -15298,7 +15307,8 @@ function handle(request, response) {
     const store = new SyncStore(databasePath);
     const customerColumns = store.database.prepare("PRAGMA table_info(booking_customers)").all().map((column) => column.name);
     const hasCustomerCodes = ["encrypted_code", "channel", "deleted_at"].every((column) => customerColumns.includes(column));
-    if (!store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_income_tips'").get() || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_customer_cards'").get() || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_mail_outbox'").get() || !hasCustomerCodes || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_income'").get()) {
+    const hasNoShowPolicy = store.database.prepare("PRAGMA table_info(booking_customer_cards)").all().some((column) => column.name === "unlocked_count");
+    if (!hasNoShowPolicy || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_income_tips'").get() || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_customer_cards'").get() || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_mail_outbox'").get() || !hasCustomerCodes || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_income'").get()) {
       const backup = `${databasePath}.before-booking-${Date.now()}.bak`;
       store.database.exec(`VACUUM INTO '${backup.replaceAll("'", "''")}'`);
       (0, import_node_fs5.chmodSync)(backup, 384);

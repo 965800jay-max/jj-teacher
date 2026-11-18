@@ -1,6 +1,6 @@
 const APP_ROOT = "/3628/";
-const CACHE = "3628-shell-e313e3963820b132";
-const FILES = ["/3628/_expo/static/js/web/index-9517e7b7798fa09cb472e788292cf09c.js","/3628/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Feather.ca4b48e04dc1ce10bfbddb262c8b835f.ttf","/3628/book/access.css","/3628/book/app.js","/3628/book/brand.css","/3628/book/calendar.js","/3628/book/display.js","/3628/book/glass.css","/3628/book/i18n.js","/3628/book/logo.svg","/3628/book/style.css","/3628/favicon.ico","/3628/icons/icon-180.png","/3628/icons/icon-192.png","/3628/icons/icon-512.png","/3628/manifest.webmanifest","/3628/metadata.json","/3628/register-pwa.js","/3628/"];
+const CACHE = "3628-shell-b070eebb96ec20a7";
+const FILES = ["/3628/_expo/static/js/web/index-7716a87bb6207d7543c557f8dee074a7.js","/3628/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Feather.ca4b48e04dc1ce10bfbddb262c8b835f.ttf","/3628/book/access.css","/3628/book/app.js","/3628/book/brand.css","/3628/book/calendar.js","/3628/book/display.js","/3628/book/glass.css","/3628/book/i18n.js","/3628/book/logo.svg","/3628/book/style.css","/3628/favicon.ico","/3628/icons/icon-180.png","/3628/icons/icon-192.png","/3628/icons/icon-512.png","/3628/manifest.webmanifest","/3628/metadata.json","/3628/register-pwa.js","/3628/"];
 const STATIC = new Set(FILES);
 
 self.addEventListener('install', event => {
