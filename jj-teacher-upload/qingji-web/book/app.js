@@ -9,6 +9,16 @@ document.querySelector('.brand').href = `/3628/book/?shop=${encodeURIComponent(s
 const base = `/qingji/v1/public-booking/${encodeURIComponent(shop)}`;
 let catalog;
 let service;
+let serviceOptions = [];
+function servicePrice(item) {
+  return editingAppointment && item.id === editingAppointment.serviceId ? editingAppointment.priceCents : window.BookingPricing.priceOnDate(item, element('date').value);
+}
+function refreshServicePrices() {
+  for (const button of element('services').children) {
+    const item = serviceOptions.find(option => option.id === button.dataset.serviceId);
+    if (item) button.querySelector('.service-price').textContent = money(servicePrice(item));
+  }
+}
 let selectedSlot;
 let slotsEpoch = 0;
 let initializationEpoch = 0;
@@ -44,9 +54,10 @@ async function api(path, payload) {
 function summary() {
   element('submit').disabled = !service || !selectedSlot || submitting || (!editingAppointment && upcomingCount >= 3);
   element('submit').textContent = editingAppointment ? 'Save appointment changes ↗' : 'Confirm appointment ↗';
-  element('summary').textContent = service && selectedSlot ? `${service.name} · ${money(service.priceCents)}\n${element('date').value} · ${timeLabel(selectedSlot.startsAt)} – ${timeLabel(selectedSlot.endsAt)} (New York)` : 'Choose a service and time to continue.';
+  element('summary').textContent = service && selectedSlot ? `${service.name} · ${money(servicePrice(service))}\n${element('date').value} · ${timeLabel(selectedSlot.startsAt)} – ${timeLabel(selectedSlot.endsAt)} (New York)` : 'Choose a service and time to continue.';
 }
 async function loadSlots(preserve = false) {
+  refreshServicePrices();
   const epoch = ++slotsEpoch;
   const oldSlot = preserve ? selectedSlot : undefined;
   selectedSlot = undefined;
@@ -93,7 +104,7 @@ function readyToSubmit() {
 }
 async function submitBooking() {
   if (!readyToSubmit()) return;
-  const payload = { serviceId: service.id, startsAt: selectedSlot.startsAt, email: element('email').value.trim(), phone: element('phone').value.trim(), notes: element('notes').value.trim(), expectedPriceCents: service.priceCents, expectedDurationMinutes: service.durationMinutes };
+  const payload = { serviceId: service.id, startsAt: selectedSlot.startsAt, email: element('email').value.trim(), phone: element('phone').value.trim(), notes: element('notes').value.trim(), expectedPriceCents: servicePrice(service), expectedDurationMinutes: service.durationMinutes };
   const serialized = JSON.stringify(payload);
   if (previousPayload && previousPayload !== serialized) requestId = crypto.randomUUID();
   previousPayload = serialized;
@@ -183,11 +194,12 @@ async function initialize(preloaded) {
     element('date').value = editingDate;
     window.BookingDatePicker.refresh();
     const services = editingAppointment ? [{ id: editingAppointment.serviceId, name: editingAppointment.serviceName, priceCents: editingAppointment.priceCents, durationMinutes: editingAppointment.durationMinutes }, ...catalog.services.filter(item => item.id !== editingAppointment.serviceId)] : catalog.services;
+    serviceOptions = services;
     for (const item of services) {
-      const button = document.createElement('button'); button.type = 'button'; button.className = 'service'; button.setAttribute('aria-pressed', 'false');
+      const button = document.createElement('button'); button.type = 'button'; button.className = 'service'; button.dataset.serviceId = item.id; button.setAttribute('aria-pressed', 'false');
       const title = document.createElement('span'); title.textContent = item.name;
       const detail = document.createElement('small'); detail.textContent = window.BookingDisplay.serviceDurationLabel(item); title.append(detail);
-      const price = document.createElement('span'); price.textContent = money(item.priceCents); button.append(title, price);
+      const price = document.createElement('span'); price.className = 'service-price'; price.textContent = money(servicePrice(item)); button.append(title, price);
       button.addEventListener('click', () => {
         if (submitting) return;
         service = item;

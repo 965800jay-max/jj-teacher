@@ -54,6 +54,29 @@ var require_customer_id = __commonJS({
   }
 });
 
+// public-booking/pricing.js
+var require_pricing = __commonJS({
+  "public-booking/pricing.js"(exports2, module2) {
+    "use strict";
+    (function() {
+      function priceOnDate(service, date) {
+        let price = service.priceCents;
+        let effective = "";
+        for (const rule of service.priceSchedule || []) {
+          if (rule.effectiveOn <= date && rule.effectiveOn > effective) {
+            price = rule.priceCents;
+            effective = rule.effectiveOn;
+          }
+        }
+        return price;
+      }
+      const api = { priceOnDate };
+      if (typeof module2 !== "undefined" && module2.exports) module2.exports = api;
+      else window.BookingPricing = api;
+    })();
+  }
+});
+
 // server/mount.ts
 var mount_exports = {};
 __export(mount_exports, {
@@ -812,6 +835,11 @@ async function handleBooking(store, userId, request, response, url, body, send, 
 }) {
   if (!url.pathname.startsWith("/v1/booking/")) return false;
   store.authorize(userId);
+  if (request.method === "POST" && url.pathname === "/v1/booking/service-prices") {
+    store.saveServicePrice(userId, await body());
+    send(200, { ok: true });
+    return true;
+  }
   if (request.method === "POST" && url.pathname === "/v1/booking/appointments/search") {
     send(200, store.searchAppointments(userId, await body()));
     return true;
@@ -1250,6 +1278,7 @@ var validCustomerText = customerIdText.validText;
 function normalizeCustomerCredential(value) {
   return customerIdText.normalize(value);
 }
+var servicePriceOnDate = require_pricing().priceOnDate;
 var formatter = new Intl.DateTimeFormat("en-CA", { timeZone: BOOKING_ZONE, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
 function nyParts(instant = Date.now()) {
   const parts = Object.fromEntries(formatter.formatToParts(instant).map((part) => [part.type, part.value]));
@@ -1301,6 +1330,7 @@ var BookingStore = class {
         buffer_before INTEGER NOT NULL CHECK(buffer_before BETWEEN 0 AND 180), buffer_after INTEGER NOT NULL CHECK(buffer_after BETWEEN 0 AND 180), active INTEGER NOT NULL CHECK(active IN (0,1)), UNIQUE(id,owner_id));
       CREATE TABLE IF NOT EXISTS booking_hours (owner_id TEXT NOT NULL REFERENCES booking_owners(user_id), weekday INTEGER NOT NULL CHECK(weekday BETWEEN 0 AND 6),
         opens TEXT NOT NULL, closes TEXT NOT NULL, closed INTEGER NOT NULL CHECK(closed IN (0,1)), configured INTEGER NOT NULL CHECK(configured IN (0,1)), PRIMARY KEY(owner_id,weekday));
+      CREATE TABLE IF NOT EXISTS booking_service_prices (service_id TEXT NOT NULL,owner_id TEXT NOT NULL,effective_on TEXT NOT NULL,price_cents INTEGER NOT NULL CHECK(price_cents BETWEEN 0 AND 999999999),PRIMARY KEY(service_id,effective_on),FOREIGN KEY(service_id,owner_id) REFERENCES booking_services(id,owner_id));
       CREATE TABLE IF NOT EXISTS booking_appointments (id TEXT PRIMARY KEY, owner_id TEXT NOT NULL REFERENCES booking_owners(user_id), service_id TEXT NOT NULL,
         service_name TEXT NOT NULL, customer_name TEXT NOT NULL, phone TEXT NOT NULL, starts_at INTEGER NOT NULL, ends_at INTEGER NOT NULL,
         duration_minutes INTEGER NOT NULL CHECK(duration_minutes BETWEEN 5 AND 720), buffer_before INTEGER NOT NULL CHECK(buffer_before BETWEEN 0 AND 180), buffer_after INTEGER NOT NULL CHECK(buffer_after BETWEEN 0 AND 180),
@@ -1428,7 +1458,31 @@ var BookingStore = class {
     };
   }
   service(row) {
-    return { id: String(row.id), name: String(row.name), priceCents: Number(row.price_cents), durationMinutes: Number(row.duration_minutes), bufferBefore: Number(row.buffer_before), bufferAfter: Number(row.buffer_after), active: !!row.active };
+    return { id: String(row.id), name: String(row.name), priceCents: Number(row.price_cents), priceSchedule: this.rows("SELECT effective_on,price_cents FROM booking_service_prices WHERE service_id=? AND owner_id=? ORDER BY effective_on", String(row.id), String(row.owner_id)).map((rule) => ({ effectiveOn: String(rule.effective_on), priceCents: Number(rule.price_cents) })), durationMinutes: Number(row.duration_minutes), bufferBefore: Number(row.buffer_before), bufferAfter: Number(row.buffer_after), active: !!row.active };
+  }
+  scheduledPrice(owner, serviceId, date, base2) {
+    return Number(this.rows("SELECT price_cents FROM booking_service_prices WHERE owner_id=? AND service_id=? AND effective_on<=? ORDER BY effective_on DESC LIMIT 1", owner, serviceId, date)[0]?.price_cents ?? base2);
+  }
+  saveServicePrice(owner, input) {
+    this.transaction(() => {
+      this.revision(owner, input.revision);
+      check2(typeof input.serviceId === "string" && this.rows("SELECT 1 FROM booking_services WHERE id=? AND owner_id=?", input.serviceId, owner).length, "\u670D\u52A1\u4E0D\u5B58\u5728\u3002", 404);
+      check2(typeof input.effectiveOn === "string", "\u8BF7\u586B\u5199\u751F\u6548\u65E5\u671F\u3002");
+      nyInstant(input.effectiveOn, "00:00");
+      const today = nyParts().date;
+      check2(input.effectiveOn >= today, "\u5DF2\u8FC7\u53BB\u7684\u8C03\u4EF7\u65E5\u671F\u4E0D\u53EF\u4FEE\u6539\u3002");
+      if (input.remove === true) {
+        check2(input.effectiveOn > today, "\u5DF2\u751F\u6548\u7684\u8C03\u4EF7\u4E0D\u53EF\u53D6\u6D88\uFF0C\u8BF7\u53E6\u8BBE\u4ECA\u5929\u6216\u4E4B\u540E\u7684\u65B0\u4EF7\u683C\u3002");
+        check2(this.rows("SELECT 1 FROM booking_service_prices WHERE service_id=? AND owner_id=? AND effective_on=?", input.serviceId, owner, input.effectiveOn).length, "\u8C03\u4EF7\u8BB0\u5F55\u4E0D\u5B58\u5728\u3002", 404);
+        this.run("DELETE FROM booking_service_prices WHERE service_id=? AND owner_id=? AND effective_on=?", input.serviceId, owner, input.effectiveOn);
+      } else {
+        check2(Number.isSafeInteger(input.priceCents) && Number(input.priceCents) >= 0 && Number(input.priceCents) <= 999999999, "\u4EF7\u683C\u65E0\u6548\u3002");
+        check2(this.rows("SELECT 1 FROM booking_service_prices WHERE service_id=? AND effective_on=?", input.serviceId, input.effectiveOn).length || Number(this.rows("SELECT count(*) AS total FROM booking_service_prices WHERE service_id=?", input.serviceId)[0].total) < 100, "\u6BCF\u9879\u670D\u52A1\u6700\u591A\u4FDD\u5B58100\u6B21\u8C03\u4EF7\u3002");
+        this.run("INSERT INTO booking_service_prices VALUES (?,?,?,?) ON CONFLICT(service_id,effective_on) DO UPDATE SET price_cents=excluded.price_cents", input.serviceId, owner, input.effectiveOn, Number(input.priceCents));
+      }
+      this.changed(owner, input.serviceId, "service-price");
+    });
+    this.events.emit(owner);
   }
   appointment(row) {
     const customer = this.rows("SELECT c.* FROM booking_customers c JOIN booking_customer_appointments a ON a.customer_id=c.id WHERE a.appointment_id=? AND c.owner_id=?", String(row.id), String(row.owner_id))[0];
@@ -1649,9 +1703,10 @@ var BookingStore = class {
       const slot = this.publicSlots(code2, input.serviceId, date).slots.find((item) => item.startsAt === startsAt);
       check2(slot, "This time is no longer available. Please choose another time.", 409);
       const service = this.rows("SELECT * FROM booking_services WHERE id=? AND owner_id=? AND active=1", input.serviceId, owner)[0];
-      check2((input.expectedPriceCents === void 0 || input.expectedPriceCents === service.price_cents) && (input.expectedDurationMinutes === void 0 || input.expectedDurationMinutes === service.duration_minutes), "Service details have changed. Please reload this page before booking.", 409);
+      const effectivePrice = this.scheduledPrice(owner, String(service.id), date, Number(service.price_cents));
+      check2((input.expectedPriceCents === void 0 || input.expectedPriceCents === effectivePrice) && (input.expectedDurationMinutes === void 0 || input.expectedDurationMinutes === service.duration_minutes), "Service details have changed. Please reload this page before booking.", 409);
       const id = (0, import_node_crypto3.randomUUID)();
-      this.writeAppointment(owner, id, { customerName: customer.name === "\u672A\u547D\u540D\u5BA2\u6237" ? "Customer" : customer.name, phone: input.phone, notes: input.notes, serviceId: input.serviceId, startsAt, endsAt: slot.endsAt, priceCents: Number(service.price_cents), status: "confirmed" });
+      this.writeAppointment(owner, id, { customerName: customer.name === "\u672A\u547D\u540D\u5BA2\u6237" ? "Customer" : customer.name, phone: input.phone, notes: input.notes, serviceId: input.serviceId, startsAt, endsAt: slot.endsAt, priceCents: effectivePrice, status: "confirmed" });
       this.run("INSERT INTO booking_contacts VALUES (?,?)", id, email);
       this.run("INSERT INTO booking_mail_outbox(appointment_id,state,next_at,created_at) VALUES (?,'pending',?,?)", id, Date.now(), Date.now());
       this.run("INSERT INTO booking_submissions VALUES (?,?,?,?)", owner, input.requestId, fingerprint, id);
@@ -1708,10 +1763,11 @@ var BookingStore = class {
       const switched = targetServiceId !== row.service_id;
       const targetService = switched ? this.rows("SELECT * FROM booking_services WHERE id=? AND owner_id=? AND active=1", targetServiceId, owner)[0] : row;
       check2(targetService, "Service is unavailable.", 404);
-      check2((input.expectedPriceCents === void 0 || input.expectedPriceCents === targetService.price_cents) && (input.expectedDurationMinutes === void 0 || input.expectedDurationMinutes === targetService.duration_minutes), "Service details have changed. Please reload this page before booking.", 409);
+      const effectivePrice = switched ? this.scheduledPrice(owner, targetServiceId, nyParts(Number(input.startsAt)).date, Number(targetService.price_cents)) : Number(row.price_cents);
+      check2((input.expectedPriceCents === void 0 || input.expectedPriceCents === effectivePrice) && (input.expectedDurationMinutes === void 0 || input.expectedDurationMinutes === targetService.duration_minutes), "Service details have changed. Please reload this page before booking.", 409);
       const slot = this.publicSlots(code2, targetServiceId, nyParts(Number(input.startsAt)).date, now, row, switched).slots.find((item) => item.startsAt === input.startsAt);
       check2(slot, "This time is no longer available. Please choose another time.", 409);
-      this.writeAppointment(owner, id, { customerName: String(row.customer_name), serviceId: targetServiceId, phone: input.phone, notes: input.notes, startsAt: slot.startsAt, endsAt: slot.endsAt, priceCents: Number(targetService.price_cents), status: "confirmed", revision: Number(row.revision) });
+      this.writeAppointment(owner, id, { customerName: String(row.customer_name), serviceId: targetServiceId, phone: input.phone, notes: input.notes, startsAt: slot.startsAt, endsAt: slot.endsAt, priceCents: effectivePrice, status: "confirmed", revision: Number(row.revision) });
       this.run("INSERT INTO booking_contacts VALUES (?,?) ON CONFLICT(appointment_id) DO UPDATE SET email=excluded.email", id, email);
       this.run("INSERT INTO booking_mail_outbox(appointment_id,state,next_at,created_at) VALUES (?,'pending',?,?) ON CONFLICT(appointment_id) DO UPDATE SET state='pending',attempts=0,next_at=excluded.next_at,created_at=excluded.created_at,error=''", id, now, now);
       this.run("INSERT INTO booking_submissions VALUES (?,?,?,?)", owner, input.requestId, fingerprint, id);
@@ -15364,7 +15420,8 @@ function handle(request, response) {
     const customerColumns = store.database.prepare("PRAGMA table_info(booking_customers)").all().map((column) => column.name);
     const hasCustomerCodes = ["encrypted_code", "channel", "deleted_at"].every((column) => customerColumns.includes(column));
     const hasNoShowPolicy = store.database.prepare("PRAGMA table_info(booking_customer_cards)").all().some((column) => column.name === "unlocked_count");
-    if (!hasNoShowPolicy || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_income_tips'").get() || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_customer_cards'").get() || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_mail_outbox'").get() || !hasCustomerCodes || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_income'").get()) {
+    const hasScheduledPrices = !!store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_service_prices'").get();
+    if (!hasScheduledPrices || !hasNoShowPolicy || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_income_tips'").get() || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_customer_cards'").get() || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_mail_outbox'").get() || !hasCustomerCodes || !store.database.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='booking_income'").get()) {
       const backup = `${databasePath}.before-booking-${Date.now()}.bak`;
       store.database.exec(`VACUUM INTO '${backup.replaceAll("'", "''")}'`);
       (0, import_node_fs5.chmodSync)(backup, 384);
