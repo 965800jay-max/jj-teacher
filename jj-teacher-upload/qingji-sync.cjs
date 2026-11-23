@@ -812,6 +812,10 @@ async function handleBooking(store, userId, request, response, url, body, send, 
 }) {
   if (!url.pathname.startsWith("/v1/booking/")) return false;
   store.authorize(userId);
+  if (request.method === "POST" && url.pathname === "/v1/booking/appointments/search") {
+    send(200, store.searchAppointments(userId, await body()));
+    return true;
+  }
   const incomeTip = /^\/v1\/booking\/appointments\/([a-zA-Z0-9_-]{1,100})\/income-detail$/.exec(url.pathname);
   if (incomeTip && request.method === "GET") {
     send(200, store.incomeDetail(userId, incomeTip[1]));
@@ -1393,6 +1397,21 @@ var BookingStore = class {
   }
   revision(owner, revision) {
     check2(revision === this.authorize(owner), "\u9884\u7EA6\u8BBE\u7F6E\u5DF2\u66F4\u65B0\uFF0C\u8BF7\u5237\u65B0\u540E\u91CD\u8BD5\u3002", 409);
+  }
+  searchAppointments(owner, input) {
+    this.authorize(owner);
+    check2(typeof input.query === "string" && (input.query.trim() === "" || validCustomerText(input.query)), "\u641C\u7D22\u5185\u5BB9\u6700\u591A256\u4E2A\u5B57\u7B26\u3002");
+    const query = input.query.normalize("NFKC").trim().toUpperCase();
+    if (!query) return { appointments: [], hasMore: false };
+    const customerIds = new Set([...this.customers(owner, input.query), ...this.customers(owner, input.query, true)].map((customer) => customer.id));
+    const now = Date.now();
+    const matches = this.rows(`SELECT a.id,a.customer_name,a.starts_at,a.ends_at,a.service_name,a.status,c.id AS customer_id,c.name AS registered_name,c.encrypted_code,c.suffix
+      FROM booking_appointments a LEFT JOIN booking_customer_appointments link ON link.appointment_id=a.id
+      LEFT JOIN booking_customers c ON c.id=link.customer_id AND c.owner_id=a.owner_id WHERE a.owner_id=?`, owner).filter((row) => String(row.registered_name ?? row.customer_name).normalize("NFKC").toUpperCase().includes(query) || customerIds.has(String(row.customer_id))).sort((left, right) => {
+      const rank = (row) => row.status === "cancelled" ? 2 : Number(row.starts_at) >= now ? 0 : 1;
+      return rank(left) - rank(right) || (rank(left) === 0 ? Number(left.starts_at) - Number(right.starts_at) : Number(right.starts_at) - Number(left.starts_at)) || String(left.id).localeCompare(String(right.id));
+    });
+    return { hasMore: matches.length > 50, appointments: matches.slice(0, 50).map((row) => ({ id: String(row.id), customerName: String(row.registered_name ?? row.customer_name), customerCode: row.customer_id ? this.vault.open(String(row.encrypted_code), `${owner}:${row.customer_id}`) : "", customerCodeSuffix: String(row.suffix ?? ""), startsAt: Number(row.starts_at), endsAt: Number(row.ends_at), serviceName: String(row.service_name), status: String(row.status) })) };
   }
   snapshot(owner, from, to) {
     const revision = this.authorize(owner);
